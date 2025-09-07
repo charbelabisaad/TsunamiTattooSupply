@@ -1,0 +1,16 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+
+# Logs
+*.log
+
+# Other
+*.db
+*.mdf
+*.ldf
