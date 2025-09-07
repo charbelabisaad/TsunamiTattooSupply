@@ -21,7 +21,7 @@ namespace TsunamiTattooSupply.Controllers
 
 		public IActionResult Index()
 		{
-			return View("~/Views/BackEnd/Index.cshtml");
+			return View();
 		}
 
 		[HttpPost]
@@ -32,7 +32,7 @@ namespace TsunamiTattooSupply.Controllers
 			if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
 			{
 				ViewBag.Error = "Please enter username and password!";
-				return View("Index"); // Return to login view
+				return View(); // Return to login view
 			}
 
 			bool isValidUser = IsValidUser(Username, Global.Encrypt(Password)); // replace with actual validation
@@ -45,7 +45,7 @@ namespace TsunamiTattooSupply.Controllers
 			{
 
 				ViewBag.Error = "Invalid username or password!";
-				return View("~/Views/BackEnd/Index.cshtml"); // will return BackEnd login view
+				return View(); // will return BackEnd login view
 			}
 		}
 
