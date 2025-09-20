@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using TsunamiTattooSupply.Functions;
 using System.Data;
+using Npgsql; 
 
 namespace TsunamiTattooSupply.Controllers
 {
@@ -9,9 +10,7 @@ namespace TsunamiTattooSupply.Controllers
 
 	public class BackEndController : Controller
 	{
-
-	 
-
+ 
 		IConfiguration _configuration;
 
 		public BackEndController(IConfiguration configuration)
@@ -51,46 +50,60 @@ namespace TsunamiTattooSupply.Controllers
 
 		private bool IsValidUser(string USR_NAME, string USR_PASSWORD)
 		{
- 
 			bool isValid = false;
 
-			using (SqlConnection DBConn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+			using (var DBConn = new NpgsqlConnection(_configuration.GetConnectionString("TsunamiConnection")))
 			{
+				DBConn.Open();
+
+				using (var transaction = DBConn.BeginTransaction()) // <- start transaction
+				{
 					try
 					{
+						using (var cmd = new NpgsqlCommand("user_log_in", DBConn, transaction))
+						{
+							cmd.CommandType = CommandType.StoredProcedure;
 
-						SqlCommand cmd;
-						SqlDataReader rdr;
+							cmd.Parameters.AddWithValue("p_usr_name", USR_NAME);
+							cmd.Parameters.AddWithValue("p_usr_password", USR_PASSWORD);
+							cmd.Parameters.AddWithValue("p_usr_default", true);
 
-						cmd = new SqlCommand();
-						DBConn.Open();
+							var refCursor = new NpgsqlParameter("ref", NpgsqlTypes.NpgsqlDbType.Refcursor);
+							refCursor.Direction = ParameterDirection.InputOutput;
+							refCursor.Value = "my_cursor";
+							cmd.Parameters.Add(refCursor);
 
-						cmd.Connection = DBConn;
-						cmd.CommandType = CommandType.StoredProcedure;
-						cmd.CommandText = "[dbo].[USER_LOG_IN]";
-						cmd.Parameters.AddWithValue("@USR_NAME", USR_NAME);
-						cmd.Parameters.AddWithValue("@USR_PASSWORD", USR_PASSWORD);
-						cmd.Parameters.AddWithValue("@USR_DEFAULT", true);
-						rdr = cmd.ExecuteReader();
+							// Execute procedure
+							cmd.ExecuteNonQuery();
+						}
 
-						if (rdr.Read())
-							isValid = true;
+						// Fetch the cursor in the same transaction
+						using (var fetchCmd = new NpgsqlCommand("FETCH ALL FROM my_cursor;", DBConn, transaction))
+						using (var rdr = fetchCmd.ExecuteReader())
+						{
+							if (rdr.Read())
+								isValid = true; // user found
+						}
 
-						rdr.Close();
-						DBConn.Close();
-						DBConn.Dispose();
+						// Close cursor
+						using (var closeCmd = new NpgsqlCommand("CLOSE my_cursor;", DBConn, transaction))
+							closeCmd.ExecuteNonQuery();
 
-						
-
+						transaction.Commit(); // commit transaction
 					}
-					catch (Exception ex) {  
+					catch (Exception ex)
+					{
+						transaction.Rollback();
 						isValid = false;
-						ViewData["ErrorHandling"] = "Error Log In\n\n" + ex.Message; 
-					}	
-					return isValid;
+						ViewData["ErrorHandling"] = "Error Log In\n\n" + ex.Message;
+					}
 				}
-			 
+
+				DBConn.Close();
 			}
 
+			return isValid;
+		}
+		 
 	}
 }

@@ -1,8 +1,13 @@
+using Microsoft.EntityFrameworkCore;
+using TsunamiTattooSupply.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); // <-- Add this;
+
+builder.Services.AddDbContext<TsunamiDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("TsunamiConnection")));
 
 var app = builder.Build();
 
