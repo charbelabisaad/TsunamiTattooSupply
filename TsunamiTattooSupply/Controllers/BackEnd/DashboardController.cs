@@ -10,5 +10,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			return View("~/Views/BackEnd/Dashboard/Index.cshtml");
 		}
+
+		[HttpGet]
+		public IActionResult Index2()
+		{
+			return View("~/Views/BackEnd/Dashboard/Index2.cshtml");
+		}
+
+		[HttpGet]
+		public IActionResult Index3()
+		{
+			return View("~/Views/BackEnd/Dashboard/Index3.cshtml");
+		}
+
+
 	}
 }

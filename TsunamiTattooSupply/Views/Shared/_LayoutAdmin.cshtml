@@ -9,7 +9,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TsunamiTattooSupply</title>
-     
+
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
@@ -38,9 +38,9 @@
     <style>
 
         .fas.fake-regular {
-            font-weight: 100; /* lighter stroke */
-            opacity: 0.6; /* make it look outline */
-            color: #555; /* optional */
+        font-weight: 100; /* lighter stroke */
+        opacity: 0.6; /* make it look outline */
+        color: #555; /* optional */
         }
 
     </style>
@@ -53,73 +53,79 @@
         <div class="preloader flex-column justify-content-center align-items-center">
             <img class="animation__shake" src="~/dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
         </div>
-    <aside class="main-sidebar sidebar-dark-primary elevation-4">
-        <!-- Brand Logo -->
-        <a href="index3.html" class="brand-link">
-            <img src="~/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-            <span class="brand-text font-weight-light">AdminLTE 3</span>
-        </a>
+        <aside class="main-sidebar sidebar-dark-primary elevation-4">
+            <!-- Brand Logo -->
+            <a href="index3.html" class="brand-link">
+                <img src="~/dist/img/AdminLTELogo.png" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+                <span class="brand-text font-weight-light">AdminLTE 3</span>
+            </a>
 
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <!-- Sidebar user panel (optional) -->
-            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
-                <div class="image">
-                    <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
-                </div>
-                <div class="info">
-                    <a href="#" class="d-block">Alexander Pierce</a>
-                </div>
-            </div>
-
-            <!-- SidebarSearch Form -->
-            <div class="form-inline">
-                <div class="input-group" data-widget="sidebar-search">
-                    <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
-                    <div class="input-group-append">
-                        <button class="btn btn-sidebar">
-                            <i class="fas fa-search fa-fw"></i>
-                        </button>
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Sidebar user panel (optional) -->
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                    <div class="image">
+                        <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image">
+                    </div>
+                    <div class="info">
+                        <a href="#" class="d-block">Alexander Pierce</a>
                     </div>
                 </div>
-            </div>
 
-            <!-- Sidebar Menu -->
-            <nav class="mt-2">
-                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-                    <!-- Add icons to the links using the .nav-icon class
-                         with font-awesome or any other icon font library -->
-                    <li class="nav-item menu-open">
-                        <a href="#" class="nav-link active">
-                            <i class="nav-icon fas fa-tachometer-alt"></i>
-                            <p class="font-weight-bold">
-                                Dashboard
-                                <i class="right fas fa-angle-left"></i>
-                            </p>
-                        </a>
+                <!-- SidebarSearch Form -->
+                <div class="form-inline">
+                    <div class="input-group" data-widget="sidebar-search">
+                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-sidebar">
+                                <i class="fas fa-search fa-fw"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar Menu -->
+				<nav class="mt-2">
+					@{
+						var currenctController = ViewContext.RouteData.Values["controller"]?.ToString();
+						var currenctAction = ViewContext.RouteData.Values["action"]?.ToString();
+					}
+
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                        <!-- Add icons to the links using the .nav-icon class
+                        with font-awesome or any other icon font library -->
+                        <li class="nav-item @(currenctController == "Dashboard" ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @(currenctController == "Dashboard" ? "active" : string.Empty)">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p class="font-weight-bold">
+                                    Dashboard
+                                    <i class="right fas fa-angle-left"></i>
+                                </p>
+                            </a>
+
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a href="./index.html" class="nav-link active">
+									<a asp-area="" asp-controller="Dashboard" asp-action="Index" class="nav-link @(currenctController == "Dashboard" && currenctAction == "Index" ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard 1</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="./index2.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index2" class="nav-link @(currenctController == "Dashboard" && currenctAction == "Index2" ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard v2</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="./index3.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index3" class="nav-link @(currenctController == "Dashboard" && currenctAction == "Index3" ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard v3</p>
                                 </a>
                             </li>
                         </ul>
-                    </li> 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                    </li>
+                        <li class="nav-item @((currenctController == "BannersHome" || currenctController == "BannersPages") ? "menu-open" : string.Empty)">
+                        <a href="#" class="nav-link @((currenctController == "BannersHome" || currenctController == "BannersPages") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-images"></i>
                             <p class="font-weight-bold">
                                 Banners
@@ -128,14 +134,14 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a href="pages/layout/top-nav.html" class="nav-link">
-                                        <i class="bi bi-house-door nav-icon"></i>
+                                <a asp-area="" asp-controller="BannersHome" asp-action="Index" class="nav-link @(currenctController == "BannersHome" && currenctAction == "Index" ? "active" : string.Empty)">
+                                    <i class="bi bi-house-door nav-icon"></i>
                                     <p>Home</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/layout/top-nav-sidebar.html" class="nav-link">
-                                        <i class="bi bi-journals nav-icon"></i>
+                                <a asp-area="" asp-controller="BannersPages" asp-action="Index" class="nav-link @(currenctController == "BannersPages" && currenctAction == "Index" ? "active" : string.Empty)">
+                                    <i class="bi bi-journals nav-icon"></i>
                                     <p>Pages</p>
                                 </a>
                             </li> 
