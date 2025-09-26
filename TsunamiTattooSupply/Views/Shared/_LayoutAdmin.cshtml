@@ -251,8 +251,10 @@
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <li class="nav-item @((currenctController == "About" || currenctController == "Contact"|| currenctController == "Services" 
+                                            || currenctController == "Useful" || currenctController == "Situation") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link@((currenctController == "About" || currenctController == "Contact" || currenctController == "Services"
+                                                        || currenctController == "Useful" || currenctController == "Situation") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-info-circle"></i>
                             <p class="font-weight-bold">
                                 Tsunami Information
@@ -261,39 +263,41 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a href="pages/forms/general.html" class="nav-link">
+                                    <a asp-area="" asp-controller="About" asp-action="Index" class="nav-link @((currenctController == "About" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-info-square nav-icon"></i>
                                     <p>About</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/forms/advanced.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Contact" asp-action="Index" class="nav-link @((currenctController == "Contact" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-phone-vibrate nav-icon"></i>
                                     <p>Contact</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/forms/editors.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Services" asp-action="Index" class="nav-link @((currenctController == "Services" && currenctAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi-tools nav-icon"></i>
                                     <p>Services</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/forms/validation.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Useful" asp-action="Index" class="nav-link @((currenctController == "Useful" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-journal-text nav-icon"></i>
                                     <p>Useful</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/forms/validation.html" class="nav-link">
+                                    <a asp-area="" asp-controller="Situation" asp-action="Index" class="nav-link @((currenctController == "Situation" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-exclamation-triangle nav-icon"></i>
                                     <p>Situation</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
+                        <li class="nav-item @((currenctController == "Shipping" || currenctController == "Privacy"
+                            || currenctController == "Refund" || currenctController == "TermsConditions") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @((currenctController == "Shipping" || currenctController == "Privacy"
+                               || currenctController == "Refund" || currenctController == "TermsConditions") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-shield"></i>
                             <p class="font-weight-bold">
                                 Policies
@@ -302,25 +306,25 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a href="pages/tables/simple.html" class="nav-link">
+                                    <a asp-controller="Shipping" asp-action="Index" class="nav-link @((currenctController == "Shipping" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-box-seam nav-icon"></i>
                                     <p>Shipping</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/tables/data.html" class="nav-link">
+                                    <a asp-controller="Privacy" asp-action="Index" class="nav-link @((currenctController == "Privacy" && currenctAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-shield-lock nav-icon"></i>
                                     <p>Privacy</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/tables/jsgrid.html" class="nav-link">
+                                    <a asp-controller="Refund" asp-action="Index" class="nav-link @((currenctController == "Refund" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-arrow-counterclockwise nav-icon"></i>
                                     <p>Refund</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a href="pages/tables/jsgrid.html" class="nav-link">
+                                    <a asp-controller="TermsConditions" asp-action="Index" class="nav-link @((currenctController == "TermsConditions" && currenctAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-file-text nav-icon"></i>
                                     <p>Terms & Conditions</p>
                                 </a>
@@ -328,7 +332,7 @@
                         </ul>
                     </li>   
                     <li class="nav-item">
-                        <a href="pages/kanban.html" class="nav-link">
+                            <a asp-controller="UserAccounts" asp-action="Index" class="nav-link @((currenctController == "UserAccounts" && currenctAction == "Index")  ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-user-circle"></i>
                             <p class="font-weight-bold">
                                 User Accounts
