@@ -35,17 +35,17 @@
     <div class="login-box">
         <div class="card">
             <div class="card-body login-card-body" >
-                <div class="login-row">
+                <div class="login-row d-flex flex-column flex-md-row align-items-center">
 
                     <!-- Logo -->
-                    <div class="login-logo-col">
+                    <div class="login-logo-col mb-3 mb-md-0 text-center text-md-left">
                         <img id="imgLogInLogo" src="~/Images/GENERAL/TsunamiLogoLogIn.png" style="max-width: 100%; height: auto;" />
                     </div>
 
                     <!-- Form -->
-                    <div class="login-form-col">
+                    <div class="login-form-col ml-md-4 w-100">
                         <p class="login-box-msg">Sign in to start your session</p>
-                        <form method="post"    id="loginForm">
+                        <form method="post" id="loginForm">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" name="Username" placeholder="Username" required>
                                 <div class="input-group-append">
@@ -68,7 +68,7 @@
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    <button id="btnLogIn" type="button" class="btn btn-orange btn-block">
+                                    <button id="btnLogIn" type="button" class="btn btn-orange btn-block" style="width:150px">
                                         <i class="fas fa-sign-in-alt"></i> Log In
                                     </button>
                                 </div>

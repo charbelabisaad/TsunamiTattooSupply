@@ -33,6 +33,17 @@ body {
     color: #ffffff;
 }
 
+.btn-black { 
+    background-color: #000000 !important;
+    color: #ffffff;
+    transition:.5s;
+}
+ 
+.btn-black:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
 .admin-login-logo{
     max-width:300px;
     width:100%;
@@ -51,4 +62,5 @@ body {
     text-align: center;
     z-index: 1050; /* above other elements */
 }
+
 

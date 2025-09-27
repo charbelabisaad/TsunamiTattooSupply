@@ -1,0 +1,47 @@
+﻿body {
+}
+
+.dataTables_filter {
+    position: relative; /* make wrapper relative for absolute positioning */
+}
+
+.dataTables_filter input {
+    padding: 17px 10px 17px 30px  !important; /* top-bottom 17px, left-right 10px */
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.dataTables_filter .icon {
+    position: absolute;
+    left: 15px;
+    top: 45%;
+    transform: translateY(-50%);
+    color: #000;
+    pointer-events: none; /* prevent icon from blocking clicks */
+}
+
+.dataTable thead{
+    background-color: gainsboro;
+    color:#000;
+}
+
+.dataTable thead th {
+    border:none 
+}
+
+.dataTable tbody td{
+    border:none
+}
+
+.dataTable tbody td odd {
+    background-color: whitesmoke;
+}
+
+.dataTable tbody tr:nth-child(odd){
+    background-color: #e9e7e7;
+}
+
+
+.dataTable tbody tr:nth-child(even) {
+    background-color: whitesmoke;
+}
