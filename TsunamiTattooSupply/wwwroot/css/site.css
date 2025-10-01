@@ -63,4 +63,6 @@ body {
     z-index: 1050; /* above other elements */
 }
 
-
+.form-control{
+    box-shadow:none !important;
+}

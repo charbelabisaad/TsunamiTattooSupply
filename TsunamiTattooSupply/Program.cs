@@ -7,6 +7,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); // <-- Add this;
 
+builder.Services.AddControllersWithViews()
+    .AddRazorOptions(options =>
+    {
+        options.ViewLocationFormats.Add("/Views/BackEnd/{1}/{0}.cshtml");
+        options.ViewLocationFormats.Add("/Views/BackEnd/Shared/{0}.cshtml");
+    });
+
 builder.Services.AddDbContext<TsunamiDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("TsunamiConnection")));
 
 var app = builder.Build();

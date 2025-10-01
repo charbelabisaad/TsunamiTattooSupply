@@ -1,7 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
-using TsunamiTattooSupply.Models;
-
+using TsunamiTattooSupply.Models; 
 namespace TsunamiTattooSupply.Data
 {
 	public class TsunamiDbContext :DbContext
@@ -10,6 +9,7 @@ namespace TsunamiTattooSupply.Data
 
 		public DbSet<UserType> UserTypes { get; set; }
 		public DbSet<User> Users { get; set; }
+		public DbSet<Status> Statuses { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

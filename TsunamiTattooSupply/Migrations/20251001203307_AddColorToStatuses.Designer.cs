@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251001203307_AddColorToStatuses")]
+    partial class AddColorToStatuses
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -57,12 +60,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedUserID")
-                        .HasColumnType("integer");
-
                     b.Property<DateTime>("EditDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -101,8 +98,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasIndex("CreatedUserID");
 
-                    b.HasIndex("DeletedUserID");
-
                     b.HasIndex("EditUserID");
 
                     b.HasIndex("StatusID");
@@ -139,10 +134,6 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedUserID");
-
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditedUser")
                         .WithMany()
                         .HasForeignKey("EditUserID")
@@ -162,8 +153,6 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired();
 
                     b.Navigation("CreatedUser");
-
-                    b.Navigation("DeletedUser");
 
                     b.Navigation("EditedUser");
 

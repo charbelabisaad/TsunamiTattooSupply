@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251001200434_UpdateUserEntity")]
+    partial class UpdateUserEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,27 +24,6 @@ namespace TsunamiTattooSupply.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.Status", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasMaxLength(1)
-                        .HasColumnType("character varying(1)");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasMaxLength(6)
-                        .HasColumnType("character varying(6)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Statuses");
-                });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.User", b =>
                 {
@@ -56,12 +38,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedUserID")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime>("EditDate")
                         .HasColumnType("timestamp with time zone");
@@ -83,10 +59,6 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("StatusID")
-                        .IsRequired()
-                        .HasColumnType("character varying(1)");
-
                     b.Property<string>("UserTypeID")
                         .IsRequired()
                         .HasMaxLength(3)
@@ -101,11 +73,7 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasIndex("CreatedUserID");
 
-                    b.HasIndex("DeletedUserID");
-
                     b.HasIndex("EditUserID");
-
-                    b.HasIndex("StatusID");
 
                     b.HasIndex("UserTypeID");
 
@@ -139,20 +107,10 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
-                        .WithMany()
-                        .HasForeignKey("DeletedUserID");
-
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditedUser")
                         .WithMany()
                         .HasForeignKey("EditUserID")
                         .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.UserType", "UserType")
@@ -163,11 +121,7 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Navigation("CreatedUser");
 
-                    b.Navigation("DeletedUser");
-
                     b.Navigation("EditedUser");
-
-                    b.Navigation("Status");
 
                     b.Navigation("UserType");
                 });
