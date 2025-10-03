@@ -8,6 +8,7 @@ namespace TsunamiTattooSupply.Models
 	[Index(nameof(Username), IsUnique = true)] // Create unique index on Username
 	[Index(nameof(UserTypeID))] // Non-unique index on UserTypeID
 	[Index(nameof(StatusID))]
+
 	public class User
 	{
 		[Key]
@@ -42,28 +43,29 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		public int CreatedUserID { get; set; }
 
-		[ForeignKey("CreatedUserID")]
+	 
 		public virtual User CreatedUser { get; set; }
 
 		[Required]
 		public DateTime CreationDate { get; set; }
-
-		[Required]
-		public int EditUserID { get; set; }
+		 
+		public int? EditUserID { get; set; }
 
 		[ForeignKey("EditUserID")]
 		public virtual User EditedUser { get; set; }
-
-		[Required]
-		public DateTime EditDate { get; set; }
 		 
+		public DateTime? EditDate { get; set; }
+		 
+		public int? DeletedUserID { get; set; }
+
 		// 🔹 Soft delete fields
 		public DateTime? DeletedDate { get; set; }
 
-		public int? DeletedUserID { get; set; }
-		[ForeignKey("DeletedUserID")]
-
+		[ForeignKey("DeletedUserID")] 
 		public virtual User DeletedUser { get; set; }
 
 	}
+
+
+
 }

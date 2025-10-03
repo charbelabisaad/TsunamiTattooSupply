@@ -18,6 +18,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		public List<UserType> usertypes { get; set; }
+		public List<User> users { get; set; }
 
 		public IActionResult Index()
 		{
@@ -27,6 +28,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			 
 		}
 
+		[HttpGet]
 		public List<UserType> GetUserTypes()
 		{
 
@@ -38,6 +40,27 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			return userTypesList;
 
 		}
+
+		[HttpGet]
+		public IActionResult GetUsers()
+		{
+
+			var users = _dbContext.Users.Select(
+						u => new
+							{
+								id = u.ID,
+								username = u.Username,
+								firstName = u.FirstName,
+								lastName = u.LastName,
+								userType = u.UserType.Description,
+								status = u.Status.Description
+							}
+						).ToList();
+
+			return Json( new { data = users } );
+
+		}
+
 
 	}
 }

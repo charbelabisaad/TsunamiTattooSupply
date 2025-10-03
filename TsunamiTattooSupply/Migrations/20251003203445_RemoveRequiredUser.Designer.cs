@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251003203445_RemoveRequiredUser")]
+    partial class RemoveRequiredUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,6 +102,8 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("CreatedUserID");
+
                     b.HasIndex("DeletedUserID");
 
                     b.HasIndex("EditUserID");
@@ -131,6 +136,12 @@ namespace TsunamiTattooSupply.Migrations
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.User", b =>
                 {
+                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
                         .HasForeignKey("DeletedUserID");
@@ -151,6 +162,8 @@ namespace TsunamiTattooSupply.Migrations
                         .HasForeignKey("UserTypeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("CreatedUser");
 
                     b.Navigation("DeletedUser");
 

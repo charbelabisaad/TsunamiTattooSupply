@@ -26,6 +26,10 @@ namespace TsunamiTattooSupply.Data
 				.OnDelete(DeleteBehavior.Restrict);
 
 			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<User>()
+			  .Ignore(u => u.CreatedUser);
+
 		}
 
 	}
