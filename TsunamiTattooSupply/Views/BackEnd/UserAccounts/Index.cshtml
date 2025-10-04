@@ -6,6 +6,8 @@
 }
 
 <partial name="SaveUser" />
+<partial name="DeleteUser" />
+<partial name="ResetPassword" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -62,14 +64,24 @@
 </div>
 
 @section Scripts {
+
     <script>
         $(document).ready(function () {
+
             var table = $('#tableUsers').DataTable({
                 processing: true,
                 responsive: true,
                 ajax: {
-                    url: '@Url.Action("GetUsers", "UserAccounts")',
-                    type: 'GET'
+                    url: '@Url.Action("ListGetUsers", "UserAccounts")',
+                        type: 'GET',
+                    dataSrc: function (json) {
+                        // Handle backend error gracefully
+                        if (json.success === false) {
+                            toastr.error(json.message);
+                            return [];
+                        }
+                        return json.data;
+                    }
                 },
                 dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
                 language: {
@@ -77,13 +89,11 @@
                     searchPlaceholder: "Search users..."
                 },
                 buttons: [
-                    { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' } },
-                    { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' } },
-                    { extend: 'pdf', className: 'btn btn-danger btn-sm', exportOptions: { columns: ':visible:not(.no-export)' } },
-                    { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' } },
-                    {
-                        text: '<i class="fas fa-sync"></i> Refresh',
-                        className: 'btn btn-primary btn-sm',
+                        { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                        { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                        { extend: 'pdf', className: 'btn btn-danger btn-sm', exportOptions: { columns: ':visible:not(.no-export)'}, text: '<i class="fas fa-file-pdf"></i> PDF'  },
+                        { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                    { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
                         action: function () {
                             table.ajax.reload();
                         }
@@ -94,7 +104,12 @@
                     { data: 'firstName' },
                     { data: 'lastName' },
                     { data: 'userType' },
-                    { data: 'status' },
+                    { data: 'status',
+                        render: function (data, type, row) { 
+                          let badgeClass = row.statusID === 'A' ? 'badge-success' : 'badge-danger';
+                          return `<div class="badge text-center ${badgeClass}" style="width:100px">${data}</div>`;
+                        }
+                    },
                     {
                         data: null,
                         orderable: false,
@@ -107,11 +122,16 @@
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item btnEdit" href="#" data-id="{{row.id}}">
+                                <a class="dropdown-item btnEditUser" style="cursor:pointer" data-id="${row.id}" data-username="${row.username}"
+                                data-firstname="${row.firstName}" data-lastname="${row.lastName}" data-usertypeid="${row.userTypeID}"
+                                data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <a class="dropdown-item btnDelete" href="#" data-id="{{row.id}}">
+                                    <a class="dropdown-item btnDeleteUser" style="cursor:pointer" data-id="${row.id}">
                                     <i class="fas fa-trash"></i> Delete
+                                </a>
+                                    <a class="dropdown-item btnResetPassword" style="cursor:pointer" data-id="${row.id}">
+                                    <i class="fas fa-key"></i> Reset Password
                                 </a>
                             </div>
                         </div>
@@ -123,33 +143,141 @@
 
             // place export buttons next to search bar
             table.buttons().container().appendTo('#tableUsers_wrapper .col-md-6:eq(1)');
+             
+            var $filter = $('#tableUsers_filter');
 
+            $filter.css("position", "relative");
 
-        var $filter = $('#tableUsers_filter');
-
-        $filter.css("position", "relative");
-
-        // Insert FA icons
+            // Insert FA icons
        
-        $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+            $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
 
-        // Toggle X on typing
-        $('#tableUsers_filter input').on("input", function () {
-            if ($(this).val().length > 0) {
-                $('#clearSearch').show();
-            } else {
-                $('#clearSearch').hide();
-            }
+            // Toggle X on typing
+            $('#tableUsers_filter input').on("input", function () {
+                if ($(this).val().length > 0) {
+                    $('#clearSearch').show();
+                } else {
+                    $('#clearSearch').hide();
+                }
+            });
+
+            // Clear on X click
+            $('#clearSearch').on("click", function () {
+                $('#tableUsers_filter input').val('');
+                table.search('').draw();
+                $(this).hide();
+            });
+
+            const btnNewUser = document.getElementById("btnNewUser");
+                
+            btnNewUser.addEventListener("click", function () { 
+                     
+                const modalEl = document.getElementById("saveUserModal");
+                const modal = new bootstrap.Modal(modalEl);
+
+                $("#modalTitle").text('Create User');
+    
+                $("#UserID").val(0); 
+ 
+                $("#Username").val('');
+                $("#FirstName").val('');
+                $("#LastName").val('');
+
+                 $("#UserTypeID").val('RGL').change();
+
+                $("#StatusID").val('A');
+                $("#StatusToggle").prop("checked", true);
+                        
+                $("#UsernameMessage").text('');
+                $("#FirstNameMessage").text('');
+                $("#LastNameMessage").text('');
+                         
+                $("#Username").removeClass('border-danger');
+                $("#FirstName").removeClass('border-danger');
+                $("#LastName").removeClass('border-danger');
+
+                modal.show();
+
+                $(modalEl).on('shown.bs.modal', function () {
+                     
+                    $("#FirstName").focus();
+
+                });
+
+            });
+               
+            $(document).on('click', '.btnEditUser', function(){  
+                
+                $("#modalTitle").text('Modify User');
+
+                const ID = $(this).data('id');
+                const Username = $(this).data('username');
+                const FirstName = $(this).data('firstname');
+                const LastName = $(this).data('lastname');
+                const UserTypeID = $(this).data('usertypeid');
+                const StatusID = $(this).data('statusid'); 
+                const modalEl = document.getElementById("saveUserModal");
+                const modal = new bootstrap.Modal(modalEl);
+                   
+                $("#UserID").val(ID); 
+                $("#Username").val(Username);
+                $("#FirstName").val(FirstName);
+                $("#LastName").val(LastName);
+                $("#UserTypeID").val(UserTypeID).change();
+                $("#StatusID").val(StatusID);
+
+                $("#UsernameMessage").text('');
+                $("#FirstNameMessage").text('');
+                $("#LastNameMessage").text('');
+
+                $("#Username").removeClass('border-danger');
+                $("#FirstName").removeClass('border-danger');
+                $("#LastName").removeClass('border-danger');
+
+                $("#StatusToggle").prop("checked", StatusID == 'A' ? true : false);
+
+                modal.show();
+
+                $(modalEl).on('shown.bs.modal', function () {
+
+                    $("#FirstName").focus();
+
+                });
+
+            });
+
+        // Show modal when Delete button clicked
+        $(document).on("click", ".btnDeleteUser", function (e) {
+          e.preventDefault();
+
+          const userId = $(this).data("id");
+            $("#deletedUserId").val(userId);
+
+          const username = $(this).closest("tr").find("td:first").text();
+
+          $("#deleteUserMessage").html(
+            `Are you sure you want to delete <strong>${username}</strong>?`
+          );
+
+          $("#deleteUserModal").modal("show");
         });
 
-        // Clear on X click
-        $('#clearSearch').on("click", function () {
-            $('#tableUsers_filter input').val('');
-            table.search('').draw();
-            $(this).hide();
+        $(document).on("click", ".btnResetPassword", function (e) {
+            e.preventDefault();
+
+            const userId = $(this).data("id");
+            $("#resetPasswordUserId").val(userId);
+
+            const username = $(this).closest("tr").find("td:first").text();
+
+            $("#resetPasswordMessage").html(
+                `Are you sure you want to reset the password for <strong>${username}</strong>?`
+            );
+
+            $("#resetPasswordModal").modal("show");
         });
 
-        });
+    });
       
     </script>
 }

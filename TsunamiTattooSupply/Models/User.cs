@@ -42,17 +42,11 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public int CreatedUserID { get; set; }
-
-	 
-		public virtual User CreatedUser { get; set; }
-
+		  
 		[Required]
 		public DateTime CreationDate { get; set; }
 		 
 		public int? EditUserID { get; set; }
-
-		[ForeignKey("EditUserID")]
-		public virtual User EditedUser { get; set; }
 		 
 		public DateTime? EditDate { get; set; }
 		 
@@ -60,12 +54,7 @@ namespace TsunamiTattooSupply.Models
 
 		// 🔹 Soft delete fields
 		public DateTime? DeletedDate { get; set; }
-
-		[ForeignKey("DeletedUserID")] 
-		public virtual User DeletedUser { get; set; }
-
+ 
 	}
-
-
-
+ 
 }

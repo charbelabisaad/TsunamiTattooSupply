@@ -39,7 +39,8 @@ namespace TsunamiTattooSupply.Controllers
 			bool isValidUser = IsValidUser(Username, Global.Encrypt(Password)); // replace with actual validation
 
 			if (isValidUser)
-			{ 
+			{
+				HttpContext.Response.Cookies.Append("UserID", "0");
 				return RedirectToAction("Index", "Dashboard");
 			}
 			else

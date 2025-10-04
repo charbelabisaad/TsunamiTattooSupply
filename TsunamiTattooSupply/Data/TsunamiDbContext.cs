@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using TsunamiTattooSupply.Models; 
 namespace TsunamiTattooSupply.Data
 {
@@ -12,24 +13,9 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Status> Statuses { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			modelBuilder.Entity<User>()
-				.HasOne(u => u.CreatedUser)
-				.WithMany()
-				.HasForeignKey(u => u.CreatedUserID)
-				.OnDelete(DeleteBehavior.Restrict);
-
-			modelBuilder.Entity<User>()
-				.HasOne(u => u.EditedUser)
-				.WithMany()
-				.HasForeignKey(u => u.EditUserID)
-				.OnDelete(DeleteBehavior.Restrict);
-
+		{ 
 			base.OnModelCreating(modelBuilder);
-
-			modelBuilder.Entity<User>()
-			  .Ignore(u => u.CreatedUser);
-
+			 
 		}
 
 	}
