@@ -9,13 +9,37 @@ namespace TsunamiTattooSupply.Data
 		public TsunamiDbContext(DbContextOptions<TsunamiDbContext> options) : base(options) { }
 
 		public DbSet<UserType> UserTypes { get; set; }
+		public DbSet<Role> Roles { get; set; }	
 		public DbSet<User> Users { get; set; }
 		public DbSet<Status> Statuses { get; set; }
+		public DbSet<Permission> Permissions { get; set; }
+		public DbSet<RolePermission> RolePermissions { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{ 
 			base.OnModelCreating(modelBuilder);
-			 
+
+			// 🔹 Role → CreatedUser
+			modelBuilder.Entity<Role>()
+				.HasOne(r => r.CreatedUser)
+				.WithMany()
+				.HasForeignKey(r => r.CreatedUserID)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// 🔹 Role → EditUser
+			modelBuilder.Entity<Role>()
+				.HasOne(r => r.EditUser)
+				.WithMany()
+				.HasForeignKey(r => r.EditUserID)
+				.OnDelete(DeleteBehavior.Restrict);
+
+			// 🔹 Role → DeletedUser
+			modelBuilder.Entity<Role>()
+				.HasOne(r => r.DeletedUser)
+				.WithMany()
+				.HasForeignKey(r => r.DeletedUserID)
+				.OnDelete(DeleteBehavior.Restrict);
+
 		}
 
 	}

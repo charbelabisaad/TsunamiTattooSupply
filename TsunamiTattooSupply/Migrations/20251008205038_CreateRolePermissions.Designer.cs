@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251008205038_CreateRolePermissions")]
+    partial class CreateRolePermissions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,38 +100,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("EditUserID");
 
                     b.ToTable("Roles");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.RolePermission", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("CreatedUserID")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("PermissionID")
-                        .HasMaxLength(20)
-                        .HasColumnType("integer");
-
-                    b.Property<int>("RoleID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("CreatedUserID");
-
-                    b.HasIndex("PermissionID");
-
-                    b.HasIndex("RoleID");
-
-                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Status", b =>
@@ -262,33 +233,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("DeletedUser");
 
                     b.Navigation("EditUser");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.RolePermission", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedUserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Role", "Role")
-                        .WithMany()
-                        .HasForeignKey("RoleID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CreatedUser");
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.User", b =>

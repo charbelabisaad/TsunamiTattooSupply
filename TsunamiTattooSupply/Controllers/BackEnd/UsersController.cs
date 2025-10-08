@@ -9,13 +9,13 @@ using TsunamiTattooSupply.Data;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	public class UserAccountsController : Controller
+	public class UsersController : Controller
 	{
 
 		private readonly TsunamiDbContext _dbContext;
-		private readonly ILogger<UserAccountsController> _logger;
+		private readonly ILogger<UsersController> _logger;
 		 
-		public UserAccountsController(TsunamiDbContext dbContext, ILogger<UserAccountsController> logger)
+		public UsersController(TsunamiDbContext dbContext, ILogger<UsersController> logger)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
@@ -28,7 +28,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			usertypes = GetUserTypes(); 
 			ViewBag.UserTypes = usertypes;
-			return View("~/Views/BackEnd/UserAccounts/Index.cshtml");
+			return View("~/Views/BackEnd/Users/Index.cshtml");
 			 
 		}
 
