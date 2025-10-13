@@ -1,14 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Users")]
-	[Index(nameof(Username), IsUnique = true)] // Create unique index on Username
+	[Index(nameof(Username), IsUnique = true)] // Unique index on Username
 	[Index(nameof(UserTypeID))] // Non-unique index on UserTypeID
-	[Index(nameof(RoleID))] 
-	[Index(nameof(StatusID))] 
+	[Index(nameof(RoleID))]
+	[Index(nameof(StatusID))]   // Non-unique index on StatusID
 	public class User
 	{
 		[Key]
@@ -28,39 +29,33 @@ namespace TsunamiTattooSupply.Models
 		public string Password { get; set; }
 
 		[Required]
-		public int RoleID { get; set; }
+		public int RoleID { get; set; } // plain column — no FK constraint
 
-		[Required]
-		[StringLength(3)]
+		[Required, StringLength(3)]
 		public string UserTypeID { get; set; }
 
 		[Required]
 		public string StatusID { get; set; }
-
-		[Required]
-		public int CreatedUserID { get; set; }
-		  
-		[Required]
+		 
+		public int? CreatedUserID { get; set; }
+		 
 		public DateTime CreationDate { get; set; }
-		 
+
 		public int? EditUserID { get; set; }
-		 
+
 		public DateTime? EditDate { get; set; }
-		 
+
 		public int? DeletedUserID { get; set; }
 
-		// 🔹 Soft delete fields
 		public DateTime? DeletedDate { get; set; }
- 
+
 		[ForeignKey("UserTypeID")]
 		public virtual UserType UserType { get; set; }
 
 		[ForeignKey("RoleID")]
-		public virtual Role Role { get; set; }
+		public virtual Role Role { get; set; }  // disabled until Roles table recreated
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
-
 	}
- 
 }

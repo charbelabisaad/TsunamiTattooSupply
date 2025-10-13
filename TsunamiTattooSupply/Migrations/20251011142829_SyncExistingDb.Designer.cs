@@ -12,8 +12,8 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    [Migration("20251008200615_CreatePermissions")]
-    partial class CreatePermissions
+    [Migration("20251011142829_SyncExistingDb")]
+    partial class SyncExistingDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,8 +40,8 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.HasKey("ID");
 
@@ -52,6 +52,91 @@ namespace TsunamiTattooSupply.Migrations
                         .IsUnique();
 
                     b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.Role", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<bool>("Admin")
+                        .HasColumnType("boolean");
+
+                    b.Property<int?>("CreatedUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DeletedUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("EditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("EditUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("StatusID")
+                        .IsRequired()
+                        .HasColumnType("character varying(1)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CreatedUserID");
+
+                    b.HasIndex("DeletedUserID");
+
+                    b.HasIndex("Description")
+                        .IsUnique();
+
+                    b.HasIndex("EditUserID");
+
+                    b.HasIndex("StatusID");
+
+                    b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.RolePermission", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CreatedUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("PermissionID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("RoleID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CreatedUserID");
+
+                    b.HasIndex("PermissionID");
+
+                    b.HasIndex("RoleID");
+
+                    b.ToTable("RolePermissions");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Status", b =>
@@ -83,7 +168,8 @@ namespace TsunamiTattooSupply.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<int>("CreatedUserID")
+                    b.Property<int?>("CreatedUserID")
+                        .IsRequired()
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreationDate")
@@ -115,6 +201,9 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("RoleID")
+                        .HasColumnType("integer");
+
                     b.Property<string>("StatusID")
                         .IsRequired()
                         .HasColumnType("character varying(1)");
@@ -130,6 +219,8 @@ namespace TsunamiTattooSupply.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("RoleID");
 
                     b.HasIndex("StatusID");
 
@@ -157,8 +248,73 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("UserTypes");
                 });
 
+            modelBuilder.Entity("TsunamiTattooSupply.Models.Role", b =>
+                {
+                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedUserID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
+                        .WithMany()
+                        .HasForeignKey("EditUserID")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("DeletedUser");
+
+                    b.Navigation("EditUser");
+
+                    b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.RolePermission", b =>
+                {
+                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TsunamiTattooSupply.Models.Permission", "Permission")
+                        .WithMany()
+                        .HasForeignKey("PermissionID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TsunamiTattooSupply.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("Permission");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("TsunamiTattooSupply.Models.User", b =>
                 {
+                    b.HasOne("TsunamiTattooSupply.Models.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -170,6 +326,8 @@ namespace TsunamiTattooSupply.Migrations
                         .HasForeignKey("UserTypeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Role");
 
                     b.Navigation("Status");
 

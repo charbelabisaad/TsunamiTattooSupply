@@ -14,22 +14,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		private readonly TsunamiDbContext _dbContext;
 		private readonly ILogger<UsersController> _logger;
-		 
+
 		public UsersController(TsunamiDbContext dbContext, ILogger<UsersController> logger)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
 		}
-		 
+
 		public List<UserType> usertypes { get; set; }
+		public List<Role> roles { get; set; }
 		public List<User> users { get; set; }
 
 		public IActionResult Index()
 		{
-			usertypes = GetUserTypes(); 
+			usertypes = GetUserTypes();
+			roles  = GetRoles();
 			ViewBag.UserTypes = usertypes;
+			ViewBag.Roles = roles;	
 			return View("~/Views/BackEnd/Users/Index.cshtml");
-			 
+
 		}
 
 		[HttpGet]
@@ -37,11 +40,24 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 
 			List<UserType> userTypesList = new List<UserType>();
-			 
+
 			userTypesList = _dbContext.UserTypes.OrderBy(ut => ut.Description).ToList();
 
 			return userTypesList;
 
+		}
+
+		[HttpGet]
+		public List<Role> GetRoles() { 
+		
+			List<Role> rolesList = new List<Role>();
+
+			rolesList = _dbContext.Roles
+				.Where(r => r.IsAdmin == false)
+				.OrderBy(r => r.Description ).ToList();
+
+			return rolesList;
+		
 		}
 
 		[HttpGet]
@@ -64,12 +80,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-
-
+		 
 		[HttpPost]
-		public IActionResult SavePost(int ID, string Username, string FirstName, string LastName, string UserTypeID, string StatusID)
-		{	
-			
+		public IActionResult SavePost(int ID, string Username, string FirstName, string LastName, string UserTypeID, int RoleID, string StatusID)
+		{
+
 			string normalizedUsername = Username?.Trim().ToLower();
 			string normalizedFirstName = FirstName?.Trim().ToUpper();
 			string normalizedLastName = LastName?.Trim().ToUpper();
@@ -78,7 +93,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			try
 			{
 				// Normalize input values
-			
+
 
 				if (string.IsNullOrEmpty(normalizedUsername) ||
 					string.IsNullOrEmpty(normalizedFirstName) ||
@@ -106,17 +121,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					// Update fields
-					existingUser.Username = normalizedUsername;
-					existingUser.FirstName = normalizedFirstName;
-					existingUser.LastName = normalizedLastName;
+					existingUser.Username = normalizedUsername.Trim().ToLower();
+					existingUser.FirstName = normalizedFirstName.Trim().ToUpper();
+					existingUser.LastName = normalizedLastName.Trim().ToUpper();
 					existingUser.UserTypeID = UserTypeID;
+					existingUser.RoleID = RoleID;
 					existingUser.StatusID = StatusID;
 					existingUser.EditUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
 					existingUser.EditDate = DateTime.UtcNow;
 
 					_dbContext.SaveChanges();
 
-					UserID =  ID;
+					UserID = ID;
 
 				}
 				else // ✅ New User
@@ -132,11 +148,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					var newUser = new User
 					{
-						Username = normalizedUsername,
-						FirstName = normalizedFirstName,
-						LastName = normalizedLastName,
+						Username = normalizedUsername.Trim().ToLower(),
+						FirstName = normalizedFirstName.Trim().ToUpper(),
+						LastName = normalizedLastName.Trim().ToUpper(),
 						Password = "a9a575415e09850e33fc573b1738415ec23ac1aea3dad08a9fb0eb602499d1f6",
 						UserTypeID = UserTypeID,
+						RoleID = RoleID,
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]),
 						CreationDate = DateTime.UtcNow
@@ -150,7 +167,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 
 				// Return updated list for DataTable
-			 
+
 
 				return Json(new { exists = false, data = GetUsers() });
 			}
@@ -187,6 +204,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				users = _dbContext.Users
 					.Where(u => u.DeletedDate == null)
 					.Include(u => u.UserType)
+					.Include (u => u.Role)
 					.Include(u => u.Status)
 					.Select(u => new
 					{
@@ -196,6 +214,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						lastName = u.LastName,
 						userTypeID = u.UserType.ID,
 						userType = u.UserType.Description,
+						userRoleID = u.Role.ID,
+						userRole = u.Role.Description,
 						statusID = u.Status.ID,
 						status = u.Status.Description
 					})
@@ -256,7 +276,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex,"Reset Password [ERROR]!");
+				_logger.LogError(ex, "Reset Password [ERROR]!");
 				return Json(new { success = false, message = $"An unexpected error occurred while resetting password for user {id}!" });
 			}
 		}

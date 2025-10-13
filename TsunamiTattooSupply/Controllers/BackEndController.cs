@@ -30,25 +30,25 @@ namespace TsunamiTattooSupply.Controllers
 		{
 			// TODO: validate credentials (ADO.NET or EF)
 
-			if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
-			{
-				ViewBag.Error = "Please enter username and password!";
-				return View(); // Return to login view
-			}
+			//if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+			//{
+			//	ViewBag.Error = "Please enter username and password!";
+			//	return View(); // Return to login view
+			//}
 
-			bool isValidUser = IsValidUser(Username, Global.Encrypt(Password)); // replace with actual validation
+			//bool isValidUser = IsValidUser(Username, Global.Encrypt(Password)); // replace with actual validation
 
-			if (isValidUser)
-			{
-				HttpContext.Response.Cookies.Append("UserID", "0");
+			//if (isValidUser)
+			//{
+			HttpContext.Response.Cookies.Append("UserID", "0");
 				return RedirectToAction("Index", "Dashboard");
-			}
-			else
-			{
+			//}
+			//else
+			//{
 
-				ViewBag.Error = "Invalid username or password!";
-				return View(); // will return BackEnd login view
-			}
+			//	ViewBag.Error = "Invalid username or password!";
+			//	return View(); // will return BackEnd login view
+			//}
 		}
 
 		private bool IsValidUser(string USR_NAME, string USR_PASSWORD)

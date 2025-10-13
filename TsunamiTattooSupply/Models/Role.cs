@@ -6,6 +6,7 @@ namespace TsunamiTattooSupply.Models
 {
 	[Table("Roles")]
 	[Index(nameof(Description), IsUnique = true)]
+	[Index(nameof(StatusID))]
 	[Index(nameof(CreatedUserID))]
 	[Index(nameof(EditUserID))]
 	[Index(nameof(DeletedUserID))]
@@ -20,13 +21,14 @@ namespace TsunamiTattooSupply.Models
 		public string Description { get; set; }
 
 		[Required]
-		public bool Active { get; set; }
-
-		[Required] 
-		public int CreatedUserID { get; set; }
+		public string StatusID { get; set; }
 
 		[Required]
-		public DateTime CreationDate { get; set; }
+		public bool IsAdmin {  get; set; } = false;
+ 
+		public int? CreatedUserID { get; set; }
+		 
+		public DateTime? CreationDate { get; set; }
 		 
 		public int? EditUserID { get; set; }
 		 
@@ -35,6 +37,9 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 		 
 		public DateTime? DeletedDate { get; set; }
+		 
+		[ForeignKey("StatusID")]
+		public virtual Status Status { get; set; }
 
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }

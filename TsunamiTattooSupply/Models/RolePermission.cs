@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -14,17 +15,17 @@ namespace TsunamiTattooSupply.Models
 		public int ID { get; set; }
 
 		[Required]
-		public int RoleID { get; set; }
+		public int RoleID { get; set; }   // no FK to Roles yet
 
 		[Required]
-		[StringLength(20)]
-		public int PermissionID { get; set; }
+		public int PermissionID { get; set; }  // int type, not string
 
-		[ForeignKey("RoleID")]
-		public virtual Role Role { get; set; }
-
+		// ForeignKey to Permission (still valid)
 		[ForeignKey("PermissionID")]
 		public virtual Permission Permission { get; set; }
+
+		[ForeignKey("RoleID")]
+		 public virtual Role Role { get; set; }
 
 		[Required]
 		public int CreatedUserID { get; set; }
@@ -35,5 +36,7 @@ namespace TsunamiTattooSupply.Models
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }
 
+	 
+		
 	}
 }

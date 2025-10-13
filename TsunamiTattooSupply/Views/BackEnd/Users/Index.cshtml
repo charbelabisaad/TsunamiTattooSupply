@@ -46,6 +46,7 @@
                                     <th>First Name</th>
                                     <th>Last Name</th>
                                     <th>Type</th>
+                                    <th>Role</th>
                                     <th>Status</th>
                                     <th class="no-export">Actions</th>
                                 </tr>
@@ -72,12 +73,15 @@
                 processing: true,
                 responsive: true,
                 ajax: {
-                    url: '@Url.Action("ListGetUsers", "UserAccounts")',
+                    url: '@Url.Action("ListGetUsers", "Users")',
                         type: 'GET',
                     dataSrc: function (json) {
-                        // Handle backend error gracefully
-                        if (json.success === false) {
-                            toastr.error(json.message);
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load users.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
                             return [];
                         }
                         return json.data;
@@ -104,6 +108,7 @@
                     { data: 'firstName' },
                     { data: 'lastName' },
                     { data: 'userType' },
+                    { data: 'userRole' },
                     { data: 'status',
                         render: function (data, type, row) { 
                           let badgeClass = row.statusID === 'A' ? 'badge-success' : 'badge-danger';
@@ -124,7 +129,7 @@
                             <div class="dropdown-menu">
                                 <a class="dropdown-item btnEditUser" style="cursor:pointer" data-id="${row.id}" data-username="${row.username}"
                                 data-firstname="${row.firstName}" data-lastname="${row.lastName}" data-usertypeid="${row.userTypeID}"
-                                data-statusid="${row.statusID}">
+                                data-userroleid="${row.userRoleID}" data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
                                     <a class="dropdown-item btnDeleteUser" style="cursor:pointer" data-id="${row.id}">
@@ -171,7 +176,7 @@
             const btnNewUser = document.getElementById("btnNewUser");
                 
             btnNewUser.addEventListener("click", function () { 
-                     
+                 
                 const modalEl = document.getElementById("saveUserModal");
                 const modal = new bootstrap.Modal(modalEl);
 
