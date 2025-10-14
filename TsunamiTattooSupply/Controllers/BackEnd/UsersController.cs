@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text; 
 using TsunamiTattooSupply.Data;
+using TsunamiTattooSupply.DTO;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
@@ -66,7 +67,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			try
 			{
 				var users = GetUsers();
-				return Json(new { data = users });
+				return Json(new { data = users, success = true });
 			}
 			catch (Exception ex)
 			{
@@ -195,31 +196,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
-		public IEnumerable<object> GetUsers()
+		public List<UserDto> GetUsers()
 		{
-			List<object> users = new();
+			List<UserDto> users = new List<UserDto>();
 
-			try
-			{
-				users = _dbContext.Users
-					.Where(u => u.DeletedDate == null)
+			try {  
+			  
+				  users = _dbContext.Users
+					.Where(u => u.DeletedDate == null && u.Role.IsAdmin == false)
 					.Include(u => u.UserType)
 					.Include (u => u.Role)
 					.Include(u => u.Status)
-					.Select(u => new
+					.Select(u => new UserDto
 					{
-						id = u.ID,
-						username = u.Username,
-						firstName = u.FirstName,
-						lastName = u.LastName,
-						userTypeID = u.UserType.ID,
-						userType = u.UserType.Description,
-						userRoleID = u.Role.ID,
-						userRole = u.Role.Description,
-						statusID = u.Status.ID,
-						status = u.Status.Description
+						Id = u.ID,
+						Username = u.Username,
+						FirstName = u.FirstName,
+						LastName = u.LastName,
+						UserTypeID = u.UserType.ID,
+						UserType = u.UserType.Description,
+						UserRoleID = u.Role.ID,
+						UserRole = u.Role.Description,
+						StatusID = u.Status.ID,
+						Status = u.Status.Description,
+						StatusColor = u.Status.Color
 					})
-					.ToList<object>(); // explicit cast to List<object>
+					.ToList(); // explicit cast to List<object>
 			}
 			catch (Exception ex)
 			{

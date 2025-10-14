@@ -39,9 +39,9 @@
                         <table id="tableRoles" class="table table-striped w-100 ">
                             <thead>
                                 <tr>
-                                    <th>Description</th> 
-                                    <th>Status</th>
-                                    <th class="no-export">Actions</th>
+                                    <th style="width:70%">Description</th> 
+                                    <th style="width:20%">Status</th>
+                                    <th style="width:10%" class="no-export">Actions</th>
                                 </tr>
                             </thead>
                         </table>
@@ -69,18 +69,21 @@
                         url: '@Url.Action("ListGetRoles", "Roles")',
                             type: 'GET',
                         dataSrc: function (json) {
-                            // Handle backend error gracefully
-                            if (json.success === false) {
-                                toastr.error(json.message);
-                                return [];
-                            }
-                            return json.data;
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load roles.");
+                            return [];
                         }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
                     },
                     dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
                     language: {
                         search: "",
-                        searchPlaceholder: "Search users..."
+                        searchPlaceholder: "Search roles..."
                     },
                     buttons: [
                             { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
@@ -94,11 +97,10 @@
                         }
                     ],
                     columns: [
-                        { data: 'Description' }, 
+                        { data: 'description' }, 
                         { data: 'status',
-                            render: function (data, type, row) {
-                              let badgeClass = row.statusID === 'A' ? 'badge-success' : 'badge-danger';
-                              return `<div class="badge text-center ${badgeClass}" style="width:100px">${data}</div>`;
+                            render: function (data, type, row) { 
+                              return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
                             }
                         },
                         {
@@ -129,7 +131,7 @@
                 });
 
                 // place export buttons next to search bar
-                table.buttons().container().appendTo('#tableRoles_wrapper .col-md-6:eq(1)');
+                //table.buttons().container().appendTo('#tableRoles_wrapper .col-md-6:eq(1)');
 
                 var $filter = $('#tableRoles_filter');
 
@@ -137,23 +139,23 @@
 
                 // Insert FA icons
 
-                $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+                // $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
 
                 // Toggle X on typing
-                $('#tableRoles_filter input').on("input", function () {
-                    if ($(this).val().length > 0) {
-                        $('#clearSearch').show();
-                    } else {
-                        $('#clearSearch').hide();
-                    }
-                });
+                // $('#tableRoles_filter input').on("input", function () {
+                //     if ($(this).val().length > 0) {
+                //         $('#clearSearch').show();
+                //     } else {
+                //         $('#clearSearch').hide();
+                //     }
+                // });
 
                 // Clear on X click
-                $('#clearSearch').on("click", function () {
-                    $('#tableRoles_filter input').val('');
-                    table.search('').draw();
-                    $(this).hide();
-                });
+                // $('#clearSearch').on("click", function () {
+                //     $('#tableRoles_filter input').val('');
+                //     table.search('').draw();
+                //     $(this).hide();
+                // });
 
                 const btnNewRole = document.getElementById("btnNewRole");
 

@@ -111,8 +111,9 @@
                     { data: 'userRole' },
                     { data: 'status',
                         render: function (data, type, row) { 
-                          let badgeClass = row.statusID === 'A' ? 'badge-success' : 'badge-danger';
-                          return `<div class="badge text-center ${badgeClass}" style="width:100px">${data}</div>`;
+                        
+                          return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px;">${data}</div>`;
+
                         }
                     },
                     {
@@ -155,23 +156,23 @@
 
             // Insert FA icons
        
-            $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+            //$filter.append('<i class="fas fa-times" id="clearSearch"></i>');
 
             // Toggle X on typing
-            $('#tableUsers_filter input').on("input", function () {
-                if ($(this).val().length > 0) {
-                    $('#clearSearch').show();
-                } else {
-                    $('#clearSearch').hide();
-                }
-            });
+            // $('#tableUsers_filter input').on("input", function () {
+            //     if ($(this).val().length > 0) {
+            //         $('#clearSearch').show();
+            //     } else {
+            //         $('#clearSearch').hide();
+            //     }
+            // });
 
             // Clear on X click
-            $('#clearSearch').on("click", function () {
-                $('#tableUsers_filter input').val('');
-                table.search('').draw();
-                $(this).hide();
-            });
+            // $('#clearSearch').on("click", function () {
+            //     $('#tableUsers_filter input').val('');
+            //     table.search('').draw();
+            //     $(this).hide();
+            // });
 
             const btnNewUser = document.getElementById("btnNewUser");
                 

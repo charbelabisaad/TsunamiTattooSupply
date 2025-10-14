@@ -6,9 +6,8 @@
 }
 
 .dataTables_filter input {
-    padding: 17px 10px 17px 30px  !important; /* top-bottom 17px, left-right 10px */
     width: 100% !important;
-    max-width: 100% !important;
+    padding-left: 2rem; /* space for the search icon */
 }
 
 .dataTables_filter .icon {
@@ -19,6 +18,28 @@
     color: #000;
     pointer-events: none; /* prevent icon from blocking clicks */
 }
+
+
+/* Make the label relative so ::before can be positioned */
+.dataTables_filter label {
+    position: relative;
+    width: 100%;
+}
+ 
+/* Add FA Search icon inside the input (left) */
+.dataTables_filter label::before {
+    content: "\f002"; /* Font Awesome search icon */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900; /* solid style */
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #000000;
+    font-size: 0.9rem;
+    pointer-events: none; /* keep input clickable */
+}
+ 
 
 .dataTable thead{
     background-color: gainsboro;
