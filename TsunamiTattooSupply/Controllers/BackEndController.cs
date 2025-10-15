@@ -40,7 +40,7 @@ namespace TsunamiTattooSupply.Controllers
 
 			//if (isValidUser)
 			//{
-			HttpContext.Response.Cookies.Append("UserID", "0");
+			HttpContext.Response.Cookies.Append("UserID", "4");
 				return RedirectToAction("Index", "Dashboard");
 			//}
 			//else

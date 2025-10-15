@@ -87,7 +87,7 @@
                             </button>
 
 							<button id="btnSaveUser" type="button" class="btn btn-primary ml-2">
-                                <span class="spinner-border spinner-border-sm d-none" id="btnSaveSpinner" role="status" aria-hidden="true"></span>
+                                <span class="spinner-border spinner-border-sm d-none" id="btnSaveUserSpinner" role="status" aria-hidden="true"></span>
                                 <i class="fas fa-save"></i> Save
                             </button>
                         </div>
@@ -129,7 +129,7 @@
             $('#UsernameMessage, #FirstNameMessage, #LastNameMessage').text('');
 
             // Show spinner while saving
-            $('#btnSaveSpinner').removeClass('d-none');
+            $('#btnSaveUserSpinner').removeClass('d-none');
             $('#btnSaveUser i').addClass('d-none');
 
             // Gather form values
@@ -164,20 +164,20 @@
 
             // Stop if validation failed
             if (requiredValidation) {
-                $('#btnSaveSpinner').addClass('d-none');
+                $('#btnSaveUserSpinner').addClass('d-none');
                 $('#btnSaveUser i').removeClass('d-none');
                 return;
             }
 
             // ✅ AJAX request
             $.ajax({
-                url: '@Url.Action("SavePost", "Users")',
+                url: '@Url.Action("SaveUser", "Users")',
                 type: 'POST',
                 data: data,
                 success: function (response) {
                     const table = $("#tableUsers").DataTable();
 
-                    $('#btnSaveSpinner').addClass('d-none');
+                    $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
                     $('#btnSaveUser').prop('disabled', true);
 
@@ -196,7 +196,7 @@
                         return;
                     }
 
-                    if (response.data) {
+                    if (response.users) {
                         $('#saveUserModal').modal('hide');
                         table.ajax.reload(null, false);
                         toastr.success("User saved successfully!");
@@ -204,12 +204,12 @@
                         $('#modalMessage').text("Unexpected response from server.").show();
                     }
 
-                    $('#btnSaveSpinner').addClass('d-none');
+                    $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
                     $('#btnSaveUser').prop('disabled', false);
                 },
                 error: function (xhr, status, error) {
-                    $('#btnSaveSpinner').addClass('d-none');
+                    $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
                     $('#btnSaveUser').prop('disabled', false);
                     $('#modalMessage').text("An error occurred while saving user" ).show();

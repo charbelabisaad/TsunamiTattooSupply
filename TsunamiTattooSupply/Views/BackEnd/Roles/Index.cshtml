@@ -6,6 +6,9 @@
     ViewData["Title"] = "Roles";
 }
 
+<partial name="SaveRole" />
+<partial name="DeleteRole" />
+
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -164,26 +167,26 @@
                     const modalEl = document.getElementById("saveRoleModal");
                     const modal = new bootstrap.Modal(modalEl);
 
-                    $("#modalTitle").text('Create Role');
+                    $("#modalRoleTitle").text('Create New Role');
 
                     $("#RoleID").val(0);
 
-                    $("#Description").val(''); 
+                    $("#RoleDescription").val(''); 
                       
-                    $("#StatusID").val('A');
-                    $("#StatusToggle").prop("checked", true);
+                    $("#RoleStatusID").val('A');
+                    $("#RoleStatusToggle").prop("checked", true);
 
-                    $("#DescriptionMessage").text(''); 
+                    $("#RoleDescriptionMessage").text(''); 
 
-                    $("#Description").removeClass('border-danger');
+                    $("#RoleDescription").removeClass('border-danger');
 
-                    $("#StatusToggle").prop("checked", true);
+                    $("#RoleStatusToggle").prop("checked", true);
 
                     modal.show();
 
                     $(modalEl).on('shown.bs.modal', function () {
 
-                        $("#Description").focus();
+                        $("#RoleDescription").focus();
 
                     });
 
@@ -191,21 +194,21 @@
 
                 $(document).on('click', '.btnEditRole', function(){
 
-                    $("#modalTitle").text('Modify Role');
+                    $("#modalRoleTitle").text('Modify Role');
 
-                    const ID = $(this).data('id');
-                    const Description = $(this).data('description'); 
-                    const StatusID = $(this).data('statusid');
+                    const RoleID = $(this).data('id');
+                    const RoleDescription = $(this).data('description'); 
+                    const RoleStatusID = $(this).data('statusid');
                     const modalEl = document.getElementById("saveRoleModal");
                     const modal = new bootstrap.Modal(modalEl);
 
-                    $("#RoleID").val(ID);
-                    $("#Description").val(Description); 
-                    $("#StatusID").val(StatusID);
+                    $("#RoleID").val(RoleID);
+                    $("#RoleDescription").val(RoleDescription); 
+                    $("#RoleStatusID").val(RoleStatusID);
 
                     $("#DescriptionMessage").text(''); 
 
-                    $("#Description").removeClass('border-danger'); 
+                    $("#RoleDescription").removeClass('border-danger'); 
 
                     $("#StatusToggle").prop("checked", StatusID == 'A' ? true : false);
 
@@ -223,13 +226,13 @@
             $(document).on("click", ".btnDeleteRole", function (e) {
               e.preventDefault();
 
-              const userId = $(this).data("id");
-                $("#deletedRoleId").val(userId);
+              const roleId = $(this).data("id");
+                $("#deletedRoleId").val(roleId);
 
-              const username = $(this).closest("tr").find("td:first").text();
+              const roledescription = $(this).closest("tr").find("td:first").text();
 
               $("#deleteRoleMessage").html(
-                `Are you sure you want to delete <strong>${username}</strong>?`
+                `Are you sure you want to delete <strong>${roledescription}</strong>?`
               );
 
               $("#deleteRoleModal").modal("show");

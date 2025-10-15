@@ -83,7 +83,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 		 
 		[HttpPost]
-		public IActionResult SavePost(int ID, string Username, string FirstName, string LastName, string UserTypeID, int RoleID, string StatusID)
+		public IActionResult SaveUser(int ID, string Username, string FirstName, string LastName, string UserTypeID, int RoleID, string StatusID)
 		{
 
 			string normalizedUsername = Username?.Trim().ToLower();
@@ -170,7 +170,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// Return updated list for DataTable
 
 
-				return Json(new { exists = false, data = GetUsers() });
+				return Json(new { exists = false, users = GetUsers() });
 			}
 			catch (Exception ex)
 			{
@@ -181,7 +181,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					exists = false,
 					error = true,
-					message = $"An unexpected error occurred while saving the user {UserID}!"
+					message = $"An unexpected error occurred while saving the user {Username}!"
 				});
 			}
 		}
@@ -234,10 +234,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[HttpPost]
 		public IActionResult DeleteUser(int id)
-		{
+		{	
+			var user = _dbContext.Users.FirstOrDefault(u => u.ID == id);
+
 			try
 			{
-				var user = _dbContext.Users.FirstOrDefault(u => u.ID == id);
+			
 				if (user == null)
 					return Json(new { success = false, message = "User not found." });
 
@@ -252,7 +254,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Delete User [ERROR]!");
-				return Json(new { success = false, message = $"An unexpected error occurred while deleting user {id}!" });
+				return Json(new { success = false, message = $"An unexpected error occurred while deleting user {user.Username}!" });
 			}
 		}
 
