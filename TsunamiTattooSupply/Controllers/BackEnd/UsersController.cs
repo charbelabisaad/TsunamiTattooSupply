@@ -220,6 +220,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						StatusID = u.Status.ID,
 						Status = u.Status.Description,
 						StatusColor = u.Status.Color
+
 					})
 					.ToList(); // explicit cast to List<object>
 			}
