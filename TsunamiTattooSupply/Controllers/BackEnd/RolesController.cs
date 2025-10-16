@@ -165,7 +165,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				}
 			 
-				return Json(new { exists = false, roles = GetRoles() });
+				return Json(new { success = true });
 
 			}
 			catch (Exception ex)

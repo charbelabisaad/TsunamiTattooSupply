@@ -56,7 +56,7 @@
             //$("#btnConfirmDeleteRole").addClass("disabled")
 
             $.ajax({
-                url: '@Url.Action("DeleteRole", "RoleAccounts")',
+                url: '@Url.Action("DeleteRole", "Roles")',
                 type: "POST",
                 data: { ID: roleidId }
             })

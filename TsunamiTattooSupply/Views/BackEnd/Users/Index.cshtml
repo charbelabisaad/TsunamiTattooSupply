@@ -95,7 +95,31 @@
                 buttons: [
                         { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
                         { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
-                        { extend: 'pdf', className: 'btn btn-danger btn-sm', exportOptions: { columns: ':visible:not(.no-export)'}, text: '<i class="fas fa-file-pdf"></i> PDF'  },
+                        {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: { columns: ':visible:not(.no-export)' },
+                            text: '<i class="fas fa-file-pdf"></i> PDF',
+                            customize: function (doc) {
+                                // Set all columns to auto width
+                                var tableBody = doc.content[1].table.body;
+                                var colCount = tableBody[0].length;
+
+                                // Distribute column widths evenly (100% width)
+                                var colWidths = [];
+                                for (var i = 0; i < colCount; i++) {
+                                    colWidths.push('*');
+                                }
+                                doc.content[1].table.widths = colWidths;
+
+                                // Optional: reduce margins and font size to fit better
+                                doc.styles.tableBodyEven.alignment = 'center';
+                                doc.styles.tableBodyOdd.alignment = 'center';
+                                doc.styles.tableHeader.alignment = 'center';
+                                doc.defaultStyle.fontSize = 8;
+                                doc.pageMargins = [10, 10, 10, 10];
+                            }
+                        },
                         { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
                     { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
                         action: function () {
