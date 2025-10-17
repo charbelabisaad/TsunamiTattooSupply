@@ -6,6 +6,7 @@ namespace TsunamiTattooSupply.Models
 {
 	[Table("Categories")]
 	[Index(nameof(Description),IsUnique =  true)]
+	[Index(nameof(StatusID))]   // Non-unique index on StatusID
 	public class Category
 	{
 		[Key]
@@ -41,7 +42,7 @@ namespace TsunamiTattooSupply.Models
 		public int Rank { get; set; } = 0;
 
 		[Required]
-		public bool Active { get; set; } = true;
+		public string StatusID { get; set; } 
 
 		public int CreatedUserID { get; set; }
 
@@ -54,7 +55,10 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
-		 
+
+		[ForeignKey("StatusID")]
+		public virtual Status Status { get; set; }
+
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }
 

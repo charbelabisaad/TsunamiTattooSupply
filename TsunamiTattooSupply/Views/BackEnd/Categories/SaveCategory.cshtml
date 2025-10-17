@@ -1,0 +1,160 @@
+﻿<div class="modal fade fullmodal-right" id="saveCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalCategoryTitle" class="modal-title"></h5>
+            </div>
+
+            <form id="categoryForm" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <input id="CategoryID" type="hidden" value="0" />
+
+                        <div class="col-md-12 mb-3">
+                            <label for="CategoryDescription" class="form-label">Description</label>
+                            <input type="text" class="form-control" id="CategoryDescription" placeholder="Fill Description" name="FirstName" />
+                            <div id="CategoryDescriptionMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <div class="col-md-12 mb-3">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="CategoryStatusToggle" checked />
+                                <label class="custom-control-label" for="CategoryStatusToggle" id="CategoryStatusLabel"></label>
+                                <input type="hidden" id="CategoryStatusID" name="CategoryStatusID" value="A" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="modalCategoryMessage" class="col-md-7 d-flex align-items-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-5 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+
+                            <button id="btnSaveCategory" type="button" class="btn btn-primary ml-2">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnSaveCategorySpinner" role="status" aria-hidden="true"></span>
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const toggle = document.getElementById("CategoryStatusToggle");
+        const hidden = document.getElementById("CategoryStatusID");
+        const label = document.getElementById("CategoryStatusLabel");
+
+        if (toggle && hidden && label) {
+            toggle.addEventListener("change", function () {
+                if (toggle.checked) {
+                    label.textContent = "Active";
+                    hidden.value = "A";
+                } else {
+                    label.textContent = "Inactive";
+                    hidden.value = "I";
+                }
+            });
+        }
+
+        $('#btnSaveCategory').on('click', function (e) {
+
+            e.preventDefault(); // ✅ prevent default form submission
+
+            // Reset validation flag
+            let requiredValidation = false;
+
+            // Clear previous errors and borders
+            $('#CategoryDescription').removeClass("border-danger");
+            $('#CategoryDescriptionMessage').text('');
+
+            // Show spinner while saving
+            $('#btnSaveCategorySpinner').removeClass('d-none');
+            $('#btnSaveCategory i').addClass('d-none');
+
+            // Gather form values
+            var data = {
+                ID: $('#CategoryID').val() || 0,
+                Description: $('#CategoryDescription').val().trim(),
+                StatusID: $('#CategoryStatusID').val()
+            };
+
+            // Basic validation
+            if (!data.Description) {
+                $('#CategoryDescriptionMessage').text("Description is required!");
+                $('#CategoryDescription').addClass("border-danger");
+                requiredValidation = true;
+            }
+
+            // Stop if validation failed
+            if (requiredValidation) {
+                $('#btnSaveCategorySpinner').addClass('d-none');
+                $('#btnSaveCategory i').removeClass('d-none');
+                return;
+            }
+
+            // ✅ AJAX request
+            $.ajax({
+                url: '@Url.Action("SaveCategory", "Categories")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+
+                    const table = $("#tableCategories").DataTable();
+
+                    $('#btnSaveCategorySpinner').addClass('d-none');
+                    $('#btnSaveCategory i').removeClass('d-none');
+                    $('#btnSaveCategory').prop('disabled', true);
+
+                    if (response.exists) {
+                        $('#CategoryDescriptionMessage').text(response.message || "Description already exists!");
+                        $('#CategoryDescription').addClass("border-danger");
+                        toastr.warning(response.message || "Description already exists!");
+                        $('#btnSaveCategory').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.error) {
+                        $('#modalCategoryMessage').text(response.message || "Error saving category.").show();
+                        toastr.error(response.message || "Error saving category.");
+                        $('#btnSaveCategory').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.categories) {
+                        $('#saveCategoryModal').modal('hide');
+                        table.ajax.reload(null, false);
+                        toastr.success("Category saved successfully!");
+                    } else {
+                        $('#modalCategoryMessage').text("Unexpected response from server.").show();
+                    }
+
+                    $('#btnSaveCategorySpinner').addClass('d-none');
+                    $('#btnSaveCategory i').removeClass('d-none');
+                    $('#btnSaveCategory').prop('disabled', false);
+                },
+                error: function (xhr, status, error) {
+                    $('#btnSaveCategorySpinner').addClass('d-none');
+                    $('#btnSaveCategory i').removeClass('d-none');
+                    $('#btnSaveCategory').prop('disabled', false);
+                    $('#modalCategoryMessage').text("An error occurred while saving category" ).show();
+                    toastr.error("An error occurred while saving category."); // ✅ fixed missing parenthesis
+                }
+            });
+        });
+
+    });
+     
+</script>

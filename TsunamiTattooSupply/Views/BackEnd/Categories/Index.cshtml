@@ -5,7 +5,10 @@
     Layout = "_LayoutAdmin";
     ViewData["Title"] = "Categories";
 }
- 
+
+<partial name="SaveCategory" />
+<partial name="DeleteCategory" />
+
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -21,7 +24,245 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">Categories List</h3></div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                            <button id="btnNewCategory" type="button" class="btn btn-sm btn-dark btn-black"><i class="fas fa-plus"></i> Add New Category</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="col-sm-12 mt-3">
+                        <table id="tableCategories" class="table table-striped w-100 ">
+                            <thead>
+                                <tr>
+                                    <th style="width:70%">Description</th> 
+                                    <th style="width:20%">Status</th>
+                                    <th style="width:10%" class="no-export">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </section>
 
 </div>
+
+@section Scripts {
+
+    <script>
+            $(document).ready(function () {
+
+                var table = $('#tableCategories').DataTable({
+                    processing: true,
+                    responsive: true,
+                    ajax: {
+                        url: '@Url.Action("ListGetCategories", "Categories")',
+                            type: 'GET',
+                        dataSrc: function (json) {
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load categories.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                    },
+                    dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Search categories..."
+                    },
+                    buttons: [
+                            { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                            { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                            {
+                                extend: 'pdfHtml5',
+                                className: 'btn btn-danger btn-sm',
+                                exportOptions: { columns: ':visible:not(.no-export)' },
+                                text: '<i class="fas fa-file-pdf"></i> PDF',
+                                customize: function (doc) {
+                                    // Set all columns to auto width
+                                    var tableBody = doc.content[1].table.body;
+                                    var colCount = tableBody[0].length;
+
+                                    // Distribute column widths evenly (100% width)
+                                    var colWidths = [];
+                                    for (var i = 0; i < colCount; i++) {
+                                        colWidths.push('*');
+                                    }
+                                    doc.content[1].table.widths = colWidths;
+
+                                    // Optional: reduce margins and font size to fit better
+                                    doc.styles.tableBodyEven.alignment = 'center';
+                                    doc.styles.tableBodyOdd.alignment = 'center';
+                                    doc.styles.tableHeader.alignment = 'center';
+                                    doc.defaultStyle.fontSize = 8;
+                                    doc.pageMargins = [10, 10, 10, 10];
+                                }
+                            },
+                            { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                        { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
+                            action: function () {
+                                table.ajax.reload();
+                            }
+                        }
+                    ],
+                    columns: [
+                        { data: 'description' }, 
+                        { data: 'status',
+                            render: function (data, type, row) { 
+                              return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
+                            }
+                        },
+                        {
+                            data: null,
+                            orderable: false,
+                            searchable: false,
+                            className: "no-export",
+                            render: function (data, type, row) {
+                                return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditCategory" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}" 
+                                    data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                        <a class="dropdown-item btnDeleteCategory" style="cursor:pointer" data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>   
+                                </div>
+                            </div>
+                                `;
+                            }
+                        }
+                    ]
+                });
+
+                // place export buttons next to search bar
+                //table.buttons().container().appendTo('#tableCategories_wrapper .col-md-6:eq(1)');
+
+                var $filter = $('#tableCategories_filter');
+
+                $filter.css("position", "relative");
+
+                // Insert FA icons
+
+                // $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+
+                // Toggle X on typing
+                // $('#tableCategories_filter input').on("input", function () {
+                //     if ($(this).val().length > 0) {
+                //         $('#clearSearch').show();
+                //     } else {
+                //         $('#clearSearch').hide();
+                //     }
+                // });
+
+                // Clear on X click
+                // $('#clearSearch').on("click", function () {
+                //     $('#tableCategories_filter input').val('');
+                //     table.search('').draw();
+                //     $(this).hide();
+                // });
+
+                const btnNewCategory = document.getElementById("btnNewCategory");
+
+                btnNewCategory.addEventListener("click", function () {
+
+                    const modalEl = document.getElementById("saveCategoryModal");
+                    const modal = new bootstrap.Modal(modalEl);
+
+                    $("#modalCategoryTitle").text('Create New Category');
+
+                    $("#CategoryID").val(0);
+
+                    $("#CategoryDescription").val(''); 
+                      
+                    $("#CategoryStatusID").val('A');
+                    $("#CategoryStatusToggle").prop("checked", true);
+
+                    $("#CategoryDescriptionMessage").text(''); 
+
+                    $("#CategoryDescription").removeClass('border-danger');
+                     
+                    modal.show();
+
+                    $(modalEl).on('shown.bs.modal', function () {
+
+                        $("#CategoryDescription").focus();
+
+                    });
+
+                });
+
+                $(document).on('click', '.btnEditCategory', function(){
+
+                    $("#modalCategoryTitle").text('Modify Category');
+                     
+                    const CategoryID = $(this).data('id');
+                    const CategoryDescription = $(this).data('description'); 
+                    const CategoryStatusID = $(this).data('statusid');
+                    const modalEl = document.getElementById("saveCategoryModal");
+                    const modal = new bootstrap.Modal(modalEl);
+
+                    $("#CategoryID").val(CategoryID);
+                    $("#CategoryDescription").val(CategoryDescription); 
+                    $("#CategoryStatusID").val(CategoryStatusID);
+
+                    $("#DescriptionMessage").text(''); 
+
+                    $("#CategoryDescription").removeClass('border-danger'); 
+                     
+                    $("#CategoryStatusToggle").prop("checked", CategoryStatusID == 'A' ? true : false);
+                      
+                    modal.show();
+                     
+                    $(modalEl).on('shown.bs.modal', function () {
+
+                        $("#CategoryDescription").focus();
+
+                    });
+
+                });
+
+            // Show modal when Delete button clicked
+            $(document).on("click", ".btnDeleteCategory", function (e) {
+              e.preventDefault();
+
+              const categoryId = $(this).data("id");
+                $("#deletedCategoryId").val(categoryId);
+
+              const categorydescription = $(this).closest("tr").find("td:first").text();
+
+              $("#deleteCategoryMessage").html(
+                `Are you sure you want to delete <strong>${categorydescription}</strong>?`
+              );
+
+              $("#deleteCategoryModal").modal("show");
+            });
+
+            
+        });
+
+    </script>
+}
+
