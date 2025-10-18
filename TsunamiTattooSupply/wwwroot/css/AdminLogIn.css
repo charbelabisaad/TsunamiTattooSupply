@@ -3,14 +3,13 @@
     background-size:cover;
     background-position: center
 }
-  body.login-page {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background-color: #f4f6f9;
-    }
-
+body.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #f4f6f9;
+} 
 .card-body {
     background-color: rgba(255,255,255,0.5) !important;
 }
@@ -22,41 +21,41 @@
     width: 90%;
 }
 
+.login-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.login-logo-col {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-form-col {
+    flex: 1;
+    padding: 20px;
+}
+
+.btn-orange {
+    background-color: #ff6600;
+    color: white;
+}
+
+@media (max-width: 768px) {
     .login-row {
-        display: flex;
-        flex-wrap: wrap;
+        flex-direction: column;
     }
 
-    .login-logo-col {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
+    .login-box {
+        width: 90%;
     }
+}
 
-    .login-form-col {
-        flex: 1;
-        padding: 20px;
-    }
-
-    .btn-orange {
-        background-color: #ff6600;
-        color: white;
-    }
-
-    @@media (max-width: 768px) {
-        .login-row {
-            flex-direction: column;
-        }
-
-        .login-box {
-            width: 90%;
-        }
-    }
-
-    .btn-orange {
-        background-color: #ff6600;
-        color: white;
-    }
+.btn-orange {
+    background-color: #ff6600;
+    color: white;
+}
 

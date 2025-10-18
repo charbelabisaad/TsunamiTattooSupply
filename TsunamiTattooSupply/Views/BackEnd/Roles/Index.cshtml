@@ -199,6 +199,7 @@
                       
                     $("#RoleStatusID").val('A');
                     $("#RoleStatusToggle").prop("checked", true);
+                    $("#RoleStatusLabel").text("Active");
 
                     $("#RoleDescriptionMessage").text(''); 
 
@@ -233,6 +234,7 @@
                     $("#RoleDescription").removeClass('border-danger'); 
                      
                     $("#RoleStatusToggle").prop("checked", RoleStatusID == 'A' ? true : false);
+                    $("#RoleStatusLabel").text(RoleStatusID == 'A' ? 'Active' : 'Inactive');
                       
                     modal.show();
                      

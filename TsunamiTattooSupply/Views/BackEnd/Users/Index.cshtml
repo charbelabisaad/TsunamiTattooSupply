@@ -217,6 +217,7 @@
 
                 $("#StatusID").val('A');
                 $("#StatusToggle").prop("checked", true);
+                $("#statusLabel").text("Active");
                         
                 $("#UsernameMessage").text('');
                 $("#FirstNameMessage").text('');
@@ -265,6 +266,7 @@
                 $("#LastName").removeClass('border-danger');
 
                 $("#StatusToggle").prop("checked", StatusID == 'A' ? true : false);
+                $("#statusLabel").text(StatusID == 'A' ? 'Active' : 'Inactive')
 
                 modal.show();
 

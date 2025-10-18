@@ -13,25 +13,32 @@
 
             <form id="roleForm" method="post">
                 <div class="modal-body">
-                    <div class="row">
-
+                    <div class="row align-items-center mb-3">
                         <input id="RoleID" type="hidden" value="0" />
-                         
-                        <div class="col-md-12 mb-3">
-                            <label for="RoleDescription" class="form-label">Description</label>
-                            <input type="text" class="form-control" id="RoleDescription" placeholder="Fill Description" name="FirstName" />
-                            <div id="RoleDescriptionMessage" class="text-danger fw-normal"></div>
+
+                        <!-- 🔹 Label -->
+                        <div class="col-12 col-md-2 d-flex align-items-center">
+                            <label for="RoleDescription" class="form-label mb-0">Description</label>
                         </div>
-    
-                        <div class="col-md-12 mb-3">
-                            <div class="custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="RoleStatusToggle" checked />
-                                <label class="custom-control-label" for="RoleStatusToggle" id="RoleStatusLabel"></label>
-                                <input type="hidden" id="RoleStatusID" name="RoleStatusID" value="A" />
+
+                        <!-- 🔹 Input -->
+                        <div class="col-12 col-md-8 d-flex align-items-center">
+                            <div class="w-100">
+                                <input type="text" class="form-control" id="RoleDescription" placeholder="Fill Description" />
+                                <div id="RoleDescriptionMessage" class="text-danger fw-normal"></div>
                             </div>
                         </div>
 
+                        <!-- 🔹 Status Toggle -->
+                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-end">
+                            <div class="custom-control custom-switch m-0">
+                                <input type="checkbox" class="custom-control-input" id="RoleStatusToggle" checked>
+                                <label class="custom-control-label" for="RoleStatusToggle" id="RoleStatusLabel">Active</label>
+                                <input type="hidden" id="RoleStatusID" name="RoleStatusID" value="A">
+                            </div>
+                        </div>
                     </div>
+
                 </div>
 
                 <div class="modal-footer">

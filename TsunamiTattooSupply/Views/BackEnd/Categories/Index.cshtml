@@ -199,6 +199,7 @@
                       
                     $("#CategoryStatusID").val('A');
                     $("#CategoryStatusToggle").prop("checked", true);
+                    $("#CategoryStatusLabel").text("Active");
 
                     $("#CategoryDescriptionMessage").text(''); 
 
@@ -233,6 +234,7 @@
                     $("#CategoryDescription").removeClass('border-danger'); 
                      
                     $("#CategoryStatusToggle").prop("checked", CategoryStatusID == 'A' ? true : false);
+                    $("#CategoryStatusLabel").text(CategoryStatusID == 'A' ? 'Active' : 'Inactive');
                       
                     modal.show();
                      
