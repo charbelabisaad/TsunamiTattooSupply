@@ -92,6 +92,8 @@ body {
 }
 
 .subcardheader {
+    font-weight:bold;
+    font-style: italic;
     padding: 10px;
     border-bottom: 1px solid gainsboro
 }
