@@ -21,7 +21,7 @@ namespace TsunamiTattooSupply.Models
 		public string? BannerImage { get; set; }
 
 		[StringLength(50)]
-		public string? Image {  get; set; }
+		public string? WebImage {  get; set; }
 
 		[StringLength(50)]
 		public string? AD_Image1 { get; set; }
@@ -33,7 +33,7 @@ namespace TsunamiTattooSupply.Models
 		public string? AD_Image3 { get; set; }
 
 		[Column(TypeName ="text")]
-		public string? AD_Details { get; set; }
+		public string? Details { get; set; }
 
 		[StringLength(50)]
 		public string? MobileImage { get; set; }

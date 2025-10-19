@@ -24,4 +24,11 @@
     <PackageReference Include="System.Data.SqlClient" Version="4.9.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\Images\CATEGORY\ADS\" />
+    <Folder Include="wwwroot\Images\CATEGORY\BANNER\" />
+    <Folder Include="wwwroot\Images\CATEGORY\MOBILE\" />
+    <Folder Include="wwwroot\Images\CATEGORY\WEB\" />
+  </ItemGroup>
+
 </Project>

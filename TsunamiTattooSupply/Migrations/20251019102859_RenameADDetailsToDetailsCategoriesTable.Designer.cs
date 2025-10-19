@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251019102859_RenameADDetailsToDetailsCategoriesTable")]
+    partial class RenameADDetailsToDetailsCategoriesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -72,6 +75,10 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int?>("EditUserID")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Image")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
                     b.Property<string>("MobileImage")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -82,10 +89,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<string>("StatusID")
                         .IsRequired()
                         .HasColumnType("character varying(1)");
-
-                    b.Property<string>("WebImage")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
 
                     b.HasKey("ID");
 

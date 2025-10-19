@@ -12,7 +12,7 @@ namespace TsunamiTattooSupply.DTO
  
 		public string? BannerImage { get; set; }
 		 
-		public string? Image { get; set; }
+		public string? WebImage { get; set; }
 		 
 		public string? AD_Image1 { get; set; }
 		 

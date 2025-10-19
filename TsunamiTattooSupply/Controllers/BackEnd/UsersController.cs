@@ -89,6 +89,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			string normalizedUsername = Username?.Trim().ToLower();
 			string normalizedFirstName = FirstName?.Trim().ToUpper();
 			string normalizedLastName = LastName?.Trim().ToUpper();
+
 			int UserID = 0;
 
 			try
@@ -255,7 +256,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Delete User [ERROR]!");
-				return Json(new { success = false, message = $"An unexpected error occurred while deleting user {user.Username}!" });
+				return Json(new { 
+					success = false, message = $"An unexpected error occurred while deleting user {user.Username}!" });
 			}
 		}
 
