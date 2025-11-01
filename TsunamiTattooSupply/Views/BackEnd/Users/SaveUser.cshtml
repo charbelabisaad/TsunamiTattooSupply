@@ -175,7 +175,11 @@
                 type: 'POST',
                 data: data,
                 success: function (response) {
+
                     const table = $("#tableUsers").DataTable();
+
+                    $("#dErrorHandling").addClass("d-none");
+                    $("#dErrorHandling").text("");
 
                     $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
@@ -207,12 +211,15 @@
                     $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
                     $('#btnSaveUser').prop('disabled', false);
+
                 },
                 error: function (xhr, status, error) {
                     $('#btnSaveUserSpinner').addClass('d-none');
                     $('#btnSaveUser i').removeClass('d-none');
                     $('#btnSaveUser').prop('disabled', false);
                     $('#modalMessage').text("An error occurred while saving user" ).show();
+                    $("#dErrorHandling").show();
+                    $("#dErrorHandling").text(error.message);
                     toastr.error("An error occurred while saving user."); // ✅ fixed missing parenthesis
                 }
             });

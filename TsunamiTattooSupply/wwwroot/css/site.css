@@ -35,6 +35,7 @@ body {
 
 .btn-black { 
     background-color: #000000 !important;
+    border:1px solid #000000;
     color: #ffffff;
     transition:.5s;
 }
@@ -44,10 +45,17 @@ body {
     color: #000000 !important;
 }
 
+.btn-close{
+    background-color:transparent;
+    border:none;
+}
+
 .admin-login-logo{
     max-width:300px;
     width:100%;
 }
+
+
 
 .error-handling {
     position: fixed;

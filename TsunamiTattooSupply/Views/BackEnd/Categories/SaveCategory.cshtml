@@ -1,9 +1,33 @@
-﻿<div class="modal fade fullmodal-right" id="saveCategoryModal" tabindex="-1" aria-hidden="true">
+﻿<!-- 🔹 Centered Image Modal -->
+<div class="modal fade" id="imageCategoryViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body d-flex justify-content-center align-items-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+                <img id="imageCategoryViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<div class="modal fade fullmodal-right" id="saveCategoryModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
 
             <div class="modal-header">
                 <h5 id="modalCategoryTitle" class="modal-title">Create New Category</h5>
+                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
             </div>
 
             <!-- Form -->
@@ -57,7 +81,7 @@
                                                     <span class="text-muted placeholder-icon" style="font-size:50px;">
                                                         <i class="fas fa-image"></i>
                                                     </span>
-                                                    <img id="categoryWebImage" src="" alt="Category Preview"
+                                                    <img id="categoryWebImagePreview" src="" alt="Category Preview"
                                                          class="img-fluid rounded d-none"
                                                          style="width:100%; height:100%; object-fit:contain;">
                                                 </div>
@@ -159,7 +183,7 @@
                                                     <span class="text-muted placeholder-icon" style="font-size:50px;">
                                                         <i class="fas fa-image"></i>
                                                     </span>
-                                                    <img id="categoryAds1" src="" alt="Ads 1 Preview"
+                                                    <img id="categoryAds1Preview" src="" alt="Ads 1 Preview"
                                                          class="img-fluid rounded d-none"
                                                          style="width:100%; height:100%; object-fit:contain;">
                                                 </div>
@@ -211,7 +235,7 @@
                                                     <span class="text-muted placeholder-icon" style="font-size:50px;">
                                                         <i class="fas fa-image"></i>
                                                     </span>
-                                                    <img id="categoryAds3" src="" alt="Ads 3 Preview"
+                                                    <img id="categoryAds3Preview" src="" alt="Ads 3 Preview"
                                                          class="img-fluid rounded d-none"
                                                          style="width:100%; height:100%; object-fit:contain;">
                                                 </div>
@@ -253,11 +277,11 @@
 
                 </div>
 
-                <div class="modal fade" id="imageViewModal" tabindex="-1" aria-hidden="true">
+                <div class="modal fade" id="imageCategoryViewModal" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content bg-dark">
                             <div class="modal-body text-center p-0">
-                                <img id="imageViewModalImg" src="" class="img-fluid rounded" />
+                                <img id="imageCategoryViewModalImg" src="" class="img-fluid rounded" />
                             </div>
                         </div>
                     </div>
@@ -279,111 +303,152 @@
     </div>
 </div>
 
-
+<input type="hidden" id="ClearWebImage" name="ClearWebImage" value="false" />
+<input type="hidden" id="ClearBannerImage" name="ClearBannerImage" value="false" />
+<input type="hidden" id="ClearMobileImage" name="ClearMobileImage" value="false" />
+<input type="hidden" id="ClearADImage1" name="ClearADImage1" value="false" />
+<input type="hidden" id="ClearADImage2" name="ClearADImage2" value="false" />
+<input type="hidden" id="ClearADImage3" name="ClearADImage3" value="false" />
 
 <script>
-
     document.addEventListener("DOMContentLoaded", function () {
-         
-            const toggle = document.getElementById("CategoryStatusToggle");
-            const hidden = document.getElementById("CategoryStatusID");
-            const label = document.getElementById("CategoryStatusLabel");
-              
-            if (toggle && hidden) {
-                toggle.addEventListener("change", function () {
-                    if (toggle.checked) {
-                        label.textContent = "Active";
-                        hidden.value = "A";
-                    } else {
-                        label.textContent = "Inactive";
-                        hidden.value = "I";
-                    }
-                });
-            }
 
-    $('#btnSaveCategory').on('click', function (e) {
-        e.preventDefault();
+        // ========================
+        // 🔹 Status Toggle Handler
+        // ========================
+        const toggle = document.getElementById("CategoryStatusToggle");
+        const hidden = document.getElementById("CategoryStatusID");
+        const label = document.getElementById("CategoryStatusLabel");
 
-        $('#btnSaveCategorySpinner').removeClass('d-none');
-        $('#btnSaveCategory i').addClass('d-none');
-        $('#btnSaveCategory').prop('disabled', true);
-
-        $('#CategoryDescription').removeClass("border-danger");
-        $('#CategoryDescriptionMessage').text('');
-
-        let description = $('#CategoryDescription').val().trim();
-        if (!description) {
-            $('#CategoryDescriptionMessage').text("Description is required!");
-            $('#CategoryDescription').addClass("border-danger");
-            $('#btnSaveCategorySpinner').addClass('d-none');
-            $('#btnSaveCategory i').removeClass('d-none');
-            $('#btnSaveCategory').prop('disabled', false);
-            return;
+        if (toggle && hidden) {
+            toggle.addEventListener("change", function () {
+                if (toggle.checked) {
+                    label.textContent = "Active";
+                    hidden.value = "A";
+                } else {
+                    label.textContent = "Inactive";
+                    hidden.value = "I";
+                }
+            });
         }
 
-        let formData = new FormData();
-        formData.append("ID", $('#CategoryID').val() || 0);
-        formData.append("Description", description);
-        formData.append("StatusID", $('#CategoryStatusID').val());
-        formData.append("Details", $('#categoryDetails').summernote('code'));
+        // ===============================
+        // 🔹 Save Button (AJAX Submission)
+        // ===============================
+        $('#btnSaveCategory').on('click', function (e) {
+            e.preventDefault();
 
-        // Append image files (if any)
-        const appendFile = (id, name) => {
-            let fileInput = document.getElementById(id);
-            if (fileInput && fileInput.files.length > 0) {
-                formData.append(name, fileInput.files[0]);
+            // Reset error area
+            $("#dErrorHandling").addClass("d-none").text("");
+
+            // Start loading state
+            $('#btnSaveCategorySpinner').removeClass('d-none');
+            $('#btnSaveCategory i').addClass('d-none');
+            $('#btnSaveCategory').prop('disabled', true);
+
+            // Reset field validation
+            $('#CategoryDescription').removeClass("border-danger");
+            $('#CategoryDescriptionMessage').text('');
+
+            let description = $('#CategoryDescription').val().trim();
+            if (!description) {
+                $('#CategoryDescriptionMessage').text("Description is required!");
+                $('#CategoryDescription').addClass("border-danger");
+                resetButtonState();
+                return;
             }
-        };
 
-        appendFile("categoryWebImage", "WebImage");
-        appendFile("categoryBannerImage", "BannerImage");
-        appendFile("categoryAdsImage1", "AD_Image1");
-        appendFile("categoryAdsImage2", "AD_Image2");
-        appendFile("categoryAdsImage3", "AD_Image3");
-        appendFile("categoryMobileImage", "MobileImage");
+            // Build form data
+            let formData = new FormData();
+            formData.append("ID", $('#CategoryID').val() || 0);
+            formData.append("Description", description);
+            formData.append("StatusID", $('#CategoryStatusID').val());
 
-        $.ajax({
-            url: '@Url.Action("SaveCategory", "Categories")',
-            type: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function (response) {
-                const table = $("#tableCategories").DataTable();
+            // Handle Summernote safely
+            let details = $('#categoryDetails').summernote ? $('#categoryDetails').summernote('code') : '';
+            formData.append("Details", details || '');
 
-                if (response.exists) {
-                    toastr.warning(response.message || "Category already exists!");
-                    return;
+            // Append files only if browsed
+            const appendFile = (inputId, fieldName) => {
+                const input = document.getElementById(inputId);
+                if (input && input.files.length > 0) {
+                    formData.append(fieldName, input.files[0]);
                 }
+            };
+            appendFile("categoryWebImage", "WebImage");
+            appendFile("categoryBannerImage", "BannerImage");
+            appendFile("categoryAdsImage1", "AD_Image1");
+            appendFile("categoryAdsImage2", "AD_Image2");
+            appendFile("categoryAdsImage3", "AD_Image3");
+            appendFile("categoryMobileImage", "MobileImage");
 
-                if (response.error) {
-                    toastr.error(response.message || "Error saving category.");
-                    return;
+            // Append clear-image flags
+            formData.append("ClearWebImage", $("#ClearWebImage").val() || "false");
+            formData.append("ClearBannerImage", $("#ClearBannerImage").val() || "false");
+            formData.append("ClearMobileImage", $("#ClearMobileImage").val() || "false");
+            formData.append("ClearADImage1", $("#ClearADImage1").val() || "false");
+            formData.append("ClearADImage2", $("#ClearADImage2").val() || "false");
+            formData.append("ClearADImage3", $("#ClearADImage3").val() || "false");
+
+            // Send AJAX
+            $.ajax({
+                url: '@Url.Action("SaveCategory", "Categories")',
+                type: 'POST',
+                data: formData,
+                processData: false, 
+                contentType: false,
+                success: function (response) {
+                    const table = $.fn.DataTable.isDataTable("#tableCategories")
+                        ? $("#tableCategories").DataTable()
+                        : null;
+
+                    if (response.exists) {
+                        toastr.warning(response.message || "Category already exists!");
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.error) {
+                        toastr.error(response.message || "Error saving category.");
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.category) {
+                        $('#saveCategoryModal').modal('hide');
+                        if (table) table.ajax.reload(null, false);
+                        toastr.success(response.message || "Category saved successfully!");
+
+                        // Reset clear flags + file inputs
+                        $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
+                        $("#saveCategoryModal input[type='file']").val('');
+                        $(".image-box-wrapper img").attr("src", "").addClass("d-none");
+                        $(".image-box-wrapper .placeholder-icon").removeClass("d-none");
+                        $(".image-box-wrapper .btn-clear, .image-box-wrapper .btn-view").hide();
+                    } else {
+                        toastr.error("Unexpected response from server.");
+                    }
+
+                    resetButtonState();
+                },
+                error: function (xhr) {
+                    toastr.error("An error occurred while saving category.");
+                    $("#dErrorHandling").removeClass("d-none").text(xhr.responseText || "Server error.");
+                    resetButtonState();
                 }
+            });
 
-                if (response.categories) {
-                    $('#saveCategoryModal').modal('hide');
-                    table.ajax.reload(null, false);
-                    toastr.success("Category saved successfully!");
-                } else {
-                    toastr.error("Unexpected response from server.");
-                }
-
-                $('#btnSaveCategorySpinner').addClass('d-none');
-                $('#btnSaveCategory i').removeClass('d-none');
-                $('#btnSaveCategory').prop('disabled', false);
-
-            },
-            error: function () {
-                toastr.error("An error occurred while saving category.");
+            // Helper: reset spinner + button
+            function resetButtonState() {
                 $('#btnSaveCategorySpinner').addClass('d-none');
                 $('#btnSaveCategory i').removeClass('d-none');
                 $('#btnSaveCategory').prop('disabled', false);
             }
         });
-    });
 
-         
+        // ===========================================
+        // 🔹 Image Upload / Preview / Clear / View Logic
+        // ===========================================
         document.querySelectorAll('.image-box-wrapper').forEach(wrapper => {
 
             const input = wrapper.querySelector('input[type="file"]');
@@ -393,10 +458,11 @@
             const viewBtn = wrapper.querySelector('.btn-view');
             const browseBtn = wrapper.querySelector('.btn-browse');
 
-            // Initialize buttons hidden
+            // Hide buttons initially
             clearBtn.style.display = 'none';
             viewBtn.style.display = 'none';
 
+            // When file is chosen
             input.addEventListener('change', function () {
                 const file = this.files[0];
                 if (!file) return;
@@ -406,43 +472,69 @@
                     preview.src = e.target.result;
                     preview.classList.remove('d-none');
                     placeholder.classList.add('d-none');
-
-                    // Show buttons only if image is loaded
                     clearBtn.style.display = 'inline-block';
                     viewBtn.style.display = 'inline-block';
+                    resetClearFlag(wrapper);
                 };
                 reader.readAsDataURL(file);
             });
 
+            // When Clear clicked
             clearBtn.addEventListener('click', () => {
                 preview.src = '';
                 preview.classList.add('d-none');
                 placeholder.classList.remove('d-none');
                 input.value = '';
-
-                // Hide Clear and View buttons again
                 clearBtn.style.display = 'none';
                 viewBtn.style.display = 'none';
+                setClearFlag(wrapper);
             });
 
-            viewBtn.addEventListener('click', () => {
-                if (!preview.src) return;
-                const modalImg = document.getElementById('imageViewModalImg');
-                modalImg.src = preview.src;
-                new bootstrap.Modal(document.getElementById('imageViewModal')).show();
+            // When View clicked
+              viewBtn.addEventListener('click', () => {
+                    if (!preview.src) return;
+                    const modalImg = document.getElementById('imageCategoryViewModalImg');
+                    modalImg.src = preview.src;
+                    new bootstrap.Modal(document.getElementById('imageCategoryViewModal')).show();
             });
 
+            // Browse button click triggers input
             browseBtn.addEventListener('click', () => input.click());
 
-        }); 
-    
-        $(function(){
+            // Helper: set clear flag
+               function setClearFlag(wrapper) {
+                    if (wrapper.querySelector("#categoryWebImagePreview")) $("#ClearWebImage").val("true");
+                    if (wrapper.querySelector("#categoryMobileImagePreview")) $("#ClearMobileImage").val("true");
+                    if (wrapper.querySelector("#categoryBannerImagePreview")) $("#ClearBannerImage").val("true");
+                    if (wrapper.querySelector("#categoryAds1Preview")) $("#ClearADImage1").val("true");
+                    if (wrapper.querySelector("#categoryAds2Preview")) $("#ClearADImage2").val("true");
+                    if (wrapper.querySelector("#categoryAds3Preview")) $("#ClearADImage3").val("true");
+                }
 
+                function resetClearFlag(wrapper) {
+                    if (wrapper.querySelector("#categoryWebImagePreview")) $("#ClearWebImage").val("false");
+                    if (wrapper.querySelector("#categoryMobileImagePreview")) $("#ClearMobileImage").val("false");
+                    if (wrapper.querySelector("#categoryBannerImagePreview")) $("#ClearBannerImage").val("false");
+                    if (wrapper.querySelector("#categoryAds1Preview")) $("#ClearADImage1").val("false");
+                    if (wrapper.querySelector("#categoryAds2Preview")) $("#ClearADImage2").val("false");
+                    if (wrapper.querySelector("#categoryAds3Preview")) $("#ClearADImage3").val("false");
+                }
+        });
+
+        // =============================
+        // 🔹 Reset Clear Flags on Close
+        // =============================
+        $('#saveCategoryModal').on('hidden.bs.modal', function () {
+            $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
+        });
+
+        // =======================
+        // 🔹 Summernote Setup
+        // =======================
+        $(function () {
             $("#categoryDetails").summernote({
-                height: 250 
+                height: 250
             });
-
-        })
-
+        });
     });
-    </script>
+</script>

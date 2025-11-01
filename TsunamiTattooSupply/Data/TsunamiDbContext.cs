@@ -15,6 +15,7 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Role> Roles { get; set; }
 		public DbSet<RolePermission> RolePermissions { get; set; }
 		public DbSet<Category> Categories { get; set; }
+		public DbSet<SubCategory> SubCategories { get; set; }
 		public DbSet<FilePath> FilePaths { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

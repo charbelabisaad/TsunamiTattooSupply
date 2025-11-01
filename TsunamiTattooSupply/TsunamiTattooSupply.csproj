@@ -25,10 +25,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\Images\CATEGORY\ADS\" />
-    <Folder Include="wwwroot\Images\CATEGORY\BANNER\" />
-    <Folder Include="wwwroot\Images\CATEGORY\MOBILE\" />
-    <Folder Include="wwwroot\Images\CATEGORY\WEB\" />
+    <Folder Include="wwwroot\Images\CATEGORY\ADS\DELETED\" />
+    <Folder Include="wwwroot\Images\CATEGORY\BANNER\DELETED\" />
+    <Folder Include="wwwroot\Images\CATEGORY\MOBILE\DELETED\" />
+    <Folder Include="wwwroot\Images\CATEGORY\WEB\DEELTED\" />
   </ItemGroup>
 
 </Project>

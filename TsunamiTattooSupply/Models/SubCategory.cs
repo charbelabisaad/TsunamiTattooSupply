@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Categories")]
-	[Index(nameof(Description),IsUnique =  true)]
+	[Table("SubCategories")]
+	[Index(nameof(Description), IsUnique = true)]
+	[Index(nameof(CategoryID))]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID
-	public class Category
+	public class SubCategory
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -21,20 +22,8 @@ namespace TsunamiTattooSupply.Models
 		public string? BannerImage { get; set; }
 
 		[StringLength(500)]
-		public string? WebImage {  get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image1 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image2 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image3 { get; set; }
-
-		[Column(TypeName ="text")]
-		public string? Details { get; set; }
-
+		public string? WebImage { get; set; }
+  
 		[StringLength(500)]
 		public string? MobileImage { get; set; }
 
@@ -42,7 +31,10 @@ namespace TsunamiTattooSupply.Models
 		public int Rank { get; set; } = 0;
 
 		[Required]
-		public string StatusID { get; set; } 
+		public int CategoryID { get; set; }
+
+		[Required]
+		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }
 
@@ -55,6 +47,9 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
+
+		[ForeignKey("CategoryID")]
+		public virtual Category Category { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
