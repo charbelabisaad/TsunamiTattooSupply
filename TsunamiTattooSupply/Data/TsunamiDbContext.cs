@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using TsunamiTattooSupply.Controllers.BackEnd;
 using TsunamiTattooSupply.Models; 
 namespace TsunamiTattooSupply.Data
 {
@@ -17,6 +18,35 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Category> Categories { get; set; }
 		public DbSet<SubCategory> SubCategories { get; set; }
 		public DbSet<FilePath> FilePaths { get; set; }
+		public DbSet<Country> Countries { get; set; }
+		public DbSet<Client> Clients { get; set; }
+		public DbSet<ClientAddress> ClientAddresses { get; set; }
+		public DbSet<Brand> Brands { get; set; }
+		public DbSet<Unit> Units { get; set; }
+		public DbSet<Currency> Currencies { get; set; }
+		public DbSet<CurrencyConversion> CurrenciesConversion {  get; set; } 
+		public DbSet<Product> Products { get; set; }
+		public DbSet<ProductSubCategory> ProductsSubCategories { get; set; }
+		public DbSet<Size> Sizes { get; set; }
+		public DbSet<ProductSize> ProductsSizes { get; set; }
+		public DbSet<Price> Prices { get; set; }
+		public DbSet<ProductColor> ProductsColors { get; set; }
+		public DbSet<ProductImage> ProductsImages { get; set; }		
+		public DbSet<Stock> Stocks { get; set; }
+		public DbSet<Color> Colors { get; set; }
+		public DbSet<Cart> Carts { get; set; }
+		public DbSet<GetWay> GetWays { get; set; }
+		public DbSet<Order> Orders { get; set; }
+		public DbSet<OrderProduct> OrderProducts { get; set; }
+		public DbSet<TrackingOrderStatus> TrackingOrderStatuses { get; set; }
+		public DbSet<TrackingOrder> TrackingOrders { get; set; }
+		public DbSet<ProductBestSeller> ProductsBestSeller { get; set; }
+		public DbSet<ProductRecentlyViewed> ProductsRecentlyViewed { get; set; }
+		public DbSet<ProductWishList> ProductsWishList { get; set; }
+		public DbSet<SocialMedia> SocialMedias { get; set; }
+		public DbSet<Subscription> Subscriptions { get; set; }
+		public DbSet<Service> Services { get; set; }
+		public DbSet<POSStock> POSStocks { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

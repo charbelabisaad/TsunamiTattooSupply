@@ -4,45 +4,26 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Categories")]
-	[Index(nameof(Description),IsUnique =  true)]
+	[Table("Units")]
+	[Index(nameof(ShortDescription), IsUnique = true)]
+	[Index(nameof(LongDescription), IsUnique = true)]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID
-	public class Category
+	public class Unit
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int ID { get; set; }
 
 		[Required]
-		[StringLength(500)]
-		public string Description { get; set; }
-
-		[StringLength(500)]
-		public string? BannerImage { get; set; }
-
-		[StringLength(500)]
-		public string? WebImage {  get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image1 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image2 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image3 { get; set; }
-
-		[Column(TypeName ="text")]
-		public string? Details { get; set; }
-
-		[StringLength(500)]
-		public string? MobileImage { get; set; }
+		[StringLength(50)]
+		public string ShortDescription { get; set; }
 
 		[Required]
-		public int Rank { get; set; } = 0;
-
+		[StringLength(50)]
+		public string LongDescription { get; set; }
+		 
 		[Required]
-		public string StatusID { get; set; } 
+		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }
 

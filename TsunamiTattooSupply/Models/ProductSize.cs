@@ -4,45 +4,30 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Categories")]
-	[Index(nameof(Description),IsUnique =  true)]
-	[Index(nameof(StatusID))]   // Non-unique index on StatusID
-	public class Category
+	[Table("ProductsSizes")]
+	[Index(nameof(ProductID))]
+	[Index(nameof(SizeID))]
+	[Index(nameof(StatusID))]
+	public class ProductSize
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int ID { get; set; }
 
 		[Required]
-		[StringLength(500)]
-		public string Description { get; set; }
-
-		[StringLength(500)]
-		public string? BannerImage { get; set; }
-
-		[StringLength(500)]
-		public string? WebImage {  get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image1 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image2 { get; set; }
-
-		[StringLength(500)]
-		public string? AD_Image3 { get; set; }
-
-		[Column(TypeName ="text")]
-		public string? Details { get; set; }
-
-		[StringLength(500)]
-		public string? MobileImage { get; set; }
+		public int ProductID { get; set; }
 
 		[Required]
-		public int Rank { get; set; } = 0;
+		public int SizeID { get; set; }
+
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal Sale {  get; set; }
+
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal Raise { get; set; }
 
 		[Required]
-		public string StatusID { get; set; } 
+		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }
 
@@ -56,6 +41,12 @@ namespace TsunamiTattooSupply.Models
 
 		public DateTime? DeletedDate { get; set; }
 
+		[ForeignKey("ProductID")]
+		public Product Product { get; set; }
+
+		[ForeignKey("SizeID")]
+		public Size Size { get; set; }	
+
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
 
@@ -67,6 +58,6 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("DeletedUserID")]
 		public virtual User DeletedUser { get; set; }
-		 
+
 	}
 }

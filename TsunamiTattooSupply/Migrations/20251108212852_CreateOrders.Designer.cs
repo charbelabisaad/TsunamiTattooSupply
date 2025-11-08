@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251108212852_CreateOrders")]
+    partial class CreateOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,43 +24,6 @@ namespace TsunamiTattooSupply.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("TsunamiTattooSupply.Controllers.BackEnd.SocialMedia", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<int>("Rank")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Code")
-                        .IsUnique();
-
-                    b.HasIndex("Description")
-                        .IsUnique();
-
-                    b.ToTable("SocialMedias");
-                });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Brand", b =>
                 {
@@ -853,35 +819,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("OrderProducts");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.POSStock", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Barcode")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(12,2)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Barcode")
-                        .IsUnique();
-
-                    b.ToTable("POSStocks");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.Permission", b =>
                 {
                     b.Property<int>("ID")
@@ -1074,42 +1011,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductBestSeller", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ColorID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("CreatedUserID")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("SizeID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ColorID");
-
-                    b.HasIndex("CreatedUserID");
-
-                    b.HasIndex("ProductID");
-
-                    b.HasIndex("SizeID");
-
-                    b.ToTable("ProductsBestSeller");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.ProductColor", b =>
                 {
                     b.Property<int>("ID")
@@ -1228,32 +1129,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("ProductsImages");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductRecentlyViewed", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ClientID")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ClientID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("ProductsRecentlyViewed");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.ProductSize", b =>
                 {
                     b.Property<int>("ID")
@@ -1366,32 +1241,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("ProductsSubCategories");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductWishList", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<int>("ClientID")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("ClientID");
-
-                    b.HasIndex("ProductID");
-
-                    b.ToTable("ProductsWishList");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.Role", b =>
                 {
                     b.Property<int>("ID")
@@ -1475,36 +1324,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("RoleID");
 
                     b.ToTable("RolePermissions");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.Service", b =>
-                {
-                    b.Property<string>("ID")
-                        .HasColumnType("text");
-
-                    b.Property<int>("CreatedUserID")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("EditDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("EditUserID")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("CreatedUserID");
-
-                    b.HasIndex("EditUserID");
-
-                    b.ToTable("Services");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Size", b =>
@@ -1713,30 +1532,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("SubCategories");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.Subscription", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(300)
-                        .HasColumnType("character varying(300)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("Subscriptions");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.TrackingOrder", b =>
                 {
                     b.Property<int>("ID")
@@ -1745,8 +1540,7 @@ namespace TsunamiTattooSupply.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<int?>("CreatedUserID")
-                        .IsRequired()
+                    b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreationDate")
@@ -2428,41 +2222,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Unit");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductBestSeller", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.Color", "Color")
-                        .WithMany()
-                        .HasForeignKey("ColorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedUserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Size", "Size")
-                        .WithMany()
-                        .HasForeignKey("SizeID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Color");
-
-                    b.Navigation("CreatedUser");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Size");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.ProductColor", b =>
                 {
                     b.HasOne("TsunamiTattooSupply.Models.Color", "Color")
@@ -2555,25 +2314,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductRecentlyViewed", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.ProductSize", b =>
@@ -2670,25 +2410,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("SubCategory");
                 });
 
-            modelBuilder.Entity("TsunamiTattooSupply.Models.ProductWishList", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.Client", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("TsunamiTattooSupply.Models.Role", b =>
                 {
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
@@ -2746,23 +2467,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Permission");
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.Service", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
-                        .WithMany()
-                        .HasForeignKey("CreatedUserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
-                        .WithMany()
-                        .HasForeignKey("EditUserID");
-
-                    b.Navigation("CreatedUser");
-
-                    b.Navigation("EditUser");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Size", b =>
