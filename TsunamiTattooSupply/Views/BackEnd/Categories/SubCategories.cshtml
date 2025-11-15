@@ -18,23 +18,23 @@
                     <div class="col-12 col-lg-7 d-flex flex-column">
                         <div class="card flex-grow-1 shadow-sm border-0">
                             <div class="card-header subcardheader-equal justify-content-between align-items-center">
-                                
+
                                 <div class="row align-items-center">
 
-									<div class="col-6 d-flex flex-column">
-										<h6 class="mb-0 fw-bold">
-											Sub Categories List
-										</h6>
-									</div>
+                                    <div class="col-6 d-flex flex-column">
+                                        <h6 class="mb-0 fw-bold">
+                                            Sub Categories List
+                                        </h6>
+                                    </div>
 
-									<div class="col-6 d-flex justify-content-end">
-										<button id="btnNewSubCategory" class="btn btn-sm btn-black">
-											<i class="fas fa-plus"></i> Add New Sub Category
-										</button>
-									</div>
+                                    <div class="col-6 d-flex justify-content-end">
+                                        <button id="btnNewSubCategory" class="btn btn-sm btn-black">
+                                            <i class="fas fa-plus"></i> Add New Sub Category
+                                        </button>
+                                    </div>
 
                                 </div>
-                                 
+
                             </div>
 
                             <div class="card-body p-3">
@@ -76,7 +76,7 @@
                                         <div class="col-12 col-md-5">
                                             <input type="text" class="form-control" id="SubCategoryDescription" placeholder="Fill Description" />
                                             <div id="SubCategoryDescriptionMessage" class="text-danger small mt-1"></div>
-										</div> 
+                                        </div>
                                         <div class="col-12 col-md-4 d-flex justify-content-md-end">
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="subcategoryStatusToggle" checked />
@@ -86,11 +86,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Status -->
-                                  
-                                       
-                                       
-                                     
+                                    <!-- IMAGES -->
                                     <div class="row">
                                         <!-- Web Image -->
                                         <div class="col-md-6 text-center mb-3">
@@ -109,21 +105,22 @@
                                                 </div>
                                                 <div class="image-overlay d-flex justify-content-center align-items-center">
                                                     <div class="d-flex gap-3">
-                                                        <button type="button" class="overlay-btn btn-clear"><i class="fas fa-times"></i></button>
-                                                        <button type="button" class="overlay-btn btn-view"><i class="fas fa-eye"></i></button>
-                                                        <button type="button" class="overlay-btn btn-browse"><i class="fas fa-paperclip"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-view"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-browse"><i class="fas fa-paperclip"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
+                                        <!-- Mobile Image -->
                                         <div id="dSubCategoryMobileImage" class="col-md-6 text-center mb-3">
                                             <label for="subcategoryMobileImage" class="form-label text-primary">Mobile Image</label>
                                             <div class="image-box-wrapper mx-auto position-relative" style="width:220px; height:220px;">
                                                 <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
                                                      style="width:100%; height:100%; cursor:pointer;">
                                                     <input type="file" id="subcategoryMobileImage" accept="image/*"
-                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                           style="opacity:0; position:absolute; width:100%; height:100%;">
                                                     <span class="text-muted placeholder-icon" style="font-size:50px;">
                                                         <i class="fas fa-image"></i>
                                                     </span>
@@ -131,21 +128,19 @@
                                                          class="img-fluid rounded d-none"
                                                          style="width:100%; height:100%; object-fit:contain;">
                                                 </div>
-                                                <!-- Overlay -->
                                                 <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
                                                     <div class="d-flex gap-4">
-                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
-                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
-                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-view"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-browse"><i class="fas fa-paperclip"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Banner Image -->
-                                        
                                     </div>
 
+                                    <!-- Banner Image -->
                                     <div class="row">
                                         <div class="col-md-12 text-center mb-3">
                                             <label class="form-label text-primary">Banner Image</label>
@@ -163,9 +158,9 @@
                                                 </div>
                                                 <div class="image-overlay d-flex justify-content-center align-items-center">
                                                     <div class="d-flex gap-3">
-                                                        <button type="button" class="overlay-btn btn-clear"><i class="fas fa-times"></i></button>
-                                                        <button type="button" class="overlay-btn btn-view"><i class="fas fa-eye"></i></button>
-                                                        <button type="button" class="overlay-btn btn-browse"><i class="fas fa-paperclip"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-view"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-sub-browse"><i class="fas fa-paperclip"></i></button>
                                                     </div>
                                                 </div>
                                             </div>
@@ -185,6 +180,9 @@
                                     </button>
                                 </div>
                             </div>
+                            <input type="hidden" id="ClearSubWebImage" value="false" />
+                            <input type="hidden" id="ClearSubMobileImage" value="false" />
+                            <input type="hidden" id="ClearSubBannerImage" value="false" />
                         </form>
                     </div>
                 </div>
@@ -193,3 +191,491 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // -----------------------------------------
+        // 🔹 When SubCategories modal is opened
+        // -----------------------------------------
+        $('#SubCategoriesModal').on('shown.bs.modal', function () {
+            initializeSubCategoryImageHandlers();
+        });
+
+        // ---------------------------------------------------
+        // 🔹 FULL SubCategory Image Handler (Browse/Clear/View)
+        // ---------------------------------------------------
+        function initializeSubCategoryImageHandlers() {
+
+            document.querySelectorAll('#SubCategoriesModal .image-box-wrapper').forEach(wrapper => {
+
+                const input = wrapper.querySelector('input[type="file"]');
+                const preview = wrapper.querySelector('img');
+                const placeholder = wrapper.querySelector('.placeholder-icon');
+
+                const clearBtn = wrapper.querySelector('.btn-sub-clear');
+                const viewBtn = wrapper.querySelector('.btn-sub-view');
+                const browseBtn = wrapper.querySelector('.btn-sub-browse');
+
+                // Hide buttons initially
+                clearBtn.style.display = 'none';
+                viewBtn.style.display = 'none';
+
+                // -------------------------------
+                // 🔹 Browse
+                // -------------------------------
+                browseBtn.addEventListener('click', () => {
+                    input.click();
+                });
+
+                // -------------------------------
+                // 🔹 Preview Image
+                // -------------------------------
+                input.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                        placeholder.classList.add('d-none');
+
+                        clearBtn.style.display = 'inline-block';
+                        viewBtn.style.display = 'inline-block';
+
+                        resetSubClearFlag(wrapper);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
+                // -------------------------------
+                // 🔹 Clear Image
+                // -------------------------------
+                clearBtn.addEventListener('click', () => {
+                    preview.src = '';
+                    preview.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+
+                    input.value = '';
+
+                    clearBtn.style.display = 'none';
+                    viewBtn.style.display = 'none';
+
+                    setSubClearFlag(wrapper);
+                });
+
+                // -------------------------------
+                // 🔹 View Image (Modal)
+                // -------------------------------
+                viewBtn.addEventListener('click', () => {
+                    if (!preview.src) return;
+
+                    const modalImg = document.getElementById('imageCategoryViewModalImg');
+                    modalImg.src = preview.src;
+
+                    new bootstrap.Modal(document.getElementById('imageCategoryViewModal')).show();
+                });
+
+                // -------------------------------
+                // 🔹 Set Clear Flag
+                // -------------------------------
+                function setSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("true");
+                }
+
+                // -------------------------------
+                // 🔹 Reset Clear Flag
+                // -------------------------------
+                function resetSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("false");
+                }
+            });
+        }
+         
+        // ---------------------------------------------------
+        // 🔹 When clicking "View Sub Categories"
+        // ---------------------------------------------------
+       $(document).on("click", ".btnViewSubCategories", function () {
+
+        const categoryId = $(this).data("id");
+        const categoryDescription = $(this).data("description");
+
+        // Set parent ID for saving
+        $("#ParentCategoryID").val(categoryId);
+
+        // Set modal title
+        $("#SubCategoriesModal .modal-title").html(
+            `<span class="text-secondary">Sub Categories of</span>
+             <span class="font-weight-bold">${categoryDescription}</span>`
+        );
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
+        modal.show();
+
+        // Reload or Initialize DataTable
+        if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
+
+            $("#tableSubCategories").DataTable()
+                .ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`)
+                .load();
+
+        } else {
+            initializeSubCategoryTable(categoryId);
+        }
+
+        // Reset form
+        resetSubCategoryForm();
+    });
+
+
+            // ================================================
+    // 🔹 SAVE SUBCATEGORY (AJAX)
+    // ================================================
+       // RESET BUTTON FUNCTION — MUST BE OUTSIDE
+    function resetSubButton() {
+        $('#btnSaveSubCategorySpinner').addClass('d-none');
+        $('#btnSaveSubCategory i').removeClass('d-none');
+        $('#btnSaveSubCategory').prop('disabled', false);
+    }
+
+    $(document).on("click", "#btnSaveSubCategory", function (e) {
+        e.preventDefault();
+
+        // Start loading state
+        $('#btnSaveSubCategorySpinner').removeClass('d-none');
+        $('#btnSaveSubCategory i').addClass('d-none');
+        $('#btnSaveSubCategory').prop('disabled', true);
+
+        // Reset errors
+        $('#SubCategoryDescription').removeClass('border-danger');
+        $('#SubCategoryDescriptionMessage').text('');
+
+        let description = $('#SubCategoryDescription').val().trim();
+        if (!description) {
+            $('#SubCategoryDescriptionMessage').text("Description is required!");
+            $('#SubCategoryDescription').addClass('border-danger');
+            resetSubButton();
+            return;
+        }
+
+        let formData = new FormData();
+
+        formData.append("ID", $('#SubCategoryID').val());
+        formData.append("CategoryID", $('#ParentCategoryID').val());
+        formData.append("Description", description);
+        formData.append("StatusID", $('#subCategoryStatusID').val());
+
+        const attach = (id, key) => {
+            let input = document.getElementById(id);
+            if (input && input.files.length > 0) {
+                formData.append(key, input.files[0]);
+            }
+        };
+
+        attach("subcategoryWebImage", "WebImage");
+        attach("subcategoryMobileImage", "MobileImage");
+        attach("subcategoryBannerImage", "BannerImage");
+
+        formData.append("ClearWebImage", $("#ClearSubWebImage").val());
+        formData.append("ClearMobileImage", $("#ClearSubMobileImage").val());
+        formData.append("ClearBannerImage", $("#ClearSubBannerImage").val());
+
+        $.ajax({
+            url: "/Categories/SaveSubCategory",
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function (response) {
+
+                if (response.exists) {
+                    toastr.warning(response.message);
+                    resetSubButton();
+                    return;
+                }
+
+                if (response.error) {
+                    toastr.error(response.message);
+                    resetSubButton();
+                    return;
+                }
+
+                if (response.subCategory) {
+                    toastr.success(response.message);
+
+                    $("#tableSubCategories").DataTable().ajax.reload(null, false);
+
+                    resetSubCategoryForm();
+                }
+
+                resetSubButton();
+            },
+            error: function () {
+                toastr.error("Error saving sub category!");
+                resetSubButton();
+            }
+        });
+    });
+
+
+    function initializeSubCategoryTable(categoryId) {
+
+        var table = $("#tableSubCategories").DataTable({
+            processing: true,
+            responsive: true,
+            destroy: true,
+            ajax: {
+                url: `/Categories/ListGetSubCategories?CategoryID=${categoryId}`,
+                type: "GET",
+                dataSrc: function (json) {
+                    if (json && json.success === false) {
+                        toastr.error(json.message || "Failed to load subcategories.");
+                        return [];
+                    }
+                    if (!json || !json.data) {
+                        toastr.error("Unexpected response from server.");
+                        return [];
+                    }
+                    return json.data;
+                }
+            },
+
+            // SAME dom design as categories
+            dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+
+            language: {
+                search: "",
+                searchPlaceholder: "Search Sub Categories..."
+            },
+
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn btn-secondary btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-copy"></i> Copy'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-success btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-excel"></i> Excel'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-danger btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    customize: function (doc) {
+                        var tableBody = doc.content[1].table.body;
+                        var colCount = tableBody[0].length;
+
+                        var colWidths = [];
+                        for (var i = 0; i < colCount; i++) colWidths.push('*');
+                        doc.content[1].table.widths = colWidths;
+
+                        doc.styles.tableBodyEven.alignment = 'center';
+                        doc.styles.tableBodyOdd.alignment = 'center';
+                        doc.styles.tableHeader.alignment = 'center';
+                        doc.defaultStyle.fontSize = 8;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn btn-dark btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-print"></i> Print'
+                },
+                {
+                    text: '<i class="fas fa-sync"></i> Refresh',
+                    className: 'btn btn-primary btn-sm',
+                    action: function () {
+                        table.ajax.reload();
+                    }
+                }
+            ],
+
+            columns: [
+                // Description
+                {
+                    data: "description",
+                    render: function (data) {
+                        return `<span class="fw-bold">${data}</span>`;
+                    }
+                },
+
+                // Status
+               { data: 'status',
+                    render: function (data, type, row) {
+                        return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
+                    }
+               },
+
+                // Actions Dropdown
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    className: "no-export text-center",
+                    render: function (data, type, row) {
+                        return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+
+                            <div class="dropdown-menu">
+
+                                <a class="dropdown-item btnEditSubCategory"
+                                   style="cursor:pointer"
+                                   data-id="${row.ID}"
+                                   data-description="${row.description}"
+                                   data-webimagepath="${row.webImagePath}"
+                                   data-webimage="${row.webImage}"
+                                   data-mobileimagepath="${row.mobileImagePath}"
+                                   data-mobileimage="${row.mobileImage}"
+                                   data-bannerimagepath="${row.bannerImagePath}"
+                                   data-bannerimage="${row.bannerImage}"
+                                   data-statusid="${row.statusID}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+
+                                <a class="dropdown-item btnDeleteSubCategory"
+                                   style="cursor:pointer"
+                                   data-id="${row.ID}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+
+                            </div>
+                        </div>`;
+                    }
+                }
+            ]
+        });
+
+    }
+
+    $(document).on("click", ".btnEditSubCategory", function () {
+
+        // --- Get Values from Data Attributes ---
+        let id = $(this).data("id");
+        let description = $(this).data("description");
+        let webPath = $(this).data("webimagepath");
+        let webImg = $(this).data("webimage");
+        let mobilePath = $(this).data("mobileimagepath");
+        let mobileImg = $(this).data("mobileimage");
+        let bannerPath = $(this).data("bannerimagepath");
+        let bannerImg = $(this).data("bannerimage");
+        let statusId = $(this).data("statusid");
+
+        // --- Set form hidden ID ---
+        $("#SubCategoryID").val(id);
+
+        // --- Set Description ---
+        $("#SubCategoryDescription").val(description);
+
+        // --- Status Toggle ---
+        if (statusId === "A") {
+            $("#subcategoryStatusToggle").prop("checked", true);
+            $("#subCategoryStatusLabel").text("Active");
+            $("#subCategoryStatusID").val("A");
+        } else {
+            $("#subcategoryStatusToggle").prop("checked", false);
+            $("#subCategoryStatusLabel").text("Inactive");
+            $("#subCategoryStatusID").val("I");
+        }
+
+        // ===========================
+        //  🔵 Load SubCategory Images
+        // ===========================
+
+        function loadPreview(inputId, previewId, placeholderClass, clearFlag, filePath, fileName) {
+            const wrapper = $(previewId).closest(".image-box-wrapper");
+            const preview = $(previewId);
+            const placeholder = wrapper.find("." + placeholderClass);
+            const clearBtn = wrapper.find(".btn-sub-clear");
+            const viewBtn = wrapper.find(".btn-sub-view");
+
+            if (fileName) {
+                let fullPath = filePath + fileName;
+
+                preview.attr("src", fullPath).removeClass("d-none");
+                placeholder.addClass("d-none");
+
+                clearBtn.show();
+                viewBtn.show();
+
+                $(clearFlag).val("false"); // not cleared
+            } else {
+                preview.attr("src", "").addClass("d-none");
+                placeholder.removeClass("d-none");
+
+                clearBtn.hide();
+                viewBtn.hide();
+
+                $(clearFlag).val("false");
+            }
+
+            // Reset the file input (to allow re-uploading same file)
+            $(inputId).val("");
+        }
+
+        // 🔹 Web Image
+        loadPreview(
+            "#subcategoryWebImage",
+            "#subcategoryWebImagePreview",
+            "placeholder-icon",
+            "#ClearSubWebImage",
+            webPath,
+            webImg
+        );
+
+        // 🔹 Mobile Image
+        loadPreview(
+            "#subcategoryMobileImage",
+            "#subcategoryMobileImagePreview",
+            "placeholder-icon",
+            "#ClearSubMobileImage",
+            mobilePath,
+            mobileImg
+        );
+
+        // 🔹 Banner Image
+        loadPreview(
+            "#subcategoryBannerImage",
+            "#subcategoryBannerImagePreview",
+            "placeholder-icon",
+            "#ClearSubBannerImage",
+            bannerPath,
+            bannerImg
+        );
+
+        // --------------------------
+        //  Show the Form Panel (Right side)
+        // --------------------------
+        $("#subcategoryForm")[0].scrollIntoView({ behavior: "smooth" });
+    });
+
+
+     
+    });
+
+</script>

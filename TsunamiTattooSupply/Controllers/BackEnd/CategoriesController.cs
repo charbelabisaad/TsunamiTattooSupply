@@ -34,6 +34,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			Global.CategoryADImagePath = fp.GetFilePath("CTGADIMG").Description;
 			Global.CategoryMobileImagePath = fp.GetFilePath("CTGMBLIMG").Description;
 
+			Global.SubCategoryWebImagePath = fp.GetFilePath("SBCTGWBIMG").Description;
+			Global.SubCategoryBannerImagePath = fp.GetFilePath("SBCTGBNNRIMG").Description;
+			Global.SubCategoryMobileImagePath = fp.GetFilePath("SBCTGMBLIMG").Description;
+
 			return View("~/Views/BackEnd/Categories/Index.cshtml");
 		}
 		 
@@ -94,7 +98,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			catch (Exception ex) { 
 			
 				categories = null;
-				_logger.LogError(ex, "Fetch Cagegories [ERROR]");
+				_logger.LogError(ex, "Fetch Categories [ERROR]");
 			
 			}
 		 
@@ -390,7 +394,245 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		public IActionResult ListGetSubCategories(int CategoryID)
+		{
+			try
+			{
+				var subcategories = GetSubCategories(CategoryID);
+				return Json(new { data = subcategories, success = true });
+			}
+			catch (Exception ex)
+			{
 
+				return Json(new
+				{
+					data = new List<SubCategory>(),
+					success = false,
+					message = "An unexpected error occurred while loading subcategories"
+				});
+
+			}
+
+		}
+
+		public List<SubCategoryDto> GetSubCategories(int CategoryID)
+		{
+
+
+			List<SubCategoryDto> subcategories = new List<SubCategoryDto>();
+
+			try
+			{
+
+				subcategories = _dbContext.SubCategories
+					.Where(sc => sc.CategoryID == CategoryID && sc.DeletedDate == null)
+					.Include(sc => sc.Status)
+					.Select(sc => new SubCategoryDto
+					{
+						ID = sc.ID,
+						Description = sc.Description,
+						WebImagePath = Global.SubCategoryWebImagePath,
+						WebImage = sc.WebImage,
+						MobileImagePath = Global.SubCategoryMobileImagePath,
+						MobileImage = sc.MobileImage,
+						BannerImagePath = Global.SubCategoryBannerImagePath,
+						BannerImage = sc.BannerImage, 
+						StatusID = sc.StatusID,
+						Status = sc.Status.Description,
+						StatusColor = sc.Status.Color 
+					}
+
+
+					).ToList();
+
+			}
+			catch (Exception ex)
+			{
+
+				subcategories = null;
+				_logger.LogError(ex, "Fetch Sub Categories [ERROR]");
+
+			}
+
+			return subcategories;
+
+		}
+
+
+		[HttpPost]
+	public IActionResult SaveSubCategory(
+	int ID,
+	int CategoryID,
+	string Description,
+	IFormFile? BannerImage,
+	IFormFile? WebImage,
+	IFormFile? MobileImage,
+	string StatusID)
+		{
+			try
+			{
+				string normalizedDescription = Description?.Trim().ToUpper() ?? string.Empty;
+				int userId = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
+
+				// 🔹 Duplicate check (within SAME parent category)
+				bool exists = _dbContext.SubCategories
+					.Any(s => s.Description.ToUpper() == normalizedDescription
+						   && s.CategoryID == CategoryID
+						   && s.ID != ID);
+
+				if (exists)
+				{
+					return Json(new
+					{
+						success = false,
+						error = false,
+						exists = true,
+						message = $"Sub Category '{Description}' already exists!"
+					});
+				}
+
+				// 🔹 Ensure subcategory directories
+				string[] dirs =
+				{
+			Global.SubCategoryWebImagePath,
+			Global.SubCategoryBannerImagePath,
+			Global.SubCategoryMobileImagePath
+		};
+
+				foreach (var dir in dirs)
+					if (!Directory.Exists(dir))
+						Directory.CreateDirectory(dir);
+
+				// 🔹 File save helper
+				string SaveFile(IFormFile? file, string path, string prefix, int id)
+				{
+					if (file == null || file.Length == 0) return null;
+
+					var webRoot = _env.WebRootPath;
+					var relative = path.Trim().TrimStart('/', '\\');
+					var physicalFolder = Path.Combine(webRoot, relative);
+
+					Directory.CreateDirectory(physicalFolder);
+
+					string timestamp = DateTime.Now.ToString("yyyyMMddHHmmssfff");
+					string ext = Path.GetExtension(file.FileName);
+					string fileName = $"{prefix}_{id}_{timestamp}{ext}";
+					string fullPath = Path.Combine(physicalFolder, fileName);
+
+					using (var stream = new FileStream(fullPath, FileMode.Create))
+						file.CopyTo(stream);
+
+					return fileName;
+				}
+
+				// 🔹 Handle clear flags
+				string HandleClear(string flag, string? fileField, string folderPath)
+				{
+					if (Request.Form[flag] == "true")
+					{
+						if (!string.IsNullOrEmpty(fileField))
+						{
+							var webRoot = _env.WebRootPath;
+							var relative = folderPath.Trim().TrimStart('/', '\\');
+							var physicalFolder = Path.Combine(webRoot, relative);
+							var full = Path.Combine(physicalFolder, fileField);
+
+							if (System.IO.File.Exists(full))
+								System.IO.File.Delete(full);
+						}
+						return null;
+					}
+					return fileField;
+				}
+
+				// 🔹 Replace file
+				string ReplaceFile(IFormFile? newFile, string? oldFile, string folder, string prefix, int subId)
+				{
+					if (newFile != null && newFile.Length > 0)
+					{
+						if (!string.IsNullOrEmpty(oldFile))
+						{
+							string delPath = Path.Combine(folder, oldFile);
+							if (System.IO.File.Exists(delPath))
+								System.IO.File.Delete(delPath);
+						}
+						return SaveFile(newFile, folder, prefix, subId);
+					}
+
+					return oldFile;
+				}
+
+				SubCategory sub;
+				bool isNew = (ID == 0);
+
+				if (isNew)
+				{
+					sub = new SubCategory
+					{
+						CategoryID = CategoryID,
+						Description = Description,
+						StatusID = StatusID,
+						CreatedUserID = userId,
+						CreationDate = DateTime.UtcNow
+					};
+
+					_dbContext.SubCategories.Add(sub);
+					_dbContext.SaveChanges(); // Needed to generate ID
+				}
+				else
+				{
+					sub = _dbContext.SubCategories.FirstOrDefault(s => s.ID == ID);
+
+					if (sub == null)
+						return Json(new { success = false, error = true, message = "Sub Category not found." });
+
+					sub.Description = Description;
+					sub.StatusID = StatusID;
+					sub.EditUserID = userId;
+					sub.EditDate = DateTime.UtcNow;
+				}
+
+				// 🔹 Clear flags
+				sub.WebImage = HandleClear("ClearSubWebImage", sub.WebImage, Global.SubCategoryWebImagePath);
+				sub.MobileImage = HandleClear("ClearSubMobileImage", sub.MobileImage, Global.SubCategoryMobileImagePath);
+				sub.BannerImage = HandleClear("ClearSubBannerImage", sub.BannerImage, Global.SubCategoryBannerImagePath);
+
+				// 🔹 Replace images
+				sub.WebImage = ReplaceFile(WebImage, sub.WebImage, Global.SubCategoryWebImagePath, "SCTG_WEB", sub.ID);
+				sub.MobileImage = ReplaceFile(MobileImage, sub.MobileImage, Global.SubCategoryMobileImagePath, "SCTG_MBL", sub.ID);
+				sub.BannerImage = ReplaceFile(BannerImage, sub.BannerImage, Global.SubCategoryBannerImagePath, "SCTG_BNR", sub.ID);
+
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					error = false,
+					exists = false,
+					message = isNew ? "Sub Category added successfully." : "Sub Category updated successfully.",
+					subCategory = new
+					{
+						sub.ID,
+						sub.Description,
+						sub.StatusID,
+						sub.WebImage,
+						sub.MobileImage,
+						sub.BannerImage
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					error = true,
+					exists = false,
+					message = "An unexpected error occurred while saving subcategory."
+				});
+			}
+		}
+ 
 	}
 
 }

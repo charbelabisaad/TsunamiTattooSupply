@@ -463,15 +463,50 @@
             });
 
 
-            function resetSubCategoryForm() {
-                $("#subcategoryForm")[0].reset();
-                $("#subcategoryWebImagePreview, #subcategoryBannerImagePreview")
-                    .attr("src", "")
-                    .addClass("d-none");
-                $(".placeholder-icon").removeClass("d-none");
-            }
 
-            
+        $(document).on("click", "#btnNewSubCategory", function () {
+
+            // Reset ID to insert mode
+            $("#SubCategoryID").val("0");
+
+            // Clear description + error message
+            $("#SubCategoryDescription").val("");
+            $("#SubCategoryDescriptionMessage").text("");
+
+            // Reset toggle to Active (A)
+            $("#subcategoryStatusToggle").prop("checked", true);
+            $("#subCategoryStatusLabel").text("Active");
+            $("#subCategoryStatusID").val("A");
+
+            // Reset image previews
+            $("#subcategoryWebImagePreview, #subcategoryMobileImagePreview, #subcategoryBannerImagePreview")
+                .attr("src", "")
+                .addClass("d-none");
+
+            // Show placeholder icons
+            $("#subcategoryForm .placeholder-icon").removeClass("d-none");
+
+            // Hide clear + view buttons
+            $("#subcategoryForm .btn-sub-clear, #subcategoryForm .btn-sub-view").hide();
+
+            // Reset input files
+            $("#subcategoryWebImage").val("");
+            $("#subcategoryMobileImage").val("");
+            $("#subcategoryBannerImage").val("");
+
+            // Reset clear flags
+            $("#ClearSubWebImage").val("false");
+            $("#ClearSubMobileImage").val("false");
+            $("#ClearSubBannerImage").val("false");
+
+            // Scroll to top of form for user convenience
+            $(".modal-body").animate({ scrollTop: 0 }, 300);
+
+            // Focus input
+            $("#SubCategoryDescription").focus();
+        });
+
+             
         });
 
     </script>
