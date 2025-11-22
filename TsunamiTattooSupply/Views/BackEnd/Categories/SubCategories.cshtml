@@ -167,7 +167,7 @@
 
                                 <!-- Footer -->
                                 <div class="card-footer border-top d-flex justify-content-end bg-white">
-                                    <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                    <button id="btnCancelSubCategory" type="button" class="btn btn-secondary me-2">
                                         <i class="fas fa-ban"></i> Cancel
                                     </button>
                                     <button id="btnSaveSubCategory" type="button" class="btn btn-primary ml-3">
@@ -188,4 +188,32 @@
         </div>
     </div>
 </div>
+
+<!-- 🔹 SubCategory Image Viewer Modal -->
+<!-- 🔹 SubCategory Image Viewer Modal -->
+<div class="modal fade" id="imageSubCategoryViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body d-flex justify-content-center align-items-center p-0"
+                 style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+
+                <img id="imageSubCategoryViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit:contain;">
+
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        style="background:rgba(0,0,0,0.6); border-radius:50%; width:45px; height:45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
  

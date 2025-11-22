@@ -454,7 +454,7 @@
 
                 // Load or reload DataTable
                 if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
-                    $("#tableSubCategories").DataTable().ajax.url(`/SubCategories/GetByCategory/${categoryId}`).load();
+                        $("#tableSubCategories").DataTable().ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`).load();
                 } else {
                     initializeSubCategoryTable(categoryId);
                 }
@@ -604,6 +604,8 @@
             $("#ClearSubWebImage").val("false");
             $("#ClearSubMobileImage").val("false");
             $("#ClearSubBannerImage").val("false");
+             
+            $("#SubCategoryDescription").focus();
 
             const modalBody = $("#SubCategoriesModal .modal-body");
             if (modalBody.length) {
@@ -688,54 +690,51 @@
                 ]
             });
         }
- initializeSubCategoryImageHandlers();
-        // 🔹 ON MODAL SHOWN: init image handlers
-        $('#SubCategoriesModal').on('shown.bs.modal', function () {
-           
-        });
 
+        initializeSubCategoryImageHandlers();
+      
         // 🔹 VIEW SUBCATEGORIES
-        $(document).on("click", ".btnViewSubCategories", function () {
+        // $(document).on("click", ".btnViewSubCategories", function () {
 
-            const categoryId = $(this).data("id");
-            const categoryDescription = $(this).data("description");
+        //     const categoryId = $(this).data("id");
+        //     const categoryDescription = $(this).data("description");
 
-            $("#ParentCategoryID").val(categoryId);
+        //     $("#ParentCategoryID").val(categoryId);
 
-            $("#SubCategoriesModal .modal-title").html(
-                `<span class="text-secondary">Sub Categories of</span>
-                 <span class="font-weight-bold">${categoryDescription}</span>`
-            );
+        //     $("#SubCategoriesModal .modal-title").html(
+        //         `<span class="text-secondary">Sub Categories of</span>
+        //          <span class="font-weight-bold">${categoryDescription}</span>`
+        //     );
 
-            const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
-            modal.show();
+        //     const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
+        //     modal.show();
 
-            if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
-                $("#tableSubCategories").DataTable()
-                    .ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`)
-                    .load();
-            } else {
-                initializeSubCategoryTable(categoryId);
-            }
+        //     if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
+        //         $("#tableSubCategories").DataTable()
+        //             .ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`)
+        //             .load();
+        //     } else {
+        //         initializeSubCategoryTable(categoryId);
+        //     }
 
-            resetSubCategoryForm();
-        });
+        //     resetSubCategoryForm();
+        // });
 
-           const subToggle = document.getElementById("subcategoryStatusToggle");
-        const subHidden = document.getElementById("subCategoryStatusID");
-        const subLabel = document.getElementById("subCategoryStatusLabel");
+        //    const subToggle = document.getElementById("subcategoryStatusToggle");
+        // const subHidden = document.getElementById("subCategoryStatusID");
+        // const subLabel = document.getElementById("subCategoryStatusLabel");
 
-        if (subToggle && subHidden) {
-            subToggle.addEventListener("change", function () {
-                if (subToggle.checked) {
-                    subLabel.textContent = "Active";
-                    subHidden.value = "A";
-                } else {
-                    subLabel.textContent = "Inactive";
-                    subHidden.value = "I";
-                }
-            });
-        }
+        // if (subToggle && subHidden) {
+        //     subToggle.addEventListener("change", function () {
+        //         if (subToggle.checked) {
+        //             subLabel.textContent = "Active";
+        //             subHidden.value = "A";
+        //         } else {
+        //             subLabel.textContent = "Inactive";
+        //             subHidden.value = "I";
+        //         }
+        //     });
+        // }
 
 
         // 🔹 SAVE SUBCATEGORY
@@ -816,10 +815,13 @@
             });
         });
 
+        $(document).on("click", "#btnCancelSubCategory", function () {
+            resetSubCategoryForm();
+        });
+
         // 🔹 NEW SUBCATEGORY BUTTON
         $(document).on("click", "#btnNewSubCategory", function () {
             resetSubCategoryForm();
-            $("#SubCategoryDescription").focus();
         });
 
         // 🔹 EDIT SUBCATEGORY
@@ -959,6 +961,7 @@
                 }
             });
         });
+
 
 
     });
