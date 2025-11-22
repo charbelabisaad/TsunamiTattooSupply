@@ -118,14 +118,15 @@
                         <table id="tableCategories" class="table table-striped w-100 ">
                             <thead>
                                 <tr style="vertical-align:middle">
+                                    <th style="width:70px">Web</th>        <!-- NEW -->
+                                    <th style="width:70px">Mobile</th>     <!-- NEW -->
                                     <th style="width:70%">Description</th>
-									<th style="width:20%">Status</th>
-									<th style="width:120px">Sub Categories</th>
-									<th style="width:100px" class="no-export">Actions</th>
+                                    <th style="width:20%">Status</th>
+                                    <th style="width:120px">Sub Categories</th>
+                                    <th style="width:100px" class="no-export">Actions</th>
                                 </tr>
                             </thead>
-                        </table>
-
+                        </table> 
                     </div>
 
                 </div>
@@ -160,7 +161,13 @@
                         return json.data;
                     }
                     },
-                    dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+                        dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                        '<"row mt-2 mb-2 d-flex align-items-center"' +
+                        '<"col-md-6 d-flex align-items-center" l>' +
+                        '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                        '<"col-md-2 d-flex justify-content-end" p>' +
+                        '>',
+
                     language: {
                         search: "",
                         searchPlaceholder: "Search categories..."
@@ -200,15 +207,45 @@
                             }
                         }
                     ],
+                    order: [[2, "asc"]],
                     columns: [
-                        { data: 'description' }, 
+                            {
+                            data: "webImage",
+                            className: "align-middle",
+                            render: function (data, type, row) {
+                                if (!row.webImage) return `<span class="text-muted">No Image</span>`;
+                                return `
+                                    <img src="${row.webImagePath}${row.webImage}"
+                                            style="width:70px;height:70px;object-fit:contain;border-radius:4px;">
+                                `;
+                            }
+                        },
+
+                        // 🔹 Mobile Image
+                        {
+                            data: "mobileImage",
+                            className: "align-middle",
+                            render: function (data, type, row) {
+                                if (!row.mobileImage) return `<span class="text-muted">No Image</span>`;
+                                return `
+                                    <img src="${row.mobileImagePath}${row.mobileImage}"
+                                            style="width:70px;height:70px;object-fit:contain;border-radius:4px;">
+                                `;
+                            }
+                        },
+                        {   
+                            data: 'description',
+                            className: "align-middle"
+                        }, 
                         { data: 'status',
+                            className: "align-middle",
                             render: function (data, type, row) { 
                               return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
                             }
                         },
                         {
                             data: 'subCategoryCount',
+                            className: "align-middle",
                             render: function(data, type, row){
                                 return `<button class="btn btn-sm btnViewSubCategories"
                                                 data-id="${row.id}"
@@ -219,10 +256,10 @@
                             }
                         },
                         {
-                            data: null,
+                            data: null, 
                             orderable: false,
                             searchable: false,
-                            className: "no-export text-center",
+                            className: "no-export text-center align-middle",
                             render: function (data, type, row) {
                                 return `
                             <div class="dropdown">
@@ -613,6 +650,8 @@
             }
         }
 
+        initializeSubCategoryImageHandlers();
+
         // 🔹 DATATABLE
         function initializeSubCategoryTable(categoryId) {
             var table = $("#tableSubCategories").DataTable({
@@ -637,14 +676,51 @@
                     zeroRecords: "No matching sub categories found"
                 },
                 columns: [
+
+                    // ✅ NEW COLUMN — Web Image
+                    {
+                        data: null,
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (row.webImage && row.webImagePath) {
+                                return `
+                                    <img src="${row.webImagePath}${row.webImage}"
+                                         style="width:50px;height:60px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">
+                                `;
+                            }
+                            return `<span class="text-muted small">No Image</span>`;
+                        }
+                    },
+
+                    // ✅ NEW COLUMN — Mobile Image
+                    {
+                        data: null,
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (row.mobileImage && row.mobileImagePath) {
+                                return `
+                                    <img src="${row.mobileImagePath}${row.mobileImage}"
+                                         style="width:45px;height:45px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">
+                                `;
+                            }
+                            return `<span class="text-muted small">No Image</span>`;
+                        }
+                    },
+
+                    // -----------------------------------
+                    // ✅ Your original columns (unchanged)
+                    // -----------------------------------
+
                     {
                         data: "description",
+                        className: "align-middle",
                         render: function (data) {
                             return `<span class="fw-bold">${data}</span>`;
-                        }
+                    }
                     },
                     {
                         data: "status",
+                        className: "align-middle",
                         render: function (data, type, row) {
                             return `
                                 <div class="badge text-center text-white"
@@ -655,6 +731,7 @@
                     },
                     {
                         data: null,
+                        className: "align-middle",
                         orderable: false,
                         searchable: false,
                         className: "no-export text-center",
@@ -691,7 +768,8 @@
             });
         }
 
-        initializeSubCategoryImageHandlers();
+
+       
       
         // 🔹 VIEW SUBCATEGORIES
         // $(document).on("click", ".btnViewSubCategories", function () {
