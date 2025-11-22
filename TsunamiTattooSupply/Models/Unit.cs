@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Units")]
-	[Index(nameof(ShortDescription), IsUnique = true)]
-	[Index(nameof(LongDescription), IsUnique = true)]
+	//[Index(nameof(ShortDescription), IsUnique = true)]
+	//[Index(nameof(LongDescription), IsUnique = true)]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID
 	public class Unit
 	{

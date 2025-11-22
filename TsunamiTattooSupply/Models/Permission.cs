@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Permissions")]
-	[Index(nameof(Code), IsUnique = true)]
-	[Index(nameof(Description), IsUnique = true)]
+	//[Index(nameof(Code), IsUnique = true)]
+	//[Index(nameof(Description), IsUnique = true)]
 	public class Permission
 	{
 		[Key]

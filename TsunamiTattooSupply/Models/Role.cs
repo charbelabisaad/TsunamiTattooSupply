@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Roles")]
-	[Index(nameof(Description), IsUnique = true)]
+	//[Index(nameof(Description), IsUnique = true)]
 	[Index(nameof(StatusID))]
 	[Index(nameof(CreatedUserID))]
 	[Index(nameof(EditUserID))]

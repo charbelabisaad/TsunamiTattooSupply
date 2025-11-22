@@ -5,8 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Orders")]
-	[Index(nameof(Code), IsUnique = true)]
-	[Index(nameof(PaymentCode), IsUnique = true)]
+	//[Index(nameof(Code), IsUnique = true)]
+	//[Index(nameof(PaymentCode), IsUnique = true)]
 	[Index(nameof(ClientID))]
 	[Index(nameof(ClientAddressID))]
 	[Index(nameof(CurrencyID))]

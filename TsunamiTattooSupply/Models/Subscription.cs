@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Subscriptions")]
-	[Index(nameof(Email), IsUnique = true)]
+	//[Index(nameof(Email), IsUnique = true)]
 	public class Subscription
 	{
 		[Key]

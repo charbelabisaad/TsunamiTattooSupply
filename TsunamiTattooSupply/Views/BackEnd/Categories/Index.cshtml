@@ -79,12 +79,11 @@
     }
      
 </style>
-
-
-
+ 
 <partial name="SaveCategory" />
 <partial name="DeleteCategory" />
 <partial name="SubCategories" />
+<partial name="DeleteSubCategory" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -321,6 +320,8 @@
                     });
                 }
 
+               
+
         // ====================================
         // 🔹 EDIT CATEGORY BUTTON (Open Modal)
         // ====================================
@@ -463,51 +464,504 @@
             });
 
 
+            function initializeSubCategoryImageHandlers() {
 
-        $(document).on("click", "#btnNewSubCategory", function () {
+                document.querySelectorAll('#SubCategoriesModal .image-box-wrapper').forEach(wrapper => {
 
-            // Reset ID to insert mode
+                const input = wrapper.querySelector('input[type="file"]');
+                const preview = wrapper.querySelector('img');
+                const placeholder = wrapper.querySelector('.placeholder-icon');
+
+                const clearSubBtn = wrapper.querySelector('.btn-sub-clear');
+                const viewSubBtn = wrapper.querySelector('.btn-sub-view');
+                const browseSubBtn = wrapper.querySelector('.btn-sub-browse');
+
+                // Validate
+                if (!input || !preview || !placeholder || !clearSubBtn || !viewSubBtn || !browseSubBtn)
+                    return;
+
+                // Hide buttons initially
+                clearSubBtn.style.display = 'none';
+                viewSubBtn.style.display = 'none';
+
+                // --------------------------
+                // Browse
+                // --------------------------
+                browseSubBtn.addEventListener('click', () => {
+                    input.click();
+                });
+
+                // --------------------------
+                // Preview Image
+                // --------------------------
+                input.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                        placeholder.classList.add('d-none');
+
+                        clearSubBtn.style.display = 'inline-block';
+                        viewSubBtn.style.display = 'inline-block';
+
+                        resetSubClearFlag(wrapper);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
+                // --------------------------
+                // Clear Image
+                // --------------------------
+                clearSubBtn.addEventListener('click', () => {
+                    preview.src = '';
+                    preview.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+
+                    input.value = '';
+
+                    clearSubBtn.style.display = 'none';
+                    viewSubBtn.style.display = 'none';
+
+                    setSubClearFlag(wrapper);
+                });
+
+                // --------------------------
+                // View Image
+                // --------------------------
+                viewSubBtn.addEventListener('click', () => {
+                    if (!preview.src) return;
+
+                    const modalImg = document.getElementById('imageCategoryViewModalImg');
+                    if (!modalImg) return;
+
+                    modalImg.src = preview.src;
+                    new bootstrap.Modal(document.getElementById('imageCategoryViewModal')).show();
+                });
+
+                // --------------------------
+                // Clear Flag Functions
+                // --------------------------
+                function setSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("true");
+                }
+
+                function resetSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("false");
+                }
+            });
+        }
+
+
+        // 🔹 RESET BUTTON STATE
+        function resetSubButton() {
+            $('#btnSaveSubCategorySpinner').addClass('d-none');
+            $('#btnSaveSubCategory i').removeClass('d-none');
+            $('#btnSaveSubCategory').prop('disabled', false);
+        }
+
+        // 🔹 RESET FORM
+        function resetSubCategoryForm() {
+
+            $("#SubCategoryEntryTitle").text("Add New Sub Category");
+
             $("#SubCategoryID").val("0");
-
-            // Clear description + error message
             $("#SubCategoryDescription").val("");
             $("#SubCategoryDescriptionMessage").text("");
 
-            // Reset toggle to Active (A)
             $("#subcategoryStatusToggle").prop("checked", true);
             $("#subCategoryStatusLabel").text("Active");
             $("#subCategoryStatusID").val("A");
 
-            // Reset image previews
             $("#subcategoryWebImagePreview, #subcategoryMobileImagePreview, #subcategoryBannerImagePreview")
                 .attr("src", "")
                 .addClass("d-none");
 
-            // Show placeholder icons
             $("#subcategoryForm .placeholder-icon").removeClass("d-none");
-
-            // Hide clear + view buttons
             $("#subcategoryForm .btn-sub-clear, #subcategoryForm .btn-sub-view").hide();
 
-            // Reset input files
             $("#subcategoryWebImage").val("");
             $("#subcategoryMobileImage").val("");
             $("#subcategoryBannerImage").val("");
 
-            // Reset clear flags
             $("#ClearSubWebImage").val("false");
             $("#ClearSubMobileImage").val("false");
             $("#ClearSubBannerImage").val("false");
 
-            // Scroll to top of form for user convenience
-            $(".modal-body").animate({ scrollTop: 0 }, 300);
+            const modalBody = $("#SubCategoriesModal .modal-body");
+            if (modalBody.length) {
+                modalBody.animate({ scrollTop: 0 }, 300);
+            }
+        }
 
-            // Focus input
+        // 🔹 DATATABLE
+        function initializeSubCategoryTable(categoryId) {
+            var table = $("#tableSubCategories").DataTable({
+                processing: true,
+                responsive: true,
+                destroy: true,
+                ajax: {
+                    url: `/Categories/ListGetSubCategories?CategoryID=${categoryId}`,
+                    type: "GET",
+                    dataSrc: function (json) {
+                        if (!json || json.success === false) {
+                            toastr.error(json && json.message ? json.message : "Failed to load subcategories.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search Sub Categories...",
+                    emptyTable: "No sub categories available",
+                    zeroRecords: "No matching sub categories found"
+                },
+                columns: [
+                    {
+                        data: "description",
+                        render: function (data) {
+                            return `<span class="fw-bold">${data}</span>`;
+                        }
+                    },
+                    {
+                        data: "status",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="badge text-center text-white"
+                                     style="background-color:#${row.statusColor}; width:100px;">
+                                    ${data}
+                                </div>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export text-center",
+                        render: function (data, type, row) {
+                            return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditSubCategory"
+                                       style="cursor:pointer"
+                                       data-id="${row.id}"
+                                       data-description="${row.description}"
+                                       data-webimagepath="${row.webImagePath}"
+                                       data-webimage="${row.webImage}"
+                                       data-mobileimagepath="${row.mobileImagePath}"
+                                       data-mobileimage="${row.mobileImage}"
+                                       data-bannerimagepath="${row.bannerImagePath}"
+                                       data-bannerimage="${row.bannerImage}"
+                                       data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a class="dropdown-item btnDeleteSubCategory"
+                                       style="cursor:pointer"
+                                       data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>`;
+                        }
+                    }
+                ]
+            });
+        }
+ initializeSubCategoryImageHandlers();
+        // 🔹 ON MODAL SHOWN: init image handlers
+        $('#SubCategoriesModal').on('shown.bs.modal', function () {
+           
+        });
+
+        // 🔹 VIEW SUBCATEGORIES
+        $(document).on("click", ".btnViewSubCategories", function () {
+
+            const categoryId = $(this).data("id");
+            const categoryDescription = $(this).data("description");
+
+            $("#ParentCategoryID").val(categoryId);
+
+            $("#SubCategoriesModal .modal-title").html(
+                `<span class="text-secondary">Sub Categories of</span>
+                 <span class="font-weight-bold">${categoryDescription}</span>`
+            );
+
+            const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
+            modal.show();
+
+            if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
+                $("#tableSubCategories").DataTable()
+                    .ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`)
+                    .load();
+            } else {
+                initializeSubCategoryTable(categoryId);
+            }
+
+            resetSubCategoryForm();
+        });
+
+           const subToggle = document.getElementById("subcategoryStatusToggle");
+        const subHidden = document.getElementById("subCategoryStatusID");
+        const subLabel = document.getElementById("subCategoryStatusLabel");
+
+        if (subToggle && subHidden) {
+            subToggle.addEventListener("change", function () {
+                if (subToggle.checked) {
+                    subLabel.textContent = "Active";
+                    subHidden.value = "A";
+                } else {
+                    subLabel.textContent = "Inactive";
+                    subHidden.value = "I";
+                }
+            });
+        }
+
+
+        // 🔹 SAVE SUBCATEGORY
+        $(document).on("click", "#btnSaveSubCategory", function (e) {
+            e.preventDefault();
+
+            $('#btnSaveSubCategorySpinner').removeClass('d-none');
+            $('#btnSaveSubCategory i').addClass('d-none');
+            $('#btnSaveSubCategory').prop('disabled', true);
+
+            $('#SubCategoryDescription').removeClass('border-danger');
+            $('#SubCategoryDescriptionMessage').text('');
+
+            let description = $('#SubCategoryDescription').val().trim();
+            if (!description) {
+                $('#SubCategoryDescriptionMessage').text("Description is required!");
+                $('#SubCategoryDescription').addClass('border-danger');
+                resetSubButton();
+                return;
+            }
+
+            let formData = new FormData();
+
+            formData.append("ID", $('#SubCategoryID').val());
+            formData.append("CategoryID", $('#ParentCategoryID').val());
+            formData.append("Description", description);
+            formData.append("StatusID", $('#subCategoryStatusID').val());
+             
+            const attach = (id, key) => {
+                let input = document.getElementById(id);
+                if (input && input.files.length > 0) {
+                    formData.append(key, input.files[0]);
+                }
+            };
+
+            attach("subcategoryWebImage", "WebImage");
+            attach("subcategoryMobileImage", "MobileImage");
+            attach("subcategoryBannerImage", "BannerImage");
+
+            formData.append("ClearWebImage", $("#ClearSubWebImage").val());
+            formData.append("ClearMobileImage", $("#ClearSubMobileImage").val());
+            formData.append("ClearBannerImage", $("#ClearSubBannerImage").val());
+
+            $.ajax({
+                url: "/Categories/SaveSubCategory",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+
+                    if (response.exists) {
+                        toastr.warning(response.message);
+                        resetSubButton();
+                        return;
+                    }
+
+                    if (response.error) {
+                        toastr.error(response.message);
+                        resetSubButton();
+                        return;
+                    }
+
+                    if (response.subCategory) {
+                        toastr.success(response.message);
+
+                        $("#tableSubCategories").DataTable().ajax.reload(null, false);
+                        resetSubCategoryForm();
+                        resetSubButton();
+                    } else {
+                        resetSubButton();
+                    }
+                },
+                error: function () {
+                    toastr.error("Error saving sub category!");
+                    resetSubButton();
+                }
+            });
+        });
+
+        // 🔹 NEW SUBCATEGORY BUTTON
+        $(document).on("click", "#btnNewSubCategory", function () {
+            resetSubCategoryForm();
             $("#SubCategoryDescription").focus();
         });
 
-             
+        // 🔹 EDIT SUBCATEGORY
+        $(document).on("click", ".btnEditSubCategory", function () {
+
+            let id = $(this).data("id");
+            let description = $(this).data("description");
+            let webPath = $(this).data("webimagepath");
+            let webImg = $(this).data("webimage");
+            let mobilePath = $(this).data("mobileimagepath");
+            let mobileImg = $(this).data("mobileimage");
+            let bannerPath = $(this).data("bannerimagepath");
+            let bannerImg = $(this).data("bannerimage");
+            let statusId = $(this).data("statusid");
+
+            $("#SubCategoryEntryTitle").text('Edit Sub Category');
+
+            $("#SubCategoryID").val(id);
+            $("#SubCategoryDescription").val(description);
+
+            if (statusId === "A") {
+                $("#subcategoryStatusToggle").prop("checked", true);
+                $("#subCategoryStatusLabel").text("Active");
+                $("#subCategoryStatusID").val("A");
+            } else {
+                $("#subcategoryStatusToggle").prop("checked", false);
+                $("#subCategoryStatusLabel").text("Inactive");
+                $("#subCategoryStatusID").val("I");
+            }
+
+            function loadPreview(inputId, previewId, placeholderClass, clearFlag, filePath, fileName) {
+                const wrapper = $(previewId).closest(".image-box-wrapper");
+                const preview = $(previewId);
+                const placeholder = wrapper.find("." + placeholderClass);
+                const clearBtn = wrapper.find(".btn-sub-clear");
+                const viewBtn = wrapper.find(".btn-sub-view");
+
+                if (fileName) {
+                    let fullPath = filePath + fileName;
+
+                    preview.attr("src", fullPath).removeClass("d-none");
+                    placeholder.addClass("d-none");
+
+                    clearBtn.show();
+                    viewBtn.show();
+
+                    $(clearFlag).val("false");
+                } else {
+                    preview.attr("src", "").addClass("d-none");
+                    placeholder.removeClass("d-none");
+
+                    clearBtn.hide();
+                    viewBtn.hide();
+
+                    $(clearFlag).val("false");
+                }
+
+                $(inputId).val("");
+            }
+
+            loadPreview(
+                "#subcategoryWebImage",
+                "#subcategoryWebImagePreview",
+                "placeholder-icon",
+                "#ClearSubWebImage",
+                webPath,
+                webImg
+            );
+
+            loadPreview(
+                "#subcategoryMobileImage",
+                "#subcategoryMobileImagePreview",
+                "placeholder-icon",
+                "#ClearSubMobileImage",
+                mobilePath,
+                mobileImg
+            );
+
+            loadPreview(
+                "#subcategoryBannerImage",
+                "#subcategoryBannerImagePreview",
+                "placeholder-icon",
+                "#ClearSubBannerImage",
+                bannerPath,
+                bannerImg
+            );
+
+            $("#subcategoryForm")[0].scrollIntoView({ behavior: "smooth" });
         });
+
+
+        $(document).on("click", ".btnDeleteSubCategory", function () {
+
+            let id = $(this).data("id");
+
+            $("#deletedSubCategoryId").val(id);
+
+            // Show Modal (Bootstrap 4)
+            $("#deleteSubCategoryModal").modal("show");
+        });
+
+        $(document).on("click", "#btnConfirmDeleteSubCategory", function () {
+
+            let id = $("#deletedSubCategoryId").val();
+
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteSubCategory i").addClass("d-none");
+            $("#btnConfirmDeleteSubCategory").prop("disabled", true);
+
+            $.ajax({
+                url: "/Categories/DeleteSubCategory",
+                type: "POST",
+                data: { ID: id },
+                success: function (response) {
+
+                    $("#btnDeleteSpinner").addClass("d-none");
+                    $("#btnConfirmDeleteSubCategory i").removeClass("d-none");
+                    $("#btnConfirmDeleteSubCategory").prop("disabled", false);
+
+                    if (response.success) {
+                        toastr.success(response.message);
+
+                        $("#tableSubCategories").DataTable().ajax.reload(null, false);
+
+                        $("#deleteSubCategoryModal").modal("hide");
+                    }
+                    else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error deleting sub category!");
+
+                    $("#btnDeleteSpinner").addClass("d-none");
+                    $("#btnConfirmDeleteSubCategory i").removeClass("d-none");
+                    $("#btnConfirmDeleteSubCategory").prop("disabled", false);
+                }
+            });
+        });
+
+
+    });
 
     </script>
 }

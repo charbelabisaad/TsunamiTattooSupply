@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Countries")]
-	[Index(nameof(Name), IsUnique = true)]
+	//[Index(nameof(Name), IsUnique = true)]
 	public class Country
 	{
 		[Key] 

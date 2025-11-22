@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("POSStocks")]
-	[Index(nameof(Barcode), IsUnique = true)]
+	//[Index(nameof(Barcode), IsUnique = true)]
 	public class POSStock
 	{
 		[Key]

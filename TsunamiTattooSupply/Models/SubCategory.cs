@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("SubCategories")]
-	[Index(nameof(Description), IsUnique = true)]
+	//[Index(nameof(Description), IsUnique = true)]
 	[Index(nameof(CategoryID))]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID
 	public class SubCategory

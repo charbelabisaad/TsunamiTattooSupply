@@ -87,7 +87,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				var existingRole = _dbContext.Roles.FirstOrDefault(r => r.ID == ID);
 
-				var existingRoleDescription =_dbContext.Roles.FirstOrDefault(r => r.Description.Trim().ToLower() == Description.Trim().ToLower() && r.ID != ID);
+				var existingRoleDescription =_dbContext.Roles.FirstOrDefault(r => r.Description.Trim().ToLower() == Description.Trim().ToLower() && r.ID != ID && r.DeletedDate == null);
 
 				if (existingRoleDescription != null) {
 

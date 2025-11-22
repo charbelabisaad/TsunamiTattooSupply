@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Users")]
-	[Index(nameof(Username), IsUnique = true)] // Unique index on Username
+	//[Index(nameof(Username), IsUnique = true)] // Unique index on Username
 	[Index(nameof(UserTypeID))] // Non-unique index on UserTypeID
 	[Index(nameof(RoleID))]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID

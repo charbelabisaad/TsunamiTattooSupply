@@ -127,7 +127,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				// 🔹 Duplicate check
 				bool exists = _dbContext.Categories
-					.Any(c => c.Description.ToUpper() == normalizedDescription && c.ID != ID);
+					.Any(c => c.Description.ToUpper() == normalizedDescription &&
+					c.DeletedDate == null &&      // <-- ignore deleted rows
+					c.ID != ID);
 
 				if (exists)
 				{
@@ -417,8 +419,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<SubCategoryDto> GetSubCategories(int CategoryID)
 		{
-
-
+ 
 			List<SubCategoryDto> subcategories = new List<SubCategoryDto>();
 
 			try
@@ -476,9 +477,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				// 🔹 Duplicate check (within SAME parent category)
 				bool exists = _dbContext.SubCategories
-					.Any(s => s.Description.ToUpper() == normalizedDescription
-						   && s.CategoryID == CategoryID
-						   && s.ID != ID);
+				.Any(s =>
+					 s.Description.ToUpper() == normalizedDescription && 
+					 s.DeletedDate == null &&      // <-- ignore deleted rows
+					 s.ID != ID);
+
 
 				if (exists)
 				{
@@ -629,6 +632,84 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					error = true,
 					exists = false,
 					message = "An unexpected error occurred while saving subcategory."
+				});
+			}
+		}
+
+		[HttpPost]
+		public IActionResult DeleteSubCategory(int ID)
+		{
+			try
+			{
+				var sub = _dbContext.SubCategories.FirstOrDefault(x => x.ID == ID);
+
+				if (sub == null)
+				{
+					return Json(new { success = false, message = "Sub Category not found!" });
+				}
+
+				// ===== Soft Delete Fields =====
+				int? userId = null;
+				if (HttpContext.Request.Cookies.ContainsKey("UserID"))
+				{
+					int.TryParse(HttpContext.Request.Cookies["UserID"], out int parsedUserId);
+					userId = parsedUserId;
+				}
+
+				sub.DeletedUserID = userId;
+				sub.DeletedDate = DateTime.UtcNow;
+
+				// ===== Move Images to /DELETED Folders =====
+				void MoveToDeleted(string? fileName, string folder)
+				{
+					try
+					{
+						if (string.IsNullOrWhiteSpace(fileName))
+							return;
+
+						var webRoot = _env.WebRootPath;
+						var relativeFolder = folder.Trim().TrimStart('/', '\\');
+						var sourcePath = Path.Combine(webRoot, relativeFolder, fileName);
+
+						if (!System.IO.File.Exists(sourcePath))
+							return;
+
+						var deletedFolder = Path.Combine(webRoot, relativeFolder, "DELETED");
+						if (!Directory.Exists(deletedFolder))
+							Directory.CreateDirectory(deletedFolder);
+
+						var destPath = Path.Combine(deletedFolder, fileName);
+
+						System.IO.File.Move(sourcePath, destPath, overwrite: true);
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, $"Failed to move file '{fileName}' from {folder} to DELETED folder.");
+					}
+				}
+
+				// ===== Move subcategory images =====
+				MoveToDeleted(sub.WebImage, Global.SubCategoryWebImagePath);
+				MoveToDeleted(sub.MobileImage, Global.SubCategoryMobileImagePath);
+				MoveToDeleted(sub.BannerImage, Global.SubCategoryBannerImagePath);
+
+				// ===== Save Soft Delete =====
+				_dbContext.SubCategories.Update(sub);
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					message = $"Sub Category '{sub.Description}' deleted successfully."
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "DeleteSubCategory [ERROR]");
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while deleting the sub category."
 				});
 			}
 		}
