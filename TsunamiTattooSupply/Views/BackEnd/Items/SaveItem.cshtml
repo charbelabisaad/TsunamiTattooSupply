@@ -1,0 +1,132 @@
+﻿<div class="modal fade" id="imageItemViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body d-flex justify-content-center align-items-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+                <img id="imageItemViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fullmodal-right" id="saveItemModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalItemTitle" class="modal-title">Create New Item</h5>
+                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+            </div>
+
+            <!-- Form -->
+            <form id="itemForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <!-- ✅ Scrollable body -->
+                <div class="modal-body flex-grow-1">
+
+                    <div class="row align-items-center mb-3">
+                        <input id="ItemID" type="hidden" value="0" />
+
+                        <div class="col-12 d-flex col-md-1 ">
+                            <label for="ItemDescription" class="form-label">Description</label>
+                        </div>
+
+                        <div class="col-12 d-flex col-md-5">
+                            <input type="text" class="form-control" id="ItemDescription" placeholder="Fill Description" />
+                            <div id="ItemDescriptionMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- 🔹 Status Toggle -->
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="ItemStatusToggle" checked />
+                                <label class="custom-control-label" for="ItemStatusToggle" id="ItemStatusLabel">Active</label>
+                                <input type="hidden" id="ItemStatusID" name="ItemStatusID" value="A" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================== -->
+                    <!--   Item & Banner Images -->
+                    <!-- ========================== -->
+                    <div class="row">
+                        <!-- Item & Mobile -->
+                        <div class="col-12 col-md-6 d-flex flex-column">
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Images</div>
+                                </div>
+                                <div class="subcardcontent">
+                                    <div class="row"> 
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                         
+                    </div>
+                     
+                    <div class="row mt-3">
+
+                        <div class="col-12">
+                            <div class="subcard">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Details</div>
+                                </div>
+                                <div class="subcardcontent">
+                                    <textarea id="itemDetails" class="editornote" placeholder="Write details here...">
+
+                                    </textarea>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal fade" id="imageItemViewModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content bg-dark">
+                            <div class="modal-body text-center p-0">
+                                <img id="imageItemViewModalImg" src="" class="img-fluid rounded" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ Fixed footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+                    <button id="btnSaveItem" type="button" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveItemSpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="ClearWebImage" name="ClearWebImage" value="false" />
+<input type="hidden" id="ClearBannerImage" name="ClearBannerImage" value="false" />
+<input type="hidden" id="ClearMobileImage" name="ClearMobileImage" value="false" />
+<input type="hidden" id="ClearADImage1" name="ClearADImage1" value="false" />
+<input type="hidden" id="ClearADImage2" name="ClearADImage2" value="false" />
+<input type="hidden" id="ClearADImage3" name="ClearADImage3" value="false" />

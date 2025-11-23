@@ -1,0 +1,217 @@
+﻿<!-- ========================================= -->
+<!--  BRAND IMAGE VIEW MODAL (Single & Global) -->
+<!-- ========================================= -->
+<div class="modal fade" id="imageBrandViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+
+            <div class="modal-body d-flex justify-content-center align-items-center p-0"
+                 style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+
+                <img id="imageBrandViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ========================== -->
+<!--  SAVE BRAND MODAL (RIGHT) -->
+<!-- ========================== -->
+<div class="modal fade fullmodal-right" id="saveBrandModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalBrandTitle" class="modal-title">Create New Brand</h5>
+
+                <button type="button"
+                        class="btn-close border-0"
+                        data-bs-dismiss="modal">
+                    <i class="fas fa-close"></i>
+                </button>
+            </div>
+
+            <!-- ====================================== -->
+            <!--         BRAND FORM (Scrollable)       -->
+            <!-- ====================================== -->
+            <form id="brandForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <div class="modal-body flex-grow-1">
+
+                    <input id="BrandID" type="hidden" value="0" />
+
+                    <!-- DESCRIPTION + STATUS -->
+                    <div class="row align-items-center mb-3">
+
+                        <!-- Label -->
+                        <div class="col-md-1 col-12">
+                            <label for="BrandDescription" class="form-label">Description</label>
+                        </div>
+
+                        <!-- Text -->
+                        <div class="col-md-5 col-12">
+                            <input type="text"
+                                   class="form-control"
+                                   id="BrandDescription"
+                                   placeholder="Fill Description" />
+
+                            <div id="BrandDescriptionMessage"
+                                 class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- Status + Show Home -->
+                        <div class="col-md-6 col-12 d-flex flex-column align-items-end mt-3 mt-md-0">
+
+                            <!-- Status Toggle -->
+                            <div class="custom-control custom-switch mb-2" style="width: 150px;">
+                                <input type="checkbox"
+                                       class="custom-control-input"
+                                       id="BrandStatusToggle"
+                                       checked>
+                                <label class="custom-control-label" for="BrandStatusToggle">
+                                    Active
+                                </label>
+                                <input type="hidden" id="BrandStatusID" name="BrandStatusID" value="A">
+                            </div>
+
+                            <!-- Show Home Toggle -->
+                            <div class="custom-control custom-switch" style="width: 150px;">
+                                <input type="checkbox"
+                                       class="custom-control-input"
+                                       id="BrandShowHomeToggle">
+                                <label class="custom-control-label" for="BrandShowHomeToggle">
+                                    Show Home
+                                </label>
+                                <input type="hidden" id="BrandShowHome" name="BrandShowHome" value="0">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ========================== -->
+                    <!--  IMAGE + DETAILS SECTION   -->
+                    <!-- ========================== -->
+                    <div class="row mt-3">
+
+                        <!-- LEFT: BRAND IMAGE -->
+                        <div class="col-md-6 col-12">
+
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Image</div>
+                                </div>
+
+								<div class="subcardcontent" style="height:300px">
+                                    <div class="row">
+
+                                        <div id="dBrandImage" class="col-md-12 text-center mb-3">
+                                             
+                                            <div class="image-box-wrapper mx-auto position-relative"
+                                                 style="width:250px; height:250px;">
+
+                                                <!-- Main Box -->
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+
+                                                    <input type="file"
+                                                           id="brandImage"
+                                                           accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" />
+
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+
+                                                    <img id="brandImagePreview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;" />
+                                                </div>
+
+                                                <!-- Overlay Buttons -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+
+                                                        <button type="button" class="overlay-btn btn-view" title="View">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse">
+                                                            <i class="fas fa-paperclip"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- RIGHT: BRAND DETAILS -->
+                        <div class="col-md-6 col-12">
+
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Details</div>
+                                </div>
+
+                                <div class="subcardcontent" style="height:300px">
+                                    <textarea id="brandDetails"
+                                              class="editornote"
+                                              placeholder="Write details here..."
+                                              style="width:100%; resize:vertical;"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+
+                    <button id="btnSaveBrand" type="button" class="btn btn-primary">
+                        <span id="btnSaveBrandSpinner"
+                              class="spinner-border spinner-border-sm d-none"
+                              role="status"></span>
+
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="ClearImage" value="false" />

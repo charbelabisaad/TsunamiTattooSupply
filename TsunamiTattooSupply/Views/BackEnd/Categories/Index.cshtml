@@ -767,54 +767,7 @@
                 ]
             });
         }
-
-
-       
-      
-        // 🔹 VIEW SUBCATEGORIES
-        // $(document).on("click", ".btnViewSubCategories", function () {
-
-        //     const categoryId = $(this).data("id");
-        //     const categoryDescription = $(this).data("description");
-
-        //     $("#ParentCategoryID").val(categoryId);
-
-        //     $("#SubCategoriesModal .modal-title").html(
-        //         `<span class="text-secondary">Sub Categories of</span>
-        //          <span class="font-weight-bold">${categoryDescription}</span>`
-        //     );
-
-        //     const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
-        //     modal.show();
-
-        //     if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
-        //         $("#tableSubCategories").DataTable()
-        //             .ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`)
-        //             .load();
-        //     } else {
-        //         initializeSubCategoryTable(categoryId);
-        //     }
-
-        //     resetSubCategoryForm();
-        // });
-
-        //    const subToggle = document.getElementById("subcategoryStatusToggle");
-        // const subHidden = document.getElementById("subCategoryStatusID");
-        // const subLabel = document.getElementById("subCategoryStatusLabel");
-
-        // if (subToggle && subHidden) {
-        //     subToggle.addEventListener("change", function () {
-        //         if (subToggle.checked) {
-        //             subLabel.textContent = "Active";
-        //             subHidden.value = "A";
-        //         } else {
-        //             subLabel.textContent = "Inactive";
-        //             subHidden.value = "I";
-        //         }
-        //     });
-        // }
-
-
+         
         // 🔹 SAVE SUBCATEGORY
         $(document).on("click", "#btnSaveSubCategory", function (e) {
             e.preventDefault();
@@ -1039,9 +992,12 @@
                 }
             });
         });
-
-
-
+              $(function () {
+                $("#categoryDetails").summernote({
+                    height: 250,
+                    disableResizeEditor: true
+                });
+            });
     });
 
     </script>
