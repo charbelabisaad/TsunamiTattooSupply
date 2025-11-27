@@ -55,7 +55,18 @@ body {
     width:100%;
 }
 
+.table-responsive {
+    overflow-x: visible !important;
+}
 
+.dropdown-menu {
+    inset: auto !important; /* stop forcing fixed position */
+    transform: translate(0, 0) !important; /* prevent overflow shift */
+    left: auto !important;
+    right: 0 !important; /* keep inside table */
+    max-width: 160px; /* optional */
+    white-space: nowrap; /* prevent wide items */
+}
 
 .error-handling {
     position: fixed;

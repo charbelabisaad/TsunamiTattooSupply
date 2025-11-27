@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127131657_CreateTableGroupGroupType")]
+    partial class CreateTableGroupGroupType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1244,6 +1247,9 @@ namespace TsunamiTattooSupply.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
+                    b.Property<int>("BrandID")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1272,9 +1278,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Property<bool>("Feature")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("GroupID")
-                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -1312,13 +1315,13 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("BrandID");
+
                     b.HasIndex("CreatedUserID");
 
                     b.HasIndex("DeletedUserID");
 
                     b.HasIndex("EditUserID");
-
-                    b.HasIndex("GroupID");
 
                     b.HasIndex("StatusID");
 
@@ -2776,6 +2779,12 @@ namespace TsunamiTattooSupply.Migrations
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Product", b =>
                 {
+                    b.HasOne("TsunamiTattooSupply.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
                         .WithMany()
                         .HasForeignKey("CreatedUserID")
@@ -2790,12 +2799,6 @@ namespace TsunamiTattooSupply.Migrations
                         .WithMany()
                         .HasForeignKey("EditUserID");
 
-                    b.HasOne("TsunamiTattooSupply.Models.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -2808,13 +2811,13 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("Brand");
+
                     b.Navigation("CreatedUser");
 
                     b.Navigation("DeletedUser");
 
                     b.Navigation("EditUser");
-
-                    b.Navigation("Group");
 
                     b.Navigation("Status");
 

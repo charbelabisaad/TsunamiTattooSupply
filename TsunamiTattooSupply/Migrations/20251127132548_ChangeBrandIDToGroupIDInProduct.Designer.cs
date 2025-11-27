@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251127132548_ChangeBrandIDToGroupIDInProduct")]
+    partial class ChangeBrandIDToGroupIDInProduct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1244,6 +1247,9 @@ namespace TsunamiTattooSupply.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
+                    b.Property<int>("BrandID")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -1311,6 +1317,8 @@ namespace TsunamiTattooSupply.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("BrandID");
 
                     b.HasIndex("CreatedUserID");
 
@@ -2776,6 +2784,12 @@ namespace TsunamiTattooSupply.Migrations
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Product", b =>
                 {
+                    b.HasOne("TsunamiTattooSupply.Models.Brand", "Brand")
+                        .WithMany()
+                        .HasForeignKey("BrandID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
                         .WithMany()
                         .HasForeignKey("CreatedUserID")
@@ -2807,6 +2821,8 @@ namespace TsunamiTattooSupply.Migrations
                         .HasForeignKey("UnitID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Brand");
 
                     b.Navigation("CreatedUser");
 

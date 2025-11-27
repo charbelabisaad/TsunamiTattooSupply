@@ -4,61 +4,38 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Products")]
-	//[Index(nameof(Code), IsUnique = true)]
-	//[Index(nameof(Name), IsUnique = true)]
-	[Index(nameof(UnitID))]
-	[Index(nameof(GroupID))]
+	[Table("Groups")]
+	[Index(nameof(TypeID))]
 	[Index(nameof(StatusID))]
-	public class Product
+	public class Group
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int ID { get; set; }
 
 		[Required]
-		[StringLength(100)]
-		public string Code { get; set; }
-
-		[Required]
-		[StringLength(200)]
+		[StringLength(50)]
 		public string Name { get; set; }
 
-		[Column(TypeName="text")]
-		public string? Description { get; set; }
-
-		[Required]
-		public int UnitID { get; set; }
-
-		[Required]
-		public int GroupID { get; set; }
-		 
-		[Required]
-		public bool VAT {  get; set; }
-
-		[Required] 
-		public bool Feature { get; set; }
-
-		[Required]
-		public bool NewArrival { get; set; }
-
-		[Column(TypeName = "date")]
-		public DateTime? NewArrivalDateExpiryDate { get; set; }
-
-		[Required]
-		public bool Warranty { get; set; }
-
-		[Required]
-		public int WarrantyMonths {  get; set; }
+		[Column(TypeName = "text")]
+		public string? Summary { get; set; }
 
 		[Column(TypeName = "text")]
-		public string VideoUrl {  get; set; }
+		public string? Image { get; set; }
+
+		[Required]
+		public bool ShowHome { get; set; } = true;
 
 		[Required]
 		public int Rank { get; set; } = 0;
 
 		[Required]
+		[StringLength(3)]
+		public string TypeID { get; set; }   
+
+		[Required]
 		public string StatusID { get; set; }
+
 
 		public int CreatedUserID { get; set; }
 
@@ -72,11 +49,8 @@ namespace TsunamiTattooSupply.Models
 
 		public DateTime? DeletedDate { get; set; }
 
-		[ForeignKey("UnitID")]
-		public virtual Unit Unit { get; set; }
-		 
-		[ForeignKey("GroupID")]
-		public virtual Group Group { get; set; }
+		[ForeignKey("TypeID")]
+		public virtual GroupType GroupType { get; set;}
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
@@ -89,6 +63,7 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("DeletedUserID")]
 		public virtual User DeletedUser { get; set; }
+
 
 	}
 }

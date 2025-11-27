@@ -210,7 +210,7 @@
         <!-- /.navbar -->
 
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
-            <!-- Brand Logo -->
+            <!-- Group Logo -->
             <a href="index3.html" class="brand-link text-center">
                 <img src="~/Images/GENERAL/TsunamiLogoWhiteWord.png" alt="Tsunami Tattoo Supply Logo" style="max-width:100px">
                 @* <div class="brand-text font-weight-light font-weight-bold">TSUNAMI TATTOO SUPPLY</div> *@
@@ -304,7 +304,7 @@
                             </li> 
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "Categories" || currenctController == "Brands" || currenctController == "Items" || currenctController == "BestSellers") ? "menu-open" : string.Empty)">
+                        <li class="nav-item @((currenctController == "Categories" || currenctController == "Groups" || currenctController == "Items" || currenctController == "BestSellers") ? "menu-open" : string.Empty)">
                             <a href="#" class="nav-link @((currenctController == " " || currenctController == " " || currenctController == " " || currenctController == " ") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-layer-group"></i>
                             <p class="font-weight-bold">
@@ -320,9 +320,9 @@
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="Brands" asp-action="Index" class="nav-link @((currenctController == "Brands" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="Groups" asp-action="Index" class="nav-link @((currenctController == "Groups" && currenctAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-tags nav-icon"></i>
-                                    <p>Brands</p>
+                                    <p>Groups</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">

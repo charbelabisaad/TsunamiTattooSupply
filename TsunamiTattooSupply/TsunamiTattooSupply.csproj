@@ -29,6 +29,7 @@
     <Folder Include="wwwroot\Images\CATEGORY\BANNER\DELETED\" />
     <Folder Include="wwwroot\Images\CATEGORY\MOBILE\DELETED\" />
     <Folder Include="wwwroot\Images\CATEGORY\WEB\DEELTED\" />
+    <Folder Include="wwwroot\Images\GROUP\DELETED\" />
   </ItemGroup>
 
 </Project>

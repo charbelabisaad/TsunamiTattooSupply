@@ -51,6 +51,8 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Banner> Banners { get; set; }
 		public DbSet<BannerMobile> BannersMobiles { get; set; }
 		public DbSet<BannerPage> BannersPages { get; set; }
+		public DbSet<Group> Groups { get; set; }
+		public DbSet<GroupType> GroupTypes { get; set; }
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

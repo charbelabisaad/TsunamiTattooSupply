@@ -336,6 +336,7 @@
         // 🔹 Save Button (AJAX Submission)
         // ===============================
         $('#btnSaveCategory').on('click', function (e) {
+
             e.preventDefault();
 
             // Reset error area
@@ -351,6 +352,7 @@
             $('#CategoryDescriptionMessage').text('');
 
             let description = $('#CategoryDescription').val().trim();
+
             if (!description) {
                 $('#CategoryDescriptionMessage').text("Description is required!");
                 $('#CategoryDescription').addClass("border-danger");

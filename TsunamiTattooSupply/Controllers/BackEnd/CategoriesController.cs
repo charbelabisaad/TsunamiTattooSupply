@@ -233,7 +233,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					// ===== INSERT =====
 					category = new Category
 					{
-						Description = Description,
+						Description = Description.Trim().ToUpper(),
 						Details = Details,
 						StatusID = StatusID,
 						CreatedUserID = userId,
@@ -250,7 +250,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					if (category == null)
 						return Json(new { success = false, error = true, message = "Category not found." });
 
-					category.Description = Description;
+					category.Description = Description.Trim().ToUpper();
 					category.Details = Details ?? category.Details;
 					category.StatusID = StatusID;
 					category.EditUserID = userId;
@@ -573,7 +573,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					sub = new SubCategory
 					{
 						CategoryID = CategoryID,
-						Description = Description,
+						Description = Description.Trim().ToUpper(),
 						StatusID = StatusID,
 						CreatedUserID = userId,
 						CreationDate = DateTime.UtcNow
@@ -589,7 +589,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					if (sub == null)
 						return Json(new { success = false, error = true, message = "Sub Category not found." });
 
-					sub.Description = Description;
+					sub.Description = Description.Trim().ToUpper();
 					sub.StatusID = StatusID;
 					sub.EditUserID = userId;
 					sub.EditDate = DateTime.UtcNow;
