@@ -32,6 +32,9 @@ namespace TsunamiTattooSupply.Functions
 		public static string SubCategoryBannerImagePath = string.Empty;
 		public static string SubCategoryMobileImagePath = string.Empty;
 
+		public static string ProductSmallImagePath = string.Empty;
+		public static string ProductOriginalImagePath = string.Empty;
+
 		public static string GroupImagePath = string.Empty;
 
 	}

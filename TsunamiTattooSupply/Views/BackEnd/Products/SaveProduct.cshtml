@@ -1,0 +1,229 @@
+﻿<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body d-flex justify-content-center align-products-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+                <img id="imageProductViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fullmodal-right" id="saveProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
+                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+            </div>
+
+            <!-- Form -->
+            <form id="productForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <div class="modal-body flex-grow-1">
+
+                    <input id="ProductID" type="hidden" value="0" />
+
+                    <div class="row">
+
+                        <!-- CODE -->
+						<div class="col-12 col-md-2 mb-3">
+							<label class="form-label">Code</label>
+							<input id="ProductCode" class="form-control" placeholder="Fill Code" />
+							<div id="ProductCodeMessage" class="text-danger fw-normal"></div>
+						</div>
+
+                        <!-- NAME -->
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="form-label">Name</label>
+                            <input id="ProductName" class="form-control" placeholder="Fill Name" />
+                            <div id="ProductNameMessage" class="text-danger fw-normal"></div>
+                        </div>
+                         
+                        <!-- GROUP -->
+                        <div class="col-12 col-md-2 mb-3"> 
+							<label class="form-label">Group Type</label>
+							<select id="ProductGroupType" class="form-control">
+								<option value="">-- Select Group Type --</option>
+							</select>     
+                        </div>
+                         
+                        <div class="col-12 col-md-4 mb-3">
+                            <div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <label class="form-label">Group</label>
+                                    </div>
+                                    <div class="col-6 text-right">
+
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox" class="custom-control-input" id="ProductStatusToggle" checked />
+                                            <label class="custom-control-label" for="ProductStatusToggle" id="ProductStatusLabel">
+                                                Active
+                                            </label>
+                                            <input type="hidden" id="ProductStatusID" value="A" />
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <select id="ProductGroup" class="form-control">
+                                    <option value="">-- Select Group --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                     
+                    <div class="row">
+						<!-- DESCRIPTION -->
+						<div class="col-12 col-md-12 mb-3">
+							<label class="form-label">Description</label>
+							<textarea id="ProductDescription" class="form-control" style="height:100px" placeholder="Fill Description"></textarea>
+							<div id="ProductDescriptionMessage" class="text-danger fw-normal"></div>
+						</div>
+
+                    </div>
+
+                    <div class="row">
+
+                        <!-- UNIT -->
+                        <div class="col-12 col-md-3">
+                            <label class="form-label">Unit</label>
+                            <select id="ProductUnitID" class="form-control">
+                                <option value="">-- Select Unit --</option>
+                            </select>
+                            <div id="ProductUnitMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+						<!-- New Arrival -->
+						<div class="col-12 col-md-3"> 
+
+							<div class="row"> 
+								<div class="col-6"> 
+									<label class="form-label">Expiry Date</label> 
+								</div> 
+								<div class="col-6 text-right">
+									<div class="custom-control custom-switch">
+										<input type="checkbox" class="custom-control-input" id="ProductNewArrival" />
+										<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
+									</div>
+								</div> 
+							</div>
+
+							<div class="row">
+								<!-- Expiry Date -->
+								<div class="col-12">
+									<input id="ProductExpiryDate" class="form-control" placeholder="MM-DD-YYYY" />
+								</div>
+							</div>
+
+						</div>
+
+						<div class="col-12 col-md-3">
+
+							<div class="row">
+								<div class="col-6">
+									<label class="form-label">Warranty Months</label>
+								</div>
+								<div class="col-6 text-right">
+									<!-- WARRANTY -->
+									<div class="custom-control custom-switch">
+										<input type="checkbox" class="custom-control-input" id="ProductWarranty" />
+										<label class="custom-control-label" for="ProductWarranty">Warranty</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="row">
+								<!-- WARRANTY MONTHS -->
+								<div class="col-12">
+									<input id="ProductWarrantyMonths" type="number" class="form-control" placeholder="0" />
+								</div>
+							</div>
+
+						</div>
+
+						<div class="col-12 col-md-3 text-right">
+                             
+							<!-- VAT -->
+							<div class="d-inline-block text-left"> 
+								<div class="custom-control custom-switch mt-2">
+									<input type="checkbox" class="custom-control-input" id="ProductVAT">
+									<label class="custom-control-label" for="ProductVAT">VAT</label>
+								</div>  
+                                <div class="custom-control custom-switch mt-2">
+									<input type="checkbox" class="custom-control-input" id="ProductFeature">
+									<label class="custom-control-label" for="ProductFeature">Feature</label>
+								</div>
+							</div>
+                                 
+                        </div>
+                         
+					</div>
+ 
+                    <div class="row mt-3">
+
+                        <!-- CATEGORY (single selection) -->
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="form-label">Category</label>
+                            <select id="ProductCategory" class="form-control">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- SUBCATEGORY (multiple selection) -->
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="form-label">Sub Categories</label>
+                            <select id="ProductSubCategory" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
+                                <!-- Options loaded dynamically -->
+                            </select>
+                            <div id="ProductSubCategoryMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- SIZE (multiple selection) -->
+                        <div class="col-12 col-md-4 mb-3">
+                            <label class="form-label">Sizes</label>
+                            <select id="ProductSizes" class="form-control selectpicker" multiple data-live-search="true" data-actions-box="true">
+                                <!-- Options loaded dynamically -->
+                            </select>
+                            <div id="ProductSizesMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- ✅ Fixed footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+                    <button id="btnSaveProduct" type="button" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveProductSpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+ 

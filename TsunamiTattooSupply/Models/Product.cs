@@ -52,7 +52,7 @@ namespace TsunamiTattooSupply.Models
 		public int WarrantyMonths {  get; set; }
 
 		[Column(TypeName = "text")]
-		public string VideoUrl {  get; set; }
+		public string? VideoUrl {  get; set; }
 
 		[Required]
 		public int Rank { get; set; } = 0;

@@ -30,6 +30,8 @@
     <Folder Include="wwwroot\Images\CATEGORY\MOBILE\DELETED\" />
     <Folder Include="wwwroot\Images\CATEGORY\WEB\DEELTED\" />
     <Folder Include="wwwroot\Images\GROUP\DELETED\" />
+    <Folder Include="wwwroot\Images\PRODUCT\ORIGINAL\DELETED\" />
+    <Folder Include="wwwroot\Images\PRODUCT\SMALL\DELETED\" />
   </ItemGroup>
 
 </Project>

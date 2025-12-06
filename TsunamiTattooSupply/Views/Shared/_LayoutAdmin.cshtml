@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - TsunamiTattooSupply</title>
 
+
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback" asp-append-version="true" />
     <!-- Font Awesome -->
@@ -31,6 +32,8 @@
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css" asp-append-version="true" />
     <!-- Daterange picker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/css/bootstrap-select.min.css"/>
+
     <link rel="stylesheet" href="~/plugins/daterangepicker/daterangepicker.css" asp-append-version="true" />
     <!-- summernote -->
     <link rel="stylesheet" href="~/plugins/summernote/summernote-bs4.min.css" asp-append-version="true" />
@@ -304,7 +307,7 @@
                             </li> 
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "Categories" || currenctController == "Groups" || currenctController == "Items" || currenctController == "BestSellers") ? "menu-open" : string.Empty)">
+                        <li class="nav-item @((currenctController == "Categories" || currenctController == "Groups" || currenctController == "Products" || currenctController == "BestSellers") ? "menu-open" : string.Empty)">
                             <a href="#" class="nav-link @((currenctController == " " || currenctController == " " || currenctController == " " || currenctController == " ") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-layer-group"></i>
                             <p class="font-weight-bold">
@@ -326,9 +329,9 @@
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="Items" asp-action="Index" class="nav-link @((currenctController == "Items" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="Products" asp-action="Index" class="nav-link @((currenctController == "Products" && currenctAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-diagram-3 nav-icon"></i>
-                                    <p>Items</p>
+                                    <p>Products</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
@@ -913,6 +916,7 @@
     <script src="~/plugins/datatables-buttons/js/buttons.colVis.min.js" asp-append-version="true"></script>
     <script src="~/plugins/toastr/toastr.min.js" asp-append-version="true"></script>
     <script src="~/plugins/summernote/summernote-bs4.min.js" asp-append-version="true"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.14.0-beta3/js/bootstrap-select.min.js"></script>
 
     <script src="~/js/CustomDatatable.js" asp-append-version="true"></script>
     @* <script src="~/js/CustomEditor.js" asp-append-version="true"></script> *@
