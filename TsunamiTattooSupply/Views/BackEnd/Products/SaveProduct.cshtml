@@ -36,189 +36,226 @@
 
                     <input id="ProductID" type="hidden" value="0" />
 
-                    <div class="row">
+                    <div class="card">
 
-                        <!-- CODE -->
-						<div class="col-12 col-md-2 mb-3">
-							<label class="form-label">Code</label>
-							<input id="ProductCode" class="form-control" placeholder="Fill Code" />
-							<div id="ProductCodeMessage" class="text-danger fw-normal"></div>
-						</div>
+                        <div class="card-header font-weight-bold">Initial Information</div>
 
-                        <!-- NAME -->
-                        <div class="col-12 col-md-4 mb-3">
-                            <label class="form-label">Name</label>
-                            <input id="ProductName" class="form-control" placeholder="Fill Name" />
-                            <div id="ProductNameMessage" class="text-danger fw-normal"></div>
-                        </div>
-                         
-                        <!-- GROUP -->
-                        <div class="col-12 col-md-2 mb-3"> 
-							<label class="form-label">Group Type</label>
-							<select id="ProductGroupType" class="form-control">
+                        <div class="card-body">
 
-                                @foreach(var obj in Model.groupTypes){
-                                    <option value="@obj.ID">@obj.Description</option>
-                                }
-                                 
-							</select>     
-                        </div>
-                         
-                        <div class="col-12 col-md-4 mb-3">
-                            <div>
-                                <div class="row">
-                                    <div class="col-6">
-                                        <label class="form-label">Group</label>
-                                    </div>
-                                    <div class="col-6 text-right">
+							<div class="row">
 
-                                        <div class="custom-control custom-switch">
-                                            <input type="checkbox" class="custom-control-input" id="ProductStatusToggle" checked />
-                                            <label class="custom-control-label" for="ProductStatusToggle" id="ProductStatusLabel">
-                                                Active
-                                            </label>
-                                            <input type="hidden" id="ProductStatusID" value="A" />
-                                        </div>
+								<!-- CODE -->
+								<div class="col-12 col-md-2 mb-3">
+									<label class="form-label">Code</label>
+									<input id="ProductCode" class="form-control" placeholder="Fill Code" />
+									<div id="ProductCodeMessage" class="text-danger fw-normal"></div>
+								</div>
 
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <select id="ProductGroup" class="form-control">
-                                    <option value="">-- Select Group --</option>
-                                </select>
-                            </div>
-                        </div>
+								<!-- NAME -->
+								<div class="col-12 col-md-4 mb-3">
+									<label class="form-label">Name</label>
+									<input id="ProductName" class="form-control" placeholder="Fill Name" />
+									<div id="ProductNameMessage" class="text-danger fw-normal"></div>
+								</div>
 
-                    </div>
-                     
-                    <div class="row">
-						<!-- DESCRIPTION -->
-						<div class="col-12 col-md-12 mb-3">
-							<label class="form-label">Description</label>
-							<textarea id="ProductDescription" class="form-control" style="height:100px" placeholder="Fill Description"></textarea>
-							<div id="ProductDescriptionMessage" class="text-danger fw-normal"></div>
-						</div>
+								<!-- GROUP -->
+								<div class="col-12 col-md-2 mb-3">
+									<label class="form-label">Group Type</label>
+									<select id="ProductGroupType" class="form-control">
 
-                    </div>
+										@foreach (var obj in Model.groupTypes)
+										{
+											<option value="@obj.ID">@obj.Description</option>
+										}
 
-                    <div class="row">
+									</select>
+								</div>
 
-                        <!-- UNIT -->
-                        <div class="col-12 col-md-3">
-                            <label class="form-label">Unit</label>
-                            <select id="ProductUnitID" class="form-control">
-                                <option value="">-- Select Unit --</option>
-                            </select>
-                            <div id="ProductUnitMessage" class="text-danger fw-normal"></div>
-                        </div>
+								<div class="col-12 col-md-4 mb-3">
+									<div>
+										<div class="row">
+											<div class="col-6">
+												<label class="form-label">Group</label>
+											</div>
+											<div class="col-6 text-right">
 
-						<!-- New Arrival -->
-						<div class="col-12 col-md-3"> 
+												<div class="custom-control custom-switch">
+													<input type="checkbox" class="custom-control-input" id="ProductStatusToggle" checked />
+													<label class="custom-control-label" for="ProductStatusToggle" id="ProductStatusLabel">
+														Active
+													</label>
+													<input type="hidden" id="ProductStatusID" value="A" />
+												</div>
 
-							<div class="row"> 
-								<div class="col-6"> 
-									<label class="form-label">Expiry Date</label> 
-								</div> 
-								<div class="col-6 text-right">
-									<div class="custom-control custom-switch">
-										<input type="checkbox" class="custom-control-input" id="ProductNewArrival" />
-										<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
+											</div>
+										</div>
 									</div>
-								</div> 
-							</div>
-
-							<div class="row">
-								<!-- Expiry Date -->
-								<div class="col-12">
-									<input id="ProductExpiryDate" class="form-control" placeholder="MM-DD-YYYY" />
-								</div>
-							</div>
-
-						</div>
-
-						<div class="col-12 col-md-3">
-
-							<div class="row">
-								<div class="col-6">
-									<label class="form-label">Warranty Months</label>
-								</div>
-								<div class="col-6 text-right">
-									<!-- WARRANTY -->
-									<div class="custom-control custom-switch">
-										<input type="checkbox" class="custom-control-input" id="ProductWarranty" />
-										<label class="custom-control-label" for="ProductWarranty">Warranty</label>
+									<div>
+										<select id="ProductGroup" class="form-control">
+											<option value="">-- Select Group --</option>
+										</select>
 									</div>
 								</div>
+
 							</div>
 
 							<div class="row">
-								<!-- WARRANTY MONTHS -->
-								<div class="col-12">
-									<input id="ProductWarrantyMonths" type="number" class="form-control" placeholder="0" />
+								<!-- DESCRIPTION -->
+								<div class="col-12 col-md-12 mb-3">
+									<label class="form-label">Description</label>
+									<textarea id="ProductDescription" class="form-control" style="height:100px" placeholder="Fill Description"></textarea>
+									<div id="ProductDescriptionMessage" class="text-danger fw-normal"></div>
 								</div>
+
 							</div>
 
-						</div>
+							<div class="row">
 
-						<div class="col-12 col-md-3 text-right">
-                             
-							<!-- VAT -->
-							<div class="d-inline-block text-left"> 
-								<div class="custom-control custom-switch mt-2">
-									<input type="checkbox" class="custom-control-input" id="ProductVAT">
-									<label class="custom-control-label" for="ProductVAT">VAT</label>
-								</div>  
-                                <div class="custom-control custom-switch mt-2">
-									<input type="checkbox" class="custom-control-input" id="ProductFeature">
-									<label class="custom-control-label" for="ProductFeature">Feature</label>
-								</div>
-							</div>
-                                 
-                        </div>
-                         
-					</div>
+								<!-- UNIT -->
+								<div class="col-12 col-md-3">
+									<label class="form-label">Unit</label>
+									<select id="ProductUnit" class="form-control">
+
+										@foreach(var obj in Model.units){
+											<option value="@obj.ID">@obj.ShortDescription - @obj.LongDescription</option>
+										}
  
-                    <div class="row mt-3">
+									</select> 
+								</div>
 
-                        <!-- CATEGORY (single selection) -->
-                        <div class="col-12 col-md-4 mb-3">
-                            <label class="form-label">Category</label>
-                            <select id="ProductCategory" class="form-control">
+								<!-- New Arrival -->
+								<div class="col-12 col-md-3">
 
-                                @foreach(var obj in Model.categories){
-                                    <option value="@obj.ID">@obj.Description</option>
-                                }
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Expiry Date</label>
+										</div>
+										<div class="col-6 text-right">
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductNewArrival" />
+												<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
+											</div>
+										</div>
+									</div>
 
-                               
-                            </select>
-                            <div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
-                        </div>
+									<div class="row">
+										<!-- Expiry Date -->
+										<div class="col-12">
+											<input type="text" id="ProductExpiryDate" class="form-control" placeholder="Select date" />
+										</div>
+									</div>
 
-                        <!-- SUBCATEGORY (multiple selection) -->
-                        <div class="col-12 col-md-4 mb-3">
-                            <label class="form-label">Sub Categories</label>
-                            <select id="ProductSubCategory" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
-                                <!-- Options loaded dynamically -->
-                            </select>
-                            <div id="ProductSubCategoryMessage" class="text-danger fw-normal"></div>
-                        </div>
+								</div>
 
-                        <!-- SIZE (multiple selection) -->
-                        <div class="col-12 col-md-4 mb-3">
-                            <label class="form-label">Sizes</label>
-                            <select id="ProductSizes" class="form-control selectpicker" multiple data-live-search="true" data-actions-box="true">
-                                <!-- Options loaded dynamically -->
-                            </select>
-                            <div id="ProductSizesMessage" class="text-danger fw-normal"></div>
-                        </div>
+								<div class="col-12 col-md-3">
+
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Warranty Months</label>
+										</div>
+										<div class="col-6 text-right">
+											<!-- WARRANTY -->
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductWarranty" />
+												<label class="custom-control-label" for="ProductWarranty">Warranty</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<!-- WARRANTY MONTHS -->
+										<div class="col-12">
+											<input id="ProductWarrantyMonths" type="number" class="form-control" placeholder="0" />
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-12 col-md-3 text-right">
+
+									<!-- VAT -->
+									<div class="d-inline-block text-left">
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductVAT">
+											<label class="custom-control-label" for="ProductVAT">VAT</label>
+										</div>
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductFeature">
+											<label class="custom-control-label" for="ProductFeature">Feature</label>
+										</div>
+									</div>
+
+								</div>
+
+							</div>
+
+						</div>
 
                     </div>
 
+					<div class="card"> 
+						<div class="card-header font-weight-bold">Categories & Sub Categories</div>
+						<div class="card-body">
+
+
+							<div class="row">
+
+								<!-- CATEGORY (single selection) -->
+								<div class="col-12 col-md-4">
+									<label class="form-label">Category</label>
+									<select id="ProductCategory" class="form-control">
+
+										@foreach (var obj in Model.categories)
+										{
+											<option value="@obj.ID">@obj.Description</option>
+										}
+
+
+									</select>
+									<div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
+								</div>
+
+								<!-- SUBCATEGORY (multiple selection) -->
+								<div class="col-12 col-md-8 mb-3">
+									<label class="form-label">Sub Categories</label>
+									<select id="ProductSubCategory" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
+										<!-- Options loaded dynamically -->
+									</select>
+									<div id="ProductSubCategoryMessage" class="text-danger fw-normal"></div>
+								</div>
+
+							</div>
+
+
+						</div>
+					</div>
+
+					<div class="card">
+
+						<div class="card-header font-weight-bold">Sizes</div>
+
+						<div class="card-body">
+
+							<div class="row">
+
+								<!-- SIZE (multiple selection) -->
+								<div class="col-12 col-md-12">
+									<label class="form-label">Sizes</label>
+									<select id="ProductSizes" class="form-control selectpicker" multiple data-live-search="true" data-actions-box="true">
+										<!-- Options loaded dynamically -->
+									</select>
+									<div id="ProductSizesMessage" class="text-danger fw-normal"></div>
+								</div>
+
+
+							</div>
+
+						</div>
+
+					</div>
 
                 </div>
-
-
+				 
                 <!-- ✅ Fixed footer -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">

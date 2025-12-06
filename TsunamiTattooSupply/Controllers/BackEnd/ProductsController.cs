@@ -20,7 +20,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			var vm = new ProductPageViewModel
 			{
 				groupTypes = GetGroupTypes(),
-				categories = GetGategories()
+				categories = GetGategories(),
+				units = GetUnits()
 			};
 
 			srvcFilePath fp = new srvcFilePath(_dbcontext);
@@ -41,11 +42,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}).ToList();
 
 		}
-
-
+		 
 		public List<Category> GetGategories()
 		{
 			return _dbcontext.Categories
+				.Where(c => c.DeletedDate == null)
 				.Select(c => new Category
 				{
 					ID = c.ID,
@@ -54,6 +55,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
+		public List<Unit> GetUnits()
+		{
+			return _dbcontext.Units
+				.Where(u => u.DeletedDate == null)
+				.Select(u => new Unit
+				{
+					ID = u.ID,
+					ShortDescription = u.ShortDescription,
+					LongDescription = u.LongDescription,
+				}).ToList();
+
+		}
 
 		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env)
 		{

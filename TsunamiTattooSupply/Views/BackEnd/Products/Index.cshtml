@@ -3,7 +3,7 @@
 *@
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Items";
+    ViewData["Title"] = "Products";
 }
 
 <style>
@@ -79,7 +79,9 @@
     }
      
 </style>
- 
+
+
+
 <partial name="SaveProduct" />
 <partial name="DeleteProduct" />  
 <div class="content-wrapper">
@@ -143,7 +145,8 @@
 @section Scripts {
 
     <script>
-        $(document).ready(function () {
+
+    $(document).ready(function () {
 
             var table = $('#tableProducts').DataTable({
                 processing: true,
@@ -409,8 +412,13 @@
 
         });
 
+        $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
+        autoApply: true,
+        showDropdowns: true,
+        timePicker: false,
+        locale: { format: 'DD-MM-YYYY' }});
 
-        });
+    });
     </script>
 
 
