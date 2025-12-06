@@ -56,7 +56,11 @@
                         <div class="col-12 col-md-2 mb-3"> 
 							<label class="form-label">Group Type</label>
 							<select id="ProductGroupType" class="form-control">
-								<option value="">-- Select Group Type --</option>
+
+                                @foreach(var obj in Model.groupTypes){
+                                    <option value="@obj.ID">@obj.Description</option>
+                                }
+                                 
 							</select>     
                         </div>
                          
@@ -181,7 +185,12 @@
                         <div class="col-12 col-md-4 mb-3">
                             <label class="form-label">Category</label>
                             <select id="ProductCategory" class="form-control">
-                                <option value="">-- Select Category --</option>
+
+                                @foreach(var obj in Model.categories){
+                                    <option value="@obj.ID">@obj.Description</option>
+                                }
+
+                               
                             </select>
                             <div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
                         </div>

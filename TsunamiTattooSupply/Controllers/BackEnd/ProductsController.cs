@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions;
+using TsunamiTattooSupply.Models;
+using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
@@ -12,16 +14,46 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public readonly TsunamiDbContext _dbcontext;
 		private readonly ILogger<CategoriesController> _logger;
 		private readonly IWebHostEnvironment _env;
-
+		 
 		public IActionResult Index()
 		{
+			var vm = new ProductPageViewModel
+			{
+				groupTypes = GetGroupTypes(),
+				categories = GetGategories()
+			};
+
 			srvcFilePath fp = new srvcFilePath(_dbcontext);
 
 			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
 			Global.ProductOriginalImagePath = fp.GetFilePath("PRDORGIMG").Description;
 
-			return View("~/Views/BackEnd/Products/Index.cshtml");
+			return View("~/Views/BackEnd/Products/Index.cshtml",vm);
 		}
+
+		public List<GroupType> GetGroupTypes()
+		{
+			return _dbcontext.GroupTypes
+				.Select(gt => new GroupType
+				{
+					ID = gt.ID,
+					Description = gt.Description
+				}).ToList();
+
+		}
+
+
+		public List<Category> GetGategories()
+		{
+			return _dbcontext.Categories
+				.Select(c => new Category
+				{
+					ID = c.ID,
+					Description = c.Description
+				}).ToList();
+
+		}
+
 
 		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env)
 		{
