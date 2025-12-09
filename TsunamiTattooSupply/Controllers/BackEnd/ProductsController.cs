@@ -21,7 +21,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				groupTypes = GetGroupTypes(),
 				categories = GetGategories(),
-				units = GetUnits()
+				units = GetUnits(),
+				sizes = GetSizes()
 			};
 
 			srvcFilePath fp = new srvcFilePath(_dbcontext);
@@ -63,7 +64,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					ID = u.ID,
 					ShortDescription = u.ShortDescription,
-					LongDescription = u.LongDescription,
+					LongDescription = u.LongDescription
+				}).ToList();
+
+		}
+
+		public List<Size> GetSizes()
+		{
+			return _dbcontext.Sizes
+				.Where(s => s.DeletedDate == null)
+				.Select(s => new Size
+				{
+					ID = s.ID,
+					Description = s.Description 
 				}).ToList();
 
 		}

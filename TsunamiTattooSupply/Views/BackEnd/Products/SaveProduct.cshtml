@@ -242,7 +242,10 @@
 								<div class="col-12 col-md-12">
 									<label class="form-label">Sizes</label>
 									<select id="ProductSizes" class="form-control selectpicker" multiple data-live-search="true" data-actions-box="true">
-										<!-- Options loaded dynamically -->
+										@foreach (var obj in Model.sizes)
+										{
+											<option value="@obj.ID">@obj.Description</option>
+										}
 									</select>
 									<div id="ProductSizesMessage" class="text-danger fw-normal"></div>
 								</div>
