@@ -470,15 +470,24 @@
 						
 							<div class="col-12 col-md-12">
 
-							@foreach(var obj in Model.currencies){
+								<div class="row">
+									
+									@foreach(var obj in Model.currencies){
 
-								<text>
-								
-									<div>@obj.Code</div>
+										<text>
+								 
+												<div class="col-12 col-md-6">  
+													
+													<label>@obj.Code</label>
+													<input type="number"  class="form-control" placeholder="Enter Price in @obj.Code" />
+													  
+												</div>
+												  
+										</text>
 
-								</text>
-
-							}
+									}
+								 
+								</div>
 
 							</div>
 						

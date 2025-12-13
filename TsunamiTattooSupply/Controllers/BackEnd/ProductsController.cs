@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
-using TsunamiTattooSupply.Functions;
+using TsunamiTattooSupply.Functions; 
 using TsunamiTattooSupply.Models;
 using TsunamiTattooSupply.ViewModels;
 
@@ -13,7 +13,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public readonly TsunamiDbContext _dbcontext;
 		private readonly ILogger<CategoriesController> _logger;
-		private readonly IWebHostEnvironment _env;
+		private readonly IWebHostEnvironment _env; 
 		 
 		public IActionResult Index()
 		{
@@ -22,7 +22,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
 			Global.ProductOriginalImagePath = fp.GetFilePath("PRDORGIMG").Description;
 			Global.CountriesFlagsImagePath = fp.GetFilePath("CNTRYFLG").Description;
-
+			 
 			var vm = new ProductPageViewModel
 			{
 				groupTypes = GetGroupTypes(),
@@ -37,6 +37,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			return View("~/Views/BackEnd/Products/Index.cshtml",vm);
 		}
 
+		//public double GetRate()
+		//{
+
+		//	int DefaultCurrencyID = _dbcontext.Currencies.Where(c => c.Priority == "DFLT")
+		//											 .Select(c => c.ID).FirstOrDefault();
+
+		//	int SecondCurrencyID = _dbcontext.Currencies.Where(c => c.Priority == "SCND")
+		//									 .Select(c => c.ID).FirstOrDefault();
+
+
+
+		//}
+	 
 		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env)
 		{
 			_dbcontext = dbContext;
