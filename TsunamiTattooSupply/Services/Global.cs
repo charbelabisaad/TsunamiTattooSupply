@@ -37,6 +37,8 @@ namespace TsunamiTattooSupply.Functions
 
 		public static string GroupImagePath = string.Empty;
 
+		public static string CountriesFlagsImagePath = string.Empty;
+
 	}
 	 
 }

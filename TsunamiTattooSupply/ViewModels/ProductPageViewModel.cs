@@ -7,7 +7,11 @@ namespace TsunamiTattooSupply.ViewModels
 	{
 		public List<GroupType> groupTypes { get; set; }
 		public List<Category> categories { get; set; }
-		public List<Unit> units { get; set; }
-		public List<Size> sizes { get; set; }
+		public List<UnitDto> units { get; set; }
+		public List<SizeDto> sizes { get; set; }
+		public List<ColorDto> colors { get; set; }
+		public List<CountryDto> countriessales { get; set; }
+		public List<CurrencyDto> currencies { get; set; }
+
 	}
 }

@@ -48,6 +48,9 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public bool Native {  get; set; } = false;
+
+		[StringLength(500)]
+		public string?  Flag{ get; set; } 
  
 	}
 }

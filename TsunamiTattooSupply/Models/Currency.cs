@@ -8,6 +8,7 @@ namespace TsunamiTattooSupply.Models
 	//[Index(nameof(Code), IsUnique = true)]
 	//[Index(nameof(Description), IsUnique = true)]
 	[Index(nameof(StatusID))]   // Non-unique index on StatusID
+	[Index(nameof(CountryID))]
 	public class Currency
 	{
 		[Key]
@@ -28,6 +29,8 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength (4)]
 		public string Priority { get; set; }
+
+		public int? CountryID { get; set; }
 		 
 		[Required]
 		public string StatusID { get; set; }
@@ -43,6 +46,9 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
+
+		[ForeignKey("CountryID")]
+		public virtual Country Country { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

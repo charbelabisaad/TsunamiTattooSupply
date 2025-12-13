@@ -1,46 +1,49 @@
-﻿<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-xl">
-        <div class="modal-content bg-transparent border-0">
-            <div class="modal-body d-flex justify-content-center align-products-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
-                <img id="imageProductViewModalImg"
-                     src=""
-                     class="img-fluid rounded shadow-lg"
-                     style="object-fit: contain; border-radius: 10px;" />
+﻿
 
-                <!-- Close Button -->
-                <button type="button"
-                        class="btn position-absolute top-0 end-0 m-3"
-                        data-bs-dismiss="modal"
-                        aria-label="Close"
-                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
-                    <i class="fas fa-times text-white fs-4"></i>
-                </button>
-            </div>
-        </div>
-    </div>
+
+<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered modal-xl">
+		<div class="modal-content bg-transparent border-0">
+			<div class="modal-body d-flex justify-content-center align-products-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+				<img id="imageProductViewModalImg"
+				src=""
+				class="img-fluid rounded shadow-lg"
+				style="object-fit: contain; border-radius: 10px;" />
+
+				<!-- Close Button -->
+				<button type="button"
+				class="btn position-absolute top-0 end-0 m-3"
+				data-bs-dismiss="modal"
+				aria-label="Close"
+				style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+					<i class="fas fa-times text-white fs-4"></i>
+				</button>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="modal fade fullmodal-right" id="saveProductModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
 
-            <div class="modal-header">
-                <h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
-                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
-            </div>
+			<div class="modal-header">
+				<h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
+				<button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+			</div>
 
-            <!-- Form -->
-            <form id="productForm" method="post" class="d-flex flex-column flex-grow-1">
+			<!-- Form -->
+			<form id="productForm" method="post" class="d-flex flex-column flex-grow-1">
 
-                <div class="modal-body flex-grow-1">
+				<div class="modal-body flex-grow-1">
 
-                    <input id="ProductID" type="hidden" value="0" />
+					<input id="ProductID" type="hidden" value="0" />
 
-                    <div class="card">
+					<div class="card">
 
-                        <div class="card-header font-weight-bold">Initial Information</div>
+						<div class="card-header font-weight-bold">Initial Information</div>
 
-                        <div class="card-body">
+						<div class="card-body">
 
 							<div class="row">
 
@@ -119,7 +122,7 @@
 										@foreach(var obj in Model.units){
 											<option value="@obj.ID">@obj.ShortDescription - @obj.LongDescription</option>
 										}
- 
+
 									</select> 
 								</div>
 
@@ -191,7 +194,7 @@
 
 						</div>
 
-                    </div>
+					</div>
 
 					<div class="card"> 
 						<div class="card-header font-weight-bold">Categories & Sub Categories</div>
@@ -230,34 +233,166 @@
 						</div>
 					</div>
 
-					<div class="card">
+					<div class="card shadow-sm">
 
-						<div class="card-header font-weight-bold">Sizes</div>
+						<!-- CARD HEADER -->
+						<div class="card-header font-weight-bold">
+							Product Details
+						</div>
 
+						<!-- CARD BODY -->
 						<div class="card-body">
 
-							<div class="row">
+							<!-- TABS NAV -->
+							<ul class="nav nav-tabs tabs-line mb-3" role="tablist">
+								<li class="nav-item">
+									<a class="nav-link active" data-toggle="tab" href="#tabSizes">
+										Sizes
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-toggle="tab" href="#tabColors">
+										Colors
+									</a>
+								</li>
+							</ul>
 
-								<!-- SIZE (multiple selection) -->
-								<div class="col-12 col-md-12">
-									<label class="form-label">Sizes</label>
-									<select id="ProductSizes" class="form-control selectpicker" multiple data-live-search="true" data-actions-box="true">
-										@foreach (var obj in Model.sizes)
-										{
-											<option value="@obj.ID">@obj.Description</option>
-										}
-									</select>
-									<div id="ProductSizesMessage" class="text-danger fw-normal"></div>
+							<!-- TABS CONTENT -->
+							<div class="tab-content">
+
+								<!-- ================= SIZES TAB ================= -->
+								<div class="tab-pane fade show active" id="tabSizes" role="tabpanel">
+
+									<div class="row">
+										<div class="col-12">
+											<label class="form-label">Sizes</label>
+											<select id="ProductSizes"
+											class="form-control selectpicker"
+											multiple
+											data-live-search="true"
+											data-actions-box="true">
+												@foreach (var obj in Model.sizes)
+												{
+													<option value="@obj.ID">@obj.Description</option>
+												}
+											</select> 
+										</div>
+									</div>
+									@* <div class="row"> *@
+									@* 	<div class="col-12"> *@
+
+									@* 		<label class="form-label">Countries</label> *@
+
+									@* 		<select id="ProductCountries" *@
+									@* 		class="form-control selectpicker" *@
+									@* 		multiple *@
+									@* 		data-live-search="true" *@
+									@* 		data-actions-box="true" *@
+									@* 		data-width="100%"> *@
+
+									@* 			@foreach (var obj in Model.countriessales) *@
+									@* 			{ *@
+
+									@* 				var flag = obj.Flag; *@
+
+									@* 				<option value="@obj.ID" *@
+									@* 					data-content=' *@
+									@* 						<span class="d-flex align-items-center"> *@
+									@* 							@if (!string.IsNullOrEmpty(obj.Flag)) *@
+									@* 							{ *@
+									@* 								<img src="@obj.Flag" *@
+									@* 										style="width:20px;height:15px;margin-right:8px;border:1px solid #ddd" *@
+									@* 										alt=""> *@
+									@* 							} *@
+									@* 							<span>@obj.Name</span> *@
+									@* 						</span> *@
+									@* 					'> *@
+									@* 					@obj.Name *@
+									@* 				</option> *@
+									@* 			} *@
+
+									@* 		</select> *@
+
+									@* 	</div> *@
+									@* </div> *@
+
+
+									<div class="row mt-3">
+
+										<div id="SizeVariationsContainer" class="col-12"></div>
+
+									</div>
+
 								</div>
 
+								<!-- ================= COLORS TAB ================= -->
+								<div class="tab-pane fade" id="tabColors" role="tabpanel">
+
+									<div class="row">
+										<div class="col-12">
+											<label class="form-label">Colors</label>
+											<select id="ProductColors"
+													class="form-control selectpicker"
+													multiple
+													data-live-search="true"
+													data-actions-box="true">
+												@foreach (var obj in Model.colors)
+												{
+													<option value="@obj.ID">
+														<span style="
+                                        display:inline-block;
+                                        width:14px;
+                                        height:14px;
+                                        background-color:#@obj.Code;
+                                        border:1px solid #ccc;
+                                        margin-right:6px;
+                                        vertical-align:middle;">
+														</span>
+														@obj.Name
+													</option>
+												}
+											</select>
+											<div id="ProductColorsMessage" class="text-danger fw-normal"></div>
+										</div>
+									</div>
+
+								</div>
 
 							</div>
 
 						</div>
-
 					</div>
 
+
+					@* <div class="card"> *@
+
+					@* 	<div class="card-header font-weight-bold">Colors</div> *@
+
+					@* 	<div class="card-body"> *@
+
+					@* 		<div class="row"> *@
+
+					@* 			<!-- SIZE (multiple selection) --> *@
+					@* 			<div class="col-12 col-md-12"> *@
+					@* 				<label class="form-label">Sizes</label> *@
+					@* 				<select id="ProductColors" class="form-control selectpicker" data-live-search="true" data-actions-box="true"> *@
+					@* 					@foreach (var obj in Model.sizes) *@
+					@* 					{ *@
+					@* 						<option value="@obj.ID">@obj.Description</option> *@
+					@* 					} *@
+					@* 				</select> *@
+					@* 				<div id="ProductColorsMessage" class="text-danger fw-normal"></div> *@
+					@* 			</div> *@
+								 
+					@* 		</div> *@
+
+					@* 	</div> *@
+
+					@* </div> *@
+
+
                 </div>
+
 				 
                 <!-- ✅ Fixed footer -->
                 <div class="modal-footer">
@@ -275,4 +410,91 @@
     </div>
 </div>
 
- 
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+
+
+	$('#ProductSizes').on('changed.bs.select', function () {
+
+		let container = $('#SizeVariationsContainer');
+		let selectedOptions = $(this).find('option:selected');
+
+		// Clear container
+		container.empty();
+
+		selectedOptions.each(function () {
+
+			let sizeId = $(this).val();
+			let sizeText = $(this).text();
+
+			let html = `
+				<div class="variation-card" data-size-id="${sizeId}">
+
+					<div class="variation-header p-2">
+						<span>${sizeText}</span>
+
+						<div class="custom-control custom-switch">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="SizeStatus_${sizeId}"
+								   name="Variations[${sizeId}].IsActive"
+								   checked>
+							<label class="custom-control-label" for="SizeStatus_${sizeId}">
+								Active
+							</label>
+						</div>
+					</div>
+
+					<div class="variation-body p-2">
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<label>Sale</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control"
+									   name="Variations[${sizeId}].Sale"
+									   placeholder="0.00">
+							</div>
+
+							<div class="col-md-6 mb-3">
+								<label>Raise</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control"
+									   name="Variations[${sizeId}].Raise"
+									   placeholder="0.00">
+							</div>
+						</div>
+
+						<div class="row mt-3">
+						
+							<div class="col-12 col-md-12">
+
+							@foreach(var obj in Model.currencies){
+
+								<text>
+								
+									<div>@obj.Code</div>
+
+								</text>
+
+							}
+
+							</div>
+						
+						</div>
+
+					</div>
+
+				</div>
+			`;
+
+			container.append(html);
+		});
+	});
+
+
+
+	});
+
+</script>

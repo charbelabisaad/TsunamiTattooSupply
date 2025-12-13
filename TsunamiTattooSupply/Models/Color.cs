@@ -27,6 +27,18 @@ namespace TsunamiTattooSupply.Models
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
 
+		public int CreatedUserID { get; set; }
+
+		public DateTime CreationDate { get; set; }
+
+		public int? EditUserID { get; set; }
+
+		public DateTime? EditDate { get; set; }
+
+		public int? DeletedUserID { get; set; }
+
+		public DateTime? DeletedDate { get; set; }
+
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }
 
