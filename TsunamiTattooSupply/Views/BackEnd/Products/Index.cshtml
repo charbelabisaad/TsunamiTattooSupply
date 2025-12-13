@@ -404,13 +404,102 @@
 
             // Show modal
             modal.show();
+             
+            LoadGroups();
+            LoadSubCategories();
 
-            // Focus on description when modal is shown
-            $(modalEl).on("shown.bs.modal", function () {
-                $("#ProductDescription").focus();
-            });
+            $("#ProductDescription").focus();
+           
+        });
+              
+        $(document).on('change', '#ProductGroupType', function () {
+
+           LoadGroups();
 
         });
+
+        function LoadGroups(){
+
+                let groupTypeId = $('#ProductGroupType').val();
+                let groupSelect = $('#ProductGroup');
+
+                // Reset Group dropdown
+                groupSelect.empty();
+                groupSelect.append('<option value="">-- Select Group --</option>');
+
+                if (!groupTypeId)
+                    return;
+
+                $.ajax({
+                    url: '/Products/GetGroupsByType', // controller action
+                    type: 'GET',
+                    data: { groupTypeId: groupTypeId },
+                    success: function (groups) {
+
+                        if (!groups || groups.length === 0) {
+                            groupSelect.append('<option value="">No groups found</option>');
+                            return;
+                        }
+
+                        $.each(groups, function (i, g) {
+                            groupSelect.append(
+                                `<option value="${g.id}">${g.name}</option>`
+                            );
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Failed to load groups');
+                    }
+                });
+
+        }
+
+        $(document).on('change', '#ProductCategory', function () {
+
+            LoadSubCategories();
+
+        });
+
+        function LoadSubCategories(){
+
+            let categoryId = $('#ProductCategory').val();
+            let subSelect = $('#ProductSubCategory');
+
+            // Reset
+            subSelect.empty();
+
+            if (!categoryId) {
+                subSelect.selectpicker('destroy').selectpicker('render');
+                return;
+            }
+             
+            $.ajax({
+                url: '/Products/GetSubCategoriesByCategory',
+                type: 'GET',
+                data: { categoryId: categoryId },
+                success: function (items) {
+ 
+                    if (!items || items.length === 0) {
+                        subSelect.append(
+                            '<option value="">No sub-categories found</option>'
+                        );
+                    } else {
+                        $.each(items, function (i, sc) {
+                            subSelect.append(
+                                `<option value="${sc.id}">${sc.name}</option>`
+                            );
+                        });
+                    }
+
+                    // IMPORTANT for bootstrap-select
+                    subSelect.selectpicker('destroy').selectpicker('render');
+                },
+                error: function () {
+                    toastr.error('Failed to load sub-categories');
+                }
+            });
+
+        }
 
         $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
         autoApply: true,

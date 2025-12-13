@@ -139,7 +139,26 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}).ToList();
 
 		}
-		 
+
+		[HttpGet]
+		public IActionResult GetGroupsByType(string groupTypeId)
+		{
+			var groups = _dbcontext.Groups
+				.Where(g =>
+					g.DeletedDate == null &&
+					g.TypeID == groupTypeId &&
+					g.StatusID == "A")
+				.OrderBy(g => g.Rank)
+				.Select(g => new
+				{
+					id = g.ID,
+					name = g.Name
+				})
+				.ToList();
+
+			return Json(groups);
+		}
+
 		public List<Category> GetGategories()
 		{
 			return _dbcontext.Categories
@@ -152,6 +171,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
+		[HttpGet]
+		public IActionResult GetSubCategoriesByCategory(int categoryId)
+		{
+			var subCategories = _dbcontext.SubCategories
+				.Where(sc =>
+					sc.DeletedDate == null &&
+					sc.StatusID == "A" &&
+					sc.CategoryID == categoryId)
+				.OrderBy(sc => sc.Rank)
+				.Select(sc => new
+				{
+					id = sc.ID,
+					name = sc.Description
+				})
+				.ToList();
+
+			return Json(subCategories);
+		}
+		 
 		public List<UnitDto> GetUnits()
 		{
 			return _dbcontext.Units
@@ -234,5 +272,84 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}).ToList();
 		}
 
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public IActionResult SaveProduct(ProductSaveDto model)
+		{
+			try
+			{
+				int userId = 1; // TODO: replace with logged user
+				int countryId = _dbcontext.Countries
+					.Where(c => c.Native)
+					.Select(c => c.ID)
+					.First();
+
+				DateTime now = DateTime.Now;
+
+				foreach (var v in model.Variations)
+				{
+					int sizeId = v.Key;
+					var data = v.Value;
+
+					foreach (var p in data.Prices)
+					{
+						int currencyId = p.Key;
+						decimal amount = p.Value;
+
+						decimal amountNet = data.PricesNet != null &&
+											data.PricesNet.ContainsKey(currencyId)
+							? data.PricesNet[currencyId]
+							: amount;
+
+						// 🔹 Check if price exists
+						var price = _dbcontext.Prices.FirstOrDefault(x =>
+							x.ProductID == model.ProductID &&
+							x.SizeID == sizeId &&
+							x.CountryID == countryId &&
+							x.CurrencyID == currencyId &&
+							x.DeletedDate == null);
+
+						if (price == null)
+						{
+							// ➕ INSERT
+							price = new Price
+							{
+								ProductID = model.ProductID,
+								SizeID = sizeId,
+								CountryID = countryId,
+								CurrencyID = currencyId,
+								Amount = amount,
+								AmountNet = amountNet,
+								StatusID = data.IsActive ? "A" : "I",
+								CreatedUserID = userId,
+								CreationDate = now
+							};
+
+							_dbcontext.Prices.Add(price);
+						}
+						else
+						{
+							// ✏ UPDATE
+							price.Amount = amount;
+							price.AmountNet = amountNet;
+							price.StatusID = data.IsActive ? "A" : "I";
+							price.EditUserID = userId;
+							price.EditDate = now;
+						}
+					}
+				}
+
+				_dbcontext.SaveChanges();
+
+				return Json(new { success = true });
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveProduct failed");
+				return Json(new { success = false, message = "Error saving product prices" });
+			}
+		}
+		 
 	}
 }
+
