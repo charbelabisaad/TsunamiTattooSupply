@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Serilog;
-using TsunamiTattooSupply.Data;
-using TsunamiTattooSupply.Interface;
-using TsunamiTattooSupply.Services;
+using TsunamiTattooSupply.Data; 
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,8 +14,7 @@ builder.Host.UseSerilog();
  
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); // <-- Add this;
-builder.Services.AddSingleton<ICurrencyConversionService, CurrencyConversionService>();
+builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); // <-- Add this; 
 
 builder.Services.AddControllersWithViews()
     .AddRazorOptions(options =>

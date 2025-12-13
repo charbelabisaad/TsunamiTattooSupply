@@ -27,6 +27,10 @@ namespace TsunamiTattooSupply.Models
 		public decimal Amount {  get; set; }
 
 		[Required]
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal AmountNet { get; set; }
+
+		[Required]
 		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }

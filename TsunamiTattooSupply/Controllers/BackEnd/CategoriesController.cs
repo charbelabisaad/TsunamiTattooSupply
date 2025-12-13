@@ -27,7 +27,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public IActionResult Index()
 		{
 
-			srvcFilePath fp = new srvcFilePath(_dbContext);
+			FilePathService fp = new FilePathService(_dbContext);
 
 			Global.CategoryWebImagePath = fp.GetFilePath("CTGWBIMG").Description;
 			Global.CategoryBannerImagePath = fp.GetFilePath("CTGBNNRIMG").Description;

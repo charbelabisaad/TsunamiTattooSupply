@@ -4,6 +4,7 @@ using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions; 
 using TsunamiTattooSupply.Models;
+using TsunamiTattooSupply.Services;
 using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
@@ -17,12 +18,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		 
 		public IActionResult Index()
 		{
-			srvcFilePath fp = new srvcFilePath(_dbcontext);
+			FilePathService fps = new FilePathService(_dbcontext);
+			CurrencyService crs = new CurrencyService(_dbcontext);
+			CountryService cts = new CountryService(_dbcontext);
 
-			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
-			Global.ProductOriginalImagePath = fp.GetFilePath("PRDORGIMG").Description;
-			Global.CountriesFlagsImagePath = fp.GetFilePath("CNTRYFLG").Description;
-			 
+			Global.ProductSmallImagePath = fps.GetFilePath("PRDSMLIMG").Description;
+			Global.ProductOriginalImagePath = fps.GetFilePath("PRDORGIMG").Description;
+			Global.CountriesFlagsImagePath = fps.GetFilePath("CNTRYFLG").Description;
+
+			int CountryID = cts.getCountryNative().ID;
+
+			int DefaultCurrencyID = crs.getCurrencyByPriority("DFLT", null).ID;
+			int SecondCurrencyID = crs.getCurrencyByPriority("SCND",CountryID).ID;
+
 			var vm = new ProductPageViewModel
 			{
 				groupTypes = GetGroupTypes(),
@@ -31,24 +39,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				sizes = GetSizes(),
 				colors = GetColors(),
 				countriessales = GetCountriesSales(),
-				currencies = GetCurrencies()
+				currencies = GetCurrencies(),
+				currencyconversion =crs.getCurrencyConversion(DefaultCurrencyID, SecondCurrencyID)
+
 			};
 
 			return View("~/Views/BackEnd/Products/Index.cshtml",vm);
 		}
 
-		//public double GetRate()
-		//{
-
-		//	int DefaultCurrencyID = _dbcontext.Currencies.Where(c => c.Priority == "DFLT")
-		//											 .Select(c => c.ID).FirstOrDefault();
-
-		//	int SecondCurrencyID = _dbcontext.Currencies.Where(c => c.Priority == "SCND")
-		//									 .Select(c => c.ID).FirstOrDefault();
-
-
-
-		//}
+	 
 	 
 		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env)
 		{

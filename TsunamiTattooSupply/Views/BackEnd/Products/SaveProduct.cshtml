@@ -409,101 +409,212 @@
         </div>
     </div>
 </div>
-
 <script>
+
+	const currencies = [
+	@foreach (var obj in Model.currencies)
+	{
+		<text>
+				{
+					id: @obj.ID,
+					code: "@obj.Code"
+				},
+		</text>
+	}
+	];
+
+	const currencyConversion = {
+		operator: '@Model.currencyconversion.Operator',
+		rate: @Model.currencyconversion.Rate
+	};
+
 	document.addEventListener('DOMContentLoaded', function () {
 
+		$('#ProductSizes').on('changed.bs.select', function () {
 
-	$('#ProductSizes').on('changed.bs.select', function () {
+			let container = $('#SizeVariationsContainer');
+			let selectedOptions = $(this).find('option:selected');
 
-		let container = $('#SizeVariationsContainer');
-		let selectedOptions = $(this).find('option:selected');
+			container.empty();
 
-		// Clear container
-		container.empty();
+			selectedOptions.each(function () {
 
-		selectedOptions.each(function () {
+				let sizeId = $(this).val();
+				let sizeText = $(this).text();
 
-			let sizeId = $(this).val();
-			let sizeText = $(this).text();
+				// ✅ FIX: declare & reset here
+				let currencyHtml = '';
 
-			let html = `
-				<div class="variation-card" data-size-id="${sizeId}">
+					currencies.forEach(c => {
 
-					<div class="variation-header p-2">
-						<span>${sizeText}</span>
+						let isDefault = c.code === 'USD';
 
-						<div class="custom-control custom-switch">
-							<input type="checkbox"
-								   class="custom-control-input"
-								   id="SizeStatus_${sizeId}"
-								   name="Variations[${sizeId}].IsActive"
-								   checked>
-							<label class="custom-control-label" for="SizeStatus_${sizeId}">
-								Active
-							</label>
-						</div>
-					</div>
-
-					<div class="variation-body p-2">
-						<div class="row">
-							<div class="col-md-6 mb-3">
-								<label>Sale</label>
+						currencyHtml += `
+							<!-- PRICE -->
+							<div class="col-12 col-md-6 mb-3">
+								<label>Price ${c.code}</label>
 								<input type="number"
 									   step="0.01"
-									   class="form-control"
-									   name="Variations[${sizeId}].Sale"
-									   placeholder="0.00">
+									   class="form-control ${isDefault ? 'default-price' : 'second-price'}"
+									   data-currency="${c.code}"
+									   data-currency-id="${c.id}"
+									   name="Variations[${sizeId}].Prices[${c.id}]"
+									   ${isDefault ? '' : 'readonly'}
+									   placeholder="Enter Price in ${c.code}">
 							</div>
 
-							<div class="col-md-6 mb-3">
-								<label>Raise</label>
+							<!-- PRICE NET -->
+							<div class="col-12 col-md-6 mb-3">
+								<label>Price Net ${c.code}</label>
 								<input type="number"
 									   step="0.01"
-									   class="form-control"
-									   name="Variations[${sizeId}].Raise"
-									   placeholder="0.00">
+									   class="form-control ${isDefault ? 'default-price-net' : 'second-price-net'}"
+									   data-currency="${c.code}"
+									   data-currency-id="${c.id}"
+									   name="Variations[${sizeId}].PricesNet[${c.id}]"
+									   ${isDefault ? '' : 'readonly'}
+									   placeholder="Enter Net Price in ${c.code}">
+							</div>
+						`;
+					});
+
+
+				let html = `
+					<div class="variation-card" data-size-id="${sizeId}">
+
+						<div class="variation-header p-2 d-flex justify-content-between align-items-center">
+							<span>${sizeText}</span>
+
+							<div class="custom-control custom-switch">
+								<input type="checkbox"
+									   class="custom-control-input"
+									   id="SizeStatus_${sizeId}"
+									   name="Variations[${sizeId}].IsActive"
+									   checked>
+								<label class="custom-control-label" for="SizeStatus_${sizeId}">
+									Active
+								</label>
 							</div>
 						</div>
 
-						<div class="row mt-3">
-						
-							<div class="col-12 col-md-12">
+						<div class="variation-body p-2">
 
 								<div class="row">
-									
-									@foreach(var obj in Model.currencies){
+									<div class="col-md-6 mb-3">
+										<label>Sale</label>
+										<input type="number"
+											   step="0.01"
+											   class="form-control sale-input"
+											   value="0"
+											   name="Variations[${sizeId}].Sale"
+											   placeholder="0.00">
+									</div>
 
-										<text>
-								 
-												<div class="col-12 col-md-6">  
-													
-													<label>@obj.Code</label>
-													<input type="number"  class="form-control" placeholder="Enter Price in @obj.Code" />
-													  
-												</div>
-												  
-										</text>
-
-									}
-								 
+									<div class="col-md-6 mb-3">
+										<label>Raise</label>
+										<input type="number"
+											   step="0.01"
+											   class="form-control raise-input"
+											   value="0"
+											   name="Variations[${sizeId}].Raise"
+											   placeholder="0.00">
+									</div>
 								</div>
 
+
+							<div class="row mt-3">
+								${currencyHtml}
 							</div>
-						
+
 						</div>
-
 					</div>
+				`;
 
-				</div>
-			`;
+				container.append(html);
+			});
 
-			container.append(html);
+
+
 		});
-	});
+
+		// ✅ Default price → auto-calc second prices
+		$(document).on('input', '.sale-input, .raise-input, .default-price', function () {
+
+			let card = $(this).closest('.variation-card');
+
+			let price = parseFloat(card.find('.default-price').val()) || 0;
+			let sale  = parseFloat(card.find('.sale-input').val()) || 0;
+			let raise = parseFloat(card.find('.raise-input').val()) || 0;
+
+			let net = price + raise - sale;
+
+			// Set NET price (USD)
+			card.find('.default-price-net').val(net.toFixed(2));
+
+			// 🔁 Also recalc second currencies NET (optional but recommended)
+			let operator = currencyConversion.operator;
+			let rate = parseFloat(currencyConversion.rate);
+
+			card.find('.second-price').each(function () {
+
+				let converted;
+
+				if (operator === 'MUL') {
+					converted = price * rate;
+				} else if (operator === 'DIV') {
+					converted = price / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(converted.toFixed(2));
+			});
+
+			card.find('.second-price-net').each(function () {
+
+				let converted;
+
+				if (operator === 'MUL') {
+					converted = net * rate;
+				} else if (operator === 'DIV') {
+					converted = net / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(converted.toFixed(2));
+			});
+
+		});
 
 
+		$(document).on('input', '.default-price-net', function () {
 
+			let defaultNet = parseFloat($(this).val());
+			if (isNaN(defaultNet)) return;
+
+			let card = $(this).closest('.variation-card');
+
+			let operator = currencyConversion.operator;
+			let rate = parseFloat(currencyConversion.rate);
+
+			card.find('.second-price-net').each(function () {
+
+				let calculated;
+
+				if (operator === 'MUL') {
+					calculated = defaultNet * rate;
+				} else if (operator === 'DIV') {
+					calculated = defaultNet / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(calculated.toFixed(2));
+			});
+		});
+
+		 
 	});
 
 </script>

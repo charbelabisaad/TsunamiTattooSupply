@@ -4,11 +4,11 @@ using TsunamiTattooSupply.Models;
 
 namespace TsunamiTattooSupply.Functions
 {
-	public class srvcFilePath
+	public class FilePathService
 	{
 		private readonly TsunamiDbContext _dbContext;
 
-		public srvcFilePath(TsunamiDbContext dbContext) { 
+		public FilePathService(TsunamiDbContext dbContext) { 
 		
 			_dbContext = dbContext;
 		

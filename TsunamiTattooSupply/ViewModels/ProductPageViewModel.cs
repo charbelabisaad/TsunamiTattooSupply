@@ -12,7 +12,7 @@ namespace TsunamiTattooSupply.ViewModels
 		public List<ColorDto> colors { get; set; }
 		public List<CountryDto> countriessales { get; set; }
 		public List<CurrencyDto> currencies { get; set; }
-		public Decimal GlobalRate { get; set; }
+		public CurrencyConversionDto currencyconversion { get; set; }
  
 	}
 }

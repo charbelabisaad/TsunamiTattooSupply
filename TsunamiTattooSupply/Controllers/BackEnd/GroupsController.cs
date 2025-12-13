@@ -24,7 +24,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public IActionResult Index()
 		{
-			srvcFilePath fp = new srvcFilePath(_dbContext);
+			FilePathService fp = new FilePathService(_dbContext);
 
 			Global.GroupImagePath = fp.GetFilePath("GRPIMG").Description;
 
