@@ -274,65 +274,221 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult SaveProduct(ProductSaveDto model)
+		public IActionResult SaveProduct()
 		{
+			using var transaction = _dbcontext.Database.BeginTransaction();
+
 			try
 			{
-				int userId = 1; // TODO: replace with logged user
+				// ============================
+				// 🔹 CONTEXT DATA
+				// ============================
+				int userId = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
+				DateTime now = DateTime.Now;
+
 				int countryId = _dbcontext.Countries
 					.Where(c => c.Native)
 					.Select(c => c.ID)
 					.First();
 
-				DateTime now = DateTime.Now;
+				var form = Request.Form;
 
-				foreach (var v in model.Variations)
+				int productId = Convert.ToInt32(form["ProductID"]);
+
+				// ============================
+				// 🔹 PRODUCT (INSERT / UPDATE)
+				// ============================
+				Product product;
+
+				if (productId == 0)
 				{
-					int sizeId = v.Key;
-					var data = v.Value;
-
-					foreach (var p in data.Prices)
+					product = new Product
 					{
-						int currencyId = p.Key;
-						decimal amount = p.Value;
+						Code = form["ProductCode"],
+						Name = form["ProductName"],
+						Description = form["ProductDescription"],
+						UnitID = Convert.ToInt32(form["ProductUnit"]),
+						GroupID = Convert.ToInt32(form["ProductGroup"]),
+						VAT = form["ProductVAT"] == "on",
+						Feature = form["ProductFeature"] == "on",
+						NewArrival = form["ProductNewArrival"] == "on",
+						NewArrivalDateExpiryDate = string.IsNullOrEmpty(form["ProductExpiryDate"])
+							? null
+							: DateTime.Parse(form["ProductExpiryDate"]),
+						Warranty = form["ProductWarranty"] == "on",
+						WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
+							? 0
+							: Convert.ToInt32(form["ProductWarrantyMonths"]),
+						StatusID = form["ProductStatusID"],
+						CreatedUserID = userId,
+						CreationDate = now
+					};
 
-						decimal amountNet = data.PricesNet != null &&
-											data.PricesNet.ContainsKey(currencyId)
-							? data.PricesNet[currencyId]
-							: amount;
+					_dbcontext.Products.Add(product);
+					_dbcontext.SaveChanges(); // to get ProductID
+					productId = product.ID;
+				}
+				else
+				{
+					product = _dbcontext.Products.First(x => x.ID == productId);
 
-						// 🔹 Check if price exists
-						var price = _dbcontext.Prices.FirstOrDefault(x =>
-							x.ProductID == model.ProductID &&
-							x.SizeID == sizeId &&
-							x.CountryID == countryId &&
-							x.CurrencyID == currencyId &&
-							x.DeletedDate == null);
+					product.Code = form["ProductCode"];
+					product.Name = form["ProductName"];
+					product.Description = form["ProductDescription"];
+					product.UnitID = Convert.ToInt32(form["ProductUnit"]);
+					product.GroupID = Convert.ToInt32(form["ProductGroup"]);
+					product.VAT = form["ProductVAT"] == "on";
+					product.Feature = form["ProductFeature"] == "on";
+					product.NewArrival = form["ProductNewArrival"] == "on";
+					product.NewArrivalDateExpiryDate = string.IsNullOrEmpty(form["ProductExpiryDate"])
+						? null
+						: DateTime.Parse(form["ProductExpiryDate"]);
+					product.Warranty = form["ProductWarranty"] == "on";
+					product.WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
+						? 0
+						: Convert.ToInt32(form["ProductWarrantyMonths"]);
+					product.StatusID = form["ProductStatusID"];
+					product.EditUserID = userId;
+					product.EditDate = now;
+				}
+
+				// ============================
+				// 🔹 PRODUCT SUB CATEGORIES
+				// ============================
+				var existingSubCats = _dbcontext.ProductsSubCategories
+					.Where(x => x.ProductID == productId && x.DeletedDate == null)
+					.ToList();
+
+				var postedSubCatIds = form.Keys
+					.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
+					.Select(k => Convert.ToInt32(form[k]))
+					.ToList();
+
+				// 🔸 Soft delete removed
+				foreach (var sc in existingSubCats)
+				{
+					if (!postedSubCatIds.Contains(sc.SubCategoryID))
+					{
+						sc.StatusID = "I";
+						sc.DeletedUserID = userId;
+						sc.DeletedDate = now;
+					}
+				}
+
+				// 🔸 Insert new
+				foreach (var subCatId in postedSubCatIds)
+				{
+					if (!existingSubCats.Any(x => x.SubCategoryID == subCatId))
+					{
+						_dbcontext.ProductsSubCategories.Add(new ProductSubCategory
+						{
+							ProductID = productId,
+							SubCategoryID = subCatId,
+							StatusID = "A",
+							CreatedUserID = userId,
+							CreationDate = now
+						});
+					}
+				}
+
+				// ============================
+				// 🔹 PRODUCT SIZES
+				// ============================
+				var sizeIds = form.Keys
+					.Where(k => k.StartsWith("Variations[") && k.EndsWith("].Sale"))
+					.Select(k => int.Parse(k.Split('[', ']')[1]))
+					.Distinct()
+					.ToList();
+
+				var existingSizes = _dbcontext.ProductsSizes
+					.Where(x => x.ProductID == productId)
+					.ToList();
+
+				foreach (var ps in existingSizes)
+				{
+					if (!sizeIds.Contains(ps.SizeID))
+					{
+						ps.StatusID = "I";
+						ps.DeletedUserID = userId;
+						ps.DeletedDate = now;
+					}
+				}
+
+				foreach (var sizeId in sizeIds)
+				{
+					var sale = decimal.Parse(form[$"Variations[{sizeId}].Sale"]);
+					var raise = decimal.Parse(form[$"Variations[{sizeId}].Raise"]);
+					var isActive = form[$"Variations[{sizeId}].IsActive"] == "on";
+
+					var ps = existingSizes.FirstOrDefault(x => x.SizeID == sizeId);
+
+					if (ps == null)
+					{
+						_dbcontext.ProductsSizes.Add(new ProductSize
+						{
+							ProductID = productId,
+							SizeID = sizeId,
+							Sale = sale,
+							Raise = raise,
+							StatusID = isActive ? "A" : "I",
+							CreatedUserID = userId,
+							CreationDate = now
+						});
+					}
+					else
+					{
+						ps.Sale = sale;
+						ps.Raise = raise;
+						ps.StatusID = isActive ? "A" : "I";
+						ps.EditUserID = userId;
+						ps.EditDate = now;
+					}
+				}
+
+				// ============================
+				// 🔹 PRICES
+				// ============================
+				var existingPrices = _dbcontext.Prices
+					.Where(p => p.ProductID == productId && p.CountryID == countryId)
+					.ToList();
+
+				foreach (var sizeId in sizeIds)
+				{
+					var priceKeys = form.Keys
+						.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
+						.ToList();
+
+					foreach (var key in priceKeys)
+					{
+						int currencyId = int.Parse(key.Split('[', ']')[3]);
+						decimal amount = decimal.Parse(form[key]);
+
+						decimal amountNet = decimal.Parse(
+							form[$"Variations[{sizeId}].PricesNet[{currencyId}]"]);
+
+						var price = existingPrices.FirstOrDefault(x =>
+							x.SizeID == sizeId && x.CurrencyID == currencyId);
 
 						if (price == null)
 						{
-							// ➕ INSERT
-							price = new Price
+							_dbcontext.Prices.Add(new Price
 							{
-								ProductID = model.ProductID,
+								ProductID = productId,
 								SizeID = sizeId,
 								CountryID = countryId,
 								CurrencyID = currencyId,
 								Amount = amount,
 								AmountNet = amountNet,
-								StatusID = data.IsActive ? "A" : "I",
+								StatusID = "A",
 								CreatedUserID = userId,
 								CreationDate = now
-							};
-
-							_dbcontext.Prices.Add(price);
+							});
 						}
 						else
 						{
-							// ✏ UPDATE
 							price.Amount = amount;
 							price.AmountNet = amountNet;
-							price.StatusID = data.IsActive ? "A" : "I";
+							price.StatusID = "A";
 							price.EditUserID = userId;
 							price.EditDate = now;
 						}
@@ -340,16 +496,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 
 				_dbcontext.SaveChanges();
+				transaction.Commit();
 
 				return Json(new { success = true });
 			}
 			catch (Exception ex)
 			{
+				transaction.Rollback();
 				_logger.LogError(ex, "SaveProduct failed");
-				return Json(new { success = false, message = "Error saving product prices" });
+				return Json(new { success = false, message = "Save failed" });
 			}
 		}
-		 
+
 	}
 }
 

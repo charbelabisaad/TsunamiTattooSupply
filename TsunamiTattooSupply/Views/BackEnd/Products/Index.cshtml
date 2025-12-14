@@ -460,46 +460,139 @@
 
         });
 
-        function LoadSubCategories(){
+        function LoadSubCategories() {
 
             let categoryId = $('#ProductCategory').val();
-            let subSelect = $('#ProductSubCategory');
+            let subSelect  = $('#ProductSubCategory');
 
             // Reset
             subSelect.empty();
 
             if (!categoryId) {
                 subSelect.selectpicker('destroy').selectpicker('render');
+                $('#SubCategoryTags').empty();
                 return;
             }
-             
+
             $.ajax({
-                url: '/Products/GetSubCategoriesByCategory',
+                    url: '@Url.Action( "GetSubCategoriesByCategory","Products")',
                 type: 'GET',
                 data: { categoryId: categoryId },
                 success: function (items) {
- 
+
                     if (!items || items.length === 0) {
-                        subSelect.append(
-                            '<option value="">No sub-categories found</option>'
-                        );
+                        subSelect.append('<option value="">No sub-categories found</option>');
                     } else {
                         $.each(items, function (i, sc) {
-                            subSelect.append(
-                                `<option value="${sc.id}">${sc.name}</option>`
-                            );
+                            subSelect.append(`<option value="${sc.id}">${sc.name}</option>`);
                         });
                     }
 
-                    // IMPORTANT for bootstrap-select
+                    // 🔁 Rebuild bootstrap-select
                     subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // 🔥 RESTORE previously selected subcategories
+                    let saved = selectedSubCategoriesByCategory[categoryId] || [];
+
+                    if (saved.length > 0) {
+                        subSelect.selectpicker('val', saved);
+                        renderSubCategoryTags(categoryId);
+                    }
                 },
                 error: function () {
                     toastr.error('Failed to load sub-categories');
                 }
             });
-
         }
+
+
+            // ================================
+              // 🔹 Globals
+              // ================================
+              let selectedSubCategoriesByCategory = {};
+
+              // ================================
+              // 🔹 Modal logic
+              // ================================
+                      // ================================
+        // 🔹 SubCategory change (GLOBAL)
+        // ================================
+        $(document).on('changed.bs.select', '#ProductSubCategory', function () {
+
+            let $sub = $(this);
+            let categoryId = $('#ProductCategory').val();
+
+            if (!categoryId) return;
+
+            // Current selection
+            let current = $sub.val() || [];
+
+            // Existing memory
+            let stored = selectedSubCategoriesByCategory[categoryId] || [];
+
+            // 🔥 Merge (bootstrap-select safe)
+            let merged = Array.from(new Set([...stored, ...current]));
+
+            // 🔥 Handle removals
+            merged = merged.filter(id =>
+                $sub.find(`option[value="${id}"]`).prop('selected')
+            );
+
+            // Save
+            selectedSubCategoriesByCategory[categoryId] = merged;
+
+            // Render tags
+            renderSubCategoryTags(categoryId);
+        });
+
+
+              // ================================
+              // 🔹 Remove tag handler
+              // ================================
+              $(document).on('click', '.remove-tag', function () {
+
+                  let id = $(this).data('id');
+                  let categoryId = $('#ProductCategory').val();
+
+                  // Remove from stored selections
+                  selectedSubCategoriesByCategory[categoryId] =
+                      (selectedSubCategoriesByCategory[categoryId] || []).filter(x => x != id);
+
+                  // Update selectpicker
+                  $('#ProductSubCategory')
+                      .selectpicker('val', selectedSubCategoriesByCategory[categoryId])
+                      .trigger('changed.bs.select');
+              });
+
+              // ================================
+              // 🔹 Render tags
+              // ================================
+                function renderSubCategoryTags(categoryId) {
+
+                    let $sub = $('#ProductSubCategory');
+                    let container = $('#SubCategoryTags').empty();
+
+                    let values = selectedSubCategoriesByCategory[categoryId] || [];
+
+                    values.forEach(function (id) {
+
+                        let text = $sub.find(`option[value="${id}"]`).text();
+
+                        container.append(`
+                            <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1"
+                                  style="font-size:13px;">
+                                ${text}
+                                <input type="hidden" name="SubCategories[${id}].ID" value="${id}">
+                                <input type="hidden" name="SubCategories[${id}].Description" value="${text}">
+                                <i class="fas fa-times ml-2 remove-tag"
+                                   data-id="${id}"
+                                   style="cursor:pointer;"></i>
+                            </span>
+                        `);
+                    });
+                }
+
+
 
         $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
         autoApply: true,
