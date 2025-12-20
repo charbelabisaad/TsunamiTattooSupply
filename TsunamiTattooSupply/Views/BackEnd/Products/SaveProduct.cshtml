@@ -1,7 +1,53 @@
 ﻿
+<style>
+ 
+	.color-images-scroll {
+		display: flex;
+		gap: 12px;
+		overflow-x: auto;
+		overflow-y: hidden;
+		 
+		scroll-behavior: smooth;
+	}
 
+	.color-images-scroll::-webkit-scrollbar {
+		height: 6px;
+	}
 
-<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true">
+	.color-images-scroll::-webkit-scrollbar-thumb {
+		background-color: #c1c1c1;
+		border-radius: 10px;
+	}
+
+	.color-images-scroll::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+	/* ---------- IMAGE ITEM ---------- */
+	.color-image-item {
+		position: relative;
+		overflow: hidden;
+		border-radius: 6px;
+	}
+
+	/* ---------- OVERLAY ---------- */
+	.color-image-item .image-overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(0,0,0,0.55);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.25s ease;
+	}
+
+	/* ---------- SHOW ON HOVER ---------- */
+	.color-image-item:hover .image-overlay {
+		opacity: 1;
+		visibility: visible;
+	}
+ 
+</style>
+
+<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true" style="z-index:2000">
 	<div class="modal-dialog modal-dialog-centered modal-xl">
 		<div class="modal-content bg-transparent border-0">
 			<div class="modal-body d-flex justify-content-center align-products-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
@@ -460,8 +506,7 @@
 		// 2️⃣ ADD missing cards
 		// ==========================
 		selectedIds.forEach(sizeId => {
-
-
+			 
 			if (container.find(`.variation-card[data-size-id="${sizeId}"]`).length)
 				return;
 
@@ -500,7 +545,7 @@
 
 			let html = `
 				<div class="variation-card" data-size-id="${sizeId}">
-					<div class="variation-header p-2 d-flex justify-content-between align-items-center">
+					<div class="variation-header p-2 d-flex justify-content-between align-items-center" style="background-color:#ecebeb">
 						<span>${sizeText}</span>
 
 						<div class="custom-control custom-switch">
@@ -627,7 +672,10 @@
 				$(this).val(calculated.toFixed(2));
 			});
 		});
-			$(document).on('changed.bs.select', '#ProductColors', function () {
+
+	const colorImagesBuffer = {};
+
+	$(document).on('changed.bs.select', '#ProductColors', function () {
 
 		let container   = $('#ColorVariationsContainer');
 		let selectedIds = $(this).val() || [];
@@ -656,141 +704,238 @@
 			let colorCode = opt.data('code');
 
 			let html = `
-			<div class="card mb-3 color-card shadow-sm border-0" data-color-id="${colorId}">
+		<div class="variation-card color-card" data-color-id="${colorId}" style="overflow:hidden">
 
-				<div class="card-header bg-light py-2">
-					<div class="row align-items-center">
+		<!-- HEADER -->
+		<div class="variation-header p-2 border-bottom" style="background-color:#ecebeb">
+			<div class="container-fluid px-2">
+				<div class="row align-items-center w-100">
 
-						<div class="col-12 col-md-6">
-							<div class="d-flex align-items-center">
-								<div style="
-									width:26px;
-									height:26px;
-									background-color:#${colorCode};
-									border:1px solid #ccc;
-									border-radius:4px;
-									margin-right:10px;">
-								</div>
-								<strong>${colorName}</strong>
+					<div class="col-12 col-md-6">
+						<div class="d-flex align-items-center">
+							<div style="
+								width:26px;
+								height:26px;
+								background-color:#${colorCode};
+								border:1px solid #ccc;
+								border-radius:4px;
+								margin-right:10px;">
 							</div>
+							<strong>${colorName}</strong>
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 text-md-right mt-2 mt-md-0">
+
+						<div class="custom-control custom-switch d-inline-block align-middle">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="ColorCover_${colorId}"
+								   name="ProductColorsMeta[${colorId}].IsCover">
+							<label class="custom-control-label"
+								   for="ColorCover_${colorId}">
+								Is Cover
+							</label>
 						</div>
 
-						<div class="col-12 col-md-6 text-right">
+						<div class="custom-control custom-switch d-inline-block align-middle ml-3">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="ColorActive_${colorId}"
+								   name="ProductColorsMeta[${colorId}].IsActive"
+								   checked>
+							<label class="custom-control-label"
+								   for="ColorActive_${colorId}">
+								Active
+							</label>
+						</div>
 
-							<div class="custom-control custom-switch d-inline-block align-middle">
-								<input type="checkbox"
-									   class="custom-control-input"
-									   id="ColorCover_${colorId}"
-									   name="ProductColorsMeta[${colorId}].IsCover">
-								<label class="custom-control-label"
-									   for="ColorCover_${colorId}">
-									Is Cover
-								</label>
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<!-- BODY -->
+		<div class="variation-body p-3">
+			<div class="row">
+
+				<!-- IMAGE BOX -->
+				<div class="col-12 col-md-2 text-center">
+					<div style="width:200px; margin:auto;">
+
+						<div class="image-box-wrapper position-relative"
+							 style="width:200px; height:200px;">
+
+							<div class="image-box border rounded bg-white shadow-sm
+										d-flex align-items-center justify-content-center
+										position-relative"
+								 style="width:100%; height:100%; cursor:pointer;">
+
+								<input type="file"
+									   class="color-image-input"
+									   name="ProductColorImages[${colorId}][]"
+									   accept="image/*"
+									   style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+
+								<span class="placeholder-icon text-muted" style="font-size:46px;">
+									<i class="fas fa-image"></i>
+								</span>
+
+								<img class="color-image-preview d-none"
+									 style="width:100%; height:100%; object-fit:contain;">
 							</div>
 
-							<div class="custom-control custom-switch d-inline-block align-middle ml-3">
-								<input type="checkbox"
-									   class="custom-control-input"
-									   id="ColorActive_${colorId}"
-									   name="ProductColorsMeta[${colorId}].IsActive"
-									   checked>
-								<label class="custom-control-label"
-									   for="ColorActive_${colorId}">
-									Active
-								</label>
+							<!-- Overlay -->
+							<div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+								<div class="d-flex gap-4">
+									<button type="button" class="overlay-btn btn-clear" title="Clear">
+										<i class="fas fa-times"></i>
+									</button>
+									<button type="button" class="overlay-btn btn-view" title="View">
+										<i class="fas fa-eye"></i>
+									</button>
+									<button type="button" class="overlay-btn btn-browse" title="Browse">
+										<i class="fas fa-paperclip"></i>
+									</button>
+								</div>
 							</div>
 
+						</div>
+
+						<div class="text-center mt-2">
+							<button type="button" class="btn btn-sm btn-primary w-100 btn-add-color-image">
+								<i class="fas fa-plus"></i> Add Image
+							</button>
 						</div>
 
 					</div>
 				</div>
 
-				<div class="card-body">
-					<div class="row">
-
-						<!-- IMAGE BOX -->
-						<div class="col-12 col-md-4 text-center">
-
-							<div style="width:200px; height:230px;">
-
-							<div class="image-box-wrapper position-relative" style="width:200px; height:200px;">
-
-								<div class="image-box border rounded bg-white shadow-sm
-											d-flex align-items-center justify-content-center
-											position-relative"
-									 style="width:100%; height:100%; cursor:pointer;">
-
-									<input type="file"
-										   class="color-image-input"
-										   name="ProductColorImages[${colorId}][]"
-										   accept="image/*"
-										   style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
-
-									<span class="placeholder-icon text-muted" style="font-size:46px;">
-										<i class="fas fa-image"></i>
-									</span>
-
-									<img class="color-image-preview d-none"
-										 style="width:100%; height:100%; object-fit:contain;">
-								</div>
-
-								<!-- Overlay -->
-								<div class="image-overlay d-flex flex-column justify-content-center align-items-center">
-									<div class="d-flex gap-4">
-										<button type="button" class="overlay-btn btn-clear" title="Clear">
-											<i class="fas fa-times"></i>
-										</button>
-										<button type="button" class="overlay-btn btn-view" title="View">
-											<i class="fas fa-eye"></i>
-										</button>
-										<button type="button" class="overlay-btn btn-browse" title="Browse">
-											<i class="fas fa-paperclip"></i>
-										</button>
-									</div>
-								</div>
- 
-							</div>
-							 
-							<div class="text-center mt-2">
-
-									<button id="btnUploadProductColorImage${colorId}" name="btnUploadProductColorImage$${colorId}" class="btn btn-sm btn-primary w-100"><i class="fas fa-plus"> Add Image </i></div>
-
-							</div>
-
-							</div>
-							 
-						</div>
-
-						<div class="col-12 col-md-8">
-							<div id="dProductColorImagesList${colorId}"></div>
-						</div>
-
-					</div>
+				<!-- IMAGE LIST -->
+				<div class="col-12 col-md-10">
+					<div id="dProductColorImagesList${colorId}" class="color-images-scroll p-2"></div>
 				</div>
 
 			</div>
+		</div>
+
+	</div>
 			`;
 
 			container.append(html);
 		});
 	});
 
+	$(document).on('click', '.btn-add-color-image', function () {
+
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
+		let $list   = $('#dProductColorImagesList' + colorId);
+
+		let files = colorImagesBuffer[colorId] || [];
+
+		if (!files.length) {
+			toastr.warning('Please browse images first');
+			return;
+		}
+
+		files.forEach(file => {
+
+			let reader = new FileReader();
+
+			reader.onload = function (e) {
+
+				let imageHtml = `
+				<div class="color-image-item position-relative"
+					 style="min-width:200px; height:200px;">
+
+					<img src="${e.target.result}"
+						 class="img-fluid rounded"
+						 style="width:100%; height:100%; object-fit:contain; background:#fff; border:1px solid #ccc;">
+
+					<div class="image-overlay d-flex justify-content-center align-items-center">
+						<button type="button" class="overlay-btn btn-view">
+							<i class="fas fa-eye"></i>
+						</button>
+						<button type="button" class="overlay-btn btn-clear">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+				</div>
+				`;
+
+				$list.append(imageHtml);
+			};
+
+			reader.readAsDataURL(file);
+
+
+		});
+
+			// 🔥 clear buffer after append
+			colorImagesBuffer[colorId] = [];
+
+			// ============================
+				// 🔥 CLEAR PREVIEW UI
+				// ============================
+				let $box = $card.find('.image-box');
+				$box.find('.color-image-preview')
+					.attr('src', '')
+					.addClass('d-none');
+
+				$box.find('.placeholder-icon').removeClass('d-none');
+
+	});
+
+
 	$(document).on('change', '.color-image-input', function () {
 
-		let input = this;
-		let box = $(this).closest('.image-box');
-		let img = box.find('.color-image-preview');
-		let icon = box.find('.placeholder-icon');
+		let input   = this;
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
 
-		if (input.files && input.files[0]) {
-			let reader = new FileReader();
-			reader.onload = e => {
-				img.attr('src', e.target.result).removeClass('d-none');
-				icon.addClass('d-none');
-			};
-			reader.readAsDataURL(input.files[0]);
+		if (!input.files || !input.files.length) return;
+
+		// ----------------------------
+		// 1️⃣ BUFFER FILES
+		// ----------------------------
+		if (!colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] = [];
 		}
+
+		Array.from(input.files).forEach(file => {
+			colorImagesBuffer[colorId].push(file);
+		});
+
+		// ----------------------------
+		// 2️⃣ PREVIEW FIRST IMAGE
+		// ----------------------------
+		let file = input.files[0];
+		let reader = new FileReader();
+
+		reader.onload = function (e) {
+
+			let $box = $card.find('.image-box');
+			let $img = $box.find('.color-image-preview');
+			let $icon = $box.find('.placeholder-icon');
+
+			$img.attr('src', e.target.result)
+				.removeClass('d-none');
+
+			$icon.addClass('d-none');
+		};
+
+		reader.readAsDataURL(file);
+
+		// ----------------------------
+		// 3️⃣ RESET INPUT (important)
+		// ----------------------------
+		input.value = '';
+
+		toastr.success('Image selected. Click "Add Image".');
 	});
+
 
 	$(document).on('click', '.btn-clear', function () {
 
@@ -800,12 +945,17 @@
 			   .attr('src', '')
 			   .addClass('d-none');
 		wrapper.find('.placeholder-icon').removeClass('d-none');
+
 	});
 
-	$(document).on('click', '.btn-browse', function () {
-		$(this).closest('.image-box-wrapper')
-			   .find('.color-image-input')
-			   .trigger('click');
+	$(document).on('click', '.btn-browse', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		let $card = $(this).closest('.color-card');
+		let $input = $card.find('.color-image-input').first();
+
+		$input.trigger('click');
 	});
 
 	$(document).on('click', '.btn-view', function () {
@@ -819,7 +969,19 @@
 		$('#imageProductViewModal').modal('show');
 	});
 
-	
+
+	$(document).on('click', '.color-image-item .btn-view', function () {
+		let src = $(this).closest('.color-image-item').find('img').attr('src');
+		if (!src) return;
+
+		$('#imageProductViewModalImg').attr('src', src);
+		$('#imageProductViewModal').modal('show');
+	});
+
+	$(document).on('click', '.color-image-item .btn-clear', function () {
+		$(this).closest('.color-image-item').remove();
+	});
+
 	$(document).on("click", "#btnSaveProduct", function () {
 
 			// -------------------------------
