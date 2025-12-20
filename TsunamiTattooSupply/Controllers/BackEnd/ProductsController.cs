@@ -93,6 +93,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Select(p => new ProductDto
 					{
 						ID = p.ID,
+						Code = p.Code,
 						ImagePath = null,
 						Image = null,
 						Name = p.Name,
@@ -100,6 +101,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						UnitID = p.Unit.ID,
 						UnitShortDescription = p.Unit.ShortDescription,
 						UnitLongDescription = p.Unit.LongDescription,
+						GroupTypeID = p.Group.GroupType.ID,
 						GroupID = p.Group.ID,
 						GroupDescription = p.Group.Name,
 						VAT = p.VAT,
@@ -280,26 +282,58 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			try
 			{
-				// ============================
+			
+				// =====================================================
 				// 🔹 CONTEXT DATA
-				// ============================
+				// =====================================================
 				int userId = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
-				DateTime now = DateTime.Now;
-
+				DateTime now = DateTime.UtcNow;
+				var form = Request.Form;
+				 
 				int countryId = _dbcontext.Countries
 					.Where(c => c.Native)
 					.Select(c => c.ID)
 					.First();
 
-				var form = Request.Form;
-
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// ============================
-				// 🔹 PRODUCT (INSERT / UPDATE)
-				// ============================
-				Product product;
+				// =====================================================
+				// 🔴 REQUIRED SERVER-SIDE VALIDATION
+				// =====================================================
+				if (string.IsNullOrWhiteSpace(form["ProductCode"]))
+					return Json(new { success = false, message = "Product Code is required" });
 
+				if (string.IsNullOrWhiteSpace(form["ProductName"]))
+					return Json(new { success = false, message = "Product Name is required" });
+
+				// =====================================================
+				// 🔹 SUB CATEGORIES (REQUIRED)
+				// =====================================================
+				var postedSubCatIds = form.Keys
+					.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
+					.Select(k => Convert.ToInt32(form[k]))
+					.ToList();
+
+				if (!postedSubCatIds.Any())
+					return Json(new { success = false, message = "At least one Sub Category is required" });
+
+				// =====================================================
+				// 🔹 SIZES (REQUIRED)
+				// =====================================================
+				var sizeIds = form.Keys
+					.Where(k => k.StartsWith("Variations[") && k.EndsWith("].Sale"))
+					.Select(k => int.Parse(k.Split('[', ']')[1]))
+					.Distinct()
+					.ToList();
+
+				if (!sizeIds.Any())
+					return Json(new { success = false, message = "At least one Size is required" });
+
+				// =====================================================
+				// 🔹 PRODUCT (INSERT / UPDATE)
+				// =====================================================
+				Product product;
+				 
 				if (productId == 0)
 				{
 					product = new Product
@@ -312,9 +346,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						VAT = form["ProductVAT"] == "on",
 						Feature = form["ProductFeature"] == "on",
 						NewArrival = form["ProductNewArrival"] == "on",
-						NewArrivalDateExpiryDate = string.IsNullOrEmpty(form["ProductExpiryDate"])
-							? null
-							: DateTime.Parse(form["ProductExpiryDate"]),
+						NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]),
 						Warranty = form["ProductWarranty"] == "on",
 						WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
 							? 0
@@ -325,7 +357,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					};
 
 					_dbcontext.Products.Add(product);
-					_dbcontext.SaveChanges(); // to get ProductID
+					_dbcontext.SaveChanges();
 					productId = product.ID;
 				}
 				else
@@ -340,9 +372,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					product.VAT = form["ProductVAT"] == "on";
 					product.Feature = form["ProductFeature"] == "on";
 					product.NewArrival = form["ProductNewArrival"] == "on";
-					product.NewArrivalDateExpiryDate = string.IsNullOrEmpty(form["ProductExpiryDate"])
-						? null
-						: DateTime.Parse(form["ProductExpiryDate"]);
+					product.NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]);
 					product.Warranty = form["ProductWarranty"] == "on";
 					product.WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
 						? 0
@@ -352,30 +382,22 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					product.EditDate = now;
 				}
 
-				// ============================
-				// 🔹 PRODUCT SUB CATEGORIES
-				// ============================
+				// =====================================================
+				// 🔹 PRODUCT SUB CATEGORIES (SOFT DELETE)
+				// =====================================================
 				var existingSubCats = _dbcontext.ProductsSubCategories
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
-				var postedSubCatIds = form.Keys
-					.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
-					.Select(k => Convert.ToInt32(form[k]))
-					.ToList();
-
-				// 🔸 Soft delete removed
 				foreach (var sc in existingSubCats)
 				{
 					if (!postedSubCatIds.Contains(sc.SubCategoryID))
 					{
-						sc.StatusID = "I";
 						sc.DeletedUserID = userId;
 						sc.DeletedDate = now;
 					}
 				}
 
-				// 🔸 Insert new
 				foreach (var subCatId in postedSubCatIds)
 				{
 					if (!existingSubCats.Any(x => x.SubCategoryID == subCatId))
@@ -391,24 +413,17 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
-				// ============================
-				// 🔹 PRODUCT SIZES
-				// ============================
-				var sizeIds = form.Keys
-					.Where(k => k.StartsWith("Variations[") && k.EndsWith("].Sale"))
-					.Select(k => int.Parse(k.Split('[', ']')[1]))
-					.Distinct()
-					.ToList();
-
+				// =====================================================
+				// 🔹 PRODUCT SIZES (SOFT DELETE)
+				// =====================================================
 				var existingSizes = _dbcontext.ProductsSizes
-					.Where(x => x.ProductID == productId)
+					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
 				foreach (var ps in existingSizes)
 				{
 					if (!sizeIds.Contains(ps.SizeID))
 					{
-						ps.StatusID = "I";
 						ps.DeletedUserID = userId;
 						ps.DeletedDate = now;
 					}
@@ -416,9 +431,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				foreach (var sizeId in sizeIds)
 				{
-					var sale = decimal.Parse(form[$"Variations[{sizeId}].Sale"]);
-					var raise = decimal.Parse(form[$"Variations[{sizeId}].Raise"]);
-					var isActive = form[$"Variations[{sizeId}].IsActive"] == "on";
+					decimal sale = decimal.Parse(form[$"Variations[{sizeId}].Sale"]);
+					decimal raise = decimal.Parse(form[$"Variations[{sizeId}].Raise"]);
+					bool isActive = form[$"Variations[{sizeId}].IsActive"] == "on";
 
 					var ps = existingSizes.FirstOrDefault(x => x.SizeID == sizeId);
 
@@ -445,12 +460,44 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
-				// ============================
-				// 🔹 PRICES
-				// ============================
+				// =====================================================
+				// 🔹 PRICES (SOFT DELETE)
+				// =====================================================
 				var existingPrices = _dbcontext.Prices
-					.Where(p => p.ProductID == productId && p.CountryID == countryId)
+					.Where(p =>
+						p.ProductID == productId &&
+						p.CountryID == countryId &&
+						p.DeletedDate == null)
 					.ToList();
+
+				var postedPrices = new List<(int SizeID, int CurrencyID)>();
+
+				foreach (var sizeId in sizeIds)
+				{
+					var priceKeys = form.Keys
+						.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
+						.ToList();
+
+					foreach (var key in priceKeys)
+					{
+						int currencyId = int.Parse(key.Split('[', ']')[3]);
+						postedPrices.Add((sizeId, currencyId));
+					}
+				}
+
+				foreach (var price in existingPrices)
+				{
+					bool sizeRemoved = !sizeIds.Contains(price.SizeID);
+					bool priceRemoved = !postedPrices.Any(p =>
+						p.SizeID == price.SizeID &&
+						p.CurrencyID == price.CurrencyID);
+
+					if (sizeRemoved || priceRemoved)
+					{
+						price.DeletedUserID = userId;
+						price.DeletedDate = now;
+					}
+				}
 
 				foreach (var sizeId in sizeIds)
 				{
@@ -462,12 +509,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						int currencyId = int.Parse(key.Split('[', ']')[3]);
 						decimal amount = decimal.Parse(form[key]);
-
-						decimal amountNet = decimal.Parse(
-							form[$"Variations[{sizeId}].PricesNet[{currencyId}]"]);
+						decimal amountNet = decimal.Parse(form[$"Variations[{sizeId}].PricesNet[{currencyId}]"]);
 
 						var price = existingPrices.FirstOrDefault(x =>
-							x.SizeID == sizeId && x.CurrencyID == currencyId);
+							x.SizeID == sizeId &&
+							x.CurrencyID == currencyId);
 
 						if (price == null)
 						{
@@ -488,7 +534,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						{
 							price.Amount = amount;
 							price.AmountNet = amountNet;
-							price.StatusID = "A";
 							price.EditUserID = userId;
 							price.EditDate = now;
 						}
@@ -506,6 +551,73 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				_logger.LogError(ex, "SaveProduct failed");
 				return Json(new { success = false, message = "Save failed" });
 			}
+		}
+
+		[HttpGet]
+		public IActionResult GetProductEditExtras(int productId)
+		{
+			// ===============================
+			// SUB CATEGORIES (ID + NAME)
+			// ===============================
+			var subCats = _dbcontext.ProductsSubCategories
+				.AsNoTracking()
+				.Where(ps =>
+					ps.ProductID == productId &&
+					ps.StatusID == "A" &&
+					ps.DeletedDate == null)
+				.Select(ps => new
+				{
+					id = ps.SubCategoryID,
+					name = ps.SubCategory.Description,
+					categoryId = ps.SubCategory.CategoryID
+				})
+				.ToList();
+
+			int? categoryId = subCats.Any()
+				? subCats.First().categoryId
+				: null;
+
+			// ===============================
+			// SIZES
+			// ===============================
+			var sizes = _dbcontext.Prices
+				.AsNoTracking()
+				.Where(p =>
+					p.ProductID == productId &&
+					p.StatusID == "A" &&
+					p.DeletedDate == null)
+				.GroupBy(p => p.SizeID)
+				.Select(g => new
+				{
+					id = g.Key,
+					prices = g.Select(p => new
+					{
+						currencyID = p.CurrencyID,
+						price = p.Amount,
+						priceNet = p.AmountNet
+					}).ToList()
+				})
+				.ToList();
+
+			return Json(new
+			{
+				success = true,
+				categoryId,
+				subCategories = subCats, // 🔥 OBJECTS, NOT IDS
+				sizes
+			});
+		}
+		 
+		private DateTime? ParseUtcDate(string value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+				return null;
+
+			// If your UI sends only a date (yyyy-MM-dd), this is enough.
+			var dt = DateTime.Parse(value);
+
+			// PostgreSQL timestamptz requires UTC kind
+			return DateTime.SpecifyKind(dt, DateTimeKind.Utc);
 		}
 
 	}

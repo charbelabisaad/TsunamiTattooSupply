@@ -39,7 +39,7 @@
 
 				<div class="modal-body flex-grow-1">
 
-					<input id="ProductID" type="hidden" value="0" />
+					<input id="ProductID" name="ProductID" type="hidden" value="0" />
 
 					<div class="card">
 
@@ -52,21 +52,21 @@
 								<!-- CODE -->
 								<div class="col-12 col-md-2 mb-3">
 									<label class="form-label">Code</label>
-									<input id="ProductCode" class="form-control" placeholder="Fill Code" />
+									<input id="ProductCode" class="form-control" name="ProductCode" placeholder="Fill Code" />
 									<div id="ProductCodeMessage" class="text-danger fw-normal"></div>
 								</div>
 
 								<!-- NAME -->
 								<div class="col-12 col-md-4 mb-3">
 									<label class="form-label">Name</label>
-									<input id="ProductName" class="form-control" placeholder="Fill Name" />
+									<input id="ProductName" class="form-control" name="ProductName" placeholder="Fill Name" />
 									<div id="ProductNameMessage" class="text-danger fw-normal"></div>
 								</div>
 
 								<!-- GROUP -->
 								<div class="col-12 col-md-2 mb-3">
 									<label class="form-label">Group Type</label>
-									<select id="ProductGroupType" class="form-control">
+									<select id="ProductGroupType" name="ProductGroupType" class="form-control">
 
 										@foreach (var obj in Model.groupTypes)
 										{
@@ -85,130 +85,39 @@
 											<div class="col-6 text-right">
 
 												<div class="custom-control custom-switch">
-													<input type="checkbox" class="custom-control-input" id="ProductStatusToggle" checked />
+													<input type="checkbox" class="custom-control-input" id="ProductStatusToggle" name="ProductStatusToggle" checked />
 													<label class="custom-control-label" for="ProductStatusToggle" id="ProductStatusLabel">
 														Active
 													</label>
-													<input type="hidden" id="ProductStatusID" value="A" />
+													<input type="hidden" id="ProductStatusID" name="ProductStatusID" value="A" />
 												</div>
 
 											</div>
 										</div>
 									</div>
 									<div>
-										<select id="ProductGroup" class="form-control">
+										<select id="ProductGroup" name="ProductGroup" class="form-control">
 											<option value="">-- Select Group --</option>
 										</select>
 									</div>
 								</div>
 
 							</div>
-
 							<div class="row">
 								<!-- DESCRIPTION -->
 								<div class="col-12 col-md-12 mb-3">
 									<label class="form-label">Description</label>
-									<textarea id="ProductDescription" class="form-control" style="height:100px" placeholder="Fill Description"></textarea>
+									<textarea id="ProductDescription" class="form-control" name="ProductDescription" style="height:100px" placeholder="Fill Description"></textarea>
 									<div id="ProductDescriptionMessage" class="text-danger fw-normal"></div>
 								</div>
 
 							</div>
-
-							<div class="row">
-
-								<!-- UNIT -->
-								<div class="col-12 col-md-3">
-									<label class="form-label">Unit</label>
-									<select id="ProductUnit" class="form-control">
-
-										@foreach(var obj in Model.units){
-											<option value="@obj.ID">@obj.ShortDescription - @obj.LongDescription</option>
-										}
-
-									</select> 
-								</div>
-
-								<!-- New Arrival -->
-								<div class="col-12 col-md-3">
-
-									<div class="row">
-										<div class="col-6">
-											<label class="form-label">Expiry Date</label>
-										</div>
-										<div class="col-6 text-right">
-											<div class="custom-control custom-switch">
-												<input type="checkbox" class="custom-control-input" id="ProductNewArrival" />
-												<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
-											</div>
-										</div>
-									</div>
-
-									<div class="row">
-										<!-- Expiry Date -->
-										<div class="col-12">
-											<input type="text" id="ProductExpiryDate" class="form-control" placeholder="Select date" />
-										</div>
-									</div>
-
-								</div>
-
-								<div class="col-12 col-md-3">
-
-									<div class="row">
-										<div class="col-6">
-											<label class="form-label">Warranty Months</label>
-										</div>
-										<div class="col-6 text-right">
-											<!-- WARRANTY -->
-											<div class="custom-control custom-switch">
-												<input type="checkbox" class="custom-control-input" id="ProductWarranty" />
-												<label class="custom-control-label" for="ProductWarranty">Warranty</label>
-											</div>
-										</div>
-									</div>
-
-									<div class="row">
-										<!-- WARRANTY MONTHS -->
-										<div class="col-12">
-											<input id="ProductWarrantyMonths" type="number" class="form-control" placeholder="0" />
-										</div>
-									</div>
-
-								</div>
-
-								<div class="col-12 col-md-3 text-right">
-
-									<!-- VAT -->
-									<div class="d-inline-block text-left">
-										<div class="custom-control custom-switch mt-2">
-											<input type="checkbox" class="custom-control-input" id="ProductVAT">
-											<label class="custom-control-label" for="ProductVAT">VAT</label>
-										</div>
-										<div class="custom-control custom-switch mt-2">
-											<input type="checkbox" class="custom-control-input" id="ProductFeature">
-											<label class="custom-control-label" for="ProductFeature">Feature</label>
-										</div>
-									</div>
-
-								</div>
-
-							</div>
-
-						</div>
-
-					</div>
-
-					<div class="card"> 
-						<div class="card-header font-weight-bold">Categories & Sub Categories</div>
-						<div class="card-body">
-
-
 							<div class="row">
 
 								<!-- CATEGORY (single selection) -->
-								<div class="col-12 col-md-4">
+								<div class="col-12 col-md-4 mb-3">
 									<label class="form-label">Category</label>
-									<select id="ProductCategory" class="form-control">
+									<select id="ProductCategory" class="form-control" name="ProductCategory">
 
 										@foreach (var obj in Model.categories)
 										{
@@ -224,19 +133,101 @@
 								<div class="col-12 col-md-8 mb-3">
 									<div>
 										<label class="form-label">Sub Categories</label>
-										<select id="ProductSubCategory" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
+										<select id="ProductSubCategory" name="ProductSubCategory[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
 											<!-- Options loaded dynamically -->
 										</select>
 										<div id="ProductSubCategoryMessage" class="text-danger fw-normal"></div>
 									</div>
 									<div id="SubCategoryTags" class="mt-2 d-flex flex-wrap gap-2"></div>
-								</div> 
+								</div>
+							</div>
+							<div class="row">
+
+								<!-- UNIT -->
+								<div class="col-12 col-md-3">
+									<label class="form-label">Unit</label>
+									<select id="ProductUnit" name="ProductUnit" class="form-control">
+
+										@foreach (var obj in Model.units)
+										{
+											<option value="@obj.ID">@obj.ShortDescription - @obj.LongDescription</option>
+										}
+
+									</select>
+								</div>
+
+								<!-- New Arrival -->
+								<div class="col-12 col-md-3">
+
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Expiry Date</label>
+										</div>
+										<div class="col-6 text-right">
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductNewArrival" name="ProductNewArrival" />
+												<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<!-- Expiry Date -->
+										<div class="col-12">
+											<input type="text" id="ProductExpiryDate" class="form-control" name="ProductExpiryDate" placeholder="Select date" />
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-12 col-md-3">
+
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Warranty Months</label>
+										</div>
+										<div class="col-6 text-right">
+											<!-- WARRANTY -->
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductWarranty" name="ProductWarranty" />
+												<label class="custom-control-label" for="ProductWarranty">Warranty</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<!-- WARRANTY MONTHS -->
+										<div class="col-12">
+											<input id="ProductWarrantyMonths" type="number" class="form-control" name="ProductWarrantyMonths" placeholder="0" />
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-12 col-md-3 text-right">
+
+									<!-- VAT -->
+									<div class="d-inline-block text-left">
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductVAT" name="ProductVAT">
+											<label class="custom-control-label" for="ProductVAT">VAT</label>
+										</div>
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductFeature" name="ProductFeature">
+											<label class="custom-control-label" for="ProductFeature">Feature</label>
+										</div>
+									</div>
+
+								</div>
+
 							</div>
 
+							
 
 						</div>
-					</div>
 
+					</div>
+					 
 					<div class="card shadow-sm">
 
 						<!-- CARD HEADER -->
@@ -270,7 +261,7 @@
 									<div class="row">
 										<div class="col-12">
 											<label class="form-label">Sizes</label>
-											<select id="ProductSizes"
+											<select id="ProductSizes" name="ProductSizes"
 											class="form-control selectpicker"
 											multiple
 											data-live-search="true"
@@ -336,7 +327,7 @@
 										<div class="col-12">
 											<label class="form-label">Colors</label>
 											<select id="ProductColors"
-													class="form-control selectpicker"
+													class="form-control selectpicker" name="ProductColors[]"
 													multiple
 													data-live-search="true"
 													data-actions-box="true">
@@ -433,112 +424,121 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
+ 
+	$('#ProductSizes').on('changed.bs.select', function () {
 
-		$('#ProductSizes').on('changed.bs.select', function () {
+		//if (isEditLoading) return;
 
-			let container = $('#SizeVariationsContainer');
-			let selectedOptions = $(this).find('option:selected');
+		let container = $('#SizeVariationsContainer');
 
-			container.empty();
+		// Selected size IDs (as strings)
+		let selectedIds = $(this).val() || [];
+		let selectedSet = new Set(selectedIds.map(String));
 
-			selectedOptions.each(function () {
+		// ==========================
+		// 1️⃣ REMOVE unselected cards
+		// ==========================
+		container.find('.variation-card').each(function () {
+			let sizeId = String($(this).data('size-id'));
+			if (!selectedSet.has(sizeId)) {
+				$(this).remove();
+			}
+		});
 
-				let sizeId = $(this).val();
-				let sizeText = $(this).text();
-
-				// ✅ FIX: declare & reset here
-				let currencyHtml = '';
-
-					currencies.forEach(c => {
-
-						let isDefault = c.code === 'USD';
-
-						currencyHtml += `
-							<!-- PRICE -->
-							<div class="col-12 col-md-6 mb-3">
-								<label>Price ${c.code}</label>
-								<input type="number"
-									   step="0.01"
-									   class="form-control ${isDefault ? 'default-price' : 'second-price'}"
-									   data-currency="${c.code}"
-									   data-currency-id="${c.id}"
-									   name="Variations[${sizeId}].Prices[${c.id}]"
-									   ${isDefault ? '' : 'readonly'} value="0"
-									   placeholder="Enter Price in ${c.code}">
-							</div>
-
-							<!-- PRICE NET -->
-							<div class="col-12 col-md-6 mb-3">
-								<label>Price Net ${c.code}</label>
-								<input type="number"
-									   step="0.01"
-									   class="form-control ${isDefault ? 'default-price-net' : 'second-price-net'}"
-									   data-currency="${c.code}"
-									   data-currency-id="${c.id}"
-									   name="Variations[${sizeId}].PricesNet[${c.id}]"
-									   ${isDefault ? '' : 'readonly'} value="0"
-									   placeholder="Enter Net Price in ${c.code}">
-							</div>
-						`;
-					});
-					 
-				let html = `
-					<div class="variation-card" data-size-id="${sizeId}">
-
-						<div class="variation-header p-2 d-flex justify-content-between align-items-center">
-							<span>${sizeText}</span>
-
-							<div class="custom-control custom-switch">
-								<input type="checkbox"
-									   class="custom-control-input"
-									   id="SizeStatus_${sizeId}"
-									   name="Variations[${sizeId}].IsActive"
-									   checked>
-								<label class="custom-control-label" for="SizeStatus_${sizeId}">
-									Active
-								</label>
-							</div>
-						</div>
-
-						<div class="variation-body p-2">
-
-								<div class="row">
-									<div class="col-md-6 mb-3">
-										<label>Sale %</label>
-										<input type="number"
-											   step="0.01"
-											   class="form-control sale-input"
-											   value="0"
-											   name="Variations[${sizeId}].Sale"
-											   placeholder="Enter Sale %">
-									</div>
-
-									<div class="col-md-6 mb-3">
-										<label>Raise %</label>
-										<input type="number"
-											   step="0.01"
-											   class="form-control raise-input"
-											   value="0"
-											   name="Variations[${sizeId}].Raise"
-											   placeholder="Enter Raise %">
-									</div>
-								</div>
+		// ==========================
+		// 2️⃣ ADD missing cards
+		// ==========================
+		selectedIds.forEach(sizeId => {
 
 
-							<div class="row mt-3">
-								${currencyHtml}
-							</div>
+			if (container.find(`.variation-card[data-size-id="${sizeId}"]`).length)
+				return;
 
-						</div>
+			let sizeText = $('#ProductSizes option[value="' + sizeId + '"]').text();
+
+			let currencyHtml = '';
+
+			currencies.forEach(c => {
+
+				let isDefault = c.code === 'USD';
+
+				currencyHtml += `
+					<div class="col-12 col-md-2 mb-2">
+						<label>Price ${c.code}</label>
+						<input type="number"
+							   step="0.01"
+							   class="form-control ${isDefault ? 'default-price' : 'second-price'}"
+							   data-currency-id="${c.id}"
+							   name="Variations[${sizeId}].Prices[${c.id}]"
+							   ${isDefault ? '' : 'readonly'}
+							   value="0">
+					</div>
+
+					<div class="col-12 col-md-2 mb-2">
+						<label>Price Net ${c.code}</label>
+						<input type="number"
+							   step="0.01"
+							   class="form-control ${isDefault ? 'default-price-net' : 'second-price-net'}"
+							   data-currency-id="${c.id}"
+							   name="Variations[${sizeId}].PricesNet[${c.id}]"
+							   ${isDefault ? '' : 'readonly'}
+							   value="0">
 					</div>
 				`;
-
-				container.append(html);
 			});
 
+			let html = `
+				<div class="variation-card" data-size-id="${sizeId}">
+					<div class="variation-header p-2 d-flex justify-content-between align-items-center">
+						<span>${sizeText}</span>
 
+						<div class="custom-control custom-switch">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="SizeStatus_${sizeId}"
+								   name="Variations[${sizeId}].IsActive"
+								   checked>
+							<label class="custom-control-label" for="SizeStatus_${sizeId}">
+								Active
+							</label>
+						</div>
+					</div>
 
+					<div class="variation-body p-2">
+
+						<div class="row">
+							<div class="col-12 col-md-2 mb-2">
+								<label>Sale %</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control sale-input"
+									   name="Variations[${sizeId}].Sale"
+									   value="0">
+							</div>
+
+							<div class="col-12 col-md-2 mb-2">
+								<label>Raise %</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control raise-input"
+									   name="Variations[${sizeId}].Raise"
+									   value="0">
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							${currencyHtml}
+						</div>
+
+					</div>
+				</div>
+			`;
+
+			container.append(html);
 		});
+	});
+
+
 
 		// ✅ Default price → auto-calc second prices
 		$(document).on('input', '.sale-input, .raise-input, .default-price', function () {
@@ -616,46 +616,108 @@
 				$(this).val(calculated.toFixed(2));
 			});
 		});
+			 
+		$(document).on("click", "#btnSaveProduct", function () {
 
+			// -------------------------------
+			// Elements
+			// -------------------------------
+			let btn     = $(this);
+			let spinner = $("#btnSaveProductSpinner");
+			let form    = $("#productForm");
+
+			// -------------------------------
+			// Reset validation messages
+			// -------------------------------
+			$("#ProductCodeMessage").text("");
+			$("#ProductNameMessage").text("");
+			$("#ProductSubCategoryMessage").text("");
+			$("#ProductSizesMessage").remove(); // dynamic message
+
+			let hasError = false;
+
+			// -------------------------------
+			// Required: Product Code
+			// -------------------------------
+			let productCode = $("#ProductCode").val().trim();
+			if (!productCode) {
+				$("#ProductCodeMessage").text("Product code is required");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Product Name
+			// -------------------------------
+			let productName = $("#ProductName").val().trim();
+			if (!productName) {
+				$("#ProductNameMessage").text("Product name is required");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Sub Categories (at least one)
+			// -------------------------------
+			let subCategories = $("#ProductSubCategory").val();
+			if (!subCategories || subCategories.length === 0) {
+				$("#ProductSubCategoryMessage").text("Please select at least one sub category");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Sizes (at least one)
+			// -------------------------------
+			let sizes = $("#ProductSizes").val();
+			if (!sizes || sizes.length === 0) {
+				if ($("#ProductSizesMessage").length === 0) {
+					$("#ProductSizes")
+						.closest(".col-12")
+						.append('<div id="ProductSizesMessage" class="text-danger fw-normal mt-1">Please select at least one size</div>');
+				}
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Stop if validation failed
+			// -------------------------------
+			if (hasError) {
+				return;
+			}
+
+			// -------------------------------
+			// Submit via AJAX
+			// -------------------------------
+			btn.prop("disabled", true);
+			spinner.removeClass("d-none");
+
+			let formData = new FormData(form[0]);
+
+			$.ajax({
+				url: '@Url.Action("SaveProduct", "Products")',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (res) {
+
+					if (res.success) {
+						toastr.success("Product saved successfully");
+
+						$("#saveProductModal").modal("hide");
+						$("#tableProducts").DataTable().ajax.reload();
+					} else {
+						toastr.error(res.message || "Failed to save product");
+					}
+				},
+				error: function () {
+					toastr.error("Unexpected server error");
+				},
+				complete: function () {
+					btn.prop("disabled", false);
+					spinner.addClass("d-none");
+				}
+			});
+		}); 
 		 
 	});
 
-		$(document).on("click", "#btnSaveProduct", function () {
-
-		let btn = $(this);
-		let spinner = $("#btnSaveProductSpinner");
-
-		btn.prop("disabled", true);
-		spinner.removeClass("d-none");
-
-		let form = $("#productForm");
-		let formData = new FormData(form[0]);
-
-		$.ajax({
-			url: '@Url.Action("SaveProduct", "Products")',
-			type: 'POST',
-			data: formData,
-			processData: false,
-			contentType: false,
-			success: function (res) {
-
-				if (res.success) {
-					toastr.success("Product saved successfully");
-
-					$("#saveProductModal").modal("hide");
-					$("#tableProducts").DataTable().ajax.reload();
-				} else {
-					toastr.error(res.message || "Failed to save product");
-				}
-			},
-			error: function () {
-				toastr.error("Unexpected server error");
-			},
-			complete: function () {
-				btn.prop("disabled", false);
-				spinner.addClass("d-none");
-			}
-		});
-	});
-	 
 </script>

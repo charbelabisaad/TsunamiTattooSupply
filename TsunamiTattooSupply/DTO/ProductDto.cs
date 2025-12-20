@@ -25,6 +25,8 @@ namespace TsunamiTattooSupply.DTO
 
 		public string UnitLongDescription { get; set; }
 		 
+		public string GroupTypeID { get; set; }
+
 		public int GroupID { get; set; }
 
 		public string GroupDescription { get; set; }
