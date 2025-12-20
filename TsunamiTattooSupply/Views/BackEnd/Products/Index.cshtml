@@ -752,7 +752,8 @@
         let selectedSizeIds = new Set();        // holds selected size IDs
         let sizePricesBySizeId = {};            // sizeId => prices[]
             let isEditLoading = false;
-                    function loadProductEditExtras(productId) {
+               
+        function loadProductEditExtras(productId) {
 
             isEditLoading = true;
 
@@ -843,6 +844,10 @@
                 }
             });
         }
+
+
+        let colorImagesByColorId = {}; // edit mode preload
+        let isColorEditLoading = false;
 
         $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
         autoApply: true,
