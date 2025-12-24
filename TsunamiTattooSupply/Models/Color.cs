@@ -20,7 +20,10 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(300)]
 		public string Name { get; set; }
-		 
+		
+		[Required]
+		public bool IsCustom { get; set; } = false;
+
 		[Required]
 		public string StatusID { get; set; }
 

@@ -12,6 +12,8 @@ namespace TsunamiTattooSupply.DTO
 		 
 		public string Name { get; set; }
 		 
+		public bool IsCustom { get; set; }
+
 		public string StatusID { get; set; }
 
 		public string StatusDescription { get; set; }

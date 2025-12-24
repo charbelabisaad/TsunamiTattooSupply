@@ -31,7 +31,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { data = roles, success = true });
 			}
 			catch (Exception ex) {
-				_logger.LogError(ex, "Fetching Users![ERROR].");
+				_logger.LogError(ex, "Fetching Roles![ERROR].");
 
 				return Json(new
 				{
@@ -75,10 +75,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
+		[HttpPost]
 		public IActionResult SaveRole(int ID, string Description, string StatusID)
 		{
-
-		
+  
 			int RoleID;
 
 		try { 
