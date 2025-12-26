@@ -66,109 +66,141 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveColors(int ID, string Code, string Name, bool IsCustom)
+		public IActionResult SaveColors(int ID, string Code, string Name, bool IsCustom, string StatusID)
 		{
-			int ColorID;
-
 			try
 			{
+				// Normalize
+				Name = Name?.Trim();
+				Code = Code?.Trim().Replace("#", string.Empty);
 
-				if(ID != 0)
+				// Validation
+				if (!IsCustom && string.IsNullOrEmpty(Code))
+				{
+					return Json(new { error = true, message = "Color code is required." });
+				}
+
+				// Custom colors must NOT have a code
+				if (IsCustom)
+				{
+					Code = null;
+				}
+
+				// ================= EDIT =================
+				if (ID != 0)
 				{
 					var existingColor = _dbcontext.Colors.FirstOrDefault(c => c.ID == ID);
 
-					var existingColorName  = _dbcontext.Colors.FirstOrDefault(c => c.Name.Trim().ToLower() == Name.Trim().ToLower() && c.ID != ID && c.DeletedDate == null);
+					if (existingColor == null)
+					{
+						return Json(new { error = true, message = "Color not found." });
+					}
 
-					if (existingColorName != null) {
+					var duplicate = _dbcontext.Colors
+						.Any(c => c.Name.ToLower() == Name.ToLower()
+							   && c.ID != ID
+							   && c.DeletedDate == null);
 
+					if (duplicate)
+					{
 						return Json(new { exists = true, message = "Color name already exists!" });
-					
 					}
 
-					if (existingColor != null) {
-						
-						existingColor.Code = Code;
-						existingColor.Name = Name;
-						existingColor.IsCustom = IsCustom;
-						 
-						_dbcontext.SaveChanges();
+					existingColor.Name = Name;
+					existingColor.Code = Code;
+					existingColor.IsCustom = IsCustom;
+					existingColor.StatusID = StatusID;
+					existingColor.EditUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
+					existingColor.EditDate = DateTime.UtcNow;
 
-					}
-
+					_dbcontext.SaveChanges();
 				}
+				// ================= CREATE =================
 				else
 				{
-					var existingColorName = _dbcontext.Colors.FirstOrDefault(c => c.Name.Trim().ToLower() == Name.Trim().ToLower() && c.DeletedDate == null);
+					var duplicate = _dbcontext.Colors
+						.Any(c => c.Name.ToLower() == Name.ToLower()
+							   && c.DeletedDate == null);
 
-					if (existingColorName != null)
+					if (duplicate)
 					{
-
 						return Json(new { exists = true, message = "Color name already exists!" });
-
 					}
 
 					var newColor = new Color
 					{
-						Code = Code,
 						Name = Name,
-						IsCustom = IsCustom
+						Code = Code,
+						IsCustom = IsCustom,
+						StatusID = StatusID,
+						CreatedUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]),
+						CreationDate = DateTime.UtcNow
+
 					};
 
 					_dbcontext.Colors.Add(newColor);
 					_dbcontext.SaveChanges();
-
-					ColorID = newColor.ID;	
-
 				}
 
-				return Json ( new { exists = false, data = GetColors() });
-				 
+				return Json(new
+				{
+					success = true,
+					data = GetColors()
+				});
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError($"[Save Color ERROR]!\n\n{ex.Message}");
+				_logger.LogError(ex, "[Save Color ERROR]");
 				return Json(new
 				{
-					exists = false,
 					error = true,
-					message = $"An expected error occured while saving color {Name}!"
+					message = $"An unexpected error occurred while saving color {Name}!"
 				});
 			}
-
 		}
 
-
+		[HttpPost]
 		public IActionResult DeleteColor(int ID)
 		{
-			var existingColors = _dbcontext.Colors.FirstOrDefault(c => c.ID == ID && c.DeletedDate == null);
-
 			try
 			{
-				 
-				if (existingColors != null) {
+				var color = _dbcontext.Colors
+					.FirstOrDefault(c => c.ID == ID && c.DeletedDate == null);
 
-					existingColors.DeletedUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);
-					existingColors.DeletedDate = DateTime.UtcNow;
-
-					_dbcontext.SaveChanges();
-
+				if (color == null)
+				{
+					return Json(new
+					{
+						error = true,
+						message = "Color not found or already deleted."
+					});
 				}
 
-				return Json(new { exists = false, data = GetColors() });
+				int userId = 0;
+				int.TryParse(HttpContext.Request.Cookies["UserID"], out userId);
 
+				color.DeletedUserID = userId;
+				color.DeletedDate = DateTime.UtcNow;
+
+				_dbcontext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					data = GetColors()
+				});
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError($"[Delete Color ERROR]!\n\n{ex.Message}");
+				_logger.LogError(ex, "[Delete Color ERROR]");
 				return Json(new
 				{
-					exists = false,
 					error = true,
-					message = $"An expected error occured while deleting color {existingColors.Name}!"
+					message = "An unexpected error occurred while deleting the color."
 				});
 			}
-
 		}
+
 
 	}
 }

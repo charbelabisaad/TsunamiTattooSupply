@@ -45,45 +45,48 @@
     document.addEventListener("DOMContentLoaded", function () {
 
         $('#btnConfirmDeleteColor').on('click', function (e) {
-            e.preventDefault();
+           e.preventDefault();
 
-            const roleId = $("#deletedColorId").val();
+           const colorId = $("#deletedColorId").val();
 
-            $("#btnDeleteSpinner").removeClass("d-none");
-            $("#btnConfirmDeleteColor i").addClass("d-none");
-            $("#btnConfirmDeleteColor").prop("disabled", true)
-            //$("#btnConfirmDeleteColor").addClass("disabled")
+           // Reset message
+           $("#deleteModalMessage").hide().text('');
 
-            $.ajax({
-                url: '@Url.Action("DeleteColor", "Colors")',
-                type: "POST",
-                data: { ID: roleId }
-            })
-            .done(function (response) {
-                if (response.success) {
+           // Spinner
+           $("#btnDeleteSpinner").removeClass("d-none");
+           $("#btnConfirmDeleteColor i").addClass("d-none");
+           $("#btnConfirmDeleteColor").prop("disabled", true);
 
-                    const table = $("#tableColors").DataTable();
+           $.ajax({
+               url: '@Url.Action("DeleteColor", "Colors")',
+               type: "POST",
+               data: { ID: colorId }
+           })
+           .done(function (response) {
 
-                    $("#deleteColorModal").modal("hide");
-                    table.ajax.reload(null, false);
-                    toastr.success("Color deleted successfully!");
-                } else {
-                    $("#deleteModalMessage").text(response.message).show();
-                }
-                $("#btnDeleteSpinner").addClass("d-none");
-                $("#btnConfirmDeleteColor i").removeClass("d-none");
-                $("#btnConfirmDeleteColor").prop("disabled", false);
-            })
-            .fail(function () {
-                $("#deleteModalMessage").text("Error deleting roleid.").show();
-            })
-            .always(function () {
-                $("#btnDeleteSpinner").addClass("d-none");
-                $("#btnConfirmDeleteColor i").removeClass("d-none");
-                $("#btnConfirmDeleteColor").prop("disabled", false);
-                //$("#btnConfirmDeleteColor").removeClass("disabled");
-            });
-        });
+               const table = $("#tableColors").DataTable();
+
+               if (response.success) {
+                   $("#deleteColorModal").modal("hide");
+                   table.ajax.reload(null, false);
+                   toastr.success("Color deleted successfully!");
+               } else {
+                   $("#deleteModalMessage")
+                       .text(response.message || "Failed to delete color.")
+                       .show();
+               }
+           })
+           .fail(function () {
+               $("#deleteModalMessage")
+                   .text("An unexpected error occurred while deleting the color.")
+                   .show();
+           })
+           .always(function () {
+               $("#btnDeleteSpinner").addClass("d-none");
+               $("#btnConfirmDeleteColor i").removeClass("d-none");
+               $("#btnConfirmDeleteColor").prop("disabled", false);
+           });
+       });
 
     });
 

@@ -16,25 +16,73 @@
                     <div class="row align-items-center mb-3">
                         <input id="ColorID" type="hidden" value="0" />
 
+
                         <!-- 🔹 Label -->
                         <div class="col-12 col-md-2 d-flex align-items-center">
-                            <label for="ColorDescription" class="form-label mb-0">Description</label>
+                            <label for="ColorName" class="form-label mb-0">Name</label>
                         </div>
 
                         <!-- 🔹 Input -->
                         <div class="col-12 col-md-8 d-flex align-items-center">
                             <div class="w-100">
-                                <input type="text" class="form-control" id="ColorDescription" placeholder="Fill Description" />
-                                <div id="ColorDescriptionMessage" class="text-danger fw-normal"></div>
+                                <input type="text" class="form-control" id="ColorName" placeholder="Fill Name" />
+                                <div id="ColorNameMessage" class="text-danger fw-normal"></div>
                             </div>
                         </div>
-
+ 
                         <!-- 🔹 Status Toggle -->
-                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-end">
+                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
                             <div class="custom-control custom-switch m-0">
                                 <input type="checkbox" class="custom-control-input" id="ColorStatusToggle" checked>
                                 <label class="custom-control-label" for="ColorStatusToggle" id="ColorStatusLabel">Active</label>
                                 <input type="hidden" id="ColorStatusID" name="ColorStatusID" value="A">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center mb-3">
+                         
+                        <!-- 🔹 Label -->
+                        <div class="col-12 col-md-2 d-flex align-items-center">
+                            <label for="ColorCode" class="form-label mb-0">Code</label>
+                        </div>
+
+                        <div class="col-12 col-md-8 d-flex align-items-center">
+
+                            <div class="row w-100">
+
+                                <div class="col-12 col-md-8">
+
+									<!-- Color picker -->
+									<input type="color"
+										   id="ColorPicker"
+										   class="form-control"
+										   value="#915555" />
+
+                                </div>
+
+                                <div class="col-12 col-md-4">
+
+									<!-- Read-only HEX -->
+									<input type="text"
+										   id="ColorCode"
+										   class="form-control"
+										   readonly />
+
+
+                                </div>
+                                 
+                                <div id="ColorCodeMessage" class="text-danger fw-normal"></div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- 🔹 Status Toggle -->
+                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
+                            <div class="custom-control custom-switch m-0">
+                                <input type="checkbox" class="custom-control-input" id="ColorIsCustomToggle">
+                                <label class="custom-control-label" for="ColorIsCustomToggle" id="ColorIsCustomLabel">Is Custom</label> 
                             </div>
                         </div>
                     </div>
@@ -70,6 +118,36 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
+       // Init when modal opens
+        $('#saveColorModal').on('shown.bs.modal', function () {
+            syncColorCode();
+        });
+
+        // Picker → HEX
+        $('#ColorPicker').on('input change', function () {
+            $('#ColorCode').val(this.value.toUpperCase());
+        });
+
+        // Is Custom toggle
+        $('#ColorIsCustomToggle').on('change', function () {
+
+            if (this.checked) {
+                // Custom color → no picker
+                $('#ColorPicker').prop('disabled', true);
+                $('#ColorCode').val('');
+                $('#ColorIsCustomLabel').text('Is Custom');
+            } else {
+                // System color → enable picker
+                $('#ColorPicker').prop('disabled', false);
+                syncColorCode();
+            }
+        });
+
+        function syncColorCode() {
+            let color = $('#ColorPicker').val();
+            $('#ColorCode').val(color ? color.toUpperCase() : '');
+        }
+
         const toggle = document.getElementById("ColorStatusToggle");
         const hidden = document.getElementById("ColorStatusID");
         const label = document.getElementById("ColorStatusLabel");
@@ -88,90 +166,110 @@
 
         $('#btnSaveColor').on('click', function (e) {
 
-            e.preventDefault(); // ✅ prevent default form submission
+            e.preventDefault();
 
-            // Reset validation flag
             let requiredValidation = false;
 
-            // Clear previous errors and borders
-            $('#ColorDescription').removeClass("border-danger");
-            $('#ColorDescriptionMessage').text('');
+            // Reset validation
+            $('#ColorName').removeClass("border-danger");
+            $('#ColorNameMessage').text('');
+            $('#ColorCodeMessage').text('');
+            $('#modalColorMessage').hide();
 
-            // Show spinner while saving
+            // Spinner
             $('#btnSaveColorSpinner').removeClass('d-none');
             $('#btnSaveColor i').addClass('d-none');
+            $('#btnSaveColor').prop('disabled', true);
 
-            // Gather form values
+            // Gather data (MATCH BACKEND)
             var data = {
                 ID: $('#ColorID').val() || 0,
-                Description: $('#ColorDescription').val().trim(),
-                StatusID: $('#ColorStatusID').val()
+                Name: $('#ColorName').val().trim(),
+                Code: $('#ColorIsCustomToggle').is(':checked')
+                    ? null
+                    : $('#ColorCode').val(),
+                IsCustom: $('#ColorIsCustomToggle').is(':checked'),
+
+                // ✅ THIS LINE IS REQUIRED
+                StatusID: $('#ColorStatusToggle').is(':checked') ? 'A' : 'I'
             };
 
-            // Basic validation
-            if (!data.Description) {
-                $('#ColorDescriptionMessage').text("Description is required!");
-                $('#ColorDescription').addClass("border-danger");
+
+            // Validation
+            if (!data.Name) {
+                $('#ColorNameMessage').text("Name is required!");
+                $('#ColorName').addClass("border-danger");
                 requiredValidation = true;
             }
 
-            // Stop if validation failed
+            if (!data.IsCustom && !data.Code) {
+                $('#ColorCodeMessage').text("Color code is required!");
+                requiredValidation = true;
+            }
+
             if (requiredValidation) {
                 $('#btnSaveColorSpinner').addClass('d-none');
                 $('#btnSaveColor i').removeClass('d-none');
+                $('#btnSaveColor').prop('disabled', false);
                 return;
             }
 
-            // ✅ AJAX request
+            // AJAX
             $.ajax({
-                url: '@Url.Action("SaveColor", "Colors")',
+                url: '@Url.Action("SaveColors", "Colors")',
                 type: 'POST',
                 data: data,
                 success: function (response) {
 
                     const table = $("#tableColors").DataTable();
 
-                    $('#btnSaveColorSpinner').addClass('d-none');
-                    $('#btnSaveColor i').removeClass('d-none');
-                    $('#btnSaveColor').prop('disabled', true);
-
                     if (response.exists) {
-                        $('#ColorDescriptionMessage').text(response.message || "Description already exists!");
-                        $('#ColorDescription').addClass("border-danger");
-                        toastr.warning(response.message || "Description already exists!");
-                        $('#btnSaveColor').prop('disabled', false);
+                        $('#ColorNameMessage').text(response.message);
+                        $('#ColorName').addClass("border-danger");
+                        toastr.warning(response.message);
                         return;
                     }
 
                     if (response.error) {
-                        $('#modalColorMessage').text(response.message || "Error saving role.").show();
-                        toastr.error(response.message || "Error saving role.");
-                        $('#btnSaveColor').prop('disabled', false);
+                        $('#modalColorMessage').text(response.message).show();
+                        toastr.error(response.message);
                         return;
                     }
 
-                    if (response.roles) {
+                    if (response.success) {
                         $('#saveColorModal').modal('hide');
                         table.ajax.reload(null, false);
                         toastr.success("Color saved successfully!");
                     } else {
-                        $('#modalColorMessage').text("Unexpected response from server.").show();
+                        $('#modalColorMessage')
+                            .text("Unexpected response from server.")
+                            .show();
                     }
-
-                    $('#btnSaveColorSpinner').addClass('d-none');
-                    $('#btnSaveColor i').removeClass('d-none');
-                    $('#btnSaveColor').prop('disabled', false);
                 },
-                error: function (xhr, status, error) {
+                error: function () {
+                    $('#modalColorMessage')
+                        .text("An error occurred while saving color.")
+                        .show();
+                    toastr.error("An error occurred while saving color.");
+                },
+                complete: function () {
                     $('#btnSaveColorSpinner').addClass('d-none');
                     $('#btnSaveColor i').removeClass('d-none');
                     $('#btnSaveColor').prop('disabled', false);
-                    $('#modalColorMessage').text("An error occurred while saving role" ).show();
-                    toastr.error("An error occurred while saving role."); // ✅ fixed missing parenthesis
                 }
             });
         });
 
+        $('#ColorStatusToggle').on('change', function () {
+            if (this.checked) {
+                $('#ColorStatusLabel').text('Active');
+                $('#ColorStatusID').val('A');
+            } else {
+                $('#ColorStatusLabel').text('Inactive');
+                $('#ColorStatusID').val('I');
+            }
+        });
+ 
     });
 
 
