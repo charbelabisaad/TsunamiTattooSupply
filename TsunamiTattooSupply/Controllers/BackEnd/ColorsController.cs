@@ -30,7 +30,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				colors = GetColors();
 
-				return Json(new { Data = colors , sucess = true });
+				return Json(new { data = colors , success = true });
 
 			}
 			catch (Exception ex) {
@@ -56,6 +56,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ID = c.ID,
 						Code = c.Code,
 						Name = c.Name,
+						StatusID = c.Status.ID,
+						StatusDescription = c.Status.Description,
+						StatusColor = c.Status.Color,
 						IsCustom = c.IsCustom,
 
 					})).ToList();
@@ -141,8 +144,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			try
 			{
-				
-
+				 
 				if (existingColors != null) {
 
 					existingColors.DeletedUserID = Convert.ToInt32(HttpContext.Request.Cookies["UserID"]);

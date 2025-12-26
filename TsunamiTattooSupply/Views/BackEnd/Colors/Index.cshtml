@@ -42,7 +42,9 @@
                         <table id="tableColors" class="table table-striped w-100 ">
                             <thead>
                                 <tr>
-                                    <th style="width:70%">Description</th> 
+                                    <th style="width:20%">Code</th>
+                                    <th style="width:40%">Name</th> 
+                                    <th style="width:10%">IsCustom</th>
                                     <th style="width:20%">Status</th>
                                     <th style="width:10%" class="no-export">Actions</th>
                                 </tr>
@@ -65,104 +67,126 @@
     <script>
             $(document).ready(function () {
 
-                var table = $('#tableColors').DataTable({
-                    processing: true,
-                    responsive: true,
-                    ajax: {
-                        url: '@Url.Action("ListGetColors", "Colors")',
-                            type: 'GET',
-                        dataSrc: function (json) {
-                        if (json && json.success === false) {
-                            toastr.error(json.message || "Failed to load roles.");
-                            return [];
-                        }
-                        if (!json || !json.data) {
-                            toastr.error("Unexpected response from server.");
-                            return [];
-                        }
-                        return json.data;
+                       var table = $('#tableColors').DataTable({
+            processing: true,
+            responsive: true,
+            ajax: {
+                url: '@Url.Action("ListGetColors", "Colors")',
+                type: 'GET',
+                dataSrc: function (json) {
+
+                    // backend typo: "sucess"
+                    if (json && json.sucess === false) {
+                        toastr.error(json.message || "Failed to load colors.");
+                        return [];
                     }
-                    },
-                    dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
-                    language: {
-                        search: "",
-                        searchPlaceholder: "Search roles..."
-                    },
-                    buttons: [
-                            { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
-                            { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
-                            {
-                                extend: 'pdfHtml5',
-                                className: 'btn btn-danger btn-sm',
-                                exportOptions: { columns: ':visible:not(.no-export)' },
-                                text: '<i class="fas fa-file-pdf"></i> PDF',
-                                customize: function (doc) {
-                                    // Set all columns to auto width
-                                    var tableBody = doc.content[1].table.body;
-                                    var colCount = tableBody[0].length;
 
-                                    // Distribute column widths evenly (100% width)
-                                    var colWidths = [];
-                                    for (var i = 0; i < colCount; i++) {
-                                        colWidths.push('*');
-                                    }
-                                    doc.content[1].table.widths = colWidths;
+                    // backend uses "Data" (capital D)
+                    if (!json || !json.data) {
+                        toastr.error("Unexpected response from server.");
+                        return [];
+                    }
 
-                                    // Optional: reduce margins and font size to fit better
-                                    doc.styles.tableBodyEven.alignment = 'center';
-                                    doc.styles.tableBodyOdd.alignment = 'center';
-                                    doc.styles.tableHeader.alignment = 'center';
-                                    doc.defaultStyle.fontSize = 8;
-                                    doc.pageMargins = [10, 10, 10, 10];
-                                }
-                            },
-                            { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
-                        { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
-                            action: function () {
-                                table.ajax.reload();
-                            }
-                        }
-                    ],
-                    columns: [
-                        { data: 'description' }, 
-                        { data: 'status',
-                            render: function (data, type, row) { 
-                              return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
-                            }
-                        },
-                        {
-                            data: null,
-                            orderable: false,
-                            searchable: false,
-                            className: "no-export",
-                            render: function (data, type, row) {
-                                return `
-                            <div class="dropdown">
-                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <div class="dropdown-menu">
-                                    <a class="dropdown-item btnEditColor" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}" 
-                                    data-statusid="${row.statusID}">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
-                                        <a class="dropdown-item btnDeleteColor" style="cursor:pointer" data-id="${row.id}">
-                                        <i class="fas fa-trash"></i> Delete
-                                    </a>   
-                                </div>
+                    return json.data;
+                }
+            },
+            dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+            language: {
+                search: "",
+                searchPlaceholder: "Search colors..."
+            },
+            buttons: [
+                { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-danger btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    customize: function (doc) {
+                        var tableBody = doc.content[1].table.body;
+                        var colCount = tableBody[0].length;
+                        doc.content[1].table.widths = Array(colCount).fill('*');
+                        doc.defaultStyle.fontSize = 8;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                },
+                { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                {
+                    text: '<i class="fas fa-sync"></i> Refresh',
+                    className: 'btn btn-primary btn-sm',
+                    action: function () {
+                        table.ajax.reload();
+                    }
+                }
+            ],
+            columns: [
+                // Code
+                { data: 'code',
+                   render: function(data, type, row){
+                    
+                       return `<div class="d-inline-block align-middle" style="background-color: ${ row.isCustom ? 'transparent' : '#' + row.code}; width:30px; height:30px; border:1px solid #000000">&nbsp;</div>
+                       <div class="d-inline-block align-middle">${row.code}</div>`;
+                   
+                   }
+                },
+
+                // Description (Name)
+                { data: 'name' },
+
+                // IsCustom
+                {
+                    data: 'isCustom',
+                    className: 'text-center align-items-center',
+                    render: function (data) {
+                        return data
+                            ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
+                            : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
+                    }
+                },
+
+                // Status (derived frontend-only)
+                { data: 'statusDescription',
+                    className: "align-middle",
+                    render: function (data, type, row) {
+                        return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${row.statusDescription}</div>`;
+                    }
+                },
+
+                // Actions
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    className: 'no-export',
+                    render: function (data, type, row) {
+                        return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item btnEditColor"
+                                   data-id="${row.ID}"
+                                   data-code="${row.Code}"
+                                   data-name="${row.Name}"
+                                   data-iscustom="${row.IsCustom}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a class="dropdown-item btnDeleteColor"
+                                   data-id="${row.ID}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
                             </div>
-                                `;
-                            }
-                        }
-                    ]
-                });
+                        </div>`;
+                    }
+                }
+            ]
+        });
 
-                // place export buttons next to search bar
-                //table.buttons().container().appendTo('#tableColors_wrapper .col-md-6:eq(1)');
+        // filter position
+        $('#tableColors_filter').css("position", "relative");
 
-                var $filter = $('#tableColors_filter');
-
-                $filter.css("position", "relative");
 
                 // Insert FA icons
 
