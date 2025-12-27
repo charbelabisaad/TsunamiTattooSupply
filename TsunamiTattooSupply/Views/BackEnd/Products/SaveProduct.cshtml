@@ -307,57 +307,55 @@
 									<div class="row">
 										<div class="col-12">
 											<label class="form-label">Sizes</label>
-											<select id="ProductSizes" name="ProductSizes"
-											class="form-control selectpicker"
-											multiple
-											data-live-search="true"
-											data-actions-box="true">
-												@foreach (var obj in Model.sizes)
-												{
-													<option value="@obj.ID">@obj.Description</option>
-												}
-											</select> 
+
+											<div class="row align-items-center p-3">
+
+												<div class="col-12 col-md-11">
+													 
+												<select id="ProductSizes" name="ProductSizes"
+													class="form-control selectpicker"
+													multiple
+													data-live-search="true"
+													data-actions-box="true">
+														@foreach (var obj in Model.sizes)
+														{
+															<option value="@obj.ID">@obj.Description</option>
+														}
+												</select> 
+
+												</div>
+												<div class="col-12 col-md-1">
+													<button id="btnNewSize" type="button" name="NewSize" class="btn btn-sm btn-primary w-100"><i class="fas fa-file"></i> New</button>
+												</div>
+
+											</div>
+
+											<div id="SizeEntry" class="row mt-1 align-items-center border border-1 p-3" style="display:none">
+
+												<div class="col-12 col-md-10">
+
+													<input id="txtSizeDescription" type="text" class="form-control" placeholder="Fill Size Description" />
+
+												</div>
+
+												<div class="col-12 col-md-1">
+
+													<button id="btnCancelSize" type="button" name="CancelSize" class="btn btn-sm btn-outline-secondary w-100"><i class="fas fa-ban"></i> Cancel</button>
+
+												</div>
+
+												<div class="col-12 col-md-1">
+
+													<button id="btnCreateSize" type="button" name="CreateSize" class="btn btn-sm btn-outline-primary w-100"><i class="fas fa-plus"></i> Create</button>
+
+												</div>
+
+											</div>
+
 										</div>
+										 
 									</div>
-									@* <div class="row"> *@
-									@* 	<div class="col-12"> *@
-
-									@* 		<label class="form-label">Countries</label> *@
-
-									@* 		<select id="ProductCountries" *@
-									@* 		class="form-control selectpicker" *@
-									@* 		multiple *@
-									@* 		data-live-search="true" *@
-									@* 		data-actions-box="true" *@
-									@* 		data-width="100%"> *@
-
-									@* 			@foreach (var obj in Model.countriessales) *@
-									@* 			{ *@
-
-									@* 				var flag = obj.Flag; *@
-
-									@* 				<option value="@obj.ID" *@
-									@* 					data-content=' *@
-									@* 						<span class="d-flex align-items-center"> *@
-									@* 							@if (!string.IsNullOrEmpty(obj.Flag)) *@
-									@* 							{ *@
-									@* 								<img src="@obj.Flag" *@
-									@* 										style="width:20px;height:15px;margin-right:8px;border:1px solid #ddd" *@
-									@* 										alt=""> *@
-									@* 							} *@
-									@* 							<span>@obj.Name</span> *@
-									@* 						</span> *@
-									@* 					'> *@
-									@* 					@obj.Name *@
-									@* 				</option> *@
-									@* 			} *@
-
-									@* 		</select> *@
-
-									@* 	</div> *@
-									@* </div> *@
-
-
+									  
 									<div class="row mt-3">
 
 										<div id="SizeVariationsContainer" class="col-12"></div>
@@ -372,34 +370,153 @@
 
 									<div class="row">
 										<div class="col-12">
-											<label class="form-label">Colors</label>
 
-											<select id="ProductColors"
-													class="form-control selectpicker"
-													name="ProductColors[]"
-													multiple
-													data-live-search="true"
-													data-actions-box="true">
-												@foreach (var obj in Model.colors)
-												{
-													<option value="@obj.ID"
-															data-name="@obj.Name"
-															data-code="@obj.Code">
-														<span style="display:inline-block;
+											<label class="form-label">Colors</label>
+											
+											<div class="row p-3">
+
+												<div class="col-12 col-md-11">
+													<select id="ProductColors"
+															class="form-control selectpicker"
+															name="ProductColors[]"
+															multiple
+															data-live-search="true"
+															data-actions-box="true">
+														@foreach (var obj in Model.colors)
+														{
+															<option value="@obj.ID"
+																	data-name="@obj.Name"
+																	data-code="@obj.Code"
+																	data-content='
+																	<span style="
+																		display:inline-block;
 																		width:14px;
 																		height:14px;
 																		background-color:#@obj.Code;
 																		border:1px solid #ccc;
-																		margin-right:6px;">
-														</span>
-														@obj.Name
-													</option>
-												}
-											</select>
+																		margin-right:6px;
+																		vertical-align:middle;">
+																	</span>
+																	<span>@obj.Name</span>
+																	'>
+																	@obj.Name
+															</option>
+														}
+													</select>
+													 
+													<div id="ProductColorsMessage" class="text-danger fw-normal"></div>
+
+												</div>
+
+												<div class="col-12 col-md-1">
+													<button id="btnNewColor" type="button" name="NewColor" class="btn btn-sm btn-primary w-100"><i class="fas fa-file"></i> New</button>
+												</div>
+
+											</div>
 
 
-											<div id="ProductColorsMessage" class="text-danger fw-normal"></div>
+											<div id="ColorEntry" class="row mt-2 border border-1 p-3" style="display:none">
+												 
+												<div class="col-12">
+													 
+													<div class="row align-items-center mb-3">
+
+														<input id="ColorID" type="hidden" value="0" />
+
+
+														<!-- 🔹 Label -->
+														<div class="col-12 col-md-2 d-flex align-items-center">
+															<label for="ColorName" class="form-label mb-0">Name</label>
+														</div>
+
+														<!-- 🔹 Input -->
+														<div class="col-12 col-md-8 d-flex align-items-center">
+															<div class="w-100">
+																<input type="text" class="form-control" id="ColorName" placeholder="Fill Name" />
+																<div id="ColorNameMessage" class="text-danger fw-normal"></div>
+															</div>
+														</div>
+
+														<!-- 🔹 Status Toggle -->
+														<div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
+															<div class="custom-control custom-switch m-0">
+																<input type="checkbox" class="custom-control-input" id="ColorStatusToggle" checked>
+																<label class="custom-control-label" for="ColorStatusToggle" id="ColorStatusLabel">Active</label>
+																<input type="hidden" id="ColorStatusID" name="ColorStatusID" value="A">
+															</div>
+														</div>
+													</div>
+
+													<div class="row align-items-center mb-3">
+
+														<!-- 🔹 Label -->
+														<div class="col-12 col-md-2 d-flex align-items-center">
+															<label for="ColorCode" class="form-label mb-0">Code</label>
+														</div>
+
+														<div class="col-12 col-md-8 d-flex align-items-center">
+
+															<div class="row w-100">
+
+																<div class="col-12 col-md-8">
+
+																	<!-- Color picker -->
+																	<input type="color"
+																		   id="ColorPicker"
+																		   class="form-control"
+																		   value="#915555" />
+
+																</div>
+
+																<div class="col-12 col-md-4">
+
+																	<!-- Read-only HEX -->
+																	<input type="text"
+																		   id="ColorCode"
+																		   class="form-control"
+																		   readonly />
+
+
+																</div>
+
+																<div id="ColorCodeMessage" class="text-danger fw-normal"></div>
+															</div>
+														</div>
+														 
+														<!-- 🔹 Status Toggle -->
+														<div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
+															<div class="custom-control custom-switch m-0">
+																<input type="checkbox" class="custom-control-input" id="ColorIsCustomToggle">
+																<label class="custom-control-label" for="ColorIsCustomToggle" id="ColorIsCustomLabel">Is Custom</label>
+															</div>
+														</div>
+													</div>
+
+													<div class="row align-items-center mb-3">
+														
+														<div class="col-12 col-md-10"></div>
+
+														<div class="col-12 col-md-1">
+
+															<button id="btnCancelColor" type="button" name="CancelSize" class="btn btn-sm btn-outline-secondary w-100"><i class="fas fa-plus"></i> Cancel</button>
+
+														</div>
+
+														<div class="col-12 col-md-1">
+
+															<button id="btnCreateColor" type="button" name="CreateColor" class="btn btn-sm btn-outline-primary w-100"><i class="fas fa-plus"></i> Create</button>
+
+														</div>
+														 
+													</div>
+
+												</div>
+												 
+											</div>
+
+
 										</div>
+
 									</div>
 
 									<!-- 🔥 Dynamic color cards -->
@@ -481,7 +598,34 @@
 	};
 
 	document.addEventListener('DOMContentLoaded', function () {
- 
+
+
+		// Picker → HEX
+		$('#ColorPicker').on('input change', function () {
+			$('#ColorCode').val(this.value.toUpperCase());
+		});
+
+		// Is Custom toggle
+		$('#ColorIsCustomToggle').on('change', function () {
+
+			if (this.checked) {
+				// Custom color → no picker
+				$('#ColorPicker').prop('disabled', true);
+				$('#ColorCode').val('');
+				$('#ColorIsCustomLabel').text('Is Custom');
+			} else {
+				// System color → enable picker
+				$('#ColorPicker').prop('disabled', false);
+				syncColorCode();
+			}
+		});
+
+		function syncColorCode() {
+			let color = $('#ColorPicker').val();
+			$('#ColorCode').val(color ? color.toUpperCase() : '');
+		}
+
+
 	$('#ProductSizes').on('changed.bs.select', function () {
 
 		//if (isEditLoading) return;
@@ -1082,7 +1226,50 @@
 				}
 			});
 		});
-		 
+
+			// Open Size Entry
+			$('#btnNewSize').on('click', function () {
+				$('#SizeEntry').stop(true, true).slideDown(300);
+				$('#txtSizeDescription').val('').focus();
+			});
+
+			$('#btnCancelSize').on('click', function () {
+				$('#SizeEntry').stop(true, true).slideUp(300);
+			});
+
+
+			// 🔹 Open Color Entry
+			// Open slowly
+		$('#btnNewColor').on('click', function () {
+
+			$('#ColorEntry').stop(true, true).slideDown(300); // same speed as size
+
+			// Reset fields
+			$('#ColorID').val(0);
+			$('#ColorName').val('');
+			$('#ColorNameMessage').text('');
+			$('#ColorCodeMessage').text('');
+
+			// Reset toggles
+			$('#ColorIsCustomToggle').prop('checked', false);
+			$('#ColorStatusToggle').prop('checked', true);
+			$('#ColorStatusLabel').text('Active');
+			$('#ColorStatusID').val('A');
+
+			// Reset picker
+			$('#ColorPicker').prop('disabled', false).val('#000000');
+			$('#ColorCode').val('#000000');
+
+			$('#ColorName').focus();
+		});
+
+
+		// Close slowly
+		$('#btnCancelColor').on('click', function () {
+			$('#ColorEntry').stop(true, true).slideUp(300); // same speed as size
+		});
+
+
 
 
 	});
