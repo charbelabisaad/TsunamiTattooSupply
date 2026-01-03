@@ -1,0 +1,340 @@
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "User Accounts";
+}
+
+<partial name="SaveUser" />
+<partial name="DeleteUser" />
+<partial name="ResetPassword" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+						<div class="col-6 d-flex align-items-center"><h3 class="card-title">Users List</h3></div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+							<button id="btnNewUser" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New User</button>
+                        </div>
+                    </div>
+                    
+                </div>
+
+				<div class="card-body p-0">
+                            
+                    <div class="col-sm-12 mt-3">
+                        <table id="tableUsers" class="table table-striped w-100 ">
+                            <thead>
+                                <tr>
+                                    <th>Username</th>
+                                    <th>First Name</th>
+                                    <th>Last Name</th>
+                                    <th>Type</th>
+                                    <th>Role</th>
+                                    <th style="width:50px">Status</th>
+                                    <th class="no-export" style="width:50px">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                    </div>
+                        
+                </div>
+               
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+        $(document).ready(function () {
+
+            var table = $('#tableUsers').DataTable({
+                processing: true,
+                responsive: true,
+                ajax: {
+                    url: '@Url.Action("ListGetUsers", "Users")',
+                        type: 'GET',
+                    dataSrc: function (json) {
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load users.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+                dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search users..."
+                },
+                buttons: [
+                        { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                        { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                        {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-danger btn-sm',
+                            exportOptions: { columns: ':visible:not(.no-export)' },
+                            text: '<i class="fas fa-file-pdf"></i> PDF',
+                            customize: function (doc) {
+                                // Set all columns to auto width
+                                var tableBody = doc.content[1].table.body;
+                                var colCount = tableBody[0].length;
+
+                                // Distribute column widths evenly (100% width)
+                                var colWidths = [];
+                                for (var i = 0; i < colCount; i++) {
+                                    colWidths.push('*');
+                                }
+                                doc.content[1].table.widths = colWidths;
+
+                                // Optional: reduce margins and font size to fit better
+                                doc.styles.tableBodyEven.alignment = 'center';
+                                doc.styles.tableBodyOdd.alignment = 'center';
+                                doc.styles.tableHeader.alignment = 'center';
+                                doc.defaultStyle.fontSize = 8;
+                                doc.pageMargins = [10, 10, 10, 10];
+                            }
+                        },
+                        { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                    { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
+                        action: function () {
+                            table.ajax.reload();
+                        }
+                    }
+                ],
+                columns: [
+                    { 
+                        data: 'username',
+                        className: 'align-middle' 
+                    },
+                    { 
+                        data: 'firstName',
+                        className: 'align-middle'
+                    },
+                    { 
+                        data: 'lastName',
+                        className: 'align-middle'
+                    },
+                    { 
+                        data: 'userType',
+                        className: 'align-middle'
+                    },
+                    { 
+                        data: 'userRole',
+                        className: 'align-middle'
+                    },
+                    { 
+                        data: 'status',
+                        className: 'align-middle text-center',
+                        render: function (data, type, row) { 
+                        
+                          return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px;">${data}</div>`;
+
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export align-middle text-center",
+                        render: function (data, type, row) {
+                            return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item btnEditUser" style="cursor:pointer" data-id="${row.id}" data-username="${row.username}"
+                                data-firstname="${row.firstName}" data-lastname="${row.lastName}" data-usertypeid="${row.userTypeID}"
+                                data-userroleid="${row.userRoleID}" data-statusid="${row.statusID}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                    <a class="dropdown-item btnDeleteUser" style="cursor:pointer" data-id="${row.id}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                                    <a class="dropdown-item btnResetPassword" style="cursor:pointer" data-id="${row.id}">
+                                    <i class="fas fa-key"></i> Reset Password
+                                </a>
+                            </div>
+                        </div>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+            // place export buttons next to search bar
+            table.buttons().container().appendTo('#tableUsers_wrapper .col-md-6:eq(1)');
+             
+            var $filter = $('#tableUsers_filter');
+
+            $filter.css("position", "relative");
+
+            // Insert FA icons
+       
+            //$filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+
+            // Toggle X on typing
+            // $('#tableUsers_filter input').on("input", function () {
+            //     if ($(this).val().length > 0) {
+            //         $('#clearSearch').show();
+            //     } else {
+            //         $('#clearSearch').hide();
+            //     }
+            // });
+
+            // Clear on X click
+            // $('#clearSearch').on("click", function () {
+            //     $('#tableUsers_filter input').val('');
+            //     table.search('').draw();
+            //     $(this).hide();
+            // });
+
+            const btnNewUser = document.getElementById("btnNewUser");
+                
+            btnNewUser.addEventListener("click", function () { 
+                 
+                const modalEl = document.getElementById("saveUserModal");
+                const modal = new bootstrap.Modal(modalEl);
+
+                $("#modalTitle").text('Create New User');
+    
+                $("#UserID").val(0); 
+ 
+                $("#Username").val('');
+                $("#FirstName").val('');
+                $("#LastName").val('');
+
+                 $("#UserTypeID").val('RGL').change();
+
+                $("#StatusID").val('A');
+                $("#StatusToggle").prop("checked", true);
+                $("#statusLabel").text("Active");
+                        
+                $("#UsernameMessage").text('');
+                $("#FirstNameMessage").text('');
+                $("#LastNameMessage").text('');
+                         
+                $("#Username").removeClass('border-danger');
+                $("#FirstName").removeClass('border-danger');
+                $("#LastName").removeClass('border-danger');
+
+                modal.show();
+
+                $(modalEl).on('shown.bs.modal', function () {
+                     
+                    $("#FirstName").focus();
+
+                });
+
+            });
+               
+            $(document).on('click', '.btnEditUser', function(){  
+                
+                $("#modalTitle").text('Modify User');
+
+                const ID = $(this).data('id');
+                const Username = $(this).data('username');
+                const FirstName = $(this).data('firstname');
+                const LastName = $(this).data('lastname');
+                const UserTypeID = $(this).data('usertypeid');
+                const StatusID = $(this).data('statusid'); 
+                const modalEl = document.getElementById("saveUserModal");
+                const modal = new bootstrap.Modal(modalEl);
+                   
+                $("#UserID").val(ID); 
+                $("#Username").val(Username);
+                $("#FirstName").val(FirstName);
+                $("#LastName").val(LastName);
+                $("#UserTypeID").val(UserTypeID).change();
+                $("#StatusID").val(StatusID);
+
+                $("#UsernameMessage").text('');
+                $("#FirstNameMessage").text('');
+                $("#LastNameMessage").text('');
+
+                $("#Username").removeClass('border-danger');
+                $("#FirstName").removeClass('border-danger');
+                $("#LastName").removeClass('border-danger');
+
+                $("#StatusToggle").prop("checked", StatusID == 'A' ? true : false);
+                $("#statusLabel").text(StatusID == 'A' ? 'Active' : 'Inactive')
+
+                modal.show();
+
+                $(modalEl).on('shown.bs.modal', function () {
+
+                    $("#FirstName").focus();
+
+                });
+
+            });
+
+        // Show modal when Delete button clicked
+        $(document).on("click", ".btnDeleteUser", function (e) {
+          e.preventDefault();
+
+          const userId = $(this).data("id");
+            $("#deletedUserId").val(userId);
+
+          const username = $(this).closest("tr").find("td:first").text();
+
+          $("#deleteUserMessage").html(
+            `Are you sure you want to delete <strong>${username}</strong>?`
+          );
+
+          $("#deleteUserModal").modal("show");
+        });
+
+        $(document).on("click", ".btnResetPassword", function (e) {
+            e.preventDefault();
+
+            const userId = $(this).data("id");
+            $("#resetPasswordUserId").val(userId);
+
+            const username = $(this).closest("tr").find("td:first").text();
+
+            $("#resetPasswordMessage").html(
+                `Are you sure you want to reset the password for <strong>${username}</strong>?`
+            );
+
+            $("#resetPasswordModal").modal("show");
+        });
+
+    });
+      
+    </script>
+}
+
+
+
+
+
+
+
+

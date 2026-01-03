@@ -1,0 +1,92 @@
+﻿<div class="modal fade" id="deleteUserModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete User</h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <p class="mb-3" id="deleteUserMessage">
+                        Are you sure you want to delete this user?
+                    </p>
+                    <input type="hidden" id="deletedUserId" value="0" />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="deleteModalMessage" class="col-md-6 d-flex align-items-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-6 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                            <button id="btnConfirmDeleteUser" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" role="status" aria-hidden="true"></span>
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+ 
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+        $('#btnConfirmDeleteUser').on('click', function (e) {
+            e.preventDefault();
+           
+
+            const userId = $("#deletedUserId").val();
+
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteUser i").addClass("d-none");
+            $("#btnConfirmDeleteUser").prop("disabled", true)
+            //$("#btnConfirmDeleteUser").addClass("disabled")
+
+            $.ajax({
+                url: '@Url.Action("DeleteUser", "UserAccounts")',
+                type: "POST",
+                data: { ID: userId }
+            })
+            .done(function (response) {
+                if (response.success) {
+
+                    const table = $("#tableUsers").DataTable();
+
+                    $("#deleteUserModal").modal("hide");
+                    table.ajax.reload(null, false);
+                    toastr.success("User deleted successfully!");
+                } else {
+                    $("#deleteModalMessage").text(response.message).show();
+                }
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteUser i").removeClass("d-none");
+                $("#btnConfirmDeleteUser").prop("disabled", false);
+            })
+            .fail(function () {
+                $("#deleteModalMessage").text("Error deleting user.").show();
+            })
+            .always(function () {
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteUser i").removeClass("d-none");
+                $("#btnConfirmDeleteUser").prop("disabled", false);
+                //$("#btnConfirmDeleteUser").removeClass("disabled");
+            });
+        });
+         
+    });
+
+</script>

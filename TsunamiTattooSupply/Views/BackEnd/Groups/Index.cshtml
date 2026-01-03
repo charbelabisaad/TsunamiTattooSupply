@@ -1,0 +1,475 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Groups";
+}
+
+<style>
+    /* 🔹 Dark translucent backdrop for both modals */
+    #imageGroupViewModal,
+    #imageSubGroupViewModal {
+        background-color: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(4px); /* subtle blur for elegance */
+        z-index: 5000;
+    }
+
+        /* 🔹 Center modal content beautifully */
+        #imageGroupViewModal .modal-dialog,
+        #imageSubGroupViewModal .modal-dialog {
+            max-width: 500px;
+            max-height: 500px;
+            margin: auto;
+        }
+
+        /* 🔹 Transparent modal box */
+        #imageGroupViewModal .modal-content,
+        #imageSubGroupViewModal .modal-content {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 🔹 Smooth image transitions */
+        #imageGroupViewModal img,
+        #imageSubGroupViewModal img {
+            transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+            opacity: 0.95;
+        }
+
+            /* 🔹 Slight zoom and fade on hover */
+            #imageGroupViewModal img:hover,
+            #imageSubGroupViewModal img:hover {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+        /* 🔹 Optional close button hover effect */
+        #imageGroupViewModal .btn:hover,
+        #imageSubGroupViewModal .btn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.1);
+            transition: all 0.2s ease-in-out;
+        }
+
+    /* 🔹 Orange bordered SubGroup button */
+    .btnViewSubGroups {
+        border: 1px solid #ff6600 !important;
+        color: #ff6600 !important;
+        width: 130px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btnViewSubGroups:hover {
+            background-color: #ff6600 !important;
+            color: #ffffff !important;
+        }
+
+        .btnViewSubGroups:focus {
+            box-shadow: none !important;
+        }
+
+    /* 🔹 Equal-height header style for SubGroup cards */
+    .subcardheader-equal {
+        min-height: 56px; /* ensures consistent header height */
+        padding: 0.75rem 1rem !important; /* consistent spacing inside */
+        align-groups: center; /* vertical center */
+        justify-content: space-between; /* title on left, button on right */
+    }
+</style>
+
+<partial name="SaveGroup" />
+<partial name="DeleteGroup" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Groups List</h3></div>
+                        <div class="col-6 d-flex align-groups-center justify-content-end">
+                            <button id="btnNewGroup" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Group</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+					<div id="groupTypeFilter" class="m-3 d-flex align-items-center justify-content-start">
+
+					 
+						<label class="mr-2">
+							<input type="radio" name="groupType" value="BRD" checked> Brands
+						</label>
+
+						<label class="mr-2">
+							<input type="radio" name="groupType" value="CLC"> Collections
+						</label>
+					</div>
+                    <div class="col-sm-12 mt-3">
+                         
+                        <table id="tableGroups" class="table table-striped w-100">
+                            <thead>
+                                <tr style="vertical-align:middle">
+                                    <th style="width:70px">Image</th>        <!-- NEW -->
+									<th>Description</th>
+									<th style="width:90px">Show Home</th>
+                                    <th style="width:50px">Status</th> 
+                                    <th style="width:50px" class="no-export">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            var table = $('#tableGroups').DataTable({
+                processing: true,
+                responsive: true,
+                       ajax: {
+            url: '@Url.Action("ListGetGroups", "Groups")',
+            type: 'GET',
+            data: function (d) {
+                d.typeID = $('input[name="groupType"]:checked').val(); // <-- NEW
+            },
+            dataSrc: function (json) {
+                if (json && json.success === false) {
+                    toastr.error(json.message || "Failed to load groups.");
+                    return [];
+                }
+                if (!json || !json.data) {
+                    toastr.error("Unexpected response from server.");
+                    return [];
+                }
+                return json.data;
+            }
+        },
+
+                // SAME DOM layout as Categories
+                dom:
+                    '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                    '<"row mt-2 mb-2 d-flex align-items-center"' +
+                    '<"col-md-6 d-flex align-items-center" l>' +
+                    '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                    '<"col-md-2 d-flex justify-content-end" p>' +
+                    '>',
+
+
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search groups..."
+                },
+
+                buttons: [
+                    {
+                        extend: 'copy',
+                        className: 'btn btn-secondary btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-copy"></i> Copy'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-excel"></i> Excel'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        customize: function (doc) {
+                            var tableBody = doc.content[1].table.body;
+                            var colCount = tableBody[0].length;
+
+                            var colWidths = [];
+                            for (var i = 0; i < colCount; i++) colWidths.push('*');
+
+                            doc.content[1].table.widths = colWidths;
+                            doc.styles.tableBodyEven.alignment = 'center';
+                            doc.styles.tableBodyOdd.alignment = 'center';
+                            doc.styles.tableHeader.alignment = 'center';
+                            doc.defaultStyle.fontSize = 8;
+                            doc.pageMargins = [10, 10, 10, 10];
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-dark btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-print"></i> Print'
+                    },
+                    {
+                        text: '<i class="fas fa-sync"></i> Refresh',
+                        className: 'btn btn-primary btn-sm',
+                        action: function () {
+                            table.ajax.reload();
+                        }
+                    }
+                ],
+
+                order: [[3, 'asc']], // Order by Status (same logic as categories)
+
+                columns: [
+                    // 🔹 Group Image
+                    {
+                        data: "image",
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (!row.image)
+                                return `<span class="text-muted">No Image</span>`;
+
+                                   return `<img src="${row.imagePath}${row.image}"
+                                       style="width:70px;height:70px;object-fit:contain;border-radius:4px;cursor:pointer"
+                                       class="groupImagePreview"
+                                       data-img="${row.image}"
+                                       data-imagepath="${row.imagepath}">
+                                `;
+
+                        }
+                    },
+
+                    // 🔹 Group Description
+                    {
+                        data: "name",
+                        className: "align-middle"
+                    }, 
+                    {
+                        data: "status",
+                        className: "align-middle text-center",
+                        render: function(data, type, row){
+                            return row.showHome == true ? `<span class="text-success font-weight-bold" style="font-size:1.5em"><i class="fas fa-check"></i></span>` 
+                                                        : `<span class="text-danger font-weight-bold" style="font-size:1.5em"><i class="fas fa-close"></i></span>`;
+                        }
+                    },
+
+                    // 🔹 Group Status with Color Badge
+                    {
+                        data: "status",
+                        className: "align-middle text-center",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="badge text-white"
+                                     style="background-color:#${row.statusColor}; width:120px;">
+                                    ${data}
+                                </div>
+                            `;
+                        }
+                    },
+
+                    // 🔹 Actions
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export text-center align-middle",
+                        render: function (data, type, row) {
+                            return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditGroup"
+                                       data-id="${row.id}"
+                                       data-name="${row.name}"
+                                       data-summary="${row.summary}"
+                                       data-imagepath="${row.imagePath}"
+                                       data-image="${row.image}"
+                                       data-typeid="${row.typeID}" 
+                                       data-statusid="${row.statusID}"
+                                       data-showhome="${row.showHome}">
+                                       <i class="fas fa-edit"></i> Edit
+                                    </a>
+
+                                    <a class="dropdown-item btnDeleteGroup"
+                                       data-id="${row.id}">
+                                       <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+            // OPTIONAL: add style to search
+            var $filter = $('#tableGroups_filter');
+            $filter.css("position", "relative");
+
+            $(document).on("click", "#btnNewGroup", function () {
+
+                // Reset fields
+                $("#GroupID").val(0);
+                $("#GroupDescription").val("");
+                $("#GroupDescriptionMessage").html("");
+
+                // Reset Status Toggle
+                $("#GroupStatusToggle").prop("checked", true);
+                $("#GroupStatusLabel").text("Active");
+                $("#GroupStatusID").val("A");
+
+                // Reset Image
+                $("#groupImagePreview").attr("src", "").addClass("d-none");
+                $("#groupImage").val(""); // clear file input
+                $(".placeholder-icon").removeClass("d-none");
+
+                $("#ClearImage").val("false");
+
+                var type = $('input[name="groupType"]:checked').val();
+
+                $("#GroupTypeID").val(type);
+
+                if (type === "BRD") {
+                    $("#modalGroupTitle").text("Create New Brand");
+                } else if (type === "CLC") {
+                    $("#modalGroupTitle").text("Create New Collection");
+                }
+
+                // Open modal
+                $("#saveGroupModal").modal("show");
+
+            });
+
+        $('input[name="groupType"]').on('change', function () {
+            table.ajax.reload();
+        });
+
+        $(document).on("click", ".btnEditGroup", function () {
+
+            var id = $(this).data("id");
+            var name = $(this).data("name");
+            var image = $(this).data("image");
+            var imagepath = $(this).data("imagepath");
+            var statusID = $(this).data("statusid");
+            var typeID = $(this).data("typeid");
+            var showHome = $(this).data("showhome");
+            var summary = $(this).data("summary");
+
+            // ------------------------------------------
+            // 🔹 Reset Modal First
+            // ------------------------------------------
+            $("#groupForm")[0].reset();
+            $("#ClearImage").val("false");
+            $("#GroupID").val(id);
+            $("#GroupDescriptionMessage").text("");
+
+            // Summernote reset
+            if ($("#groupDetails").summernote) {
+                $("#groupDetails").summernote("code", summary || "");
+            }
+
+            // ------------------------------------------
+            // 🔹 Set Basic Fields
+            // ------------------------------------------
+            $("#GroupDescription").val(name);
+            $("#GroupTypeID").val(typeID);
+
+            // Status
+            $("#GroupStatusID").val(statusID);
+            $("#GroupStatusToggle").prop("checked", statusID === "A");
+            $("#GroupStatusLabel").text(statusID === "A" ? "Active" : "Inactive");
+
+            // Show Home
+
+            $("#GroupShowHome").val(showHome);
+            $("#GroupShowHomeToggle").prop("checked", showHome == "1");
+
+            // ------------------------------------------
+            // 🔹 Handle Image
+            // ------------------------------------------
+            const preview = $("#groupImagePreview");
+            const placeholder = $(".placeholder-icon");
+            const clearBtn = $(".btn-clear");
+            const viewBtn = $(".btn-view");
+
+            if (image) {
+                preview.attr("src", imagepath + image).removeClass("d-none");
+                placeholder.addClass("d-none");
+                clearBtn.show();
+                viewBtn.show();
+            } else {
+                preview.attr("src", "").addClass("d-none");
+                placeholder.removeClass("d-none");
+                clearBtn.hide();
+                viewBtn.hide();
+            }
+
+            // ------------------------------------------
+            // 🔹 Set Modal Title
+            // ------------------------------------------
+            if (typeID === "BRD") {
+                $("#modalGroupTitle").text(`Edit Brand: ${name}`);
+            }
+            else if (typeID === "CLC") {
+                $("#modalGroupTitle").text(`Edit Collection: ${name}`);
+            }
+
+            // ------------------------------------------
+            // 🔹 Open Modal
+            // ------------------------------------------
+            $("#saveGroupModal").modal("show");
+        });
+
+
+            $(function () {
+                $("#groupDetails").summernote({
+                    height: 230,
+                    disableResizeEditor: true
+                });
+            });
+
+            // ===============================
+            // 🔹 OPEN DELETE GROUP MODAL
+            // ===============================
+            $(document).on("click", ".btnDeleteGroup", function () {
+
+                let id = $(this).data("id");
+                let name = $(this).data("name") || "this group";
+
+                // Put ID in hidden input
+                $("#deletedGroupId").val(id);
+
+                // Set message inside modal
+                $("#deleteGroupMessage").text(`Are you sure you want to delete "${name}"?`);
+
+                // Show modal
+                $("#deleteGroupModal").modal("show");
+            });
+             
+        });
+
+    </script>
+
+}

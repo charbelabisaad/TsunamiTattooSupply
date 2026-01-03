@@ -1,0 +1,982 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Products";
+}
+
+<style>
+    /* 🔹 Dark translucent backdrop for both modals */
+    #imageItemViewModal,
+    #imageSubItemViewModal {
+        background-color: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(4px); /* subtle blur for elegance */
+        z-index: 5000;
+    }
+
+    /* 🔹 Center modal content beautifully */
+    #imageItemViewModal .modal-dialog,
+    #imageSubItemViewModal .modal-dialog {
+        max-width: 500px;
+        max-height: 500px;
+        margin: auto;
+    }
+
+    /* 🔹 Transparent modal box */
+    #imageItemViewModal .modal-content,
+    #imageSubItemViewModal .modal-content {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* 🔹 Smooth image transitions */
+    #imageItemViewModal img,
+    #imageSubItemViewModal img {
+        transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+        opacity: 0.95;
+    }
+
+    /* 🔹 Slight zoom and fade on hover */
+    #imageItemViewModal img:hover,
+    #imageSubItemViewModal img:hover {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    /* 🔹 Optional close button hover effect */
+    #imageItemViewModal .btn:hover,
+    #imageSubItemViewModal .btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: scale(1.1);
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* 🔹 Orange bordered SubItem button */
+    .btnViewSubItems {
+        border: 1px solid #ff6600 !important;
+        color: #ff6600 !important;
+        width: 130px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btnViewSubItems:hover {
+        background-color: #ff6600 !important;
+        color: #ffffff !important;
+    }
+
+    .btnViewSubItems:focus {
+        box-shadow: none !important;
+    }
+
+    /* 🔹 Equal-height header style for SubItem cards */
+    .subcardheader-equal {
+        min-height: 56px; /* ensures consistent header height */
+        padding: 0.75rem 1rem !important; /* consistent spacing inside */ 
+        align-items: center; /* vertical center */
+        justify-content: space-between; /* title on left, button on right */ 
+    }
+     
+</style>
+
+
+
+<partial name="SaveProduct" />
+<partial name="DeleteProduct" />  
+<div class="content-wrapper">
+
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center">
+                            <h3 class="card-title">Products List</h3>
+                        </div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                            <button id="btnNewProduct" type="button" class="btn btn-sm btn-black">
+                                <i class="fas fa-plus"></i> Add New Product
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="col-sm-12 mt-3">
+                        <table id="tableProducts" class="table table-striped w-100">
+                            <thead>
+                                <tr style="vertical-align:middle">
+                                    <th style="width:70px">Image</th>
+                                    <th>Code</th>
+                                    <th>Name</th>
+                                    <th style="width:70px">Unit</th>
+                                    <th style="width:50px">VAT</th>
+                                    <th style="width:50px">Feature</th>
+                                    <th style="width:90px">New Arrival</th>
+                                    <th style="width:90px">Expiry Date</th>
+                                    <th style="width:50px">Warranty</th>
+                                    <th style="width:50px">Months</th>
+                                    <th style="width:50px">Status</th>
+                                    <th class="no-export" style="width:50px">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+@section Scripts {
+
+    <script>
+
+    $(document).ready(function () {
+
+            var table = $('#tableProducts').DataTable({
+                processing: true,
+                responsive: true,
+                ajax: {
+                    url: '@Url.Action("ListGetProducts", "Products")',
+                    type: 'GET',
+                    dataSrc: function (json) {
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load products.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+
+                dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                     '<"row mt-2 mb-2 d-flex align-items-center"' +
+                     '<"col-md-6 d-flex align-items-center" l>' +
+                     '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                     '<"col-md-2 d-flex justify-content-end" p>' +
+                     '>',
+
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search products..."
+                },
+
+                buttons: [
+                    { extend: 'copy', className: 'btn btn-secondary btn-sm',
+                      exportOptions: { columns: ':visible:not(.no-export)' },
+                      text: '<i class="fas fa-copy"></i> Copy'
+                    },
+                    { extend: 'excel', className: 'btn btn-success btn-sm',
+                      exportOptions: { columns: ':visible:not(.no-export)' },
+                      text: '<i class="fas fa-file-excel"></i> Excel'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        customize: function (doc) {
+                            var tableBody = doc.content[1].table.body;
+                            var colCount = tableBody[0].length;
+
+                            var colWidths = [];
+                            for (var i = 0; i < colCount; i++) {
+                                colWidths.push('*');
+                            }
+                            doc.content[1].table.widths = colWidths;
+
+                            doc.styles.tableBodyEven.alignment = 'center';
+                            doc.styles.tableBodyOdd.alignment = 'center';
+                            doc.styles.tableHeader.alignment = 'center';
+                            doc.defaultStyle.fontSize = 8;
+                            doc.pageMargins = [10, 10, 10, 10];
+                        }
+                    },
+                    { extend: 'print', className: 'btn btn-dark btn-sm',
+                      exportOptions: { columns: ':visible:not(.no-export)' },
+                      text: '<i class="fas fa-print"></i> Print'
+                    },
+                    {
+                        text: '<i class="fas fa-sync"></i> Refresh',
+                        className: 'btn btn-primary btn-sm',
+                        action: function () {
+                            table.ajax.reload();
+                        }
+                    }
+                ],
+
+                order: [[2, "asc"]],
+
+                columns: [
+                    // 🔹 Product Image
+                    {
+                        data: "image",
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (!row.image)
+                                return `<span class="text-muted">No Image</span>`;
+                            return `
+                                <img src="${row.imagePath}${row.image}"
+                                     style="width:70px;height:70px;object-fit:contain;border-radius:4px;">
+                            `;
+                        }
+                    },
+
+                    // 🔹 Code
+                    {
+                        data: "code",
+                        className: "align-middle"
+                    },
+
+                    // 🔹 Name
+                    {
+                        data: "name",
+                        className: "align-middle"
+                    },
+
+                    // 🔹 Unit
+                    {
+                        data: "unitShortDescription",
+                        className: "align-middle"
+                    },
+
+                    // 🔹 VAT
+                    {
+                        data: "vat",
+                        className: "align-middle text-center",
+                        render: d => d ?
+                        '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                        '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
+                     
+                    },
+
+                    // 🔹 Feature (Yes/No)
+                    {
+                        data: "feature",
+                        className: "align-middle text-center",
+                        render: d => d ? 
+                        '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                        '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
+                    },
+
+                    // 🔹 New Arrival (Yes/No)
+                    {
+                        data: "newArrival",
+                        className: "align-middle text-center",
+                        render: d => d ?
+                        '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                        '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
+                    },  
+                    // 🔹 Arrival Expiry Date
+                    {
+                        data: "newArrivalDateExpiryDate",
+                        className: "align-middle text-center",
+                        render: data => data ? moment(data).format("DD-MM-YYYY") : "-"
+                    },
+
+                    // 🔹 Warranty
+                    {
+                        data: "warranty",
+                        className: "align-middle text-center",
+                        render: d => d ?
+                        '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                        '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
+                    
+                    },
+
+                    // 🔹 Warranty Months
+                    {
+                        data: "warrantyMonths",
+                        className: "align-middle text-center"
+                    },
+
+                    // 🔹 Status (same pill design)
+                    {
+                        data: "statusDescription",
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="badge text-center text-white"
+                                     style="background-color:#${row.statusColor}; width:100px">
+                                    ${data}
+                                </div>
+                            `;
+                        }
+                    },
+
+                    // 🔹 Actions (same dropdown as Categories)
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export text-center align-middle",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <div class="dropdown-menu">
+
+                                        <a class="dropdown-item btnEditProduct" style="cursor:pointer"
+                                           data-id="${row.id}"
+                                           data-code="${row.code}"
+                                           data-name="${row.name}"
+                                           data-grouptypeid="${row.groupTypeID}"
+                                           data-groupid="${row.groupID}"
+                                           data-unitid="${row.unitID}"
+                                           data-vat="${row.vat}"
+                                           data-feature="${row.feature}"
+                                           data-newarrival="${row.newArrival}"
+                                           data-newarrivaldate="${row.newArrivalDateExpiryDate}"
+                                           data-warranty="${row.warranty}"
+                                           data-warrantymonths="${row.warrantyMonths}"
+                                           data-statusid="${row.statusID}">
+                                           <i class="fas fa-edit"></i> Edit
+                                        </a>
+
+                                        <a class="dropdown-item btnDeleteProduct" style="cursor:pointer"
+                                           data-id="${row.id}">
+                                           <i class="fas fa-trash"></i> Delete
+                                        </a>
+
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    }
+                ]
+            });
+
+              // =====================================
+        // 🔹 NEW PRODUCT BUTTON (Open Create Modal)
+        // =====================================
+        $(document).on("click", "#btnNewProduct", function () {
+
+            const modalEl = document.getElementById("saveProductModal");
+            const modal   = new bootstrap.Modal(modalEl);
+
+            // ================================
+            // BASIC RESET
+            // ================================
+            $("#modalProductTitle").text("Create New Product");
+            $("#ProductID").val(0);
+
+            $("#ProductDescription").val("");
+            $("#ProductCode").val("");
+            $("#ProductName").val("");
+            $("#ProductWarrantyMonths").val("");
+            $("#ProductExpiryDate").val("");
+
+            $("#ProductDescriptionMessage").text("");
+            $("#ProductCodeMessage").text("");
+            $("#ProductUnitMessage").text("");
+
+            $("#ProductUnitID").val("");
+
+            $("#ProductStatusToggle").prop("checked", true);
+            $("#ProductStatusLabel").text("Active");
+            $("#ProductStatusID").val("A");
+
+            $("#ProductVAT").prop("checked", false);
+            $("#ProductFeature").prop("checked", false);
+            $("#ProductNewArrival").prop("checked", false);
+            $("#ProductWarranty").prop("checked", false);
+
+            // ================================
+            // SHOW MODAL FIRST ✅
+            // ================================
+            modal.show();
+
+            // ================================
+            // AFTER MODAL IS VISIBLE ✅
+            // ================================
+            $('#saveProductModal').one('shown.bs.modal', function () {
+
+                // LOAD DATA
+                LoadGroups();
+                selectedSubCatIds.clear();   // very important
+                LoadSubCategories({ restoreSelection: false });
+
+                excludeExpiryDate();
+                excludeWarrantyMonths();
+
+                // ================================
+                // CLEAR SUBCATEGORIES ✅
+                // ================================
+            
+                // ================================
+                // CLEAR SIZES ✅
+                // ================================
+                let $sizes = $('#ProductSizes');
+                $sizes.selectpicker('val', []);
+                $sizes.selectpicker('refresh');
+
+                $('#SizeVariationsContainer').empty();
+                $('#ProductSizesMessage').remove();
+
+                // ================================
+                // CLEAR COLORS ✅ (NO DESTROY)
+                // ================================
+                let $colors = $('#ProductColors');
+                $colors.selectpicker('val', []);
+                $colors.selectpicker('destroy').selectpicker('render');
+
+                $('#ColorVariationsContainer').empty();
+
+                Object.keys(colorImagesBuffer).forEach(k => {
+                    colorImagesBuffer[k] = [];
+                });
+
+                $('#ProductColorsMessage').text('');
+
+                // Focus
+                $("#ProductDescription").focus();
+            });
+        });
+
+                $(document).on('change', '#ProductGroupType', function () {
+
+           LoadGroups();
+
+        });
+         
+        function excludeExpiryDate() {
+                let isNewArrival = $('#ProductNewArrival').is(':checked');
+                let expiryInput  = $('#ProductExpiryDate');
+
+                if (isNewArrival) {
+                    expiryInput.prop('disabled', false);
+                    $('#ProductExpiryDate').focus();
+                } else {
+                    expiryInput
+                        .val('')
+                        .prop('disabled', true);
+                }
+            }
+
+            // Run on toggle change
+        $(document).on('change', '#ProductNewArrival', function () {
+            excludeExpiryDate();
+        });
+
+        function excludeWarrantyMonths() {
+            let hasWarranty = $('#ProductWarranty').is(':checked');
+            let warrantyInput = $('#ProductWarrantyMonths');
+
+            if (hasWarranty) {
+                warrantyInput.prop('disabled', false);
+                $('#ProductWarrantyMonths').focus();
+            } else {
+                warrantyInput
+                    .val('')
+                    .prop('disabled', true);
+            }
+        }
+
+        // Run on toggle change
+        $(document).on('change', '#ProductWarranty', function () {
+            excludeWarrantyMonths();
+        });
+
+        function LoadGroups(){
+
+                let groupTypeId = $('#ProductGroupType').val();
+                let groupSelect = $('#ProductGroup');
+
+                // Reset Group dropdown
+                groupSelect.empty();
+                groupSelect.append('<option value="">-- Select Group --</option>');
+
+                if (!groupTypeId)
+                    return;
+
+                $.ajax({
+                    url: '/Products/GetGroupsByType', // controller action
+                    type: 'GET',
+                    data: { groupTypeId: groupTypeId },
+                    success: function (groups) {
+
+                        if (!groups || groups.length === 0) {
+                            groupSelect.append('<option value="">No groups found</option>');
+                            return;
+                        }
+
+                        $.each(groups, function (i, g) {
+                            groupSelect.append(
+                                `<option value="${g.id}">${g.name}</option>`
+                            );
+                        });
+                    },
+                    error: function () {
+                        toastr.error('Failed to load groups');
+                    }
+                });
+
+        }
+
+        $(document).on('change', '#ProductCategory', function () {
+
+            LoadSubCategories();
+
+        });
+
+        function renderProductSubCategoryTags(subCategories) {
+
+            let container = $('#SubCategoryTags').empty();
+
+            subCategories.forEach(sc => {
+                container.append(`
+                    <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1"
+                          style="font-size:13px;">
+                        ${sc.name}
+                        <input type="hidden" name="SubCategories[${sc.id}].ID" value="${sc.id}">
+                        <i class="fas fa-times ml-2 remove-tag"
+                           data-id="${sc.id}"
+                           style="cursor:pointer;"></i>
+                    </span>
+                `);
+            });
+        }
+        function LoadSubCategories({ restoreSelection = true } = {}) {
+
+            let categoryId = $('#ProductCategory').val();
+            let subSelect  = $('#ProductSubCategory');
+
+            subSelect.empty();
+            currentCategoryOptionIds = [];
+
+            // Always add empty option
+            subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+            if (!categoryId) {
+                subSelect.selectpicker('destroy').selectpicker('render');
+                renderTags();
+                return;
+            }
+
+            $.ajax({
+                url: '/Products/GetSubCategoriesByCategory',
+                type: 'GET',
+                data: { categoryId },
+                success: function (items) {
+
+                    (items || []).forEach(sc => {
+                        let id = String(sc.id);
+
+                        subSelect.append(
+                            `<option value="${id}">${sc.name}</option>`
+                        );
+
+                        currentCategoryOptionIds.push(id);
+
+                        if (!subCatMetaById[id]) {
+                            subCatMetaById[id] = {
+                                id: sc.id,
+                                name: sc.name,
+                                categoryId: parseInt(categoryId)
+                            };
+                        }
+                    });
+
+                    // Refresh picker (NO destroy)
+                    subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // ===============================
+                    // RESTORE OR CLEAR SELECTION
+                    // ===============================
+                    if (restoreSelection) {
+                        let validSelected = currentCategoryOptionIds.filter(
+                            id => selectedSubCatIds.has(id)
+                        );
+
+                        subSelect.selectpicker('val', validSelected);
+                    } else {
+                        // 🔥 FORCE CLEAR
+                        subSelect.selectpicker('val', []);
+                    }
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // Keep tags
+                    renderTags();
+                },
+                error: function () {
+                    toastr.error('Failed to load sub-categories');
+                }
+            });
+        }
+
+        function renderSubCategoryTagsFromProduct() {
+
+            let container = $('#SubCategoryTags').empty();
+
+            productSubCategories.forEach(sc => {
+
+                container.append(`
+                    <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1">
+                        ${sc.name}
+                        <input type="hidden" name="SubCategories[${sc.id}].ID" value="${sc.id}">
+                        <i class="fas fa-times ml-2 remove-tag"
+                           data-id="${sc.id}"
+                           style="cursor:pointer;"></i>
+                    </span>
+                `);
+            });
+        }
+
+
+
+            // ================================
+              // 🔹 Globals
+              // ================================
+              let selectedSubCategoriesByCategory = {};
+
+              // ================================
+              // 🔹 Modal logic
+              // ================================
+                      // ================================
+        // 🔹 SubCategory change (GLOBAL)
+        // ================================
+               $(document).on('changed.bs.select', '#ProductSubCategory', function () {
+
+            let vals = $('#ProductSubCategory').val() || []; // selected in current category (strings)
+
+            // Remove any previously selected IDs of CURRENT category that are no longer selected
+            currentCategoryOptionIds.forEach(id => {
+                if (selectedSubCatIds.has(id) && !vals.includes(id)) {
+                    selectedSubCatIds.delete(id);
+                }
+            });
+
+            // Add newly selected ones
+            vals.forEach(id => selectedSubCatIds.add(String(id)));
+
+            // Update tags
+            renderTags();
+        });
+                $(document).on('click', '.remove-tag', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            let id = String($(this).data('id'));
+
+            // remove from global truth
+            selectedSubCatIds.delete(id);
+
+            // if this ID exists in the CURRENT dropdown, unselect it there too
+            if (currentCategoryOptionIds.includes(id)) {
+                let currentVals = $('#ProductSubCategory').val() || [];
+                currentVals = currentVals.filter(x => String(x) !== id);
+
+                $('#ProductSubCategory')
+                    .selectpicker('val', currentVals);
+                    //.selectpicker('refresh');
+            }
+
+            renderTags();
+        });
+
+                function renderTags() {
+
+                    let container = $('#SubCategoryTags').empty();
+
+                    // render ALL selected subcategories (across categories) from ProductId
+                    Array.from(selectedSubCatIds).forEach(id => {
+
+                        let meta = subCatMetaById[id];
+                        let name = meta?.name || `SubCategory #${id}`;
+
+                        container.append(`
+                            <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1"
+                                  style="font-size:13px;">
+                                ${name}
+                                <input type="hidden" name="SubCategories[${id}].ID" value="${id}">
+                                <i class="fas fa-times ml-2 remove-tag"
+                                   data-id="${id}"
+                                   style="cursor:pointer;"></i>
+                            </span>
+                        `);
+                    });
+                }
+                 
+              // ================================
+              // 🔹 Render tags
+              // ================================
+                function renderSubCategoryTags(categoryId) {
+
+                    let $sub = $('#ProductSubCategory');
+                    let container = $('#SubCategoryTags').empty();
+
+                    let values = selectedSubCategoriesByCategory[categoryId] || [];
+
+                    values.forEach(function (id) {
+
+                        let text = $sub.find(`option[value="${id}"]`).text();
+
+                        container.append(`
+                            <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1"
+                                  style="font-size:13px;">
+                                ${text}
+                                <input type="hidden" name="SubCategories[${id}].ID" value="${id}">
+                                <input type="hidden" name="SubCategories[${id}].Description" value="${text}">
+                                <i class="fas fa-times ml-2 remove-tag"
+                                   data-id="${id}"
+                                   style="cursor:pointer;"></i>
+                            </span>
+                        `);
+                    });
+                }
+
+        $(document).on('click', '.btnEditProduct', function () {
+
+            const modal = new bootstrap.Modal(document.getElementById("saveProductModal"));
+            let btn = $(this);
+
+            let productId   = btn.data('id');
+            let groupTypeId = btn.data('grouptypeid');
+            let groupId     = btn.data('groupid');
+
+            $("#modalProductTitle").text("Edit Product");
+
+            $("#ProductID").val(productId);
+            $("#ProductCode").val(btn.data('code'));
+            $("#ProductName").val(btn.data('name'));
+            $("#ProductUnit").val(btn.data('unitid'));
+
+            $("#ProductGroupType").val(groupTypeId);
+            LoadGroups();
+
+            setTimeout(() => {
+                $("#ProductGroup").val(groupId);
+            }, 300);
+
+            $("#ProductVAT").prop('checked', btn.data('vat') == 1);
+            $("#ProductFeature").prop('checked', btn.data('feature') == 1);
+            $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
+            $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
+
+            $("#ProductStatusID").val(btn.data('statusid'));
+
+            let expiry = btn.data('newarrivaldate');
+            $("#ProductExpiryDate").val(expiry ? moment(expiry).format('YYYY-MM-DD') : '');
+            $("#ProductWarrantyMonths").val(btn.data('warrantymonths') || '');
+
+            // ✅ UI reset ONLY
+            $("#ProductSubCategory").empty();
+            $("#SubCategoryTags").empty();
+
+            modal.show();
+
+            // 🔥 LOAD PRODUCT DATA
+            loadProductEditExtras(productId);
+        });
+
+        // ✅ Source of truth: all selected subcategory IDs for this product
+        let selectedSubCatIds = new Set();
+
+        // ✅ Store names + categoryId for selected items (and for loaded items)
+        let subCatMetaById = {}; // { "12": { id:12, name:"Ink", categoryId:3 }, ... }
+
+        // ✅ IDs available in the dropdown for current category (strings)
+        let currentCategoryOptionIds = [];
+
+        let selectedSizeIds = new Set();        // holds selected size IDs
+        let sizePricesBySizeId = {};            // sizeId => prices[]
+        let isEditLoading = false;
+
+        function loadProductEditExtras(productId) {
+
+            isEditLoading = true;
+
+            $.ajax({
+                url: '/Products/GetProductEditExtras',
+                type: 'GET',
+                data: { productId },
+                success: function (res) {
+
+                    if (!res || !res.success) {
+                        toastr.error("Failed to load product edit data");
+                        return;
+                    }
+
+                    /* =========================
+                     * SUB CATEGORIES (UNCHANGED)
+                     * ========================= */
+                    selectedSubCatIds = new Set();
+                    subCatMetaById = {};
+                    currentCategoryOptionIds = [];
+
+                    (res.subCategories || []).forEach(sc => {
+                        let id = String(sc.id);
+                        selectedSubCatIds.add(id);
+                        subCatMetaById[id] = {
+                            id: sc.id,
+                            name: sc.name,
+                            categoryId: sc.categoryId
+                        };
+                    });
+
+                    if (res.categoryId) {
+                        $("#ProductCategory").val(res.categoryId);
+                        LoadSubCategories();
+                    } else {
+                        renderTags();
+                    }
+
+                    /* =========================
+                     * ✅ SIZES — CORRECT VERSION
+                     * ========================= */
+
+                    selectedSizeIds.clear();
+                    sizePricesBySizeId = {};
+
+                    (res.sizes || []).forEach(s => {
+                        let sizeId = String(s.id);
+                        selectedSizeIds.add(sizeId);
+                        sizePricesBySizeId[sizeId] = s.prices || [];
+                    });
+
+                    $("#ProductSizes")
+                        .selectpicker('val', Array.from(selectedSizeIds));
+
+                    /* =========================
+                     * 🎨 COLORS — SAME PATTERN
+                     * ========================= */
+
+                    let selectedColorIds = [];
+                    let colorMetaById = {};
+
+                    (res.colors || []).forEach(c => {
+                        let colorId = String(c.id);
+                        selectedColorIds.push(colorId);
+
+                        colorMetaById[colorId] = {
+                            isCover: c.isCover,
+                            isActive: c.isActive
+                        };
+                    });
+
+                    $("#ProductColors")
+                        .selectpicker('val', selectedColorIds);
+
+                    /* =========================
+                     * 🔄 TRIGGER UI BUILD
+                     * ========================= */
+                    setTimeout(function () {
+
+                        // 🔹 Sizes
+                        $("#ProductSizes").trigger('changed.bs.select');
+
+                        Object.keys(sizePricesBySizeId).forEach(sizeId => {
+
+                            let card = $(`.variation-card[data-size-id="${sizeId}"]`);
+                            if (!card.length) return;
+
+                            sizePricesBySizeId[sizeId].forEach(p => {
+
+                                card.find(
+                                    `[name="Variations[${sizeId}].Prices[${p.currencyID}]"]`
+                                ).val(p.price);
+
+                                card.find(
+                                    `[name="Variations[${sizeId}].PricesNet[${p.currencyID}]"]`
+                                ).val(p.priceNet);
+                            });
+                        });
+
+                        // 🔹 Colors
+                        $("#ProductColors").trigger('changed.bs.select');
+
+                        Object.keys(colorMetaById).forEach(colorId => {
+
+                            let meta = colorMetaById[colorId];
+
+                            $(`#ColorCover_${colorId}`).prop('checked', meta.isCover);
+                            $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
+                        });
+
+                             renderEditImages(res.images);
+
+                        // ✅ Unlock edit mode AFTER hydration
+                        isEditLoading = false;
+
+                    }, 0);
+                },
+                error: function () {
+                    toastr.error("Server error while loading product data");
+                }
+            });
+        }
+
+        function renderEditImages(images) {
+             
+            $('.color-images-scroll').empty();
+                 
+            images.forEach(img => {
+
+                let $list = $('#dProductColorImagesList' + img.colorId);
+                 
+                if (!$list.length) return;
+                 
+                let html = `
+                    <div class="color-image-item position-relative"
+                         data-db-id="${img.id}" data-image-id="${img.id}">
+
+                        <img src="${img.smallImage}"
+                             class="img-fluid rounded"
+                             style="width:200px;height:200px;object-fit:contain;background:#fff;border:1px solid #ccc;">
+
+                        <div class="image-overlay d-flex justify-content-center align-items-center">
+                            <button type="button" class="overlay-btn btn-view">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button type="button" class="overlay-btn btn-clear btn-remove-existing">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                $list.append(html);
+            });
+        }
+
+
+        let colorImagesByColorId = {}; // edit mode preload
+        let isColorEditLoading = false;
+
+
+
+        $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
+        autoApply: true,
+        showDropdowns: true,
+        timePicker: false,
+        locale: { format: 'YYYY-MM-DD' }});
+
+    });
+
+    
+
+    </script>
+
+
+}

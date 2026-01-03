@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null;
+    ViewData["Title"] = "Admin Login";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"]</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" asp-append-version="true" />
+
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css" asp-append-version="true" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/AdminLogIn.css" asp-append-version="true"/>
+
+    <link rel="icon" href="~/Images/GENERAL/favicon32.png" />
+    <link rel="icon" href="~/Images/GENERAL/favicon16.png" />
+
+    <script src="~/plugins/jquery/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/dist/js/adminlte.min.js" asp-append-version="true"></script>
+ 
+</head>
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="card">
+            <div class="card-body login-card-body" >
+                <div class="login-row d-flex flex-column flex-md-row align-items-center">
+
+                    <!-- Logo -->
+                    <div class="login-logo-col mb-3 mb-md-0 text-center text-md-left">
+                        <img id="imgLogInLogo" src="~/Images/GENERAL/TsunamiLogoLogIn.png" style="max-width: 100%; height: auto;" />
+                    </div>
+
+                    <!-- Form -->
+                    <div class="login-form-col ml-md-4 w-100">
+                        <p class="login-box-msg">Sign in to start your session</p>
+                        <form method="post" id="loginForm">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="Username" placeholder="Username" required>
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><span class="fas fa-user"></span></div>
+                                </div>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <input type="password" class="form-control" name="Password" placeholder="Password" required>
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><span class="fas fa-key"></span></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-6">
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" id="remember" name="RememberMe">
+                                        <label for="remember">Remember Me</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <button id="btnLogIn" type="button" class="btn btn-orange btn-block" style="width:150px">
+                                        <i class="fas fa-sign-in-alt"></i> Log In
+                                    </button>
+                                </div>
+
+							</div>
+
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="row mt-2">
+									<div class="col-12 text-danger text-center">@ViewBag.Error</div>
+                                </div>
+                                     
+                            }
+                                 
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (ViewData["ErrorHandling"] != null)
+    {
+        <div class="alert alert-danger error-handling">@ViewData["ErrorHandling"]</div>
+    }
+    <!-- Scripts -->
+   
+    <script>
+        $(document).ready(function() {
+
+            $('#btnLogIn').on('click', function() {
+                var btn = $(this);
+
+                // Disable the button
+                btn.prop('disabled', true);
+
+                // Show spinner
+                btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...');
+
+                // Submit the form manually
+                btn.closest('form').submit();
+            });
+             
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,540 @@
+﻿<!-- 🔹 Centered Image Modal -->
+<div class="modal fade" id="imageCategoryViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+            <div class="modal-body d-flex justify-content-center align-items-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+                <img id="imageCategoryViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<div class="modal fade fullmodal-right" id="saveCategoryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalCategoryTitle" class="modal-title">Create New Category</h5>
+                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+            </div>
+
+            <!-- Form -->
+            <form id="categoryForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <!-- ✅ Scrollable body -->
+                <div class="modal-body flex-grow-1">
+
+					<div class="row align-items-center mb-3">
+                        <input id="CategoryID" type="hidden" value="0" />
+
+                        <div class="col-12 d-flex col-md-1 ">
+                            <label for="CategoryDescription" class="form-label">Description</label>
+                        </div>
+
+                        <div class="col-12 d-flex col-md-5"> 
+                            <input type="text" class="form-control" id="CategoryDescription" placeholder="Fill Description" />
+                            <div id="CategoryDescriptionMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- 🔹 Status Toggle -->
+                        <div class="col-12 col-md-6 d-flex justify-content-md-end">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="CategoryStatusToggle" checked />
+                                <label class="custom-control-label" for="CategoryStatusToggle" id="CategoryStatusLabel">Active</label>
+                                <input type="hidden" id="CategoryStatusID" name="CategoryStatusID" value="A" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ========================== -->
+                    <!--   Category & Banner Images -->
+                    <!-- ========================== -->
+                    <div class="row">
+                        <!-- Category & Mobile -->
+                        <div class="col-12 col-md-6 d-flex flex-column">
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Images</div>
+                                </div>
+                                <div class="subcardcontent">
+                                    <div class="row">
+                                        <!-- Category Image -->
+                                        <div id="dCategoryWebImage" class="col-md-6 text-center mb-3">
+                                            <label for="categoryWebImage" class="form-label text-primary">Web Image</label>
+                                            <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+                                                    <input type="file" id="categoryWebImage" accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+                                                    <img id="categoryWebImagePreview" src="" alt="Category Preview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;">
+                                                </div>
+                                                <!-- Overlay -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Mobile Category Image -->
+                                        <div id="dCategoryMobileImage" class="col-md-6 text-center mb-3">
+                                            <label for="categoryMobileImage" class="form-label text-primary">Mobile Image</label>
+                                            <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+                                                    <input type="file" id="categoryMobileImage" accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+													<img id="categoryMobileImagePreview" src="" alt="Mobile Category Preview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;">
+                                                </div>
+                                                <!-- Overlay -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Banner -->
+                        <div class="col-12 col-md-6 d-flex flex-column">
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Banner Image</div>
+                                </div>
+                                <div class="subcardcontent">
+                                    <div class="text-center mb-3">
+                                        <label for="categoryBannerImage" class="form-label text-primary">Banner Image</label>
+                                        <div class="image-box-wrapper mx-auto position-relative" style="width:350px; height:250px;">
+                                            <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                 style="width:100%; height:100%; cursor:pointer;">
+                                                <input type="file" id="categoryBannerImage" accept="image/*"
+                                                       style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                    <i class="fas fa-image"></i>
+                                                </span>
+                                                <img id="categoryBannerImagePreview" src="" alt="Banner Preview"
+                                                     class="img-fluid rounded d-none"
+                                                     style="width:100%; height:100%; object-fit:contain;">
+                                            </div>
+                                            <!-- Overlay -->
+                                            <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                <div class="d-flex gap-4">
+                                                    <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                    <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                    <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ads Images -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="subcard">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Ads Images</div>
+                                </div>
+                                <div class="subcardcontent">
+                                    <div class="row justify-content-center">
+
+                                        <!-- Ads 1 -->
+                                        <div class="col-md-4 text-center mb-3">
+                                            <label for="categoryAdsImage1" class="form-label text-primary">Ads 1</label>
+                                            <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+                                                    <input type="file" id="categoryAdsImage1" accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+                                                    <img id="categoryAds1Preview" src="" alt="Ads 1 Preview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;">
+                                                </div>
+                                                <!-- Overlay -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ads 2 -->
+                                        <div class="col-md-4 text-center mb-3">
+                                            <label for="categoryAdsImage2" class="form-label text-primary">Ads 2</label>
+                                            <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+                                                    <input type="file" id="categoryAdsImage2" accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+                                                    <img id="categoryAds2Preview" src="" alt="Ads 2 Preview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;">
+                                                </div>
+                                                <!-- Overlay -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Ads 3 -->
+                                        <div class="col-md-4 text-center mb-3">
+                                            <label for="categoryAdsImage3" class="form-label text-primary">Ads 3</label>
+                                            <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+                                                    <input type="file" id="categoryAdsImage3" accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </span>
+                                                    <img id="categoryAds3Preview" src="" alt="Ads 3 Preview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;">
+                                                </div>
+                                                <!-- Overlay -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear"><i class="fas fa-times"></i></button>
+                                                        <button type="button" class="overlay-btn btn-view" title="View"><i class="fas fa-eye"></i></button>
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse"><i class="fas fa-paperclip"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-12">
+                            <div class="subcard">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Details</div>
+                                </div>
+                                <div class="subcardcontent">
+									<textarea id="categoryDetails" class="editornote" placeholder="Write details here...">
+                                        
+                                    </textarea>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal fade" id="imageCategoryViewModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content bg-dark">
+                            <div class="modal-body text-center p-0">
+                                <img id="imageCategoryViewModalImg" src="" class="img-fluid rounded" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ Fixed footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+                    <button id="btnSaveCategory" type="button" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveCategorySpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="ClearWebImage" name="ClearWebImage" value="false" />
+<input type="hidden" id="ClearBannerImage" name="ClearBannerImage" value="false" />
+<input type="hidden" id="ClearMobileImage" name="ClearMobileImage" value="false" />
+<input type="hidden" id="ClearADImage1" name="ClearADImage1" value="false" />
+<input type="hidden" id="ClearADImage2" name="ClearADImage2" value="false" />
+<input type="hidden" id="ClearADImage3" name="ClearADImage3" value="false" />
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ========================
+        // 🔹 Status Toggle Handler
+        // ========================
+        const toggle = document.getElementById("CategoryStatusToggle");
+        const hidden = document.getElementById("CategoryStatusID");
+        const label = document.getElementById("CategoryStatusLabel");
+
+        if (toggle && hidden) {
+            toggle.addEventListener("change", function () {
+                if (toggle.checked) {
+                    label.textContent = "Active";
+                    hidden.value = "A";
+                } else {
+                    label.textContent = "Inactive";
+                    hidden.value = "I";
+                }
+            });
+        }
+
+        // ===============================
+        // 🔹 Save Button (AJAX Submission)
+        // ===============================
+        $('#btnSaveCategory').on('click', function (e) {
+
+            e.preventDefault();
+
+            // Reset error area
+            $("#dErrorHandling").addClass("d-none").text("");
+
+            // Start loading state
+            $('#btnSaveCategorySpinner').removeClass('d-none');
+            $('#btnSaveCategory i').addClass('d-none');
+            $('#btnSaveCategory').prop('disabled', true);
+
+            // Reset field validation
+            $('#CategoryDescription').removeClass("border-danger");
+            $('#CategoryDescriptionMessage').text('');
+
+            let description = $('#CategoryDescription').val().trim();
+
+            if (!description) {
+                $('#CategoryDescriptionMessage').text("Description is required!");
+                $('#CategoryDescription').addClass("border-danger");
+                resetButtonState();
+                return;
+            }
+
+            // Build form data
+            let formData = new FormData();
+            formData.append("ID", $('#CategoryID').val() || 0);
+            formData.append("Description", description);
+            formData.append("StatusID", $('#CategoryStatusID').val());
+
+            // Handle Summernote safely
+            let details = $('#categoryDetails').summernote ? $('#categoryDetails').summernote('code') : '';
+            formData.append("Details", details || '');
+
+            // Append files only if browsed
+            const appendFile = (inputId, fieldName) => {
+                const input = document.getElementById(inputId);
+                if (input && input.files.length > 0) {
+                    formData.append(fieldName, input.files[0]);
+                }
+            };
+            appendFile("categoryWebImage", "WebImage");
+            appendFile("categoryBannerImage", "BannerImage");
+            appendFile("categoryAdsImage1", "AD_Image1");
+            appendFile("categoryAdsImage2", "AD_Image2");
+            appendFile("categoryAdsImage3", "AD_Image3");
+            appendFile("categoryMobileImage", "MobileImage");
+
+            // Append clear-image flags
+            formData.append("ClearWebImage", $("#ClearWebImage").val() || "false");
+            formData.append("ClearBannerImage", $("#ClearBannerImage").val() || "false");
+            formData.append("ClearMobileImage", $("#ClearMobileImage").val() || "false");
+            formData.append("ClearADImage1", $("#ClearADImage1").val() || "false");
+            formData.append("ClearADImage2", $("#ClearADImage2").val() || "false");
+            formData.append("ClearADImage3", $("#ClearADImage3").val() || "false");
+
+            // Send AJAX
+            $.ajax({
+                url: '@Url.Action("SaveCategory", "Categories")',
+                type: 'POST',
+                data: formData,
+                processData: false, 
+                contentType: false,
+                success: function (response) {
+                    const table = $.fn.DataTable.isDataTable("#tableCategories")
+                        ? $("#tableCategories").DataTable()
+                        : null;
+
+                    if (response.exists) {
+                        toastr.warning(response.message || "Category already exists!");
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.error) {
+                        toastr.error(response.message || "Error saving category.");
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.category) {
+                        $('#saveCategoryModal').modal('hide');
+                        if (table) table.ajax.reload(null, false);
+                        toastr.success(response.message || "Category saved successfully!");
+
+                        // Reset clear flags + file inputs
+                        $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
+                        $("#saveCategoryModal input[type='file']").val('');
+                        $(".image-box-wrapper img").attr("src", "").addClass("d-none");
+                        $(".image-box-wrapper .placeholder-icon").removeClass("d-none");
+                        $(".image-box-wrapper .btn-clear, .image-box-wrapper .btn-view").hide();
+                    } else {
+                        toastr.error("Unexpected response from server.");
+                    }
+
+                    resetButtonState();
+                },
+                error: function (xhr) {
+                    toastr.error("An error occurred while saving category.");
+                    $("#dErrorHandling").removeClass("d-none").text(xhr.responseText || "Server error.");
+                    resetButtonState();
+                }
+            });
+
+            // Helper: reset spinner + button
+            function resetButtonState() {
+                $('#btnSaveCategorySpinner').addClass('d-none');
+                $('#btnSaveCategory i').removeClass('d-none');
+                $('#btnSaveCategory').prop('disabled', false);
+            }
+        });
+
+        // ===========================================
+        // 🔹 Image Upload / Preview / Clear / View Logic
+        // ===========================================
+        document.querySelectorAll('.image-box-wrapper').forEach(wrapper => {
+
+            const input = wrapper.querySelector('input[type="file"]');
+            const preview = wrapper.querySelector('img');
+            const placeholder = wrapper.querySelector('.placeholder-icon');
+            const clearBtn = wrapper.querySelector('.btn-clear');
+            const viewBtn = wrapper.querySelector('.btn-view');
+            const browseBtn = wrapper.querySelector('.btn-browse');
+
+            // Hide buttons initially
+            clearBtn.style.display = 'none';
+            viewBtn.style.display = 'none';
+
+            // When file is chosen
+            input.addEventListener('change', function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove('d-none');
+                    placeholder.classList.add('d-none');
+                    clearBtn.style.display = 'inline-block';
+                    viewBtn.style.display = 'inline-block';
+                    resetClearFlag(wrapper);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // When Clear clicked
+            clearBtn.addEventListener('click', () => {
+                preview.src = '';
+                preview.classList.add('d-none');
+                placeholder.classList.remove('d-none');
+                input.value = '';
+                clearBtn.style.display = 'none';
+                viewBtn.style.display = 'none';
+                setClearFlag(wrapper);
+            });
+
+            // When View clicked
+              viewBtn.addEventListener('click', () => {
+                    if (!preview.src) return;
+                    const modalImg = document.getElementById('imageCategoryViewModalImg');
+                    modalImg.src = preview.src;
+                    new bootstrap.Modal(document.getElementById('imageCategoryViewModal')).show();
+            });
+
+            // Browse button click triggers input
+            browseBtn.addEventListener('click', () => input.click());
+
+            // Helper: set clear flag
+               function setClearFlag(wrapper) {
+                    if (wrapper.querySelector("#categoryWebImagePreview")) $("#ClearWebImage").val("true");
+                    if (wrapper.querySelector("#categoryMobileImagePreview")) $("#ClearMobileImage").val("true");
+                    if (wrapper.querySelector("#categoryBannerImagePreview")) $("#ClearBannerImage").val("true");
+                    if (wrapper.querySelector("#categoryAds1Preview")) $("#ClearADImage1").val("true");
+                    if (wrapper.querySelector("#categoryAds2Preview")) $("#ClearADImage2").val("true");
+                    if (wrapper.querySelector("#categoryAds3Preview")) $("#ClearADImage3").val("true");
+                }
+
+                function resetClearFlag(wrapper) {
+                    if (wrapper.querySelector("#categoryWebImagePreview")) $("#ClearWebImage").val("false");
+                    if (wrapper.querySelector("#categoryMobileImagePreview")) $("#ClearMobileImage").val("false");
+                    if (wrapper.querySelector("#categoryBannerImagePreview")) $("#ClearBannerImage").val("false");
+                    if (wrapper.querySelector("#categoryAds1Preview")) $("#ClearADImage1").val("false");
+                    if (wrapper.querySelector("#categoryAds2Preview")) $("#ClearADImage2").val("false");
+                    if (wrapper.querySelector("#categoryAds3Preview")) $("#ClearADImage3").val("false");
+                }
+        });
+
+        // =============================
+        // 🔹 Reset Clear Flags on Close
+        // =============================
+        $('#saveCategoryModal').on('hidden.bs.modal', function () {
+            $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
+        });
+
+        // =======================
+        // 🔹 Summernote Setup
+        // =======================
+       
+
+
+    });
+</script>

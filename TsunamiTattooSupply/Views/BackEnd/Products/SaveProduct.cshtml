@@ -1,0 +1,1549 @@
+﻿
+<style>
+ 
+	.color-images-scroll {
+		display: flex;
+		gap: 12px;
+		overflow-x: auto;
+		overflow-y: hidden;
+		 
+		scroll-behavior: smooth;
+	}
+
+	.color-images-scroll::-webkit-scrollbar {
+		height: 6px;
+	}
+
+	.color-images-scroll::-webkit-scrollbar-thumb {
+		background-color: #c1c1c1;
+		border-radius: 10px;
+	}
+
+	.color-images-scroll::-webkit-scrollbar-track {
+		background-color: transparent;
+	}
+	/* ---------- IMAGE ITEM ---------- */
+	.color-image-item {
+		position: relative;
+		overflow: hidden;
+		border-radius: 6px;
+	}
+
+	/* ---------- OVERLAY ---------- */
+	.color-image-item .image-overlay {
+		position: absolute;
+		inset: 0;
+		background: rgba(0,0,0,0.55);
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.25s ease;
+	}
+
+	/* ---------- SHOW ON HOVER ---------- */
+	.color-image-item:hover .image-overlay {
+		opacity: 1;
+		visibility: visible;
+	}
+ 
+</style>
+
+<div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true" style="z-index:2000">
+	<div class="modal-dialog modal-dialog-centered modal-xl">
+		<div class="modal-content bg-transparent border-0">
+			<div class="modal-body d-flex justify-content-center align-products-center p-0" style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+				<img id="imageProductViewModalImg"
+				src=""
+				class="img-fluid rounded shadow-lg"
+				style="object-fit: contain; border-radius: 10px;" />
+
+				<!-- Close Button -->
+				<button type="button"
+				class="btn position-absolute top-0 end-0 m-3"
+				data-bs-dismiss="modal"
+				aria-label="Close"
+				style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+					<i class="fas fa-times text-white fs-4"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade fullmodal-right" id="saveProductModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
+				<button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+			</div>
+
+			<!-- Form -->
+			<form id="productForm" method="post" enctype="multipart/form-data" class="d-flex flex-column flex-grow-1">
+
+				@Html.AntiForgeryToken();
+
+				<div class="modal-body flex-grow-1">
+
+					<input id="ProductID" name="ProductID" type="hidden" value="0" />
+
+					<div class="card">
+
+						<div class="card-header font-weight-bold">Initial Information</div>
+
+						<div class="card-body">
+
+							<div class="row">
+
+								<!-- CODE -->
+								<div class="col-12 col-md-2 mb-3">
+									<label class="form-label">Code</label>
+									<input id="ProductCode" class="form-control" name="ProductCode" placeholder="Fill Code" />
+									<div id="ProductCodeMessage" class="text-danger fw-normal"></div>
+								</div>
+
+								<!-- NAME -->
+								<div class="col-12 col-md-4 mb-3">
+									<label class="form-label">Name</label>
+									<input id="ProductName" class="form-control" name="ProductName" placeholder="Fill Name" />
+									<div id="ProductNameMessage" class="text-danger fw-normal"></div>
+								</div>
+
+								<!-- GROUP -->
+								<div class="col-12 col-md-2 mb-3">
+									<label class="form-label">Group Type</label>
+									<select id="ProductGroupType" name="ProductGroupType" class="form-control">
+
+										@foreach (var obj in Model.groupTypes)
+										{
+											<option value="@obj.ID">@obj.Description</option>
+										}
+
+									</select>
+								</div>
+
+								<div class="col-12 col-md-4 mb-3">
+									<div>
+										<div class="row">
+											<div class="col-6">
+												<label class="form-label">Group</label>
+											</div>
+											<div class="col-6 text-right">
+
+												<div class="custom-control custom-switch">
+													<input type="checkbox" class="custom-control-input" id="ProductStatusToggle" name="ProductStatusToggle" checked />
+													<label class="custom-control-label" for="ProductStatusToggle" id="ProductStatusLabel">
+														Active
+													</label>
+													<input type="hidden" id="ProductStatusID" name="ProductStatusID" value="A" />
+												</div>
+
+											</div>
+										</div>
+									</div>
+									<div>
+										<select id="ProductGroup" name="ProductGroup" class="form-control">
+											<option value="">-- Select Group --</option>
+										</select>
+									</div>
+								</div>
+
+							</div>
+							<div class="row">
+								<!-- DESCRIPTION -->
+								<div class="col-12 col-md-12 mb-3">
+									<label class="form-label">Description</label>
+									<textarea id="ProductDescription" class="form-control" name="ProductDescription" style="height:100px" placeholder="Fill Description"></textarea>
+									<div id="ProductDescriptionMessage" class="text-danger fw-normal"></div>
+								</div>
+
+							</div>
+							<div class="row">
+
+								<!-- CATEGORY (single selection) -->
+								<div class="col-12 col-md-4 mb-3">
+									<label class="form-label">Category</label>
+									<select id="ProductCategory" class="form-control" name="ProductCategory">
+
+										@foreach (var obj in Model.categories)
+										{
+											<option value="@obj.ID">@obj.Description</option>
+										}
+
+
+									</select>
+									<div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
+								</div>
+
+								<!-- SUBCATEGORY (multiple selection) -->
+								<div class="col-12 col-md-8 mb-3">
+									<div>
+										<label class="form-label">Sub Categories</label>
+										<select id="ProductSubCategory" name="ProductSubCategory[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
+											<!-- Options loaded dynamically -->
+										</select>
+										<div id="ProductSubCategoryMessage" class="text-danger fw-normal"></div>
+									</div>
+									<div id="SubCategoryTags" class="mt-2 d-flex flex-wrap gap-2"></div>
+								</div>
+							</div>
+							<div class="row">
+
+								<!-- UNIT -->
+								<div class="col-12 col-md-3">
+									<label class="form-label">Unit</label>
+									<select id="ProductUnit" name="ProductUnit" class="form-control">
+
+										@foreach (var obj in Model.units)
+										{
+											<option value="@obj.ID">@obj.ShortDescription - @obj.LongDescription</option>
+										}
+
+									</select>
+								</div>
+
+								<!-- New Arrival -->
+								<div class="col-12 col-md-3">
+
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Expiry Date</label>
+										</div>
+										<div class="col-6 text-right">
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductNewArrival" name="ProductNewArrival" />
+												<label class="custom-control-label" for="ProductNewArrival">New Arrival</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<!-- Expiry Date -->
+										<div class="col-12">
+											<input type="text" id="ProductExpiryDate" class="form-control" name="ProductExpiryDate" placeholder="Select date" />
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-12 col-md-3">
+
+									<div class="row">
+										<div class="col-6">
+											<label class="form-label">Warranty Months</label>
+										</div>
+										<div class="col-6 text-right">
+											<!-- WARRANTY -->
+											<div class="custom-control custom-switch">
+												<input type="checkbox" class="custom-control-input" id="ProductWarranty" name="ProductWarranty" />
+												<label class="custom-control-label" for="ProductWarranty">Warranty</label>
+											</div>
+										</div>
+									</div>
+
+									<div class="row">
+										<!-- WARRANTY MONTHS -->
+										<div class="col-12">
+											<input id="ProductWarrantyMonths" type="number" class="form-control" name="ProductWarrantyMonths" placeholder="0" />
+										</div>
+									</div>
+
+								</div>
+
+								<div class="col-12 col-md-3 text-right">
+
+									<!-- VAT -->
+									<div class="d-inline-block text-left">
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductVAT" name="ProductVAT">
+											<label class="custom-control-label" for="ProductVAT">VAT</label>
+										</div>
+										<div class="custom-control custom-switch mt-2">
+											<input type="checkbox" class="custom-control-input" id="ProductFeature" name="ProductFeature">
+											<label class="custom-control-label" for="ProductFeature">Feature</label>
+										</div>
+									</div>
+
+								</div>
+
+							</div>
+
+							
+
+						</div>
+
+					</div>
+					 
+					<div class="card shadow-sm">
+
+						<!-- CARD HEADER -->
+						<div class="card-header font-weight-bold">
+							Product Details
+						</div>
+
+						<!-- CARD BODY -->
+						<div class="card-body">
+
+							<!-- TABS NAV -->
+							<ul class="nav nav-tabs tabs-line mb-3" role="tablist">
+								<li class="nav-item">
+									<a class="nav-link active" data-toggle="tab" href="#tabSizes">
+										Sizes
+									</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" data-toggle="tab" href="#tabColors">
+										Colors
+									</a>
+								</li>
+							</ul>
+
+							<!-- TABS CONTENT -->
+							<div class="tab-content">
+
+								<!-- ================= SIZES TAB ================= -->
+								<div class="tab-pane fade show active" id="tabSizes" role="tabpanel">
+
+									<div class="row">
+										<div class="col-12">
+											<label class="form-label">Sizes</label>
+
+											<div class="row align-items-center p-3">
+
+												<div class="col-12 col-md-11">
+													 
+												<select id="ProductSizes" name="ProductSizes"
+													class="form-control selectpicker"
+													multiple
+													data-live-search="true"
+													data-actions-box="true">
+														@foreach (var obj in Model.sizes)
+														{
+															<option value="@obj.ID">@obj.Description</option>
+														}
+												</select> 
+
+												</div>
+												<div class="col-12 col-md-1">
+													<button id="btnNewSize" type="button" name="NewSize" class="btn btn-sm btn-primary w-100"><i class="fas fa-file"></i> New</button>
+												</div>
+
+											</div>
+
+											<div id="SizeEntry" class="row mt-1 align-items-center border border-1 p-3" style="display:none">
+
+												<div class="col-12 col-md-10">
+
+													<input id="txtSizeDescription" type="text" class="form-control" placeholder="Fill Size Description" />
+
+												</div>
+
+												<div class="col-12 col-md-1">
+
+													<button id="btnCancelSize" type="button" name="CancelSize" class="btn btn-sm btn-outline-secondary w-100"><i class="fas fa-ban"></i> Cancel</button>
+
+												</div>
+
+												<div class="col-12 col-md-1">
+
+													<button id="btnCreateSize" type="button" name="CreateSize" class="btn btn-sm btn-outline-primary w-100">
+														<span class="spinner-border spinner-border-sm d-none"
+															  id="btnCreateSizeSpinner"
+															  role="status"
+															  aria-hidden="true"></span>
+														<i class="fas fa-plus"></i> Create</button>
+
+												</div>
+
+											</div>
+
+										</div>
+										 
+									</div>
+									  
+									<div class="row mt-3">
+
+										<div id="SizeVariationsContainer" class="col-12"></div>
+
+									</div>
+
+								</div>
+
+								<!-- ================= COLORS TAB ================= -->
+							 
+								<div class="tab-pane fade" id="tabColors" role="tabpanel">
+
+									<div class="row">
+										<div class="col-12">
+
+											<label class="form-label">Colors</label>
+											
+											<div class="row p-3">
+
+												<div class="col-12 col-md-11">
+													<select id="ProductColors"
+															class="form-control selectpicker"
+															name="ProductColors[]"
+															multiple
+															data-live-search="true"
+															data-actions-box="true">
+														@foreach (var obj in Model.colors)
+														{
+															<option value="@obj.ID"
+																	data-name="@obj.Name"
+																	data-code="@obj.Code"
+																	data-content='
+																	<span style="
+																		display:inline-block;
+																		width:14px;
+																		height:14px;
+																		background-color:#@obj.Code;
+																		border:1px solid #ccc;
+																		margin-right:6px;
+																		vertical-align:middle;">
+																	</span>
+																	<span>@obj.Name</span>
+																	'>
+																	@obj.Name
+															</option>
+														}
+													</select>
+													 
+													<div id="ProductColorsMessage" class="text-danger fw-normal"></div>
+
+												</div>
+
+												<div class="col-12 col-md-1">
+													<button id="btnNewColor" type="button" name="NewColor" class="btn btn-sm btn-primary w-100"><i class="fas fa-file"></i> New</button>
+												</div>
+
+											</div>
+
+
+											<div id="ColorEntry" class="row mt-2 border border-1 p-3" style="display:none">
+												 
+												<div class="col-12">
+													 
+													<div class="row align-items-center mb-3">
+
+														<input id="ColorID" type="hidden" value="0" />
+
+
+														<!-- 🔹 Label -->
+														<div class="col-12 col-md-2 d-flex align-items-center">
+															<label for="ColorName" class="form-label mb-0">Name</label>
+														</div>
+
+														<!-- 🔹 Input -->
+														<div class="col-12 col-md-8 d-flex align-items-center">
+															<div class="w-100">
+																<input type="text" class="form-control" id="ColorName" placeholder="Fill Name" />
+																<div id="ColorNameMessage" class="text-danger fw-normal"></div>
+															</div>
+														</div>
+
+														<!-- 🔹 Status Toggle -->
+														<div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
+															<div class="custom-control custom-switch m-0">
+																<input type="checkbox" class="custom-control-input" id="ColorStatusToggle" checked>
+																<label class="custom-control-label" for="ColorStatusToggle" id="ColorStatusLabel">Active</label>
+																<input type="hidden" id="ColorStatusID" name="ColorStatusID" value="A">
+															</div>
+														</div>
+													</div>
+
+													<div class="row align-items-center mb-3">
+
+														<!-- 🔹 Label -->
+														<div class="col-12 col-md-2 d-flex align-items-center">
+															<label for="ColorCode" class="form-label mb-0">Code</label>
+														</div>
+
+														<div class="col-12 col-md-8 d-flex align-items-center">
+
+															<div class="row w-100">
+
+																<div class="col-12 col-md-8">
+
+																	<!-- Color picker -->
+																	<input type="color"
+																		   id="ColorPicker"
+																		   class="form-control"
+																		   value="#915555" />
+
+																</div>
+
+																<div class="col-12 col-md-4">
+
+																	<!-- Read-only HEX -->
+																	<input type="text"
+																		   id="ColorCode"
+																		   class="form-control"
+																		   readonly />
+
+
+																</div>
+
+																<div id="ColorCodeMessage" class="text-danger fw-normal"></div>
+															</div>
+														</div>
+														 
+														<!-- 🔹 Status Toggle -->
+														<div class="col-12 col-md-2 d-flex align-items-center justify-content-md-start">
+															<div class="custom-control custom-switch m-0">
+																<input type="checkbox" class="custom-control-input" id="ColorIsCustomToggle">
+																<label class="custom-control-label" for="ColorIsCustomToggle" id="ColorIsCustomLabel">Is Custom</label>
+															</div>
+														</div>
+													</div>
+
+													<div class="row align-items-center mb-3">
+														
+														<div class="col-12 col-md-10"></div>
+
+														<div class="col-12 col-md-1">
+
+															<button id="btnCancelColor" type="button" name="CancelSize" class="btn btn-sm btn-outline-secondary w-100"><i class="fas fa-ban"></i> Cancel</button>
+
+														</div>
+
+														<div class="col-12 col-md-1">
+
+															<button id="btnCreateColor" type="button" name="CreateColor" class="btn btn-sm btn-outline-primary w-100">
+																<span class="spinner-border spinner-border-sm d-none"
+																	  id="btnCreateColorSpinner"
+																	  role="status"
+																	  aria-hidden="true"></span>
+																<i class="fas fa-plus"></i> Create
+																</button>
+
+														</div>
+														 
+													</div>
+
+												</div>
+												 
+											</div>
+
+
+										</div>
+
+									</div>
+
+									<!-- 🔥 Dynamic color cards -->
+									<div class="row mt-3">
+										<div id="ColorVariationsContainer" class="col-12"></div>
+									</div>
+
+								</div>
+
+
+							</div>
+
+						</div>
+					</div>
+
+
+					@* <div class="card"> *@
+
+					@* 	<div class="card-header font-weight-bold">Colors</div> *@
+
+					@* 	<div class="card-body"> *@
+
+					@* 		<div class="row"> *@
+
+					@* 			<!-- SIZE (multiple selection) --> *@
+					@* 			<div class="col-12 col-md-12"> *@
+					@* 				<label class="form-label">Sizes</label> *@
+					@* 				<select id="ProductColors" class="form-control selectpicker" data-live-search="true" data-actions-box="true"> *@
+					@* 					@foreach (var obj in Model.sizes) *@
+					@* 					{ *@
+					@* 						<option value="@obj.ID">@obj.Description</option> *@
+					@* 					} *@
+					@* 				</select> *@
+					@* 				<div id="ProductColorsMessage" class="text-danger fw-normal"></div> *@
+					@* 			</div> *@
+								 
+					@* 		</div> *@
+
+					@* 	</div> *@
+
+					@* </div> *@
+
+
+                </div>
+
+				 
+                <!-- ✅ Fixed footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+                    <button id="btnSaveProduct" type="button" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveProductSpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+
+	const currencies = [
+	@foreach (var obj in Model.currencies)
+	{
+		<text>
+				{
+					id: @obj.ID,
+					code: "@obj.Code"
+				},
+		</text>
+	}
+	];
+
+	const currencyConversion = {
+		operator: '@Model.currencyconversion.Operator',
+		rate: @Model.currencyconversion.Rate
+	};
+
+	document.addEventListener('DOMContentLoaded', function () {
+
+
+		// Picker → HEX
+		$('#ColorPicker').on('input change', function () {
+			$('#ColorCode').val(this.value.toUpperCase());
+		});
+
+		// Is Custom toggle
+		$('#ColorIsCustomToggle').on('change', function () {
+
+			if (this.checked) {
+				// Custom color → no picker
+				$('#ColorPicker').prop('disabled', true);
+				$('#ColorCode').val('');
+				$('#ColorIsCustomLabel').text('Is Custom');
+			} else {
+				// System color → enable picker
+				$('#ColorPicker').prop('disabled', false);
+				syncColorCode();
+			}
+		});
+
+		function syncColorCode() {
+			let color = $('#ColorPicker').val();
+			$('#ColorCode').val(color ? color.toUpperCase() : '');
+		}
+
+
+	$('#ProductSizes').on('changed.bs.select', function () {
+
+		//if (isEditLoading) return;
+		  
+		$("#ProductSizesMessage").remove(); 
+
+		let container = $('#SizeVariationsContainer');
+
+		// Selected size IDs (as strings)
+		let selectedIds = $(this).val() || [];
+		let selectedSet = new Set(selectedIds.map(String));
+
+		// ==========================
+		// 1️⃣ REMOVE unselected cards
+		// ==========================
+		container.find('.variation-card').each(function () {
+			let sizeId = String($(this).data('size-id'));
+			if (!selectedSet.has(sizeId)) {
+				$(this).remove();
+			}
+		});
+
+		// ==========================
+		// 2️⃣ ADD missing cards
+		// ==========================
+		selectedIds.forEach(sizeId => {
+			 
+			if (container.find(`.variation-card[data-size-id="${sizeId}"]`).length)
+				return;
+
+			let sizeText = $('#ProductSizes option[value="' + sizeId + '"]').text();
+
+			let currencyHtml = '';
+
+			currencies.forEach(c => {
+
+				let isDefault = c.code === 'USD';
+
+				currencyHtml += `
+					<div class="col-12 col-md-2 mb-2">
+						<label>Price ${c.code}</label>
+						<input type="number"
+							   step="0.01"
+							   class="form-control ${isDefault ? 'default-price' : 'second-price'}"
+							   data-currency-id="${c.id}"
+							   name="Variations[${sizeId}].Prices[${c.id}]"
+							   ${isDefault ? '' : 'readonly'}
+							   value="0">
+					</div>
+
+					<div class="col-12 col-md-2 mb-2">
+						<label>Price Net ${c.code}</label>
+						<input type="number"
+							   step="0.01"
+							   class="form-control ${isDefault ? 'default-price-net' : 'second-price-net'}"
+							   data-currency-id="${c.id}"
+							   name="Variations[${sizeId}].PricesNet[${c.id}]"
+							   ${isDefault ? '' : 'readonly'}
+							   value="0">
+					</div>
+				`;
+			});
+
+			let html = `
+				<div class="variation-card" data-size-id="${sizeId}">
+					<div class="variation-header p-2 d-flex justify-content-between align-items-center" style="background-color:#ecebeb">
+						<span>${sizeText}</span>
+
+						<div class="custom-control custom-switch">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="SizeStatus_${sizeId}"
+								   name="Variations[${sizeId}].IsActive"
+								   checked>
+							<label class="custom-control-label" for="SizeStatus_${sizeId}">
+								Active
+							</label>
+						</div>
+					</div>
+
+					<div class="variation-body p-2">
+
+						<div class="row">
+							<div class="col-12 col-md-2 mb-2">
+								<label>Sale %</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control sale-input"
+									   name="Variations[${sizeId}].Sale"
+									   value="0">
+							</div>
+
+							<div class="col-12 col-md-2 mb-2">
+								<label>Raise %</label>
+								<input type="number"
+									   step="0.01"
+									   class="form-control raise-input"
+									   name="Variations[${sizeId}].Raise"
+									   value="0">
+							</div>
+						</div>
+
+						<div class="row mt-3">
+							${currencyHtml}
+						</div>
+
+					</div>
+				</div>
+			`;
+
+			container.append(html);
+		});
+	});
+
+
+
+		// ✅ Default price → auto-calc second prices
+		$(document).on('input', '.sale-input, .raise-input, .default-price', function () {
+
+			let card = $(this).closest('.variation-card');
+
+			let price = parseFloat(card.find('.default-price').val()) || 0;
+			let sale  = parseFloat(card.find('.sale-input').val()) || 0;
+			let raise = parseFloat(card.find('.raise-input').val()) || 0;
+
+			let net = price + raise - sale;
+
+			// Set NET price (USD)
+			card.find('.default-price-net').val(net.toFixed(2));
+
+			// 🔁 Also recalc second currencies NET (optional but recommended)
+			let operator = currencyConversion.operator;
+			let rate = parseFloat(currencyConversion.rate);
+
+			card.find('.second-price').each(function () {
+
+				let converted;
+
+				if (operator === 'MUL') {
+					converted = price * rate;
+				} else if (operator === 'DIV') {
+					converted = price / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(converted.toFixed(2));
+			});
+
+			card.find('.second-price-net').each(function () {
+
+				let converted;
+
+				if (operator === 'MUL') {
+					converted = net * rate;
+				} else if (operator === 'DIV') {
+					converted = net / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(converted.toFixed(2));
+			});
+
+		});
+
+
+		$(document).on('input', '.default-price-net', function () {
+
+			let defaultNet = parseFloat($(this).val());
+			if (isNaN(defaultNet)) return;
+
+			let card = $(this).closest('.variation-card');
+
+			let operator = currencyConversion.operator;
+			let rate = parseFloat(currencyConversion.rate);
+
+			card.find('.second-price-net').each(function () {
+
+				let calculated;
+
+				if (operator === 'MUL') {
+					calculated = defaultNet * rate;
+				} else if (operator === 'DIV') {
+					calculated = defaultNet / rate;
+				} else {
+					return;
+				}
+
+				$(this).val(calculated.toFixed(2));
+			});
+		});
+
+	const colorImagesBuffer = {};
+
+	$(document).on('changed.bs.select', '#ProductColors', function () {
+
+		let container   = $('#ColorVariationsContainer');
+		let selectedIds = $(this).val() || [];
+		let selectedSet = new Set(selectedIds.map(String));
+
+		/* ==========================
+		 * 1️⃣ REMOVE unselected cards
+		 * ========================== */
+		container.find('.color-card').each(function () {
+			let colorId = String($(this).data('color-id'));
+			if (!selectedSet.has(colorId)) {
+				$(this).remove();
+			}
+		});
+
+		/* ==========================
+		 * 2️⃣ ADD missing cards
+		 * ========================== */
+		selectedIds.forEach(colorId => {
+
+			if (container.find(`.color-card[data-color-id="${colorId}"]`).length)
+				return;
+
+			let opt       = $('#ProductColors option[value="' + colorId + '"]');
+			let colorName = opt.data('name');
+			let colorCode = opt.data('code');
+
+			let html = `
+		<div class="variation-card color-card" data-color-id="${colorId}" style="overflow:hidden">
+
+		<!-- HEADER -->
+		<div class="variation-header p-2 border-bottom" style="background-color:#ecebeb">
+			<div class="container-fluid px-2">
+				<div class="row align-items-center w-100">
+
+					<div class="col-12 col-md-6">
+						<div class="d-flex align-items-center">
+							<div style="
+								width:26px;
+								height:26px;
+								background-color:#${colorCode};
+								border:1px solid #ccc;
+								border-radius:4px;
+								margin-right:10px;">
+							</div>
+							<strong>${colorName}</strong>
+						</div>
+					</div>
+
+					<div class="col-12 col-md-6 text-md-right mt-2 mt-md-0">
+
+						<div class="custom-control custom-switch d-inline-block align-middle">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="ColorCover_${colorId}"
+								   name="ProductColorsMeta[${colorId}].IsCover">
+							<label class="custom-control-label"
+								   for="ColorCover_${colorId}">
+								Is Cover
+							</label>
+						</div>
+
+						<div class="custom-control custom-switch d-inline-block align-middle ml-3">
+							<input type="checkbox"
+								   class="custom-control-input"
+								   id="ColorActive_${colorId}"
+								   name="ProductColorsMeta[${colorId}].IsActive"
+								   checked>
+							<label class="custom-control-label"
+								   for="ColorActive_${colorId}">
+								Active
+							</label>
+						</div>
+
+					</div>
+
+				</div>
+			</div>
+		</div>
+
+		<!-- BODY -->
+		<div class="variation-body p-3">
+			<div class="row">
+
+				<!-- IMAGE BOX -->
+				<div class="col-12 col-md-2 text-center">
+					<div style="width:200px; margin:auto;">
+
+						<div class="image-box-wrapper position-relative"
+							 style="width:200px; height:200px;">
+
+							<div class="image-box border rounded bg-white shadow-sm
+										d-flex align-items-center justify-content-center
+										position-relative"
+								 style="width:100%; height:100%; cursor:pointer;">
+
+								<input type="file"
+								   class="color-image-input"
+								   data-color-id="${colorId}"
+								   accept="image/*" 
+									   style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;">
+
+								<span class="placeholder-icon text-muted" style="font-size:46px;">
+									<i class="fas fa-image"></i>
+								</span>
+
+								<img class="color-image-preview d-none"
+									 style="width:100%; height:100%; object-fit:contain;">
+							</div>
+
+							<!-- Overlay -->
+							<div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+								<div class="d-flex gap-4">
+									<button type="button" class="overlay-btn btn-clear" title="Clear">
+										<i class="fas fa-times"></i>
+									</button>
+									<button type="button" class="overlay-btn btn-view" title="View">
+										<i class="fas fa-eye"></i>
+									</button>
+									<button type="button" class="overlay-btn btn-browse" title="Browse">
+										<i class="fas fa-paperclip"></i>
+									</button>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="text-center mt-2">
+							<button type="button" class="btn btn-sm btn-primary w-100 btn-add-color-image">
+								<i class="fas fa-plus"></i> Add Image
+							</button>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- IMAGE LIST -->
+				<div class="col-12 col-md-10">
+					<div id="dProductColorImagesList${colorId}" class="color-images-scroll p-2"></div>
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+			`;
+
+			container.append(html);
+		});
+	});
+		$(document).on('click', '.btn-add-color-image', function () {
+
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
+		let $list   = $('#dProductColorImagesList' + colorId);
+
+		let files = colorImagesBuffer[colorId] || [];
+
+		if (!files.length) {
+			toastr.warning('Please browse images first');
+			return;
+		}
+
+		if (!removedNewImages[colorId]) {
+			removedNewImages[colorId] = new Set();
+		}
+
+		files.forEach(file => {
+
+			let removedSet = removedNewImages[colorId];
+
+			// 🔒 Prevent duplicates OR re-adding removed ones
+			let exists =
+				$list.find(`.color-image-item[data-filename="${file.name}"]`).length > 0 ||
+				removedSet.has(file.name);
+
+			if (exists) return;
+
+			let reader = new FileReader();
+
+			reader.onload = function (e) {
+
+				let imageHtml = `
+					<div class="color-image-item position-relative"
+						 style="min-width:200px; height:200px;"
+						 data-filename="${file.name}">
+
+						<img src="${e.target.result}"
+							 class="img-fluid rounded"
+							 style="width:100%; height:100%; object-fit:contain; background:#fff; border:1px solid #ccc;">
+
+						<div class="image-overlay d-flex justify-content-center align-items-center">
+							<button type="button" class="overlay-btn btn-view">
+								<i class="fas fa-eye"></i>
+							</button>
+							<button type="button" class="overlay-btn btn-clear">
+								<i class="fas fa-times"></i>
+							</button>
+						</div>
+					</div>
+				`;
+
+				$list.append(imageHtml);
+			};
+
+			reader.readAsDataURL(file);
+		});
+
+		// ✅ RESET IMAGE BOX PREVIEW
+		let $box = $card.find('.image-box');
+
+		$box.find('.color-image-preview')
+			.attr('src', '')
+			.addClass('d-none');
+
+		$box.find('.placeholder-icon').removeClass('d-none');
+	});
+
+	$(document).on('change', '.color-image-input', function () {
+
+		let input   = this;
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
+
+		if (!input.files || !input.files.length) return;
+
+		// ----------------------------
+		// 1️⃣ BUFFER FILES
+		// ----------------------------
+		if (!colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] = [];
+		}
+
+		Array.from(input.files).forEach(file => {
+			colorImagesBuffer[colorId].push(file);
+		});
+
+		// ----------------------------
+		// 2️⃣ PREVIEW FIRST IMAGE
+		// ----------------------------
+		let file = input.files[0];
+		let reader = new FileReader();
+
+		reader.onload = function (e) {
+
+			let $box = $card.find('.image-box');
+			let $img = $box.find('.color-image-preview');
+			let $icon = $box.find('.placeholder-icon');
+
+			$img.attr('src', e.target.result)
+				.removeClass('d-none');
+
+			$icon.addClass('d-none');
+		};
+
+		reader.readAsDataURL(file);
+
+		// ----------------------------
+		// 3️⃣ RESET INPUT (important)
+		// ----------------------------
+		input.value = '';
+
+		toastr.success('Image selected. Click "Add Image".');
+	});
+
+
+	$(document).on('click', '.btn-clear', function () {
+
+		let wrapper = $(this).closest('.image-box-wrapper');
+		wrapper.find('.color-image-input').val('');
+		wrapper.find('.color-image-preview')
+			   .attr('src', '')
+			   .addClass('d-none');
+		wrapper.find('.placeholder-icon').removeClass('d-none');
+
+	});
+
+	$(document).on('click', '.btn-browse', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
+
+		let $card = $(this).closest('.color-card');
+		let $input = $card.find('.color-image-input').first();
+
+		$input.trigger('click');
+	});
+
+	$(document).on('click', '.btn-view', function () {
+
+		let img = $(this).closest('.image-box-wrapper')
+						 .find('.color-image-preview');
+
+		if (!img.attr('src')) return;
+
+		$('#imageProductViewModalImg').attr('src', img.attr('src'));
+		$('#imageProductViewModal').modal('show');
+	});
+
+
+	$(document).on('click', '.color-image-item .btn-view', function () {
+		let src = $(this).closest('.color-image-item').find('img').attr('src');
+		if (!src) return;
+
+		$('#imageProductViewModalImg').attr('src', src);
+		$('#imageProductViewModal').modal('show');
+	});
+
+	const removedNewImages = {}; // { colorId: Set(filenames) }
+
+	$(document).on('click', '.color-image-item .btn-clear', function () {
+
+		const $item   = $(this).closest('.color-image-item');
+		const colorId = $item.closest('.color-card').data('color-id');
+		const fileName = $item.data('filename');
+
+		if (fileName) {
+			if (!removedNewImages[colorId]) {
+				removedNewImages[colorId] = new Set();
+			}
+			removedNewImages[colorId].add(fileName);
+		}
+
+		$item.remove();
+	});
+	 
+	$(document).on("click", "#btnSaveProduct", function () {
+
+			// -------------------------------
+			// Elements
+			// -------------------------------
+			let btn     = $(this);
+
+			let spinner = $("#btnSaveProductSpinner");
+			let form    = $("#productForm");
+
+			// -------------------------------
+			// Reset validation messages
+			// -------------------------------
+			$("#ProductCodeMessage").text("");
+			$("#ProductNameMessage").text("");
+			$("#ProductSubCategoryMessage").text("");
+			$("#ProductSizesMessage").remove(); // dynamic message
+
+			let hasError = false;
+
+			// -------------------------------
+			// Required: 
+			// Product Code
+			// -------------------------------
+			let productCode = $("#ProductCode").val().trim();
+			if (!productCode) {
+				$("#ProductCodeMessage").text("Product code is required");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Product Name
+			// -------------------------------
+			let productName = $("#ProductName").val().trim();
+			if (!productName) {
+				$("#ProductNameMessage").text("Product name is required");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Sub Categories (at least one)
+			// -------------------------------
+			let subCategories = $("#ProductSubCategory").val();
+			if (!subCategories || subCategories.length === 0) {
+				$("#ProductSubCategoryMessage").text("Please select at least one sub category");
+				hasError = true;
+			}
+
+			// -------------------------------
+			// Required: Sizes (at least one)
+			// -------------------------------
+			let sizes = $("#ProductSizes").val();
+			if (!sizes || sizes.length === 0) {
+				if ($("#ProductSizesMessage").length === 0) {
+					$("#ProductSizes")
+						.closest(".col-12")
+						.append('<div id="ProductSizesMessage" class="text-danger fw-normal mt-1">Please select at least one size</div>');
+				}
+				hasError = true;
+			}
+
+				// -------------------------------
+				// Required: Colors (at least one)
+				// -------------------------------
+				let colors = $("#ProductColors").val();
+
+				if (!colors || colors.length === 0) {
+					if ($("#ProductColorsMessage").length === 0) {
+						$("#ProductColors")
+							.closest(".col-12")
+							.append(
+								'<div id="ProductColorsMessage" class="text-danger fw-normal mt-1">' +
+								'Please select at least one color' +
+								'</div>'
+							);
+					}
+					hasError = true;
+				}
+
+
+			// -------------------------------
+			// Stop if validation failed
+			// -------------------------------
+			if (hasError) {
+				return;
+			}
+
+			// -------------------------------
+			// Submit via AJAX
+			// -------------------------------
+			btn.prop("disabled", true);
+			spinner.removeClass("d-none");
+
+			//$('#productForm input[type="file"][data-dynamic="true"]').remove();
+
+				// 🔥 Append buffered color images to the form
+		  
+			let formData = new FormData(form[0]);
+			 
+			Object.keys(colorImagesBuffer).forEach(colorId => {
+
+				let files = colorImagesBuffer[colorId] || [];
+				if (!files.length) return;
+
+				 let removedSet = removedNewImages[colorId] || new Set();
+
+				files.forEach(file => {
+
+					if (removedSet.has(file.name)) return;
+
+					formData.append(`ProductColorImages[${colorId}][]`, file);
+				});
+			});
+
+			$('.color-image-item[data-image-id]').each(function () {
+				formData.append(
+					'KeptImageIds[]',
+					$(this).data('image-id')
+				);
+			});
+
+			$.ajax({
+				url: '@Url.Action("SaveProduct", "Products")',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function (res) {
+
+					if (res.success) {
+
+						// 🔥 CLEAR BUFFER ONLY AFTER SUCCESS
+						Object.keys(colorImagesBuffer).forEach(k => {
+							colorImagesBuffer[k] = [];
+						});
+
+						toastr.success("Product saved successfully");
+
+						$("#saveProductModal").modal("hide");
+						$("#tableProducts").DataTable().ajax.reload();
+					} else {
+						toastr.error(res.message || "Failed to save product");
+					}
+				},
+				error: function () {
+					toastr.error("Unexpected server error");
+				},
+				complete: function () {
+					btn.prop("disabled", false);
+					spinner.addClass("d-none");
+				}
+			});
+		});
+
+			// Open Size Entry
+			$('#btnNewSize').on('click', function () {
+				$('#SizeEntry').stop(true, true).slideDown(300);
+				$('#txtSizeDescription').val('').focus();
+			});
+
+			$('#btnCancelSize').on('click', function () {
+				$('#SizeEntry').stop(true, true).slideUp(300);
+			});
+		
+		$('#btnCreateSize').on('click', function () {
+
+			const $input = $('#txtSizeDescription');
+			const description = $input.val().trim();
+
+			// 🔴 Client-side required validation
+			if (!description) {
+				$input.addClass('border-danger');
+				toastr.warning('Size description is required.');
+				$input.focus();
+				return;
+			}
+
+			// Clear validation
+			$input.removeClass('border-danger');
+
+			const $btn = $('#btnCreateSize');
+			const $spinner = $('#btnCreateSizeSpinner');
+			const $icon = $('#btnCreateSize i');
+
+			// 🔄 Show spinner
+			$spinner.removeClass('d-none');
+			$icon.addClass('d-none');
+			$btn.prop('disabled', true);
+
+			// ✅ AJAX
+			$.ajax({
+				url: '@Url.Action("CreateSize", "Products")',
+				type: 'POST',
+				data: { Description: description },
+				success: function (res) {
+
+					if (!res.success) {
+						toastr.error(res.message || 'Failed to create size.');
+						return;
+					}
+
+					// Add new size and select it
+					$('#ProductSizes').append(
+						`<option value="${res.data.id}" selected>
+							${res.data.description}
+						 </option>`
+					);
+
+					$('#ProductSizes').selectpicker('destroy').selectpicker('render').trigger('changed.bs.select');
+
+					// Close entry smoothly
+					$('#SizeEntry').slideUp(300);
+					$input.val('');
+
+					toastr.success('Size created successfully!');
+				},
+				error: function () {
+					toastr.error('Server error while creating size.');
+				},
+				complete: function () {
+					// 🔄 Restore button
+					$spinner.addClass('d-none');
+					$icon.removeClass('d-none');
+					$btn.prop('disabled', false);
+				}
+			});
+		});
+
+		$('#txtSizeDescription').on('input', function () {
+			$(this).removeClass('border-danger');
+		});
+	 
+			// 🔹 Open Color Entry
+			// Open slowly
+		$('#btnNewColor').on('click', function () {
+
+			$('#ColorEntry').stop(true, true).slideDown(300); // same speed as size
+
+			// Reset fields
+			$('#ColorID').val(0);
+			$('#ColorName').val('');
+			$('#ColorNameMessage').text('');
+			$('#ColorCodeMessage').text('');
+
+			// Reset toggles
+			$('#ColorIsCustomToggle').prop('checked', false);
+			$('#ColorStatusToggle').prop('checked', true);
+			$('#ColorStatusLabel').text('Active');
+			$('#ColorStatusID').val('A');
+
+			// Reset picker
+			$('#ColorPicker').prop('disabled', false).val('#000000');
+			$('#ColorCode').val('#000000');
+
+			$('#ColorName').focus();
+		});
+
+
+		// Close slowly
+		$('#btnCancelColor').on('click', function () {
+			$('#ColorEntry').stop(true, true).slideUp(300); // same speed as size
+		});
+
+		$('#txtSizeDescription').on('keypress', function (e) {
+			if (e.which === 13) {
+				$('#btnCreateSize').click();
+			}
+		});
+
+			$('#btnCreateColor').on('click', function () {
+
+				let hasError = false;
+
+				const $btn = $('#btnCreateColor');
+				const $spinner = $('#btnCreateColorSpinner');
+				const $icon = $('#btnCreateColor i');
+
+				const name = $('#ColorName').val().trim();
+				const isCustom = $('#ColorIsCustomToggle').is(':checked');
+				const code = isCustom ? null : $('#ColorCode').val();
+				const statusID = $('#ColorStatusToggle').is(':checked') ? 'A' : 'I';
+
+				// Reset validation
+				$('#ColorNameMessage').text('');
+				$('#ColorCodeMessage').text('');
+				$('#ColorName').removeClass('border-danger');
+
+				// 🔴 Client-side validation
+				if (!name) {
+					$('#ColorNameMessage').text('Color name is required.');
+					$('#ColorName').addClass('border-danger');
+					hasError = true;
+				}
+
+				if (!isCustom && !code) {
+					$('#ColorCodeMessage').text('Color code is required.');
+					hasError = true;
+				}
+
+				if (hasError) {
+					return;
+				}
+
+				// 🔄 Show spinner
+				$spinner.removeClass('d-none');
+				$icon.addClass('d-none');
+				$btn.prop('disabled', true);
+
+				// ✅ AJAX
+				$.ajax({
+					url: '@Url.Action("CreateColor", "Products")',
+					type: 'POST',
+					data: {
+						Name: name,
+						Code: code,
+						IsCustom: isCustom,
+						StatusID: statusID
+					},
+					success: function (res) {
+
+						if (res.exists) {
+							$('#ColorNameMessage').text(res.message);
+							$('#ColorName').addClass('border-danger');
+							toastr.warning(res.message);
+							return;
+						}
+
+						if (res.error || !res.success) {
+							toastr.error(res.message || 'Failed to create color.');
+							return;
+						}
+
+						const color = res.data;
+
+						// Add to selectpicker and select it
+						$('#ProductColors').append(`
+							<option value="${color.id}"
+									data-name="${color.name}"
+									data-code="${color.code}"
+									data-content='
+										<span style="
+											display:inline-block;
+											width:14px;
+											height:14px;
+											background-color:${color.code ? '#' + color.code : 'transparent'};
+											border:1px solid #ccc;
+											margin-right:6px;
+											vertical-align:middle;">
+										</span>
+										<span>${color.name}</span>
+									'
+									selected>
+								${color.name}
+							</option>
+						`);
+
+						$('#ProductColors').selectpicker('destroy').selectpicker('render').trigger('changed.bs.select');
+
+						// Close entry smoothly
+						$('#ColorEntry').slideUp(300);
+
+						// Reset form
+						$('#ColorName').val('');
+						$('#ColorCode').val('');
+						$('#ColorIsCustomToggle').prop('checked', false);
+
+						toastr.success('Color created successfully!');
+					},
+					error: function () {
+						toastr.error('Server error while creating color.');
+					},
+					complete: function () {
+						// 🔄 Restore button
+						$spinner.addClass('d-none');
+						$icon.removeClass('d-none');
+						$btn.prop('disabled', false);
+					}
+				});
+			});
+
+		$('#ColorName').on('input', function () {
+			$(this).removeClass('border-danger');
+			$('#ColorNameMessage').text('');
+		});
+
+
+	});
+
+</script>

@@ -1,0 +1,90 @@
+﻿<div class="modal fade" id="deleteSizeModal" tabindex="-1" size="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" size="document">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Size</h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <p class="mb-3" id="deleteSizeMessage">
+                        Are you sure you want to delete this sizeid?
+                    </p>
+                    <input type="hidden" id="deletedSizeId" value="0" />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="deleteModalMessage" class="col-md-6 d-flex align-items-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-6 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                            <button id="btnConfirmDeleteSize" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" size="status" aria-hidden="true"></span>
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $('#btnConfirmDeleteSize').on('click', function (e) {
+            e.preventDefault();
+
+            const sizeId = $("#deletedSizeId").val();
+
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteSize i").addClass("d-none");
+            $("#btnConfirmDeleteSize").prop("disabled", true)
+            //$("#btnConfirmDeleteSize").addClass("disabled")
+
+            $.ajax({
+                url: '@Url.Action("DeleteSize", "Sizes")',
+                type: "POST",
+                data: { ID: sizeId }
+            })
+            .done(function (response) {
+                if (response.success) {
+
+                    const table = $("#tableSizes").DataTable();
+
+                    $("#deleteSizeModal").modal("hide");
+                    table.ajax.reload(null, false);
+                    toastr.success("Size deleted successfully!");
+                } else {
+                    $("#deleteModalMessage").text(response.message).show();
+                }
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteSize i").removeClass("d-none");
+                $("#btnConfirmDeleteSize").prop("disabled", false);
+            })
+            .fail(function () {
+                $("#deleteModalMessage").text("Error deleting sizeid.").show();
+            })
+            .always(function () {
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteSize i").removeClass("d-none");
+                $("#btnConfirmDeleteSize").prop("disabled", false);
+                //$("#btnConfirmDeleteSize").removeClass("disabled");
+            });
+        });
+
+    });
+
+</script>

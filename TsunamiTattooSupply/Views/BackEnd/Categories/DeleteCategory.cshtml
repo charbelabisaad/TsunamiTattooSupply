@@ -1,0 +1,89 @@
+﻿<div class="modal fade" id="deleteCategoryModal" tabindex="-1" category="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Category</h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <p class="mb-3" id="deleteCategoryMessage">
+                        Are you sure you want to delete this Category?
+                    </p>
+                    <input type="hidden" id="deletedCategoryId" value="0" />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="deleteModalMessage" class="col-md-6 d-flex align-items-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-6 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                            <button id="btnConfirmDeleteCategory" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" category="status" aria-hidden="true"></span>
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+ 
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $('#btnConfirmDeleteCategory').on('click', function (e) {
+            e.preventDefault();
+
+
+            const categoryId = $("#deletedCategoryId").val();
+
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteCategory i").addClass("d-none");
+            $("#btnConfirmDeleteCategory").prop("disabled", true)
+            //$("#btnConfirmDeleteCategory").addClass("disabled")
+
+            $.ajax({
+                url: '@Url.Action("DeleteCategory", "Categories")',
+                type: "POST",
+                data: { ID: categoryId }
+            })
+            .done(function (response) {
+                if (response.success) {
+
+                    const table = $("#tableCategories").DataTable();
+
+                    $("#deleteCategoryModal").modal("hide");
+                    table.ajax.reload(null, false);
+                    toastr.success("Category deleted successfully!");
+                } else {
+                    $("#deleteModalMessage").text(response.message).show();
+                }
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteCategory i").removeClass("d-none");
+                $("#btnConfirmDeleteCategory").prop("disabled", false);
+            })
+            .fail(function () {
+                $("#deleteModalMessage").text("Error deleting categoryid.").show();
+            })
+            .always(function () {
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteCategory i").removeClass("d-none");
+                $("#btnConfirmDeleteCategory").prop("disabled", false);
+                //$("#btnConfirmDeleteCategory").removeClass("disabled");
+            });
+        });
+
+    });
+
+</script>

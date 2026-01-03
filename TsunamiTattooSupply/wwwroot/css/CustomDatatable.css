@@ -1,0 +1,68 @@
+﻿body {
+}
+
+.dataTables_filter {
+    position: relative; /* make wrapper relative for absolute positioning */
+}
+
+.dataTables_filter input {
+    width: 100% !important;
+    padding-left: 2rem; /* space for the search icon */
+}
+
+.dataTables_filter .icon {
+    position: absolute;
+    left: 15px;
+    top: 45%;
+    transform: translateY(-50%);
+    color: #000;
+    pointer-events: none; /* prevent icon from blocking clicks */
+}
+
+
+/* Make the label relative so ::before can be positioned */
+.dataTables_filter label {
+    position: relative;
+    width: 100%;
+}
+ 
+/* Add FA Search icon inside the input (left) */
+.dataTables_filter label::before {
+    content: "\f002"; /* Font Awesome search icon */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900; /* solid style */
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    transform: translateY(-50%);
+    color: #000000;
+    font-size: 0.9rem;
+    pointer-events: none; /* keep input clickable */
+}
+ 
+
+.dataTable thead{
+    background-color: gainsboro;
+    color:#000;
+}
+
+.dataTable thead th {
+    border:none 
+}
+
+.dataTable tbody td{
+    border:none
+}
+
+.dataTable tbody td odd {
+    background-color: whitesmoke;
+}
+
+.dataTable tbody tr:nth-child(odd){
+    background-color: #e9e7e7;
+}
+
+
+.dataTable tbody tr:nth-child(even) {
+    background-color: whitesmoke;
+}

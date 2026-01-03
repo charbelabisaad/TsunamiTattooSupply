@@ -1,0 +1,240 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+    margin:0;
+}
+
+.btn-orange {
+    background-color: #be202f !important;
+    /*    border:2px solid #c63428;*/
+    color: #ffffff;
+    transition: .5s;
+}
+
+.btn-orange:hover {
+    background-color: #000000 !important;
+    color: #ffffff;
+}
+
+.btn-black { 
+    background-color: #000000 !important;
+    border:1px solid #000000;
+    color: #ffffff;
+    transition:.5s;
+}
+ 
+.btn-black:hover {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+}
+
+.btn-close{
+    background-color:transparent;
+    border:none;
+}
+
+.admin-login-logo{
+    max-width:300px;
+    width:100%;
+}
+
+.table-responsive {
+    overflow-x: visible !important;
+}
+
+.dropdown-menu {
+    inset: auto !important; /* stop forcing fixed position */
+    transform: translate(0, 0) !important; /* prevent overflow shift */
+    left: auto !important;
+    right: 0 !important; /* keep inside table */
+    max-width: 160px; /* optional */
+    white-space: nowrap; /* prevent wide items */
+}
+
+.error-handling {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0; /* place at bottom */
+    margin: 0;
+    padding: 15px;
+    border-radius: 0;
+    background-color: #f44336; /* red background for error */
+    color: white;
+    text-align: center;
+    z-index: 1050; /* above other elements */
+}
+
+.form-control{
+    box-shadow:none !important;
+}
+
+/* Position search icon (left) */
+ 
+
+/* Position clear button (right) */
+#clearSearch {
+    position: absolute;
+    top: 25%;
+    right: 10px; 
+    color: #6c757d;
+    cursor: pointer;
+    display: none; /* hidden until typing */
+}
+
+.modal-body {
+    background-color:#f1f1f1 !important;
+}
+
+.subcard {
+    background-color: #ffffff;
+    border-radius: 5px;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+.subcardheader {
+    font-weight:bold;
+    font-style: italic;
+    padding: 10px;
+    border-bottom: 1px solid gainsboro
+}
+
+.subcardcontent {
+    padding: 5px
+}
+
+.subcardfooter{
+    padding:5px;
+}
+
+.image-box-wrapper {
+    overflow: hidden;
+    position: relative;
+    border-radius: 6px;
+}
+
+.image-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* Keeps aspect ratio, no crop */
+}
+
+/* --- Overlay starts hidden (off bottom) --- */
+.image-overlay {
+    position: absolute;
+    left: 0;
+    bottom: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7); /* darker opacity */
+    opacity: 0;
+    transition: bottom 0.4s ease, opacity 0.4s ease;
+}
+
+/* --- Slide up and appear on hover --- */
+.image-box-wrapper:hover .image-overlay {
+    bottom: 0;
+    opacity: 1;
+}
+
+.overlay-btn {
+    width:50px;
+    height:50px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 5px;
+    border: none;
+    color: #ffffff;
+    font-size: 1.5rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+    margin:5px;
+}
+
+.overlay-btn:hover {
+    color: whitesmoke;
+    transform: scale(1.2);
+}
+
+.editornote{
+    height: 200px !important
+}
+
+/* =========================================================
+   Reusable Line Tabs (Enterprise Style)
+   Usage: <ul class="nav nav-tabs tabs-line">
+   ========================================================= */
+
+.tabs-line {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.tabs-line .nav-link {
+    border: none !important;
+    background: transparent !important;
+    color: #6c757d;
+    font-weight: 600;
+    padding: 10px 18px;
+    position: relative;
+}
+
+.tabs-line .nav-link:hover {
+    color: #0d6efd;
+}
+
+.tabs-line .nav-link.active {
+    color: #0d6efd;
+}
+
+.tabs-line .nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 100%;
+    height: 3px;
+    background-color: #0d6efd;
+    border-radius: 2px 2px 0 0;
+}
+
+/* ================= VARIATION BLOCK ================= */
+.variation-card {
+    border: 1px solid #dee2e6;
+    border-radius: 6px; 
+    margin-bottom: 15px;
+    background-color: #fff;
+}
+
+.variation-header {
+    background-color:gainsboro;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.variation-header span {
+    font-size: 14px;
+}
+
+.variation-body .form-control {
+    font-size: 14px;
+}

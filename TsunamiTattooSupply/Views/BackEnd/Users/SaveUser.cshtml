@@ -1,0 +1,231 @@
+﻿ 
+
+<div class="modal fade" id="saveUserModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            
+            <div class="modal-header">
+                <h5 id="modalTitle" class="modal-title"></h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="userForm" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        
+                        <input id="UserID" type="hidden" value="0" />
+
+                        <!-- First Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="FirstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="FirstName" placeholder="Fill First Name" name="FirstName" />
+                            <div id="FirstNameMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- Last Name -->
+                        <div class="col-md-6 mb-3">
+                            <label for="LastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="LastName" placeholder="Fill Last Name" name="LastName" />
+                            <div id="LastNameMessage" class="text-danger fw-normal"></div>
+                        </div>
+
+						<!-- Username -->
+						<div class="col-md-6 mb-3">
+							<label for="Username" class="form-label">Username</label>
+							<input type="text" class="form-control" id="Username" placeholder="Fill Username" name="Username" />
+							<div id="UsernameMessage" class="text-danger fw-normal"></div>
+						</div>
+
+                        <!-- User Type -->
+                        <div class="col-md-6 mb-3">
+                            <label for="UserType" class="form-label">User Type</label>
+                            <select id="UserType" class="custom-select"> 
+                                @foreach (var type in ViewBag.UserTypes)
+                                {
+                                    <option value="@type.ID">@type.Description</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!--Role-->
+
+                        <div class="col-md-6 mb-3">
+                            <label for="Role" class="form-label">Role</label>
+                            <select id="Role" class="custom-select">
+                                @foreach (var role in ViewBag.Roles)
+                                {
+                                    <option value="@role.ID">@role.Description</option>
+                                }
+                            </select>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-12 mb-3"> 
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="StatusToggle" checked />
+                                <label class="custom-control-label" for="StatusToggle" id="statusLabel">Active</label>
+                                <input type="hidden" id="StatusID" name="StatusID" value="A" />
+                            </div>
+                        </div>
+                         
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <!-- Validation/Error message -->
+                        <div id="modalMessage" class="col-md-7 d-flex align-items-center text-danger" style="display:none;">
+                            <!-- message goes here -->
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-md-5 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+
+							<button id="btnSaveUser" type="button" class="btn btn-primary ml-2">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnSaveUserSpinner" role="status" aria-hidden="true"></span>
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div> 
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const toggle = document.getElementById("StatusToggle");
+        const hidden = document.getElementById("StatusID");
+        const label = document.getElementById("statusLabel");
+
+        if (toggle && hidden && label) {
+            toggle.addEventListener("change", function () {
+                if (toggle.checked) {
+                    label.textContent = "Active";
+                    hidden.value = "A";
+                } else {
+                    label.textContent = "Inactive";
+                    hidden.value = "I";
+                }
+            });
+        }
+
+        $('#btnSaveUser').on('click', function (e) {
+            e.preventDefault(); // ✅ prevent default form submission
+
+            // Reset validation flag
+            let requiredValidation = false;
+
+            // Clear previous errors and borders
+            $('#Username, #FirstName, #LastName').removeClass("border-danger");
+            $('#UsernameMessage, #FirstNameMessage, #LastNameMessage').text('');
+
+            // Show spinner while saving
+            $('#btnSaveUserSpinner').removeClass('d-none');
+            $('#btnSaveUser i').addClass('d-none');
+
+            // Gather form values
+            var data = {
+                ID: $('#UserID').val() || 0,
+                Username: $('#Username').val().trim(),
+                FirstName: $('#FirstName').val().trim(),
+                LastName: $('#LastName').val().trim(),
+                UserTypeID: $('#UserType').val(),
+                RoleID: $('#Role').val(),
+                StatusID: $('#StatusID').val()
+            };
+
+            // Basic validation
+            if (!data.Username) {
+                $('#UsernameMessage').text("Username is required!");
+                $('#Username').addClass("border-danger");
+                requiredValidation = true;
+            }
+
+            if (!data.FirstName) {
+                $('#FirstNameMessage').text("First Name is required!");
+                $('#FirstName').addClass("border-danger");
+                requiredValidation = true;
+            }
+
+            if (!data.LastName) {
+                $('#LastNameMessage').text("Last Name is required!");
+                $('#LastName').addClass("border-danger");
+                requiredValidation = true;
+            }
+
+            // Stop if validation failed
+            if (requiredValidation) {
+                $('#btnSaveUserSpinner').addClass('d-none');
+                $('#btnSaveUser i').removeClass('d-none');
+                return;
+            }
+
+            // ✅ AJAX request
+            $.ajax({
+                url: '@Url.Action("SaveUser", "Users")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+
+                    const table = $("#tableUsers").DataTable();
+
+                    $("#dErrorHandling").addClass("d-none");
+                    $("#dErrorHandling").text("");
+
+                    $('#btnSaveUserSpinner').addClass('d-none');
+                    $('#btnSaveUser i').removeClass('d-none');
+                    $('#btnSaveUser').prop('disabled', true);
+
+                    if (response.exists) {
+                        $('#UsernameMessage').text(response.message || "Username already exists!");
+                        $('#Username').addClass("border-danger");
+                        toastr.warning(response.message || "Username already exists!");
+                        $('#btnSaveUser').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.error) {
+                        $('#modalMessage').text(response.message || "Error saving user.").show();
+                        toastr.error(response.message || "Error saving user.");
+                        $('#btnSaveUser').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.users) {
+                        $('#saveUserModal').modal('hide');
+                        table.ajax.reload(null, false);
+                        toastr.success("User saved successfully!");
+                    } else {
+                        $('#modalMessage').text("Unexpected response from server.").show();
+                    }
+
+                    $('#btnSaveUserSpinner').addClass('d-none');
+                    $('#btnSaveUser i').removeClass('d-none');
+                    $('#btnSaveUser').prop('disabled', false);
+
+                },
+                error: function (xhr, status, error) {
+                    $('#btnSaveUserSpinner').addClass('d-none');
+                    $('#btnSaveUser i').removeClass('d-none');
+                    $('#btnSaveUser').prop('disabled', false);
+                    $('#modalMessage').text("An error occurred while saving user" ).show();
+                    $("#dErrorHandling").show();
+                    $("#dErrorHandling").text(error.message);
+                    toastr.error("An error occurred while saving user."); // ✅ fixed missing parenthesis
+                }
+            });
+        });
+
+    });
+
+     
+</script>

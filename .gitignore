@@ -1,0 +1,35 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+
+# Logs
+*.log
+
+# Other
+*.db
+*.mdf
+*.ldf
+
+
+migrate
+migrate/
+efbundle.exe
+
+**/publish/
+**/PublishProfiles/
+
+appsettings.Development.json
+.env
+.env.*
+
+# Ignore all images by default
+wwwroot/images/*
+
+# Allow ONLY GENERAL
+!wwwroot/images/GENERAL/
+!wwwroot/images/GENERAL/**

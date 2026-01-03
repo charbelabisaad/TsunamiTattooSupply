@@ -1,0 +1,1074 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Categories";
+}
+
+<style>
+    /* 🔹 Dark translucent backdrop for both modals */
+    #imageCategoryViewModal,
+    #imageSubCategoryViewModal {
+        background-color: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(4px); /* subtle blur for elegance */
+        z-index: 5000;
+    }
+
+    /* 🔹 Center modal content beautifully */
+    #imageCategoryViewModal .modal-dialog,
+    #imageSubCategoryViewModal .modal-dialog {
+        max-width: 500px;
+        max-height: 500px;
+        margin: auto;
+    }
+
+    /* 🔹 Transparent modal box */
+    #imageCategoryViewModal .modal-content,
+    #imageSubCategoryViewModal .modal-content {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+    }
+
+    /* 🔹 Smooth image transitions */
+    #imageCategoryViewModal img,
+    #imageSubCategoryViewModal img {
+        transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+        opacity: 0.95;
+    }
+
+    /* 🔹 Slight zoom and fade on hover */
+    #imageCategoryViewModal img:hover,
+    #imageSubCategoryViewModal img:hover {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    /* 🔹 Optional close button hover effect */
+    #imageCategoryViewModal .btn:hover,
+    #imageSubCategoryViewModal .btn:hover {
+        background: rgba(255, 255, 255, 0.2) !important;
+        transform: scale(1.1);
+        transition: all 0.2s ease-in-out;
+    }
+
+    /* 🔹 Orange bordered SubCategory button */
+    .btnViewSubCategories {
+        border: 1px solid #ff6600 !important;
+        color: #ff6600 !important;
+        width: 130px;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btnViewSubCategories:hover {
+        background-color: #ff6600 !important;
+        color: #ffffff !important;
+    }
+
+    .btnViewSubCategories:focus {
+        box-shadow: none !important;
+    }
+
+    /* 🔹 Equal-height header style for SubCategory cards */
+    .subcardheader-equal {
+        min-height: 56px; /* ensures consistent header height */
+        padding: 0.75rem 1rem !important; /* consistent spacing inside */ 
+        align-items: center; /* vertical center */
+        justify-content: space-between; /* title on left, button on right */ 
+    }
+     
+</style>
+ 
+<partial name="SaveCategory" />
+<partial name="DeleteCategory" />
+<partial name="SubCategories" />
+<partial name="DeleteSubCategory" />
+<partial name="Rank" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">Categories List</h3></div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                            <button id="btnNewCategory" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Category</button>
+                            <button id="btnRankCategory" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="col-sm-12 mt-3">
+                        <table id="tableCategories" class="table table-striped w-100 ">
+                            <thead>
+                                <tr style="vertical-align:middle">
+                                    <th style="width:70px">Web</th>        <!-- NEW -->
+                                    <th style="width:70px">Mobile</th>     <!-- NEW -->
+                                    <th style="width:70%">Description</th> 
+                                    <th style="width:120px">Sub Categories</th>
+                                    <th style="width:50px">Status</th>
+                                    <th style="width:50px" class="no-export">Actions</th>
+                                </tr>
+                            </thead>
+                        </table> 
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+            $(document).ready(function () {
+
+
+
+                var table = $('#tableCategories').DataTable({
+                    processing: true,
+                    responsive: true,
+                    ajax: {
+                        url: '@Url.Action("ListGetCategories", "Categories")',
+                            type: 'GET',
+                        dataSrc: function (json) {
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load categories.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                    },
+                        dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                        '<"row mt-2 mb-2 d-flex align-items-center"' +
+                        '<"col-md-6 d-flex align-items-center" l>' +
+                        '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                        '<"col-md-2 d-flex justify-content-end" p>' +
+                        '>',
+
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Search categories..."
+                    },
+                    buttons: [
+                            { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                            { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                            {
+                                extend: 'pdfHtml5',
+                                className: 'btn btn-danger btn-sm',
+                                exportOptions: { columns: ':visible:not(.no-export)' },
+                                text: '<i class="fas fa-file-pdf"></i> PDF',
+                                customize: function (doc) {
+                                    // Set all columns to auto width
+                                    var tableBody = doc.content[1].table.body;
+                                    var colCount = tableBody[0].length;
+
+                                    // Distribute column widths evenly (100% width)
+                                    var colWidths = [];
+                                    for (var i = 0; i < colCount; i++) {
+                                        colWidths.push('*');
+                                    }
+                                    doc.content[1].table.widths = colWidths;
+
+                                    // Optional: reduce margins and font size to fit better
+                                    doc.styles.tableBodyEven.alignment = 'center';
+                                    doc.styles.tableBodyOdd.alignment = 'center';
+                                    doc.styles.tableHeader.alignment = 'center';
+                                    doc.defaultStyle.fontSize = 8;
+                                    doc.pageMargins = [10, 10, 10, 10];
+                                }
+                            },
+                            { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                            { text: '<i class="fas fa-sync"></i> Refresh', className: 'btn btn-primary btn-sm',
+                            action: function () {
+                                table.ajax.reload();
+                            }
+                        }
+                    ],
+                    order: [[2, "asc"]],
+                    columns: [
+                            {
+                            data: "webImage",
+                            className: "align-middle",
+                            render: function (data, type, row) {
+                                if (!row.webImage) return `<span class="text-muted">No Image</span>`;
+                                return `
+                                    <img src="${row.webImagePath}${row.webImage}"
+                                            style="width:70px;height:70px;object-fit:contain;border-radius:4px;">
+                                `;
+                            }
+                        },
+
+                        // 🔹 Mobile Image
+                        {
+                            data: "mobileImage",
+                            className: "align-middle",
+                            render: function (data, type, row) {
+                                if (!row.mobileImage) return `<span class="text-muted">No Image</span>`;
+                                return `
+                                    <img src="${row.mobileImagePath}${row.mobileImage}"
+                                            style="width:70px;height:70px;object-fit:contain;border-radius:4px;">
+                                `;
+                            }
+                        },
+                        {   
+                            data: 'description',
+                            className: "align-middle"
+                        }, 
+                        {
+                            data: 'subCategoryCount',
+                            className: "align-middle",
+                            render: function(data, type, row){
+                                return `<button class="btn btn-sm btnViewSubCategories"
+                                                data-id="${row.id}"
+                                                data-description="${row.description}"
+                                                title="View subcategories">
+                                                ${row.subCategoryCount}
+                                        </button>`
+                            }
+                        },
+                        { data: 'status',
+                            className: "align-middle",
+                            render: function (data, type, row) { 
+                              return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
+                            }
+                        },
+                        {
+                            data: null, 
+                            orderable: false,
+                            searchable: false,
+                            className: "no-export text-center align-middle",
+                            render: function (data, type, row) {
+                                return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditCategory" style="cursor:pointer" 
+                                    data-id="${row.id}" 
+                                    data-description="${row.description}"
+                                    data-webimagepath="${row.webImagePath}"
+                                    data-webimage="${row.webImage}"
+                                    data-mobileimagepath="${row.mobileImagePath}"
+                                    data-mobileimage="${row.mobileImage}"
+                                    data-bannerimagepath="${row.bannerImagePath}"
+                                    data-bannerimage="${row.bannerImage}"
+                                    data-adimagepath="${row.aD_ImagePath}"
+                                    data-adimage1="${row.aD_Image1}"
+                                    data-adimage2="${row.aD_Image2}"
+                                    data-adimage3="${row.aD_Image3}"
+                                    data-addetails="${encodeURIComponent(row.aD_Details || '')}"
+                                    data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                        <a class="dropdown-item btnDeleteCategory" style="cursor:pointer" data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>   
+                                </div>
+                            </div>
+                                `;
+                            }
+                        }
+                    ]
+                });
+
+                // place export buttons next to search bar
+                //table.buttons().container().appendTo('#tableCategories_wrapper .col-md-6:eq(1)');
+
+                var $filter = $('#tableCategories_filter');
+
+                $filter.css("position", "relative");
+
+                // Insert FA icons
+
+                // $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
+
+                // Toggle X on typing
+                // $('#tableCategories_filter input').on("input", function () {
+                //     if ($(this).val().length > 0) {
+                //         $('#clearSearch').show();
+                //     } else {
+                //         $('#clearSearch').hide();
+                //     }
+                // });
+
+                // Clear on X click
+                // $('#clearSearch').on("click", function () {
+                //     $('#tableCategories_filter input').val('');
+                //     table.search('').draw();
+                //     $(this).hide();
+                // });
+
+                const btnNewCategory = document.getElementById("btnNewCategory");
+                if (btnNewCategory) {
+                    btnNewCategory.addEventListener("click", function () {
+
+                        const modalEl = document.getElementById("saveCategoryModal");
+                        const modal = new bootstrap.Modal(modalEl);
+
+                        $("#modalCategoryTitle").text('Create New Category');
+                        $("#CategoryID").val(0);
+                        $("#CategoryDescription").val('');
+                        $("#CategoryStatusID").val('A');
+                        $("#CategoryStatusToggle").prop("checked", true);
+                        $("#CategoryStatusLabel").text("Active");
+                        $("#CategoryDescriptionMessage").text('');
+                        $("#CategoryDescription").removeClass('border-danger');
+
+                        // Reset all images & placeholders
+                        $(".image-box-wrapper img").attr("src", "").addClass("d-none");
+                        $(".image-box-wrapper .placeholder-icon").removeClass("d-none");
+                        $(".image-box-wrapper .btn-clear, .image-box-wrapper .btn-view").hide();
+                        $("#saveCategoryModal input[type='file']").val('');
+                        $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
+
+                        // Reset details (summernote)
+                        if ($('#categoryDetails').summernote)
+                            $('#categoryDetails').summernote('code', '');
+
+                        modal.show();
+
+                        $(modalEl).on('shown.bs.modal', function () {
+                            $("#CategoryDescription").focus();
+                        });
+                    });
+                }
+
+               
+
+        // ====================================
+        // 🔹 EDIT CATEGORY BUTTON (Open Modal)
+        // ====================================
+                $(document).on('click', '.btnEditCategory', function () {
+                $("#modalCategoryTitle").text('Modify Category');
+
+                const modalEl = document.getElementById("saveCategoryModal");
+                const modal = new bootstrap.Modal(modalEl);
+                const baseUrl = window.location.origin;
+
+                // Get all data attributes safely
+                const category = {
+                    id: $(this).data('id') || 0,
+                    description: $(this).data('description') || '',
+                    statusid: $(this).data('statusid') || '',
+                    webpath: $(this).data('webimagepath') || '',
+                    webimage: $(this).data('webimage') || '',
+                    mobilepath: $(this).data('mobileimagepath') || '',
+                    mobileimage: $(this).data('mobileimage') || '',
+                    bannerpath: $(this).data('bannerimagepath') || '',
+                    bannerimage: $(this).data('bannerimage') || '',
+                    adpath: $(this).data('adimagepath') || '',
+                    ad1: $(this).data('adimage1') || '',
+                    ad2: $(this).data('adimage2') || '',
+                    ad3: $(this).data('adimage3') || '',
+                    addetails: decodeURIComponent($(this).attr('data-addetails') || ''),
+                };
+
+                // Helper to load image or show placeholder
+                const loadImage = (selector, path, file) => {
+                    const box = $(selector).closest('.image-box-wrapper');
+                    const placeholder = box.find('.placeholder-icon');
+                    const clearBtn = box.find('.btn-clear');
+                    const viewBtn = box.find('.btn-view');
+
+                    const safePath = (path || '').trim();
+                    const safeFile = (file || '').trim();
+
+                    if (safeFile !== '' && safePath !== '') {
+                        const fullPath = baseUrl + (safePath.startsWith('/') ? safePath : '/' + safePath) + safeFile;
+                        $(selector).attr('src', fullPath).removeClass('d-none');
+                        placeholder.addClass('d-none');
+                        clearBtn.show();
+                        viewBtn.show();
+                        resetClearFlag(box);
+                    } else {
+                        $(selector).attr('src', '').addClass('d-none');
+                        placeholder.removeClass('d-none');
+                        clearBtn.hide();
+                        viewBtn.hide();
+                        resetClearFlag(box);
+                    }
+                };
+
+                // ✅ Load all images for editing
+                loadImage("#categoryWebImagePreview", category.webpath, category.webimage);
+                loadImage("#categoryMobileImagePreview", category.mobilepath, category.mobileimage);
+                loadImage("#categoryBannerImagePreview", category.bannerpath, category.bannerimage);
+                loadImage("#categoryAds1Preview", category.adpath, category.ad1);
+                loadImage("#categoryAds2Preview", category.adpath, category.ad2);
+                loadImage("#categoryAds3Preview", category.adpath, category.ad3);
+
+        
+
+                    // ✅ Fill form fields
+                $("#CategoryID").val(category.id);
+                $("#CategoryDescription").val(category.description);
+                $("#CategoryStatusID").val(category.statusid);
+                $("#CategoryDescriptionMessage").text('');
+                $("#CategoryDescription").removeClass('border-danger');
+         
+                // ✅ Set Summernote content (after modal shown)
+                 if ($('#categoryDetails').summernote) {
+            
+                     $('#categoryDetails').summernote('code', category.addetails || '');
+                 }
+
+
+                const isActive = category.statusid === 'A';
+                $("#CategoryStatusToggle").prop("checked", isActive);
+                $("#CategoryStatusLabel").text(isActive ? 'Active' : 'Inactive');
+
+                // Reset details (summernote safe)
+              $('#categoryDetails').val(category.addetails || '');
+
+                modal.show();
+                $(modalEl).on('shown.bs.modal', () => $("#CategoryDescription").focus());
+
+                // Helper: reset clear flags
+                function resetClearFlag(wrapper) {
+                    const id = wrapper.attr("id");
+                    if (id === "dCategoryWebImage") $("#ClearWebImage").val("false");
+                    if (id === "dCategoryMobileImage") $("#ClearMobileImage").val("false");
+                    if (id === "dCategoryBannerImage") $("#ClearBannerImage").val("false");
+                    if (wrapper.find("#categoryAds1Preview").length) $("#ClearADImage1").val("false");
+                    if (wrapper.find("#categoryAds2Preview").length) $("#ClearADImage2").val("false");
+                    if (wrapper.find("#categoryAds3Preview").length) $("#ClearADImage3").val("false");
+                }
+            });
+
+            // ====================================
+            // 🔹 DELETE CATEGORY MODAL HANDLER
+            // ====================================
+            $(document).on("click", ".btnDeleteCategory", function (e) {
+                e.preventDefault();
+
+                const categoryId = $(this).data("id");
+                const categorydescription = $(this).closest("tr").find("td:first").text();
+
+                $("#deletedCategoryId").val(categoryId);
+                $("#deleteCategoryMessage").html(`Are you sure you want to delete <strong>${categorydescription}</strong>?`);
+                $("#deleteCategoryModal").modal("show");
+            });
+
+            $(document).on("click", ".btnViewSubCategories", function () {
+                const categoryId = $(this).data("id");
+                const categoryDescription = $(this).data("description");
+
+                // Set parent ID for the form
+                $("#ParentCategoryID").val(categoryId);
+
+                // Update header title
+                $("#SubCategoriesModal .modal-title").html(
+                    `<span class="text-secondary">Sub Categories of</span> <span class="font-weight-bold">${categoryDescription}</span>`
+                );
+
+                // Show modal
+                const modal = new bootstrap.Modal(document.getElementById("SubCategoriesModal"));
+                modal.show();
+
+                // Load or reload DataTable
+                if ($.fn.DataTable.isDataTable("#tableSubCategories")) {
+                        $("#tableSubCategories").DataTable().ajax.url(`/Categories/ListGetSubCategories?CategoryID=${categoryId}`).load();
+                } else {
+                    initializeSubCategoryTable(categoryId);
+                }
+
+                // Reset form when opening
+                resetSubCategoryForm();
+            });
+             
+            function initializeSubCategoryImageHandlers() {
+
+                document.querySelectorAll('#SubCategoriesModal .image-box-wrapper').forEach(wrapper => {
+
+                const input = wrapper.querySelector('input[type="file"]');
+                const preview = wrapper.querySelector('img');
+                const placeholder = wrapper.querySelector('.placeholder-icon');
+
+                const clearSubBtn = wrapper.querySelector('.btn-sub-clear');
+                const viewSubBtn = wrapper.querySelector('.btn-sub-view');
+                const browseSubBtn = wrapper.querySelector('.btn-sub-browse');
+
+                // Validate
+                if (!input || !preview || !placeholder || !clearSubBtn || !viewSubBtn || !browseSubBtn)
+                    return;
+
+                // Hide buttons initially
+                clearSubBtn.style.display = 'none';
+                viewSubBtn.style.display = 'none';
+
+                // --------------------------
+                // Browse
+                // --------------------------
+                browseSubBtn.addEventListener('click', () => {
+                    input.click();
+                });
+
+                // --------------------------
+                // Preview Image
+                // --------------------------
+                input.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        preview.src = e.target.result;
+                        preview.classList.remove('d-none');
+                        placeholder.classList.add('d-none');
+
+                        clearSubBtn.style.display = 'inline-block';
+                        viewSubBtn.style.display = 'inline-block';
+
+                        resetSubClearFlag(wrapper);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
+                // --------------------------
+                // Clear Image
+                // --------------------------
+                clearSubBtn.addEventListener('click', () => {
+                    preview.src = '';
+                    preview.classList.add('d-none');
+                    placeholder.classList.remove('d-none');
+
+                    input.value = '';
+
+                    clearSubBtn.style.display = 'none';
+                    viewSubBtn.style.display = 'none';
+
+                    setSubClearFlag(wrapper);
+                });
+
+                // --------------------------
+                // View Image
+                // --------------------------
+                viewSubBtn.addEventListener('click', () => {
+                    if (!preview.src) return;
+
+                    const modalImg = document.getElementById('imageCategoryViewModalImg');
+                    if (!modalImg) return;
+
+                    modalImg.src = preview.src;
+                    new bootstrap.Modal(document.getElementById('imageCategoryViewModal')).show();
+                });
+
+                // --------------------------
+                // Clear Flag Functions
+                // --------------------------
+                function setSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("true");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("true");
+                }
+
+                function resetSubClearFlag(wrapper) {
+                    if (wrapper.querySelector("#subcategoryWebImagePreview"))
+                        $("#ClearSubWebImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryMobileImagePreview"))
+                        $("#ClearSubMobileImage").val("false");
+
+                    if (wrapper.querySelector("#subcategoryBannerImagePreview"))
+                        $("#ClearSubBannerImage").val("false");
+                }
+            });
+        }
+
+
+        // 🔹 RESET BUTTON STATE
+        function resetSubButton() {
+            $('#btnSaveSubCategorySpinner').addClass('d-none');
+            $('#btnSaveSubCategory i').removeClass('d-none');
+            $('#btnSaveSubCategory').prop('disabled', false);
+        }
+
+        // 🔹 RESET FORM
+        function resetSubCategoryForm() {
+
+            $("#SubCategoryEntryTitle").text("Add New Sub Category");
+
+            $("#SubCategoryID").val("0");
+            $("#SubCategoryDescription").val("");
+            $("#SubCategoryDescriptionMessage").text("");
+
+            $("#subcategoryStatusToggle").prop("checked", true);
+            $("#subCategoryStatusLabel").text("Active");
+            $("#subCategoryStatusID").val("A");
+
+            $("#subcategoryWebImagePreview, #subcategoryMobileImagePreview, #subcategoryBannerImagePreview")
+                .attr("src", "")
+                .addClass("d-none");
+
+            $("#subcategoryForm .placeholder-icon").removeClass("d-none");
+            $("#subcategoryForm .btn-sub-clear, #subcategoryForm .btn-sub-view").hide();
+
+            $("#subcategoryWebImage").val("");
+            $("#subcategoryMobileImage").val("");
+            $("#subcategoryBannerImage").val("");
+
+            $("#ClearSubWebImage").val("false");
+            $("#ClearSubMobileImage").val("false");
+            $("#ClearSubBannerImage").val("false");
+             
+            $("#SubCategoryDescription").focus();
+
+            const modalBody = $("#SubCategoriesModal .modal-body");
+            if (modalBody.length) {
+                modalBody.animate({ scrollTop: 0 }, 300);
+            }
+        }
+
+        initializeSubCategoryImageHandlers();
+
+        // 🔹 DATATABLE
+        function initializeSubCategoryTable(categoryId) {
+            var table = $("#tableSubCategories").DataTable({
+                processing: true,
+                responsive: true,
+                destroy: true,
+                ajax: {
+                    url: `/Categories/ListGetSubCategories?CategoryID=${categoryId}`,
+                    type: "GET",
+                    dataSrc: function (json) {
+                        if (!json || json.success === false) {
+                            toastr.error(json && json.message ? json.message : "Failed to load subcategories.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search Sub Categories...",
+                    emptyTable: "No sub categories available",
+                    zeroRecords: "No matching sub categories found"
+                },
+                columns: [
+
+                    // ✅ NEW COLUMN — Web Image
+                    {
+                        data: null,
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (row.webImage && row.webImagePath) {
+                                return `
+                                    <img src="${row.webImagePath}${row.webImage}"
+                                         style="width:50px;height:60px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">
+                                `;
+                            }
+                            return `<span class="text-muted small">No Image</span>`;
+                        }
+                    },
+
+                    // ✅ NEW COLUMN — Mobile Image
+                    {
+                        data: null,
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (row.mobileImage && row.mobileImagePath) {
+                                return `
+                                    <img src="${row.mobileImagePath}${row.mobileImage}"
+                                         style="width:45px;height:45px;object-fit:contain;border:1px solid #ddd;border-radius:4px;">
+                                `;
+                            }
+                            return `<span class="text-muted small">No Image</span>`;
+                        }
+                    },
+
+                    // -----------------------------------
+                    // ✅ Your original columns (unchanged)
+                    // -----------------------------------
+
+                    {
+                        data: "description",
+                        className: "align-middle",
+                        render: function (data) {
+                            return `<span class="fw-bold">${data}</span>`;
+                    }
+                    },
+                    {
+                        data: "status",
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="badge text-center text-white"
+                                     style="background-color:#${row.statusColor}; width:100px;">
+                                    ${data}
+                                </div>`;
+                        }
+                    },
+                    {
+                        data: null,
+                        className: "align-middle",
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export text-center",
+                        render: function (data, type, row) {
+                            return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditSubCategory"
+                                       style="cursor:pointer"
+                                       data-id="${row.id}"
+                                       data-description="${row.description}"
+                                       data-webimagepath="${row.webImagePath}"
+                                       data-webimage="${row.webImage}"
+                                       data-mobileimagepath="${row.mobileImagePath}"
+                                       data-mobileimage="${row.mobileImage}"
+                                       data-bannerimagepath="${row.bannerImagePath}"
+                                       data-bannerimage="${row.bannerImage}"
+                                       data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a class="dropdown-item btnDeleteSubCategory"
+                                       style="cursor:pointer"
+                                       data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>`;
+                        }
+                    }
+                ]
+            });
+        }
+         
+        // 🔹 SAVE SUBCATEGORY
+        $(document).on("click", "#btnSaveSubCategory", function (e) {
+            e.preventDefault();
+
+            $('#btnSaveSubCategorySpinner').removeClass('d-none');
+            $('#btnSaveSubCategory i').addClass('d-none');
+            $('#btnSaveSubCategory').prop('disabled', true);
+
+            $('#SubCategoryDescription').removeClass('border-danger');
+            $('#SubCategoryDescriptionMessage').text('');
+
+            let description = $('#SubCategoryDescription').val().trim();
+            if (!description) {
+                $('#SubCategoryDescriptionMessage').text("Description is required!");
+                $('#SubCategoryDescription').addClass('border-danger');
+                resetSubButton();
+                return;
+            }
+
+            let formData = new FormData();
+
+            formData.append("ID", $('#SubCategoryID').val());
+            formData.append("CategoryID", $('#ParentCategoryID').val());
+            formData.append("Description", description);
+            formData.append("StatusID", $('#subCategoryStatusID').val());
+             
+            const attach = (id, key) => {
+                let input = document.getElementById(id);
+                if (input && input.files.length > 0) {
+                    formData.append(key, input.files[0]);
+                }
+            };
+
+            attach("subcategoryWebImage", "WebImage");
+            attach("subcategoryMobileImage", "MobileImage");
+            attach("subcategoryBannerImage", "BannerImage");
+
+                formData.append("ClearSubWebImage", $("#ClearSubWebImage").val());
+            formData.append("ClearSubMobileImage", $("#ClearSubMobileImage").val());
+            formData.append("ClearSubBannerImage", $("#ClearSubBannerImage").val());
+
+            $.ajax({
+                url: "/Categories/SaveSubCategory",
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+
+                    if (response.exists) {
+                        toastr.warning(response.message);
+                        resetSubButton();
+                        return;
+                    }
+
+                    if (response.error) {
+                        toastr.error(response.message);
+                        resetSubButton();
+                        return;
+                    }
+
+                    if (response.subCategory) {
+                        toastr.success(response.message);
+
+                        $("#tableSubCategories").DataTable().ajax.reload(null, false);
+                        resetSubCategoryForm();
+                        resetSubButton();
+                    } else {
+                        resetSubButton();
+                    }
+                },
+                error: function () {
+                    toastr.error("Error saving sub category!");
+                    resetSubButton();
+                }
+            });
+        });
+
+        $(document).on("click", "#btnCancelSubCategory", function () {
+            resetSubCategoryForm();
+        });
+
+        // 🔹 NEW SUBCATEGORY BUTTON
+        $(document).on("click", "#btnNewSubCategory", function () {
+            resetSubCategoryForm();
+        });
+
+        // 🔹 EDIT SUBCATEGORY
+        $(document).on("click", ".btnEditSubCategory", function () {
+
+            let id = $(this).data("id");
+            let description = $(this).data("description");
+            let webPath = $(this).data("webimagepath");
+            let webImg = $(this).data("webimage");
+            let mobilePath = $(this).data("mobileimagepath");
+            let mobileImg = $(this).data("mobileimage");
+            let bannerPath = $(this).data("bannerimagepath");
+            let bannerImg = $(this).data("bannerimage");
+            let statusId = $(this).data("statusid");
+
+            $("#SubCategoryEntryTitle").text('Edit Sub Category');
+
+            $("#SubCategoryID").val(id);
+            $("#SubCategoryDescription").val(description);
+
+            if (statusId === "A") {
+                $("#subcategoryStatusToggle").prop("checked", true);
+                $("#subCategoryStatusLabel").text("Active");
+                $("#subCategoryStatusID").val("A");
+            } else {
+                $("#subcategoryStatusToggle").prop("checked", false);
+                $("#subCategoryStatusLabel").text("Inactive");
+                $("#subCategoryStatusID").val("I");
+            }
+
+            function loadPreview(inputId, previewId, placeholderClass, clearFlag, filePath, fileName) {
+                const wrapper = $(previewId).closest(".image-box-wrapper");
+                const preview = $(previewId);
+                const placeholder = wrapper.find("." + placeholderClass);
+                const clearSubBtn = wrapper.find(".btn-sub-clear");
+                const viewBtn = wrapper.find(".btn-sub-view");
+
+                if (fileName) {
+                    let fullPath = filePath + fileName;
+
+                    preview.attr("src", fullPath).removeClass("d-none");
+                    placeholder.addClass("d-none");
+
+                    clearSubBtn.show();
+                    viewBtn.show();
+
+                    $(clearFlag).val("false");
+                } else {
+                    preview.attr("src", "").addClass("d-none");
+                    placeholder.removeClass("d-none");
+
+                    clearSubBtn.hide();
+                    viewBtn.hide();
+
+                    $(clearFlag).val("false");
+                }
+
+                $(inputId).val("");
+            }
+
+            loadPreview(
+                "#subcategoryWebImage",
+                "#subcategoryWebImagePreview",
+                "placeholder-icon",
+                "#ClearSubWebImage",
+                webPath,
+                webImg
+            );
+
+            loadPreview(
+                "#subcategoryMobileImage",
+                "#subcategoryMobileImagePreview",
+                "placeholder-icon",
+                "#ClearSubMobileImage",
+                mobilePath,
+                mobileImg
+            );
+
+            loadPreview(
+                "#subcategoryBannerImage",
+                "#subcategoryBannerImagePreview",
+                "placeholder-icon",
+                "#ClearSubBannerImage",
+                bannerPath,
+                bannerImg
+            );
+
+            $("#subcategoryForm")[0].scrollIntoView({ behavior: "smooth" });
+        });
+
+
+        $(document).on("click", ".btnDeleteSubCategory", function () {
+
+            let id = $(this).data("id");
+
+            $("#deletedSubCategoryId").val(id);
+
+            // Show Modal (Bootstrap 4)
+            $("#deleteSubCategoryModal").modal("show");
+        });
+
+        $(document).on("click", "#btnConfirmDeleteSubCategory", function () {
+
+            let id = $("#deletedSubCategoryId").val();
+
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteSubCategory i").addClass("d-none");
+            $("#btnConfirmDeleteSubCategory").prop("disabled", true);
+
+            $.ajax({
+                url: "/Categories/DeleteSubCategory",
+                type: "POST",
+                data: { ID: id },
+                success: function (response) {
+
+                    $("#btnDeleteSpinner").addClass("d-none");
+                    $("#btnConfirmDeleteSubCategory i").removeClass("d-none");
+                    $("#btnConfirmDeleteSubCategory").prop("disabled", false);
+
+                    if (response.success) {
+                        toastr.success(response.message);
+
+                        $("#tableSubCategories").DataTable().ajax.reload(null, false);
+
+                        $("#deleteSubCategoryModal").modal("hide");
+                    }
+                    else {
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error deleting sub category!");
+
+                    $("#btnDeleteSpinner").addClass("d-none");
+                    $("#btnConfirmDeleteSubCategory i").removeClass("d-none");
+                    $("#btnConfirmDeleteSubCategory").prop("disabled", false);
+                }
+            });
+        });
+              $(function () {
+                $("#categoryDetails").summernote({
+                    height: 250,
+                    disableResizeEditor: true
+                });
+            });
+
+                    $('#subcategoryStatusToggle').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('#subCategoryStatusID').val('A');
+                $('#subCategoryStatusLabel').text('Active');
+            } else {
+                $('#subCategoryStatusID').val('I');
+                $('#subCategoryStatusLa// ').text('Inactive');
+            }
+        });
+         
+        $(document).on('click', '#btnRankCategory', function () {
+   
+            currentRankContext = $(this).data('context') || null;
+
+            $('#rankModalTitle').text('Set Rank');
+             
+            const $select = $('#rankSelect').empty();
+
+            let items = $(this).data('items');
+
+            // If items come as string → parse JSON
+            if (typeof items === 'string') {
+                items = JSON.parse(items);
+            }
+              
+            new bootstrap.Modal(
+                document.getElementById('rankModal')
+            ).show();
+        });
+
+
+      // / $(document).on('click', '.btn-sub-clear', function () {
+
+        ///    const wrapper = $(this).closest('.image-box-wrapper');
+
+ //     //     if (wrapper.find('#subcategoryWebImage').length)
+        //         clearSubImage($(this), 'subcategoryW// mage', 'subcategoryWebImagePreview', 'ClearSubWebImage');
+
+    //  //     if (wrapper.find('#subcategoryMobileImage').length)
+        //         clearSubImage($(this), 'subcategoryMobileImag//  'subcategoryMobileImagePreview', 'ClearSubMobileImage');
+
+    //  //     if (wrapper.find('#subcategoryBannerImage').length)
+        //         clearSubImage($(this), 'subcategoryBannerImag//  'subcategoryBa// rImagePreview', 'ClearSubBannerImage');
+
+        // });
+
+        // // ction clearSubImage(btn, inputId, previewId, clearFlagId) {
+     // //     const wrapper = btn.closest('.image-// -wrapper');
+
+        //     wrap// .find('#' + previewId)
+        //      // .attr('src', '')
+        //         .addClass('d-none');
+
+        // //  wrapper.find('.placeholder-icon').removeClass('d-no// );
+
+        //     wrapper.find('#' + inputId// al('');
+
+        //     🔥 THIS is what backe// waits for
+        //     $('#' + clearFlagId).val('true');
+        // }
+
+
+
+    });
+
+    </script>
+}
+

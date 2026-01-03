@@ -1,0 +1,93 @@
+﻿<div class="modal fade" id="deleteColorModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Color</h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <p class="mb-3" id="deleteColorMessage">
+                        Are you sure you want to delete this roleid?
+                    </p>
+                    <input type="hidden" id="deletedColorId" value="0" />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="deleteModalMessage" class="col-md-6 d-flex align-items-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-6 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                            <button id="btnConfirmDeleteColor" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" role="status" aria-hidden="true"></span>
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        $('#btnConfirmDeleteColor').on('click', function (e) {
+           e.preventDefault();
+
+           const colorId = $("#deletedColorId").val();
+
+           // Reset message
+           $("#deleteModalMessage").hide().text('');
+
+           // Spinner
+           $("#btnDeleteSpinner").removeClass("d-none");
+           $("#btnConfirmDeleteColor i").addClass("d-none");
+           $("#btnConfirmDeleteColor").prop("disabled", true);
+
+           $.ajax({
+               url: '@Url.Action("DeleteColor", "Colors")',
+               type: "POST",
+               data: { ID: colorId }
+           })
+           .done(function (response) {
+
+               const table = $("#tableColors").DataTable();
+
+               if (response.success) {
+                   $("#deleteColorModal").modal("hide");
+                   table.ajax.reload(null, false);
+                   toastr.success("Color deleted successfully!");
+               } else {
+                   $("#deleteModalMessage")
+                       .text(response.message || "Failed to delete color.")
+                       .show();
+               }
+           })
+           .fail(function () {
+               $("#deleteModalMessage")
+                   .text("An unexpected error occurred while deleting the color.")
+                   .show();
+           })
+           .always(function () {
+               $("#btnDeleteSpinner").addClass("d-none");
+               $("#btnConfirmDeleteColor i").removeClass("d-none");
+               $("#btnConfirmDeleteColor").prop("disabled", false);
+           });
+       });
+
+    });
+
+</script>

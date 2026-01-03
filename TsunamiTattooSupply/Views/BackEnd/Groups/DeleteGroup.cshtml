@@ -1,0 +1,97 @@
+﻿<div class="modal fade" id="deleteGroupModal" tabindex="-1" group="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Delete Group</h5>
+                <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form method="post">
+                <div class="modal-body">
+                    <p class="mb-3" id="deleteGroupMessage">
+                        Are you sure you want to delete this Group?
+                    </p>
+                    <input type="hidden" id="deletedGroupId" value="0" />
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <div id="deleteModalMessage" class="col-md-6 d-flex align-groups-center text-danger" style="display:none;"></div>
+
+                        <div class="col-md-6 d-flex align-groups-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+                            <button id="btnConfirmDeleteGroup" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" group="status" aria-hidden="true"></span>
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ======================================
+        // 🔹 CONFIRM DELETE GROUP (AJAX)
+        // ======================================
+        $(document).on("click", "#btnConfirmDeleteGroup", function () {
+             
+            let id = $("#deletedGroupId").val();
+            let typeID = $('input[name="groupType"]:checked').val(); // BRD / CLC
+             
+            // Start spinner
+            $("#btnDeleteSpinner").removeClass("d-none");
+            $("#btnConfirmDeleteGroup i").addClass("d-none");
+            $("#btnConfirmDeleteGroup").prop("disabled", true);
+
+            $.ajax({
+                url: "/Groups/DeleteGroup",
+                type: "POST",
+                data: { ID: id, TypeID: typeID },
+                success: function (response) {
+
+                    if (response.success) {
+                        toastr.success(response.message);
+
+                        // hide modal
+                        $("#deleteGroupModal").modal("hide");
+
+                        // reload table
+                        if ($.fn.DataTable.isDataTable("#tableGroups")) {
+                            $("#tableGroups").DataTable().ajax.reload(null, false);
+                        }
+                    }
+                    else {
+                        toastr.error(response.message || "Failed to delete group.");
+                    }
+
+                    resetDeleteButton();
+                },
+                error: function () {
+                    toastr.error("Server error while deleting group.");
+                    resetDeleteButton();
+                }
+            });
+
+            function resetDeleteButton() {
+                $("#btnDeleteSpinner").addClass("d-none");
+                $("#btnConfirmDeleteGroup i").removeClass("d-none");
+                $("#btnConfirmDeleteGroup").prop("disabled", false);
+            }
+        });
+
+    
+    });
+
+</script>

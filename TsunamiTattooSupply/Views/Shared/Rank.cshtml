@@ -1,0 +1,62 @@
+﻿<!-- ========================= -->
+<!-- 🔹 Generic Rank Modal -->
+<!-- ========================= -->
+<div class="modal fade" id="rankModal" tabindex="-1" role="dialog" aria-labelledby="rankModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+        <div class="modal-content shadow-sm">
+
+            <!-- Header -->
+            <div class="modal-header py-2">
+                <h5 class="modal-title font-weight-bold" id="rankModalTitle">
+                    <i class="fa fa-sort-numeric-down mr-2 text-primary"></i>
+                    Set Rank
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body">
+
+                <!-- Rank List -->
+                <select id="rankSelect"
+                        class="form-control form-control-sm"
+                        size="5">
+                </select>
+
+                <!-- Up / Down -->
+                <div class="d-flex mt-3">
+                    <button type="button"
+                            id="rankUp"
+                            class="btn btn-outline-secondary btn-sm flex-fill mr-2">
+                        <i class="fa fa-arrow-up"></i> Up
+                    </button>
+
+                    <button type="button"
+                            id="rankDown"
+                            class="btn btn-outline-secondary btn-sm flex-fill">
+                        <i class="fa fa-arrow-down"></i> Down
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Footer -->
+            <div class="modal-footer py-2">
+                <button type="button"
+                        class="btn btn-secondary btn-sm"
+                        data-dismiss="modal">
+                    Cancel
+                </button>
+
+                <button type="button"
+                        id="rankSave"
+                        class="btn btn-primary btn-sm">
+                    Save
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>

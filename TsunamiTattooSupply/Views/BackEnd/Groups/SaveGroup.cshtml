@@ -1,0 +1,404 @@
+﻿<!-- ========================================= -->
+<!--  BRAND IMAGE VIEW MODAL (Single & Global) -->
+<!-- ========================================= -->
+<div class="modal fade" id="imageGroupViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+
+            <div class="modal-body d-flex justify-content-center align-items-center p-0"
+                 style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+
+                <img id="imageGroupViewModalImg"
+                     src=""
+                     class="img-fluid rounded shadow-lg"
+                     style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                        class="btn position-absolute top-0 end-0 m-3"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                        style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+ 
+<!-- ========================== -->
+<!--  SAVE BRAND MODAL (RIGHT) -->
+<!-- ========================== -->
+<div class="modal fade fullmodal-right" id="saveGroupModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalGroupTitle" class="modal-title">Create New Group</h5>
+
+                <button type="button"
+                        class="btn-close border-0"
+                        data-bs-dismiss="modal">
+                    <i class="fas fa-close"></i>
+                </button>
+            </div>
+
+            <!-- ====================================== -->
+            <!--         BRAND FORM (Scrollable)       -->
+            <!-- ====================================== -->
+            <form id="groupForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <div class="modal-body flex-grow-1">
+
+                    <input id="GroupID" type="hidden" value="0" />
+                    <input id="GroupTypeID" type="hidden" value="" />
+
+                    <!-- DESCRIPTION + STATUS -->
+                    <div class="row align-items-center mb-3">
+
+                        <!-- Label -->
+                        <div class="col-md-1 col-12">
+                            <label for="GroupDescription" class="form-label">Description</label>
+                        </div>
+
+                        <!-- Text -->
+                        <div class="col-md-5 col-12">
+                            <input type="text"
+                                   class="form-control"
+                                   id="GroupDescription"
+                                   placeholder="Fill Description" />
+
+                            <div id="GroupDescriptionMessage"
+                                 class="text-danger fw-normal"></div>
+                        </div>
+
+                        <!-- Status + Show Home -->
+                        <div class="col-md-6 col-12 d-flex flex-column align-items-end mt-3 mt-md-0">
+
+                            <!-- Status Toggle -->
+                            <div class="custom-control custom-switch mb-2" style="width: 150px;">
+                                <input type="checkbox"
+                                       class="custom-control-input"
+                                       id="GroupStatusToggle"
+                                       checked>
+                                <label class="custom-control-label" for="GroupStatusToggle">
+                                    Active
+                                </label>
+                                <input type="hidden" id="GroupStatusID" name="GroupStatusID" value="A">
+                            </div>
+
+                            <!-- Show Home Toggle -->
+                            <div class="custom-control custom-switch" style="width: 150px;">
+                                <input type="checkbox"
+                                       class="custom-control-input"
+                                       id="GroupShowHomeToggle">
+                                <label class="custom-control-label" for="GroupShowHomeToggle">
+                                    Show Home
+                                </label>
+                                <input type="hidden" id="GroupShowHome" name="GroupShowHome" value="0">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- ========================== -->
+                    <!--  IMAGE + DETAILS SECTION   -->
+                    <!-- ========================== -->
+                    <div class="row mt-3">
+
+                        <!-- LEFT: BRAND IMAGE -->
+                        <div class="col-md-6 col-12">
+
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Image</div>
+                                </div>
+
+								<div class="subcardcontent" style="height:300px">
+                                    <div class="row">
+
+                                        <div id="dGroupImage" class="col-md-12 text-center mb-3">
+                                             
+                                            <div class="image-box-wrapper mx-auto position-relative"
+                                                 style="width:250px; height:250px;">
+
+                                                <!-- Main Box -->
+                                                <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                                     style="width:100%; height:100%; cursor:pointer;">
+
+                                                    <input type="file"
+                                                           id="groupImage"
+                                                           accept="image/*"
+                                                           style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" />
+
+                                                    <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                        <i class="fas fa-image"></i>
+                                                   </span>
+
+                                                    <img id="groupImagePreview"
+                                                         class="img-fluid rounded d-none"
+                                                         style="width:100%; height:100%; object-fit:contain;" />
+                                                </div>
+
+                                                <!-- Overlay Buttons -->
+                                                <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                    <div class="d-flex gap-4">
+                                                        <button type="button" class="overlay-btn btn-clear" title="Clear">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+
+                                                        <button type="button" class="overlay-btn btn-view" title="View">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+
+                                                        <button type="button" class="overlay-btn btn-browse" title="Browse">
+                                                            <i class="fas fa-paperclip"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- RIGHT: BRAND DETAILS -->
+                        <div class="col-md-6 col-12">
+
+                            <div class="subcard flex-grow-1">
+                                <div class="subcardheader">
+                                    <div class="card-subtitle">Details</div>
+                                </div>
+
+                                <div class="subcardcontent" style="height:300px">
+                                    <textarea id="groupDetails"
+                                              class="editornote"
+                                              placeholder="Write details here..."
+                                              style="width:100%; resize:vertical;"></textarea>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- FOOTER -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-ban"></i> Cancel
+                    </button>
+
+                    <button id="btnSaveGroup" type="button" class="btn btn-primary">
+                        <span id="btnSaveGroupSpinner"
+                              class="spinner-border spinner-border-sm d-none"
+                              role="status"></span>
+
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="ClearImage" value="false" />
+ 
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ========================
+        // 🔹 Status Toggle
+        // ========================
+        $("#GroupStatusToggle").on("change", function () {
+            if (this.checked) {
+                $("#GroupStatusID").val("A");
+                $(this).next("label").text("Active");
+            } else {
+                $("#GroupStatusID").val("I");
+                $(this).next("label").text("Inactive");
+            }
+        });
+
+        // ========================
+        // 🔹 Show Home Toggle
+        // ========================
+        $("#GroupShowHomeToggle").on("change", function () {
+            $("#GroupShowHome").val(this.checked ? true : false);
+        });
+
+        // ================================
+        // 🔹 SAVE GROUP BUTTON
+        // ================================
+        $("#btnSaveGroup").on("click", function (e) {
+
+            e.preventDefault();
+
+            // Start loading state
+            $("#btnSaveGroupSpinner").removeClass("d-none");
+            $("#btnSaveGroup i").addClass("d-none");
+            $("#btnSaveGroup").prop("disabled", true);
+
+            // Reset validation
+            $("#GroupDescription").removeClass("border-danger");
+            $("#GroupDescriptionMessage").text("");
+
+            // Validate Description
+            let description = $("#GroupDescription").val().trim();
+            if (!description) {
+                $("#GroupDescriptionMessage").text("Description is required!");
+                $("#GroupDescription").addClass("border-danger");
+                resetButtonState();
+                return;
+            }
+
+            // Build FormData
+            let formData = new FormData();
+
+            formData.append("ID", $("#GroupID").val() || 0);
+            formData.append("Description", description);
+            formData.append("StatusID", $("#GroupStatusID").val());
+            formData.append("ShowHome", $("#GroupShowHome").val());
+            formData.append("TypeID", $('input[name="groupType"]:checked').val()); // BRD / CLC
+            formData.append("Summary", $("#groupDetails").summernote ? $("#groupDetails").summernote("code") : "");
+             
+            // Image file if uploaded
+            const fileInput = document.getElementById("groupImage");
+            if (fileInput.files.length > 0) {
+                formData.append("Image", fileInput.files[0]);
+            }
+
+            // Clear flag
+            formData.append("ClearImage", $("#ClearImage").val() || "false");
+
+            // ===================================
+            // 🔹 AJAX: SAVE GROUP
+            // ===================================
+            $.ajax({
+                url: '@Url.Action("SaveGroup", "Groups")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+
+                    const table = $.fn.DataTable.isDataTable("#tableGroups")
+                        ? $("#tableGroups").DataTable()
+                        : null;
+
+                    if (response.exists) {
+                        toastr.warning(response.message);
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.error) {
+                        toastr.error(response.message);
+                        resetButtonState();
+                        return;
+                    }
+
+                    if (response.group) {
+                        $("#saveGroupModal").modal("hide");
+
+                        if (table) table.ajax.reload(null, false);
+
+                        toastr.success(response.message);
+
+                        // Reset image area
+                        $("#ClearImage").val("false");
+                        $("#groupImage").val("");
+                        $("#groupImagePreview").attr("src", "").addClass("d-none");
+                        $(".placeholder-icon").removeClass("d-none");
+                    }
+
+                    resetButtonState();
+                },
+                error: function () {
+                    toastr.error("An unexpected error occurred while saving the group.");
+                    resetButtonState();
+                }
+            });
+
+            function resetButtonState() {
+                $("#btnSaveGroupSpinner").addClass("d-none");
+                $("#btnSaveGroup i").removeClass("d-none");
+                $("#btnSaveGroup").prop("disabled", false);
+            }
+        });
+
+        // ============================================
+        // 🔹 IMAGE UPLOAD / PREVIEW / CLEAR / VIEW
+        // ============================================
+        const wrapper = document.querySelector(".image-box-wrapper");
+
+        if (wrapper) {
+
+            const input = wrapper.querySelector("#groupImage");
+            const preview = wrapper.querySelector("#groupImagePreview");
+            const placeholder = wrapper.querySelector(".placeholder-icon");
+            const clearBtn = wrapper.querySelector(".btn-clear");
+            const viewBtn = wrapper.querySelector(".btn-view");
+            const browseBtn = wrapper.querySelector(".btn-browse");
+
+            clearBtn.style.display = "none";
+            viewBtn.style.display = "none";
+
+            // Browse Button
+            browseBtn.addEventListener("click", () => input.click());
+
+            // On File Select
+            input.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove("d-none");
+                    placeholder.classList.add("d-none");
+
+                    clearBtn.style.display = "inline-block";
+                    viewBtn.style.display = "inline-block";
+
+                    $("#ClearImage").val("false");
+                };
+                reader.readAsDataURL(file);
+            });
+
+            // Clear Image
+            clearBtn.addEventListener("click", () => {
+                preview.src = "";
+                preview.classList.add("d-none");
+                placeholder.classList.remove("d-none");
+                input.value = "";
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display = "none";
+
+                $("#ClearImage").val("true");
+            });
+
+            // View Image Modal
+            viewBtn.addEventListener("click", () => {
+                if (!preview.src) return;
+                $("#imageGroupViewModalImg").attr("src", preview.src);
+                new bootstrap.Modal(document.getElementById("imageGroupViewModal")).show();
+            });
+        }
+
+    });
+
+</script>

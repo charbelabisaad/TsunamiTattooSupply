@@ -1,0 +1,104 @@
+﻿/* Slide-in right modal shell */
+.fullmodal-right {
+    padding: 0 !important;
+}
+
+    .fullmodal-right .modal-dialog {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        margin: 0;
+        height: 100%;
+        width: 85%;
+        max-width: none;
+        transform: translateX(100%);
+        transition: transform .4s ease-in-out;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .fullmodal-right.show .modal-dialog {
+        transform: translateX(0);
+    }
+
+    /* Core flex layout */
+    .fullmodal-right .modal-content {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        border: 0;
+        border-radius: 0;
+        box-shadow: -4px 0 15px rgba(0,0,0,.4);
+        min-height: 0; /* IMPORTANT */
+    }
+
+        /* The form is also a flex column and must be allowed to shrink */
+        .fullmodal-right .modal-content > form {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0; /* IMPORTANT */
+        }
+
+    .fullmodal-right .modal-header {
+        flex: 0 0 auto;
+        border-bottom: 1px solid #dee2e6;
+        background: #fff;
+        z-index: 10;
+    }
+
+    /* Scrollable center */
+    .fullmodal-right .modal-body {
+        flex: 1 1 auto;
+        min-height: 0; /* CRUCIAL */
+        overflow-y: auto;
+        overflow-x: hidden;
+        background: #f8f9fa;
+        padding: 1.5rem;
+    }
+
+    /* Footer fixed by flex (do NOT absolutely position) */
+    .fullmodal-right .modal-footer {
+        flex: 0 0 auto;
+        border-top: 1px solid #dee2e6;
+        background: #fff;
+        padding: .75rem 1.25rem;
+        z-index: 10;
+    }
+
+/* Backdrop/animation */
+.modal-backdrop.show {
+    opacity: .4;
+}
+
+.fullmodal-right.fade .modal-dialog {
+    transform: translateX(100%);
+}
+
+.fullmodal-right.fade.show .modal-dialog {
+    transform: translateX(0);
+}
+
+/* In case Bootstrap sets overflow on .modal, keep outside from clipping */
+.fullmodal-right.modal {
+    overflow: hidden !important;
+}
+
+.subcard{
+
+    background-color: #ffffff;
+    border-radius:5px;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+
+}
+
+.subcardheader{
+    padding:10px;
+    border-bottom:1px solid gainsboro
+}
+
+.subcardcontent{
+    padding:5px;
+}
