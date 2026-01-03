@@ -68,7 +68,6 @@ app.UseStaticFiles();
 //	RequestPath = "/images"
 //});
 
-
 app.UseRouting();
 
 // ✅ Use session AFTER UseRouting and BEFORE UseAuthorization
