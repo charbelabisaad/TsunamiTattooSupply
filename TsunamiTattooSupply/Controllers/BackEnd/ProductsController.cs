@@ -21,8 +21,20 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public readonly TsunamiDbContext _dbcontext;
 		private readonly ILogger<CategoriesController> _logger;
-		private readonly IWebHostEnvironment _env; 
-		 
+		//private readonly IWebHostEnvironment _env;
+		private readonly string _imagesRoot;
+
+
+		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env, IConfiguration config)
+		{
+			_dbcontext = dbContext;
+			_logger = logger;
+			//_env = env;
+			_imagesRoot = config["StaticFiles:ImagesRoot"];
+
+		}
+
+
 		public IActionResult Index()
 		{
 			FilePathService fps = new FilePathService(_dbcontext);
@@ -53,16 +65,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			return View("~/Views/BackEnd/Products/Index.cshtml",vm);
 		}
-
-	 
-	 
-		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env)
-		{
-			_dbcontext = dbContext;
-			_logger = logger;
-			_env = env;
-		}
-
+		 
 		public IActionResult ListGetProducts()
 		{
 
@@ -623,13 +626,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				if (imagesToDelete.Any())
 				{
 					string originalDeletedDir = Path.Combine(
-						_env.WebRootPath,
+						_imagesRoot,
 						Global.ProductOriginalImagePath.TrimStart('/'),
 						"DELETED"
 					);
 
 					string smallDeletedDir = Path.Combine(
-						_env.WebRootPath,
+						_imagesRoot,
 						Global.ProductSmallImagePath.TrimStart('/'),
 						"DELETED"
 					);
@@ -643,7 +646,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						if (!string.IsNullOrEmpty(img.OriginalImage))
 						{
 							string src = Path.Combine(
-								_env.WebRootPath,
+								_imagesRoot,
 								Global.ProductOriginalImagePath.TrimStart('/'),
 								img.OriginalImage
 							);
@@ -658,7 +661,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						if (!string.IsNullOrEmpty(img.SmallImage))
 						{
 							string src = Path.Combine(
-								_env.WebRootPath,
+								_imagesRoot,
 								Global.ProductSmallImagePath.TrimStart('/'),
 								img.SmallImage
 							);
@@ -689,12 +692,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					// Ensure folders exist
 					string originalDir = Path.Combine(
-						_env.WebRootPath,
+						_imagesRoot,
 						Global.ProductOriginalImagePath.TrimStart('/')
 					);
 
 					string smallDir = Path.Combine(
-						_env.WebRootPath,
+						_imagesRoot,
 						Global.ProductSmallImagePath.TrimStart('/')
 					);
 

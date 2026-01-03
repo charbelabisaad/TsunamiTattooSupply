@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using Serilog;
 using TsunamiTattooSupply.Data; 
 
@@ -57,17 +58,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
-// Custom static files directory
-//app.UseStaticFiles(new StaticFileOptions
-//{
-//	FileProvider = new PhysicalFileProvider(
-//		"/var/www/staticfiles/tsnunamitattoosupply/images"
-//	),
-//	RequestPath = "/images"
-//});
+app.UseStaticFiles(); // wwwroot (css, js, js, admin assets)
 
+var imagesRoot = builder.Configuration["StaticFiles:ImagesRoot"]
+	?? throw new InvalidOperationException(
+		"StaticFiles:ImagesRoot is not configured.");
+
+app.UseStaticFiles(new StaticFileOptions
+{
+	FileProvider = new PhysicalFileProvider(imagesRoot),
+	RequestPath = ""
+});
+ 
 app.UseRouting();
 
 // ✅ Use session AFTER UseRouting and BEFORE UseAuthorization

@@ -17,13 +17,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		private readonly TsunamiDbContext _dbContext;
 		private readonly ILogger<CategoriesController> _logger;
-		private readonly IWebHostEnvironment _env;
+		//private readonly IWebHostEnvironment _env;
+		private readonly string _imagesRoot;
 
-		public CategoriesController(TsunamiDbContext dbContext , ILogger<CategoriesController> logger, IWebHostEnvironment env)
+		public CategoriesController(TsunamiDbContext dbContext , ILogger<CategoriesController> logger, IWebHostEnvironment env, IConfiguration config)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
-			_env = env;
+			//_env = env;
+			_imagesRoot = config["StaticFiles:ImagesRoot"];
 		}
 
 		public IActionResult Index()
@@ -148,7 +150,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				string PhysicalPath(string urlPath)
 				{
 					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_env.WebRootPath, relative);
+					return Path.Combine(_imagesRoot, relative);
 				}
 
 				// Save file (returns filename)
@@ -320,7 +322,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						if (string.IsNullOrWhiteSpace(fileName))
 							return;
 
-						var webRoot = _env.WebRootPath; // e.g. C:\...\wwwroot
+						var webRoot = _imagesRoot; // e.g. C:\...\wwwroot
 						var relativeFolder = folder.Trim().TrimStart('/', '\\');
 						var sourcePath = Path.Combine(webRoot, relativeFolder, fileName);
 
@@ -483,7 +485,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						throw new Exception("SubCategory image path is not configured.");
 
 					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_env.WebRootPath, relative);
+					return Path.Combine(_imagesRoot, relative);
 				}
 
 				bool IsTrue(string key)
@@ -662,7 +664,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						if (string.IsNullOrWhiteSpace(fileName))
 							return;
 
-						var webRoot = _env.WebRootPath;
+						var webRoot = _imagesRoot;
 						var relativeFolder = folder.Trim().TrimStart('/', '\\');
 						var sourcePath = Path.Combine(webRoot, relativeFolder, fileName);
 

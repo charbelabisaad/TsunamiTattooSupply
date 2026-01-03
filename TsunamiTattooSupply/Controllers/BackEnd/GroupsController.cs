@@ -14,15 +14,17 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		private readonly TsunamiDbContext _dbContext;
 		private readonly ILogger<GroupsController> _logger;
-		private readonly IWebHostEnvironment _env;
+		//private readonly IWebHostEnvironment _env;
+		private readonly string _imagesRoot;
 
-		public GroupsController(TsunamiDbContext dbContext, ILogger<GroupsController> logger, IWebHostEnvironment env)
+		public GroupsController(TsunamiDbContext dbContext, ILogger<GroupsController> logger, IWebHostEnvironment env, IConfiguration config)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
-			_env = env;
-		}
+			//_env = env;
+			_imagesRoot = config["StaticFiles:ImagesRoot"];
 
+		} 
 
 		public IActionResult Index()
 		{
@@ -134,7 +136,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						throw new Exception("GroupImagePath is not configured.");
 
 					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_env.WebRootPath, relative);
+					return Path.Combine(_imagesRoot, relative);
 				}
 
 				// 🔹 Save image helper
@@ -283,7 +285,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						if (string.IsNullOrWhiteSpace(fileName))
 							return;
 
-						var webRoot = _env.WebRootPath;
+						var webRoot = _imagesRoot;
 						var relativeFolder = folder.Trim().TrimStart('/', '\\');
 						var sourcePath = Path.Combine(webRoot, relativeFolder, fileName);
 
