@@ -12,10 +12,12 @@ using SixLabors.ImageSharp.Formats.Jpeg; // optional but recommended
 using DbSize = TsunamiTattooSupply.Models.Size;
 using DbColor = TsunamiTattooSupply.Models.Color;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize]
 	public class ProductsController : Controller
 	{
 

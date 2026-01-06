@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Serilog;
@@ -13,29 +14,29 @@ Log.Logger = new LoggerConfiguration()
 	.CreateLogger();
 
 builder.Host.UseSerilog();
- 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation(); // <-- Add this; 
 
+// Add services to the container. 
 builder.Services.AddControllersWithViews()
-    .AddRazorOptions(options =>
-    {
-        options.ViewLocationFormats.Add("/Views/BackEnd/{1}/{0}.cshtml");
-        options.ViewLocationFormats.Add("/Views/BackEnd/Shared/{0}.cshtml");
-    });
+	.AddRazorRuntimeCompilation()
+	.AddRazorOptions(options =>
+	{
+		options.ViewLocationFormats.Add("/Views/BackEnd/{1}/{0}.cshtml");
+		options.ViewLocationFormats.Add("/Views/BackEnd/Shared/{0}.cshtml");
+	});
 
 // ===============================
 // 🔐 AUTHENTICATION (THIS IS REQUIRED)
 // ===============================
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-	.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-	{
-		options.LoginPath = "/BackEnd/Index";
-		options.AccessDeniedPath = "/BackEnd/Index";
-		options.ExpireTimeSpan = TimeSpan.FromHours(8);
-		options.SlidingExpiration = true;
-	});
+builder.Services.AddAuthentication(
+	CookieAuthenticationDefaults.AuthenticationScheme)
+.AddCookie(options =>
+{
+	options.LoginPath = "/BackEnd/Index";     // 👈 LOGIN PAGE
+	options.LogoutPath = "/BackEnd/LogOut";
+	options.AccessDeniedPath = "/BackEnd/Index";
+	options.ExpireTimeSpan = TimeSpan.FromHours(8);
+});
+
 
 // ✅ Add Session BEFORE builder.Build()
 builder.Services.AddSession(options =>
@@ -77,6 +78,7 @@ app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "default",

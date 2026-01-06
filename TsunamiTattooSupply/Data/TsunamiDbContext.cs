@@ -1,8 +1,7 @@
 ﻿
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
-using TsunamiTattooSupply.Controllers.BackEnd;
-using TsunamiTattooSupply.Models; 
+using TsunamiTattooSupply.Models;
 namespace TsunamiTattooSupply.Data
 {
 	public class TsunamiDbContext :DbContext

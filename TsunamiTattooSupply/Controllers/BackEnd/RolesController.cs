@@ -3,10 +3,12 @@ using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize]
 	public class RolesController : Controller
 	{
 		public readonly TsunamiDbContext _dbContext;

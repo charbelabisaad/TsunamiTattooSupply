@@ -42,7 +42,7 @@
                     <!-- Form -->
                     <div class="login-form-col ml-md-4 w-100">
                         <p class="login-box-msg">Sign in to start your session</p>
-                        <form method="post" id="loginForm">
+                        <form method="post" id="loginForm" asp-controller="BackEnd" asp-action="LogIn">
                             <div class="input-group mb-3">
                                 <input type="text" class="form-control" name="Username" placeholder="Username" required>
                                 <div class="input-group-append">

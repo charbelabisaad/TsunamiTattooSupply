@@ -5,10 +5,12 @@ using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions;
 using TsunamiTattooSupply.Models;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize]
 	public class GroupsController : Controller
 	{
 

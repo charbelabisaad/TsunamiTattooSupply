@@ -61,6 +61,14 @@
         color: #555; /* optional */
         }
 
+        .logout{
+            color: #ffffff;
+            transition:.5s;
+        }
+
+        .logout:hover{
+           color: gainsboro;
+        }
 
 
     </style>
@@ -226,33 +234,44 @@
 				@*     <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image"> *@
 				@* </div> *@
                 <!-- Sidebar user panel (optional) -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex align-items-center">
+                <div class="user-panel mt-3 pb-3 mb-3 d-flex flex-column text-center">
 
-                    <!-- ICON -->
-                    <span class="text-white d-flex align-items-center" style="font-size: 2em;">
-                        <i class="fas fa-user-circle"></i>
-                    </span>
+                    <!-- USER INFO -->
+                    <div class="d-flex align-items-center justify-content-center mb-2">
 
-                    <!-- NAME -->
-                    <span class="info ml-3 d-flex align-items-center">
-                        @{
-                            var firstname = User.FindFirst("FirstName")?.Value ?? "";
-                            var lastname = User.FindFirst("LastName")?.Value ?? "";
-                            var fullName = $"{firstname} {lastname}".Trim();
-                        }
+                        <!-- ICON -->
+                        <span class="text-white" style="font-size: 2.2em;">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
 
-                        <a href="#" class="d-block text-white">
-                            @fullName
-                        </a>
-                    </span>
+                        <!-- NAME -->
+                        <span class="info ms-3">
+                            @{
+                                var firstname = User.FindFirst("FirstName")?.Value ?? "";
+                                var lastname = User.FindFirst("LastName")?.Value ?? "";
+                                var fullName = $"{firstname} {lastname}".Trim();
+                            }
+
+                            <a href="#" class="d-block text-white font-weight-bold">
+                                @fullName
+                            </a>
+                        </span>
+
+                    </div>
+
+                    <!-- LOGOUT -->
+                    <form asp-controller="BackEnd" asp-action="LogOut" method="post">
+                        <button type="submit" class="btn btn-link p-0 logout">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </button>
+                    </form>
 
                 </div>
-
-
+                 
                 <!-- SidebarSearch Form -->
                 <div class="form-inline">
                     <div class="input-group" data-widget="sidebar-search">
-                        <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+                        <input class="form-control form-control-sidebar"B type="search" placeholder="Search" aria-label="Search">
                         <div class="input-group-append">
                             <button class="btn btn-sidebar">
                                 <i class="fas fa-search fa-fw"></i>

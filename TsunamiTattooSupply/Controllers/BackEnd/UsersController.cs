@@ -8,10 +8,12 @@ using System.Text;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize]
 	public class UsersController : Controller
 	{
 

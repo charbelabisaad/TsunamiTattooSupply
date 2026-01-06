@@ -2,10 +2,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TsunamiTattooSupply.Controllers.BackEnd
+namespace TsunamiTattooSupply.Models
 {
 	[Table("SocialMedias")]
-	[Index(nameof(Code),IsUnique =true)]
+	[Index(nameof(Code), IsUnique = true)]
 	[Index(nameof(Description), IsUnique = true)]
 	public class SocialMedia
 	{
@@ -23,10 +23,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[Required]
 		[StringLength(100)]
-		public string Icon {  get; set; }
+		public string Icon { get; set; }
 
 		[Required]
 		public int Rank { get; set; }
-		 
+
 	}
 }
