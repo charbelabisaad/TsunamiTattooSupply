@@ -41,54 +41,120 @@ namespace TsunamiTattooSupply.Controllers
 		[HttpPost]
 		public async Task<IActionResult> LogIn(string Username, string Password)
 		{
-			if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
+			try
 			{
-				ViewBag.Error = "Please enter username and password!";
-				return View("Index");
-			}
+				bool changepassword = false;
 
-			var existingUser = _dbContext.Users.FirstOrDefault(u =>
-				u.Username == Username &&
-				u.Password == ComputeSha256Hash(Password) &&
-				u.Status.ID == "A"
-			);
-
-			if (existingUser == null)
-			{
-				ViewBag.Error = "Invalid username or password!";
-				return View("Index");
-			}
-
-			// ================================
-			// 🔐 CLAIMS ONLY (NO COOKIES)
-			// ================================
-			var claims = new List<Claim>
-			{
-				new Claim(ClaimTypes.NameIdentifier, existingUser.ID.ToString()),
-				new Claim(ClaimTypes.Name, existingUser.Username),
-
-				new Claim("FirstName", existingUser.FirstName ?? ""),
-				new Claim("LastName", existingUser.LastName ?? ""), 
-			};
-
-			var identity = new ClaimsIdentity(
-				claims,
-				CookieAuthenticationDefaults.AuthenticationScheme
-			);
-
-			var principal = new ClaimsPrincipal(identity);
-
-			await HttpContext.SignInAsync(
-				CookieAuthenticationDefaults.AuthenticationScheme,
-				principal,
-				new AuthenticationProperties
+				// ================================
+				// 🔎 BASIC VALIDATION
+				// ================================
+				if (string.IsNullOrWhiteSpace(Username) || string.IsNullOrWhiteSpace(Password))
 				{
-					IsPersistent = true,
-					ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
-				});
+					return Json(new
+					{
+						success = false,
+						message = "Please enter username and password!"
+					});
+				}
 
-			return RedirectToAction("Index", "Dashboard");
+				string hashedPassword = ComputeSha256Hash(Password);
+
+				// ================================
+				// 🔍 USER CHECK
+				// ================================
+				var existingUser = _dbContext.Users
+					.FirstOrDefault(u =>
+						u.Username == Username &&
+						u.Password == hashedPassword &&
+						u.Status.ID == "A"
+					);
+
+				if (existingUser == null)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "Invalid username or password!"
+					});
+				}
+
+				// ================================
+				// 🔐 CLAIMS AUTH
+				// ================================
+				var claims = new List<Claim>
+		{
+			new Claim(ClaimTypes.NameIdentifier, existingUser.ID.ToString()),
+			new Claim(ClaimTypes.Name, existingUser.Username),
+			new Claim("FirstName", existingUser.FirstName ?? ""),
+			new Claim("LastName", existingUser.LastName ?? "")
+		};
+
+				var identity = new ClaimsIdentity(
+					claims,
+					CookieAuthenticationDefaults.AuthenticationScheme
+				);
+
+				var principal = new ClaimsPrincipal(identity);
+
+				await HttpContext.SignInAsync(
+					CookieAuthenticationDefaults.AuthenticationScheme,
+					principal,
+					new AuthenticationProperties
+					{
+						IsPersistent = true,
+						ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+					});
+
+				// ================================
+				// 🔑 FORCE CHANGE PASSWORD
+				// ================================
+				const string defaultHash =
+					"2ea93d530707666bcd22829bc75556e2d4952ca403d5bfdadc76b9b6149f15df";
+
+				if (existingUser.Password == defaultHash && hashedPassword == defaultHash)
+				{
+					changepassword = true;
+				}
+
+				return Json(new
+				{
+					success = true,
+					changepassword
+				});
+			}
+			catch (Exception ex)
+			{
+				// 🔥 LOG EXCEPTION (recommended)
+				// _logger.LogError(ex, "Login failed");
+
+				return Json(new
+				{
+					success = false,
+					message = $"An unexpected error occurred. Please try again.\n\n{ ex.Message }"
+				});
+			}
 		}
+
+		[HttpPost]
+		public IActionResult ChangePassword(string NewPassword, string ConfirmPassword)
+		{
+			if (NewPassword != ConfirmPassword)
+				return Json(new { success = false, message = "Passwords do not match" });
+
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+			var user = _dbContext.Users.Find(int.Parse(userId));
+			if (user == null)
+				return Json(new { success = false, message = "User not found" });
+
+			user.Password = ComputeSha256Hash(NewPassword);
+		  
+
+			_dbContext.SaveChanges();
+
+			return Json(new { success = true });
+		}
+
 
 		[HttpPost]
 		public async Task<IActionResult> LogOut()

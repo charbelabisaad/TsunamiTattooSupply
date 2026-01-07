@@ -28,6 +28,9 @@
     <script src="~/dist/js/adminlte.min.js" asp-append-version="true"></script>
  
 </head>
+
+<partial name="ChangePassword" />
+
 <body class="hold-transition login-page">
     <div class="login-box">
         <div class="card">
@@ -98,17 +101,61 @@
     <script>
         $(document).ready(function() {
 
-            $('#btnLogIn').on('click', function() {
-                var btn = $(this);
+            $('#btnLogIn').on('click', function () {
 
-                // Disable the button
-                btn.prop('disabled', true);
+                let btn  = $(this);
+                let form = $('#loginForm');
 
-                // Show spinner
-                btn.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Logging in...');
+                // Remove previous errors
+                $('.login-error').remove();
 
-                // Submit the form manually
-                btn.closest('form').submit();
+                // Disable button + spinner
+                btn.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm"></span> Logging in...'
+                );
+
+                $.ajax({
+                    url: form.attr('action'),      // /BackEnd/LogIn
+                    type: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+
+                    success: function (res) {
+
+                        // ❌ Validation / Login error
+                        if (!res.success) {
+                            form.append(
+                                `<div class="login-error text-danger text-center mt-2">
+                                    ${res.message}
+                                    </div>`
+                            );
+                            return;
+                        }
+
+                        // 🔐 Force Change Password
+                        if (res.changepassword === true) {
+                            $('#changePasswordModal').modal('show');
+                            return;
+                        }
+
+                        // ✅ Login OK → redirect
+                        window.location.href = '/BackEnd/Dashboard/Index'; // adjust if needed
+                    },
+
+                    error: function () {
+                        form.append(
+                            `<div class="login-error text-danger text-center mt-2">
+                                Server error. Please try again.
+                                </div>`
+                        );
+                    },
+
+                    complete: function () {
+                        btn.prop('disabled', false).html(
+                            '<i class="fas fa-sign-in-alt"></i> Log In'
+                        );
+                    }
+                });
             });
              
         });
