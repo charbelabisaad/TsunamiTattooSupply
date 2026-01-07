@@ -69,12 +69,63 @@
         .logout:hover{
            color: gainsboro;
         }
+         
+        .changepassword {
+            color: #ffffff;
+            transition: .5s;
+        }
+
+        .changepassword:hover{
+            color: gainsboro;
+        }
+
+        /* Header hover */
+        .user-toggle {
+            background-color:#000000;
+            text-decoration: none;
+            transition:.5s;
+            cursor: pointer;
+        }
+
+            .user-toggle:hover {
+                background-color: #343a40; /* darker than bg-dark */
+            }
+
+            /* Chevron rotation */
+            .user-toggle .chevron {
+                transition: transform 0.25s ease;
+            }
+
+            .user-toggle[aria-expanded="true"] .chevron {
+                transform: rotate(180deg);
+            }
+
+        /* Collapse background */
+        .user-actions-bg {
+            background-color: #1f2937; /* darker body */
+            border-radius: 0 0 8px 8px;
+            margin-top: 4px;
+        }
+
+            /* Buttons inside collapse */
+        .user-actions-bg .btn-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            box-shadow:none;
+        }
+
+        .user-actions-bg .btn-link:hover { 
+            color: gainsboro;
+        }
 
 
     </style>
 
 </head>
 <body>
+
+    <partial name="changepassword" />
+
     <div class="wrapper">
 
         <!-- Preloader -->
@@ -234,39 +285,52 @@
 				@*     <img src="~/dist/img/user2-160x160.jpg" class="img-circle elevation-2" alt="User Image"> *@
 				@* </div> *@
                 <!-- Sidebar user panel (optional) -->
-                <div class="user-panel mt-3 pb-3 mb-3 d-flex flex-column text-center">
+                <div class="user-panel text-center pt-2 pb-2">
 
-                    <!-- USER INFO -->
-                    <div class="d-flex align-items-center justify-content-center mb-2">
+                    <!-- CLICKABLE HEADER -->
+                    <a class="d-flex align-items-center justify-content-center text-white user-toggle bg-dark px-3 py-2 rounded"
+                       data-bs-toggle="collapse"
+                       href="#userActions"
+                       role="button"
+                       aria-expanded="false"
+                       aria-controls="userActions">
 
-                        <!-- ICON -->
-                        <span class="text-white" style="font-size: 2.2em;">
+                        <!-- USER ICON -->
+                        <span style="font-size: 2.2em;">
                             <i class="fas fa-user-circle"></i>
                         </span>
 
-                        <!-- NAME -->
-                        <span class="info ms-3">
+                        <!-- USER NAME -->
+                        <span class="fw-bold ml-3">
                             @{
                                 var firstname = User.FindFirst("FirstName")?.Value ?? "";
-                                var lastname = User.FindFirst("LastName")?.Value ?? "";
-                                var fullName = $"{firstname} {lastname}".Trim();
+                                var fullName = firstname.Trim();
                             }
-
-                            <a href="#" class="d-block text-white font-weight-bold">
-                                @fullName
-                            </a>
+                            @fullName
                         </span>
+
+                        <!-- CHEVRON -->
+                        <i class="fas fa-chevron-down chevron ml-3"></i>
+                    </a>
+
+                    <!-- COLLAPSIBLE ACTIONS -->
+                    <div class="collapse user-actions-bg mt-0" id="userActions">
+
+                        <button type="button" class="btn btn-link d-block w-100 text-left p-2 changepassword">
+                            <i class="fas fa-key mr-1"></i> Change Password
+                        </button>
+
+                        <form asp-controller="BackEnd" asp-action="LogOut" method="post">
+                            <button type="submit" class="btn btn-link d-block w-100 text-left p-2 logout">
+                                <i class="fas fa-sign-out-alt mr-1"></i> Logout
+                            </button>
+                        </form>
 
                     </div>
 
-                    <!-- LOGOUT -->
-                    <form asp-controller="BackEnd" asp-action="LogOut" method="post">
-                        <button type="submit" class="btn btn-link p-0 logout">
-                            <i class="fas fa-sign-out-alt me-1"></i> Logout
-                        </button>
-                    </form>
-
                 </div>
+
+
                  
                 <!-- SidebarSearch Form -->
                 <div class="form-inline">
@@ -971,5 +1035,28 @@
     @* <script src="~/js/CustomEditor.js" asp-append-version="true"></script> *@
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+
+        $(document).on('click', '.changepassword', function (e) {
+
+            e.preventDefault();
+
+            $('#ChangePasswordDestination').val('LAYOUT');
+
+            // Reset form & errors
+            $('#changePasswordForm')[0].reset();
+            $('#changePasswordError').addClass('d-none').text('');
+
+            $('#changePasswordModal').modal('show');
+
+            $('#changePasswordModal').one('shown.bs.modal', function () {
+                $('#NewPassword').focus();
+            });
+        });
+
+
+    </script>
+
 </body>
 </html>

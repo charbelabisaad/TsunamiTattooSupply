@@ -132,11 +132,27 @@
                             return;
                         }
 
-                        // 🔐 Force Change Password
                         if (res.changepassword === true) {
-                            $('#changePasswordModal').modal('show');
+
+                            $('#ChangePasswordDestination').val('LOGIN');
+
+                            $('#changePasswordModal').modal({
+                                backdrop: 'static',   // ❌ no click outside
+                                keyboard: false       // ❌ no ESC
+                            });
+
+                            // Reset fields
+                            $('#NewPassword').val('');
+                            $('#ConfirmPassword').val('');
+
+                            // Focus first input
+                            $('#changePasswordModal').on('shown.bs.modal', function () {
+                                $('#NewPassword').focus();
+                            });
+
                             return;
                         }
+
 
                         // ✅ Login OK → redirect
                         window.location.href = '/BackEnd/Dashboard/Index'; // adjust if needed
