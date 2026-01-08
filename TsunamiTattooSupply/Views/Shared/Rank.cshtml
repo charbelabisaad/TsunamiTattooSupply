@@ -11,7 +11,7 @@
                     <i class="fa fa-sort-numeric-down mr-2 text-primary"></i>
                     Set Rank
                 </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -22,7 +22,7 @@
                 <!-- Rank List -->
                 <select id="rankSelect"
                         class="form-control form-control-sm"
-                        size="5">
+                        size="10">
                 </select>
 
                 <!-- Up / Down -->
@@ -46,17 +46,144 @@
             <div class="modal-footer py-2">
                 <button type="button"
                         class="btn btn-secondary btn-sm"
-                        data-dismiss="modal">
+                        data-bs-dismiss="modal">
                     Cancel
                 </button>
 
                 <button type="button"
                         id="rankSave"
-                        class="btn btn-primary btn-sm">
-                    Save
+                        class="btn btn-primary btn-sm" style="width:100px">
+                    <span class="save-text"> <i class="fas fa-save"></i> Save</span>
+                    <span class="save-spinner d-none ms-2">
+                        <span class="spinner-border spinner-border-sm" role="status"></span>
+                    </span>
                 </button>
             </div>
+
+            <input id="rankMode" type="hidden" name="rankMode" value="" />
 
         </div>
     </div>
 </div>
+
+<script>
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+          $('#rankUp').click(function () {
+        const $selected = $('#rankSelect option:selected');
+        $selected.each(function () {
+            const $prev = $(this).prev();
+            if ($prev.length) $(this).insertBefore($prev);
+        });
+        refreshRankNumbers();
+    });
+
+    $('#rankDown').click(function () {
+        const $selected = $('#rankSelect option:selected');
+        $($selected.get().reverse()).each(function () {
+            const $next = $(this).next();
+            if ($next.length) $(this).insertAfter($next);
+        });
+        refreshRankNumbers();
+    });
+
+    function refreshRankNumbers() {
+        $('#rankSelect option').each(function (index) {
+            const text = $(this).text().replace(/^\d+\.\s*/, '');
+            $(this).text(`${index + 1}. ${text}`);
+        });
+    }
+
+
+    $(document).on('click', '#rankSave', function () {
+
+        const mode = $('#rankMode').val();
+
+        switch (mode) {
+            case 'CTGRY':
+                saveRankCategory();
+                break;
+
+            case 'SBCTRY':
+                saveRankSubCategory();
+                break;
+
+            case 'GRP':
+                saveRankGroup();
+                break;
+
+            case 'PRDCT':
+                saveRankProduct();
+                break;
+
+            default:
+                toastr.error('Invalid rank mode');
+        }
+    });
+
+    function showSaveSpinner() {
+        $('#rankSave').prop('disabled', true);
+        $('#rankSave .save-text').text('Saving...');
+        $('#rankSave .save-spinner').removeClass('d-none');
+    }
+
+    function hideSaveSpinner() {
+        $('#rankSave').prop('disabled', false);
+        $('#rankSave .save-text').html('<i class="fas fa-save"></i> Save');
+        $('#rankSave .save-spinner').addClass('d-none');
+    }
+
+    function saveRankCategory() {
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
+            });
+        });
+
+        showSaveSpinner();
+
+        $.ajax({
+            url: '@Url.Action("saveRankCategories", "Categories")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
+
+                const table = $.fn.DataTable.isDataTable("#tableCategories")
+                    ? $("#tableCategories").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save category rank');
+                    hideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Category ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+               
+
+                hideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving category rank');
+                hideSaveSpinner();
+            }
+        });
+    }
+
+
+
+    });
+
+</script>

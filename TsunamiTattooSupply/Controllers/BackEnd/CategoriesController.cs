@@ -75,11 +75,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				categories = _dbContext.Categories
 					.Where(c => c.DeletedDate == null)
-					.Include(c => c.Status)
+					.Include(c => c.Status) 
 					.Select(c => new CategoryDto
 					{
 						ID = c.ID,
 						Description = c.Description,
+						Rank = c.Rank,
 						WebImagePath = Global.CategoryWebImagePath,
 						WebImage = c.WebImage,
 						MobileImagePath = Global.CategoryMobileImagePath,
@@ -125,7 +126,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			string? Details,
 			IFormFile? MobileImage,
 			string StatusID)
-		{
+			{
 			try
 			{
 				string normalizedDescription = Description?.Trim().ToUpper() ?? string.Empty;
@@ -291,6 +292,68 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+
+
+		[HttpPost]
+		public IActionResult saveRankCategories([FromBody] List<CategoryDto> categories)
+		{
+			try
+			{
+				if (categories == null || categories.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<CategoryDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = categories.Select(c => c.ID).ToList();
+
+				// Load affected categories once
+				var dbCategories = _dbContext.Categories
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbCategories.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in categories)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var category))
+					{
+						category.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Categories rank saved successfully",
+					data = GetCategories()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "saveRankCategories [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the categories rank.",
+					data = new List<CategoryDto>()
+				});
+			}
+		}
+
 
 
 		[HttpPost]

@@ -125,6 +125,7 @@
                                     <th style="width:70px">Web</th>        <!-- NEW -->
                                     <th style="width:70px">Mobile</th>     <!-- NEW -->
                                     <th style="width:70%">Description</th> 
+                                    <th class="d-none">Rank</th>
                                     <th style="width:120px">Sub Categories</th>
                                     <th style="width:50px">Status</th>
                                     <th style="width:50px" class="no-export">Actions</th>
@@ -213,7 +214,7 @@
                             }
                         }
                     ],
-                    order: [[2, "asc"]],
+                 
                     columns: [
                             {
                             data: "webImage",
@@ -243,6 +244,12 @@
                             data: 'description',
                             className: "align-middle"
                         }, 
+                        {
+                            data: 'rank',
+                            visible: false,
+                            orderable: true,
+                            type: 'num'
+                        },
                         {
                             data: 'subCategoryCount',
                             className: "align-middle",
@@ -298,7 +305,8 @@
                                 `;
                             }
                         }
-                    ]
+                    ],
+                    order: [[3, "asc"]],
                 });
 
                 // place export buttons next to search bar
@@ -1034,6 +1042,45 @@
             ).show();
         });
 
+        $(document).on('click', '#btnRankCategory', function () {
+
+            const $rankSelect = $('#rankSelect');
+
+            $rankSelect.empty();
+
+            $("#rankMode").val("CTGRY")
+
+            $.ajax({
+                url: '@Url.Action("ListGetCategories","Categories")',
+                type: 'GET',
+                success: function (res) {
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to load categories');
+                        return;
+                    }
+
+                    // sort by Rank (safe)
+                    res.data.sort((a, b) => a.rank - b.rank);
+
+                    $.each(res.data, function (index, item) {
+                        $rankSelect.append(
+                            `<option value="${item.id}">
+                                ${index + 1}. ${item.description}
+                            </option>`
+                        );
+                    });
+
+                   
+
+                    $('#rankModal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Server error while loading categories');
+                }
+            });
+
+        });
 
       // / $(document).on('click', '.btn-sub-clear', function () {
 
