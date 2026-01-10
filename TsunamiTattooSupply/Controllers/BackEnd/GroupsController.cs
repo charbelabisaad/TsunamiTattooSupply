@@ -68,7 +68,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				brands = _dbContext.Groups
 				.Where(g => g.TypeID == TypeID && g.DeletedDate == null)
 				.Include(g =>  g.Status)
-				.OrderBy(g => g.Name)
+				.OrderBy(g => g.Rank)
 				.Select( g => new GroupDto
 					{
 						ID = g.ID,
@@ -335,7 +335,67 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-		 
+
+		[HttpPost]
+		public IActionResult SaveRankGroups([FromBody] List<GroupDto> groups, string TypeID)
+		{
+			try
+			{
+				if (groups == null || groups.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<CategoryDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = groups.Select(c => c.ID).ToList();
+
+				// Load affected categories once
+				var dbGroups = _dbContext.Groups
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbGroups.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in groups)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var group))
+					{
+						group.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Groups rank saved successfully",
+					data = GetGroups(TypeID)
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveRankGroups [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the groups rank.",
+					data = new List<CategoryDto>()
+				});
+			}
+		}
+
 	}
 
 }

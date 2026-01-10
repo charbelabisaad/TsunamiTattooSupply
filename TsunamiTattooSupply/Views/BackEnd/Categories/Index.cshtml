@@ -147,9 +147,7 @@
 
     <script>
             $(document).ready(function () {
-
-
-
+                 
                 var table = $('#tableCategories').DataTable({
                     processing: true,
                     responsive: true,
@@ -487,6 +485,8 @@
                 $("#deleteCategoryModal").modal("show");
             });
 
+            
+
             $(document).on("click", ".btnViewSubCategories", function () {
                 const categoryId = $(this).data("id");
                 const categoryDescription = $(this).data("description");
@@ -729,7 +729,11 @@
                         className: "align-middle",
                         render: function (data) {
                             return `<span class="fw-bold">${data}</span>`;
-                    }
+                        }   
+                    },
+                    {
+                        data: "rank",
+                        className: "align-middle d-none"
                     },
                     {
                         data: "status",
@@ -777,7 +781,8 @@
                             </div>`;
                         }
                     }
-                ]
+                ],
+                order: [[3, "asc"]],
             });
         }
          
@@ -1022,25 +1027,7 @@
             }
         });
          
-        $(document).on('click', '#btnRankCategory', function () {
-   
-            currentRankContext = $(this).data('context') || null;
-
-            $('#rankModalTitle').text('Set Rank');
-             
-            const $select = $('#rankSelect').empty();
-
-            let items = $(this).data('items');
-
-            // If items come as string → parse JSON
-            if (typeof items === 'string') {
-                items = JSON.parse(items);
-            }
-              
-            new bootstrap.Modal(
-                document.getElementById('rankModal')
-            ).show();
-        });
+        
 
         $(document).on('click', '#btnRankCategory', function () {
 
@@ -1072,6 +1059,48 @@
                     });
 
                    
+
+                    $('#rankModal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Server error while loading categories');
+                }
+            });
+
+        });
+
+        $(document).on('click', '#btnRankSubCategory', function () {
+
+            const $rankSelect = $('#rankSelect'); 
+            const categoryId =  $("#ParentCategoryID").val();
+
+            $rankSelect.empty();
+
+            $("#rankMode").val("SBCTGRY")
+
+            $.ajax({
+                url: '@Url.Action("ListGetSubCategories", "Categories")',
+                type: 'GET', 
+                data: { "CategoryID": categoryId },
+                success: function (res) {
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to load categories');
+                        return;
+                    }
+
+                    // sort by Rank (safe)
+                    res.data.sort((a, b) => a.rank - b.rank);
+
+                    $.each(res.data, function (index, item) {
+                        $rankSelect.append(
+                            `<option value="${item.id}">
+                                ${index + 1}. ${item.description}
+                            </option>`
+                        );
+                    });
+
+
 
                     $('#rankModal').modal('show');
                 },

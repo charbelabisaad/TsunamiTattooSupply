@@ -29,7 +29,8 @@
                                     <div class="col-6 d-flex justify-content-end">
                                         <button id="btnNewSubCategory" class="btn btn-sm btn-black">
                                             <i class="fas fa-plus"></i> Add New Sub Category
-                                        </button>
+                                        </button> 
+                                        <button id="btnRankSubCategory" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                                     </div>
                                 </div>
                             </div>
@@ -42,6 +43,7 @@
                                                 <th style="width:70px">Web</th>
                                                 <th style="width:70px">Mobile</th>
                                                 <th>Description</th>
+                                                <th class="d-none">Rank</th>
                                                 <th style="width:50px">Status</th>
                                                 <th class="no-export text-center" style="width:50px">Actions</th>
                                             </tr>
@@ -65,7 +67,7 @@
 
                                 <div class="card-body p-4">
                                     <input id="SubCategoryID" type="hidden" value="0" />
-                                    <input id="ParentCategoryID" type="hidden" value="" />
+                                    <input id="ParentCategoryID" type="hidden" value="0" />
 
                                     <!-- Description -->
                                     <div class="row align-items-center mb-3">

@@ -295,7 +295,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 
 		[HttpPost]
-		public IActionResult saveRankCategories([FromBody] List<CategoryDto> categories)
+		public IActionResult SaveRankCategories([FromBody] List<CategoryDto> categories)
 		{
 			try
 			{
@@ -473,6 +473,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				subcategories = _dbContext.SubCategories
 					.Where(sc => sc.CategoryID == CategoryID && sc.DeletedDate == null)
 					.Include(sc => sc.Status)
+					.OrderBy(sc => sc.Rank)
 					.Select(sc => new SubCategoryDto
 					{
 						ID = sc.ID,
@@ -481,6 +482,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						WebImage = sc.WebImage,
 						MobileImagePath = Global.SubCategoryMobileImagePath,
 						MobileImage = sc.MobileImage,
+						Rank = sc.Rank,
 						BannerImagePath = Global.SubCategoryBannerImagePath,
 						BannerImage = sc.BannerImage, 
 						StatusID = sc.StatusID,
@@ -694,9 +696,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+		 
+		[HttpPost]
+		public IActionResult SaveRankSubCategories([FromBody] List<CategoryDto> subcategories, int CategoryID)
+		{
+			try
+			{
+				if (subcategories == null || subcategories.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<CategoryDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = subcategories.Select(sc => sc.ID).ToList();
+
+				// Load affected categories once
+				var dbSubCategories = _dbContext.SubCategories
+											 .Where(sc => ids.Contains(sc.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbSubCategories.ToDictionary(sc => sc.ID);
+
+				// Update only Rank
+				foreach (var dto in subcategories)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var subcategory))
+					{
+						subcategory.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
 
 
+				return Json(new
+				{
+					success = true,
+					message = "Sub Categories rank saved successfully",
+					data = GetSubCategories(CategoryID)
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveRankCategories [ERROR]");
 
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the sub categories rank.",
+					data = new List<SubCategoryDto>()
+				});
+			}
+		}
 
 		[HttpPost]
 		public IActionResult DeleteSubCategory(int ID)

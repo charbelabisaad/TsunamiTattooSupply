@@ -1,7 +1,7 @@
 ﻿<!-- ========================= -->
 <!-- 🔹 Generic Rank Modal -->
 <!-- ========================= -->
-<div class="modal fade" id="rankModal" tabindex="-1" role="dialog" aria-labelledby="rankModalTitle" aria-hidden="true">
+<div class="modal fade" id="rankModal" role="dialog" aria-labelledby="rankModalTitle" aria-hidden="true" style="z-index:2000">
     <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
         <div class="modal-content shadow-sm">
 
@@ -44,14 +44,14 @@
 
             <!-- Footer -->
             <div class="modal-footer py-2">
-                <button type="button"
+                <button id="btnCancelRank" type="button"
                         class="btn btn-secondary btn-sm"
                         data-bs-dismiss="modal">
-                    Cancel
+                  <i class="fas fa-ban"></i> Cancel
                 </button>
 
                 <button type="button"
-                        id="rankSave"
+                        id="btnSaveRank"
                         class="btn btn-primary btn-sm" style="width:100px">
                     <span class="save-text"> <i class="fas fa-save"></i> Save</span>
                     <span class="save-spinner d-none ms-2">
@@ -70,7 +70,7 @@
 
     document.addEventListener('DOMContentLoaded', function () {
 
-          $('#rankUp').click(function () {
+    $('#rankUp').click(function () {
         const $selected = $('#rankSelect option:selected');
         $selected.each(function () {
             const $prev = $(this).prev();
@@ -96,25 +96,31 @@
     }
 
 
-    $(document).on('click', '#rankSave', function () {
+    $(document).on('click', '#btnSaveRank', function () {
 
         const mode = $('#rankMode').val();
+        const CategoryID = $("#ParentCategoryID").val();
 
         switch (mode) {
-            case 'CTGRY':
-                saveRankCategory();
+            case "CTGRY":
+                SaveRankCategory();
                 break;
 
-            case 'SBCTRY':
-                saveRankSubCategory();
+            case "SBCTGRY":
+             
+                SaveRankSubCategory(CategoryID);
                 break;
 
-            case 'GRP':
-                saveRankGroup();
+            case "BRD":
+                SaveRankGroup(mode);
                 break;
 
-            case 'PRDCT':
-                saveRankProduct();
+            case "CLC": 
+                SaveRankGroup(mode)
+                break;
+
+            case "PRDCT":
+                SaveRankProduct();
                 break;
 
             default:
@@ -122,19 +128,19 @@
         }
     });
 
-    function showSaveSpinner() {
-        $('#rankSave').prop('disabled', true);
-        $('#rankSave .save-text').text('Saving...');
-        $('#rankSave .save-spinner').removeClass('d-none');
+    function ShowSaveSpinner() {
+        $('#btnSaveRank').prop('disabled', true);
+        $('#btnSaveRank .save-text').text('Saving...');
+        $('#btnSaveRank .save-spinner').removeClass('d-none');
     }
 
-    function hideSaveSpinner() {
-        $('#rankSave').prop('disabled', false);
-        $('#rankSave .save-text').html('<i class="fas fa-save"></i> Save');
-        $('#rankSave .save-spinner').addClass('d-none');
+    function HideSaveSpinner() {
+        $('#btnSaveRank').prop('disabled', false);
+        $('#btnSaveRank .save-text').html('<i class="fas fa-save"></i> Save');
+        $('#btnSaveRank .save-spinner').addClass('d-none');
     }
 
-    function saveRankCategory() {
+    function SaveRankCategory() {
 
         const ranks = [];
 
@@ -145,10 +151,10 @@
             });
         });
 
-        showSaveSpinner();
+        ShowSaveSpinner();
 
         $.ajax({
-            url: '@Url.Action("saveRankCategories", "Categories")',
+            url: '@Url.Action("SaveRankCategories", "Categories")',
             type: 'POST',
             contentType: 'application/json; charset=utf-8',
             data: JSON.stringify(ranks),
@@ -160,7 +166,7 @@
 
                 if (!res.success) {
                     toastr.error(res.message || 'Failed to save category rank');
-                    hideSaveSpinner();
+                    HideSaveSpinner();
                     return;
                 }
 
@@ -173,16 +179,111 @@
                 if (table) table.ajax.reload(null, false);
                
 
-                hideSaveSpinner();
+                HideSaveSpinner();
             },
             error: function () {
                 toastr.error('Server error while saving category rank');
-                hideSaveSpinner();
+                HideSaveSpinner();
             }
         });
+
     }
 
+        function SaveRankGroup(TypeID) {
 
+            const ranks = [];
+
+            $('#rankSelect option').each(function (index) {
+                ranks.push({
+                    ID: $(this).val(),
+                    Rank: index + 1
+                });
+            });
+
+            ShowSaveSpinner();
+
+            $.ajax({
+                url: '@Url.Action("SaveRankGroups", "Groups")?Type=' + TypeID,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ranks),
+                success: function (res) {
+
+                    const table = $.fn.DataTable.isDataTable("#tableGroups")
+                        ? $("#tableGroups").DataTable()
+                        : null;
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to save gourp rank');
+                        HideSaveSpinner();
+                        return;
+                    }
+
+                    toastr.success(res.message || 'Group ranking saved');
+
+                    // Close modal
+                    const modalEl = document.getElementById('rankModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    if (table) table.ajax.reload(null, false);
+                 
+                    HideSaveSpinner();
+                },
+                error: function () {
+                    toastr.error('Server error while saving group rank');
+                    HideSaveSpinner();
+                }
+            });
+        }
+
+        function SaveRankSubCategory(CategoryID){
+
+            const ranks = [];
+
+            $('#rankSelect option').each(function (index) {
+                ranks.push({
+                    ID: $(this).val(),
+                    Rank: index + 1
+                });
+            });
+
+            ShowSaveSpinner();
+             
+            $.ajax({
+                url: '@Url.Action("SaveRankSubCategories", "Categories")?CategoryID=' + CategoryID,
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ranks),
+                success: function (res) {
+
+                    const table = $.fn.DataTable.isDataTable("#tableSubCategories")
+                        ? $("#tableSubCategories").DataTable()
+                        : null;
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to save sub category rank');
+                        HideSaveSpinner();
+                        return;
+                    }
+
+                    toastr.success(res.message || 'Sub Category ranking saved');
+
+                    // Close modal
+                    const modalEl = document.getElementById('rankModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    if (table) table.ajax.reload(null, false);
+
+
+                    HideSaveSpinner();
+                },
+                error: function () {
+                    toastr.error('Server error while saving sub category rank');
+                    HideSaveSpinner();
+                }
+            });
+
+        }
 
     });
 

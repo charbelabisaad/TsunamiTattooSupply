@@ -81,6 +81,7 @@
 
 <partial name="SaveGroup" />
 <partial name="DeleteGroup" />
+<partial name="Rank" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -104,6 +105,7 @@
                         <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Groups List</h3></div>
                         <div class="col-6 d-flex align-groups-center justify-content-end">
                             <button id="btnNewGroup" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Group</button>
+                            <button id="btnRankGroup" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -129,6 +131,7 @@
                                 <tr style="vertical-align:middle">
                                     <th style="width:70px">Image</th>        <!-- NEW -->
 									<th>Description</th>
+                                    <th class="d-none">Rank</th>
 									<th style="width:90px">Show Home</th>
                                     <th style="width:50px">Status</th> 
                                     <th style="width:50px" class="no-export">Actions</th>
@@ -237,9 +240,7 @@
                         }
                     }
                 ],
-
-                order: [[3, 'asc']], // Order by Status (same logic as categories)
-
+                
                 columns: [
                     // 🔹 Group Image
                     {
@@ -264,6 +265,10 @@
                         data: "name",
                         className: "align-middle"
                     }, 
+                    {
+                        data: "rank",
+                        className: "align-middle d-none"
+                    },
                     {
                         data: "status",
                         className: "align-middle text-center",
@@ -321,7 +326,8 @@
                             `;
                         }
                     }
-                ]
+                ],
+                order: [[2,"asc"]]
             });
 
             // OPTIONAL: add style to search
@@ -467,7 +473,48 @@
                 // Show modal
                 $("#deleteGroupModal").modal("show");
             });
-             
+
+            $(document).on('click', '#btnRankGroup', function () {
+
+                const $rankSelect = $('#rankSelect');
+
+                $rankSelect.empty();
+
+                var type = $('input[name="groupType"]:checked').val();
+                 
+                $("#rankMode").val(type)
+
+                $.ajax({
+                    url: '@Url.Action("ListGetGroups", "Groups")',
+                    type: 'GET',
+                    data: { "TypeID": type },
+                    success: function (res) {
+
+                        if (!res.success) {
+                            toastr.error(res.message || 'Failed to load groups');
+                            return;
+                        }
+
+                        // sort by Rank (safe)
+                        res.data.sort((a, b) => a.rank - b.rank);
+
+                        $.each(res.data, function (index, item) {
+                            $rankSelect.append(
+                                `<option value="${item.id}">
+                                    ${index + 1}. ${item.name}
+                                </option>`
+                            );
+                        });
+                         
+                        $('#rankModal').modal('show');
+                    },
+                    error: function () {
+                        toastr.error('Server error while loading groups');
+                    }
+                });
+
+            });
+
         });
 
     </script>
