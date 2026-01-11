@@ -27,7 +27,18 @@
                 <div id="cardServicesHeader" class="card-header font-weight-bold">Services</div>
 
                 <div id="cardServicesBody" class="card-body">
-                    <textarea id="serviceDetails" class="editornote"></textarea>
+
+                    <input id="ServiceID" type="hidden" value="SRVC" />
+
+                    <textarea id="serviceDetails" class="editornote">
+
+                        @if(Model.service != null){
+                            @Model.service.Text
+                        }
+
+                     
+
+                    </textarea>
                 </div>
 
                 <div id="cardServicesFooter" class="card-footer align-items-center justify-content-end text-right">
@@ -59,6 +70,38 @@
                 placeholder:'Write details here...'
 
             })
+
+            // save / load service
+            $('#btnSaveServices').on('click', function () {
+
+                const serviceId = $('#ServiceID').val();
+                const serviceDetails = $('#serviceDetails').val();
+
+                // UI loading state
+                $('#btnSaveServicesSpinner').removeClass('d-none');
+                $('#btnSaveServices').prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("SaveServices","Services")',
+                    type: 'GET',
+                        data: { ID: serviceId, Text: serviceDetails },
+                    success: function (res) { 
+
+                        if(res.success == true) 
+                            toastr.success(res.message);
+                        else
+                            toastr.error("Error saving services!");
+                    },
+                    error: function () {
+                        toastr.error('Server error while loading service');
+                    },
+                    complete: function () {
+                        // restore UI
+                        $('#btnSaveServicesSpinner').addClass('d-none');
+                        $('#btnSaveServices').prop('disabled', false);
+                    }
+                });
+            });
 
         });
   
