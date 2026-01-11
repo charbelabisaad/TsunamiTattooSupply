@@ -84,6 +84,8 @@
 
 <partial name="SaveProduct" />
 <partial name="DeleteProduct" />  
+<partial name="Rank" />
+
 <div class="content-wrapper">
 
     <div class="content-header">
@@ -106,9 +108,8 @@
                             <h3 class="card-title">Products List</h3>
                         </div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
-                            <button id="btnNewProduct" type="button" class="btn btn-sm btn-black">
-                                <i class="fas fa-plus"></i> Add New Product
-                            </button>
+                            <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
+                            <button id="btnRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
                         </div>
                     </div>
                 </div>
@@ -121,6 +122,7 @@
                                     <th style="width:70px">Image</th>
                                     <th>Code</th>
                                     <th>Name</th>
+                                    <th class="done">Rank</th>
                                     <th style="width:70px">Unit</th>
                                     <th style="width:50px">VAT</th>
                                     <th style="width:50px">Feature</th>
@@ -223,7 +225,7 @@
                     }
                 ],
 
-                order: [[2, "asc"]],
+                order: [[3, "asc"]],
 
                 columns: [
                     // 🔹 Product Image
@@ -251,13 +253,15 @@
                         data: "name",
                         className: "align-middle"
                     },
-
+                    {
+                        data: "rank",
+                        className: "align-middle d-none"
+                    },
                     // 🔹 Unit
                     {
                         data: "unitShortDescription",
                         className: "align-middle"
-                    },
-
+                    }, 
                     // 🔹 VAT
                     {
                         data: "vat",
@@ -965,12 +969,54 @@
         let isColorEditLoading = false;
 
 
+         $(document).on('click', '#btnRankProduct', function () {
+
+            const $rankSelect = $('#rankSelect');
+
+            $rankSelect.empty();
+
+            $("#rankMode").val("PRDCT")
+
+            $.ajax({
+                url: '@Url.Action("ListGetProducts","Products")',
+                type: 'GET',
+                success: function (res) {
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to load products');
+                        return;
+                    }
+
+                    // sort by Rank (safe)
+                    res.data.sort((a, b) => a.rank - b.rank);
+
+                    $.each(res.data, function (index, item) {
+                        $rankSelect.append(
+                            `<option value="${item.id}">
+                                ${index + 1}. ${item.name}
+                            </option>`
+                        );
+                    });
+
+                   
+
+                    $('#rankModal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Server error while loading product');
+                }
+            });
+
+        });
+
+
 
         $('#ProductExpiryDate').daterangepicker({  singleDatePicker: true,
         autoApply: true,
         showDropdowns: true,
         timePicker: false,
         locale: { format: 'YYYY-MM-DD' }});
+
 
     });
 

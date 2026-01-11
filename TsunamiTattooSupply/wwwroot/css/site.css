@@ -171,11 +171,7 @@ body {
     color: whitesmoke;
     transform: scale(1.2);
 }
-
-.editornote{
-    height: 200px !important
-}
-
+ 
 /* =========================================================
    Reusable Line Tabs (Enterprise Style)
    Usage: <ul class="nav nav-tabs tabs-line">

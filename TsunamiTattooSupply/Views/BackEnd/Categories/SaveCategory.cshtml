@@ -264,11 +264,8 @@
                                     <div class="card-subtitle">Details</div>
                                 </div>
                                 <div class="subcardcontent">
-									<textarea id="categoryDetails" class="editornote" placeholder="Write details here...">
-                                        
-                                    </textarea>
-                                </div>
-
+									<textarea id="categoryDetails" class="editornote"></textarea>
+                                </div> 
                             </div>
 
                         </div>
@@ -529,12 +526,18 @@
         $('#saveCategoryModal').on('hidden.bs.modal', function () {
             $("#ClearWebImage, #ClearBannerImage, #ClearMobileImage, #ClearADImage1, #ClearADImage2, #ClearADImage3").val("false");
         });
-
+ 
         // =======================
         // 🔹 Summernote Setup
         // =======================
        
-
-
+        $('#categoryDetails').summernote({
+        
+            height:200,
+            minHeight:200,
+            placeholder: 'Write details here...'
+        
+        });
+  
     });
 </script>

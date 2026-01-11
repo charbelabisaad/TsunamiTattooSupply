@@ -21,7 +21,47 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+
+            <div id="cardServices" class="card">
+
+                <div id="cardServicesHeader" class="card-header font-weight-bold">Services</div>
+
+                <div id="cardServicesBody" class="card-body">
+                    <textarea id="serviceDetails" class="editornote"></textarea>
+                </div>
+
+                <div id="cardServicesFooter" class="card-footer align-items-center justify-content-end text-right">
+
+                    <button id="btnSaveServices" type="button" class="btn btn-primary">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveServicesSpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
     </section>
 
 </div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function(){
+
+            $('#serviceDetails').summernote({
+
+                height:400,
+                minHeight:400,
+                placeholder:'Write details here...'
+
+            })
+
+        });
+  
+    </script>
+
+}

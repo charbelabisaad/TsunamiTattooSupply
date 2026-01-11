@@ -21,7 +21,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	public class ProductsController : Controller
 	{
 
-		public readonly TsunamiDbContext _dbcontext;
+		public readonly TsunamiDbContext _dbContext;
 		private readonly ILogger<CategoriesController> _logger;
 		//private readonly IWebHostEnvironment _env;
 		private readonly string _imagesRoot;
@@ -29,7 +29,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public ProductsController(TsunamiDbContext dbContext, ILogger<CategoriesController>  logger, IWebHostEnvironment env, IConfiguration config)
 		{
-			_dbcontext = dbContext;
+			_dbContext = dbContext;
 			_logger = logger;
 			//_env = env;
 			_imagesRoot = config["StaticFiles:ImagesRoot"];
@@ -39,9 +39,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public IActionResult Index()
 		{
-			FilePathService fps = new FilePathService(_dbcontext);
-			CurrencyService crs = new CurrencyService(_dbcontext);
-			CountryService cts = new CountryService(_dbcontext);
+			FilePathService fps = new FilePathService(_dbContext);
+			CurrencyService crs = new CurrencyService(_dbContext);
+			CountryService cts = new CountryService(_dbContext);
 
 			Global.ProductSmallImagePath = fps.GetFilePath("PRDSMLIMG").Description;
 			Global.ProductOriginalImagePath = fps.GetFilePath("PRDORGIMG").Description;
@@ -100,7 +100,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			try
 			{
-				products = _dbcontext.Products
+				products = _dbContext.Products
 					.Where(p => p.DeletedDate == null)
 					.Select(p => new ProductDto
 					{
@@ -145,7 +145,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<GroupType> GetGroupTypes()
 		{
-			return _dbcontext.GroupTypes
+			return _dbContext.GroupTypes
 				.Select(gt => new GroupType
 				{
 					ID = gt.ID,
@@ -157,7 +157,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		[HttpGet]
 		public IActionResult GetGroupsByType(string groupTypeId)
 		{
-			var groups = _dbcontext.Groups
+			var groups = _dbContext.Groups
 				.Where(g =>
 					g.DeletedDate == null &&
 					g.TypeID == groupTypeId &&
@@ -175,7 +175,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<Category> GetGategories()
 		{
-			return _dbcontext.Categories
+			return _dbContext.Categories
 				.Where(c => c.DeletedDate == null)
 				.Select(c => new Category
 				{
@@ -188,7 +188,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		[HttpGet]
 		public IActionResult GetSubCategoriesByCategory(int categoryId)
 		{
-			var subCategories = _dbcontext.SubCategories
+			var subCategories = _dbContext.SubCategories
 				.Where(sc =>
 					sc.DeletedDate == null &&
 					sc.StatusID == "A" &&
@@ -206,7 +206,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		 
 		public List<UnitDto> GetUnits()
 		{
-			return _dbcontext.Units
+			return _dbContext.Units
 				.Where(u => u.DeletedDate == null)
 				.Select(u => new UnitDto
 				{
@@ -222,7 +222,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<SizeDto> GetSizes()
 		{
-			return _dbcontext.Sizes
+			return _dbContext.Sizes
 				.Where(s => s.DeletedDate == null)
 				.Select(s => new SizeDto
 				{
@@ -238,7 +238,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public List<CountryDto> GetCountriesSales()
 		{
 
-			return _dbcontext.Countries
+			return _dbContext.Countries
 				.Where(c => c.Sales == true)
 				.Select(c => new CountryDto
 				{
@@ -255,7 +255,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		 
 		public List<ColorDto> GetColors()
 		{
-			return _dbcontext.Colors
+			return _dbContext.Colors
 				.Where(c => c.DeletedDate == null)
 				.Select(c => new ColorDto
 				{
@@ -271,9 +271,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public List<CurrencyDto> GetCurrencies()
 		{
 
-			int NativeCountryID = _dbcontext.Countries.Where(c => c.Native == true).Select(c => c.ID).FirstOrDefault();
+			int NativeCountryID = _dbContext.Countries.Where(c => c.Native == true).Select(c => c.ID).FirstOrDefault();
 			  
-			return _dbcontext.Currencies
+			return _dbContext.Currencies
 				.Where(c => c.DeletedDate == null 
 						 && c.StatusID == "A" 
 						 && (c.CountryID == NativeCountryID || c.CountryID == null))
@@ -290,7 +290,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		[ValidateAntiForgeryToken]
 		public IActionResult SaveProduct()
 		{
-			using var transaction = _dbcontext.Database.BeginTransaction();
+			using var transaction = _dbContext.Database.BeginTransaction();
 
 			try
 			{
@@ -302,7 +302,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				DateTime now = DateTime.UtcNow;
 				var form = Request.Form;
 				 
-				int countryId = _dbcontext.Countries
+				int countryId = _dbContext.Countries
 					.Where(c => c.Native)
 					.Select(c => c.ID)
 					.First();
@@ -381,13 +381,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						CreationDate = now
 					};
 
-					_dbcontext.Products.Add(product);
-					_dbcontext.SaveChanges();
+					_dbContext.Products.Add(product);
+					_dbContext.SaveChanges();
 					productId = product.ID;
 				}
 				else
 				{
-					product = _dbcontext.Products.First(x => x.ID == productId);
+					product = _dbContext.Products.First(x => x.ID == productId);
 
 					product.Code = form["ProductCode"];
 					product.Name = form["ProductName"];
@@ -410,7 +410,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔹 PRODUCT SUB CATEGORIES (SOFT DELETE)
 				// =====================================================
-				var existingSubCats = _dbcontext.ProductsSubCategories
+				var existingSubCats = _dbContext.ProductsSubCategories
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
@@ -427,7 +427,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					if (!existingSubCats.Any(x => x.SubCategoryID == subCatId))
 					{
-						_dbcontext.ProductsSubCategories.Add(new ProductSubCategory
+						_dbContext.ProductsSubCategories.Add(new ProductSubCategory
 						{
 							ProductID = productId,
 							SubCategoryID = subCatId,
@@ -441,7 +441,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔹 PRODUCT SIZES (SOFT DELETE)
 				// =====================================================
-				var existingSizes = _dbcontext.ProductsSizes
+				var existingSizes = _dbContext.ProductsSizes
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
@@ -464,7 +464,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					if (ps == null)
 					{
-						_dbcontext.ProductsSizes.Add(new ProductSize
+						_dbContext.ProductsSizes.Add(new ProductSize
 						{
 							ProductID = productId,
 							SizeID = sizeId,
@@ -488,7 +488,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔹 PRICES (SOFT DELETE)
 				// =====================================================
-				var existingPrices = _dbcontext.Prices
+				var existingPrices = _dbContext.Prices
 					.Where(p =>
 						p.ProductID == productId &&
 						p.CountryID == countryId &&
@@ -542,7 +542,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 						if (price == null)
 						{
-							_dbcontext.Prices.Add(new Price
+							_dbContext.Prices.Add(new Price
 							{
 								ProductID = productId,
 								SizeID = sizeId,
@@ -568,7 +568,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔹 PRODUCTS COLORS (SOFT DELETE)
 				// =====================================================
-				var existingColors = _dbcontext.ProductsColors
+				var existingColors = _dbContext.ProductsColors
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
@@ -592,7 +592,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					if (pc == null)
 					{
-						_dbcontext.ProductsColors.Add(new ProductColor
+						_dbContext.ProductsColors.Add(new ProductColor
 						{
 							ProductID = productId,
 							ColorID = colorId,
@@ -618,7 +618,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Select(int.Parse)
 					.ToList();
 
-				var imagesToDelete = _dbcontext.ProductsImages
+				var imagesToDelete = _dbContext.ProductsImages
 					.Where(pi =>
 						pi.ProductID == productId &&
 						pi.DeletedDate == null &&
@@ -755,7 +755,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							}
 
 							// 🔹 Insert DB record
-							_dbcontext.ProductsImages.Add(new ProductImage
+							_dbContext.ProductsImages.Add(new ProductImage
 							{
 								ProductID = productId,
 								ColorID = colorId,
@@ -774,7 +774,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 
 
-				_dbcontext.SaveChanges();
+				_dbContext.SaveChanges();
 				transaction.Commit();
 
 				return Json(new { success = true });
@@ -793,7 +793,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			// ===============================
 			// SUB CATEGORIES (ID + NAME)
 			// ===============================
-			var subCats = _dbcontext.ProductsSubCategories
+			var subCats = _dbContext.ProductsSubCategories
 				.AsNoTracking()
 				.Where(ps =>
 					ps.ProductID == productId &&
@@ -814,7 +814,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			// ===============================
 			// SIZES
 			// ===============================
-			var sizes = _dbcontext.Prices
+			var sizes = _dbContext.Prices
 				.AsNoTracking()
 				.Where(p =>
 					p.ProductID == productId &&
@@ -836,7 +836,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			// ===============================
 			// COLORS (NO IMAGES)
 			// ===============================
-			var colors = _dbcontext.ProductsColors
+			var colors = _dbContext.ProductsColors
 				.AsNoTracking()
 				.Where(pc =>
 					pc.ProductID == productId &&
@@ -852,7 +852,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			// ===============================
 			// IMAGES (GROUPED PER COLOR)
 			// ===============================
-			var images = _dbcontext.ProductsImages
+			var images = _dbContext.ProductsImages
 				.AsNoTracking()
 				.Where(pi =>
 					pi.ProductID == productId &&
@@ -898,7 +898,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			try
 			{
-				var duplicate = _dbcontext.Sizes
+				var duplicate = _dbContext.Sizes
 						.Any(c => c.Description.ToLower() == Description.ToLower()
 							   && c.DeletedDate == null);
 
@@ -915,8 +915,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					CreationDate = DateTime.UtcNow
 				};
 
-				_dbcontext.Sizes.Add(newSize);
-				_dbcontext.SaveChanges();
+				_dbContext.Sizes.Add(newSize);
+				_dbContext.SaveChanges();
 				 
 				return Json(new { success = true, data = newSize });
 
@@ -943,7 +943,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				if (IsCustom)
 					Code = null;
 
-				var duplicate = _dbcontext.Colors
+				var duplicate = _dbContext.Colors
 						.Any(c => c.Name.ToLower() == Name.ToLower()
 							   && c.DeletedDate == null);
 
@@ -963,8 +963,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				};
 
-				_dbcontext.Colors.Add(newColor);
-				_dbcontext.SaveChanges();
+				_dbContext.Colors.Add(newColor);
+				_dbContext.SaveChanges();
 
 				return Json(new { success = true, Data = newColor });
 
@@ -978,6 +978,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 
+		}
+
+		[HttpPost]
+		public IActionResult SaveRankProducts([FromBody] List<ProductDto> products)
+		{
+			try
+			{
+				if (products == null || products.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<ProductDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = products.Select(c => c.ID).ToList();
+
+				// Load affected categories once
+				var dbProducts = _dbContext.Products
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbProducts.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in products)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var product))
+					{
+						product.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Categories rank saved successfully",
+					data = GetProducts()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "saveRankCategories [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the categories rank.",
+					data = new List<ProductDto>()
+				});
+			}
 		}
 
 	}

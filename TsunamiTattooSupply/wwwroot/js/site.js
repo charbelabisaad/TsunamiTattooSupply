@@ -37,12 +37,6 @@ $(function () {
     });
 });
 
-   $(function () {
-          // Summernote
-          $('.editornote').summernote()
 
-          // CodeMirror
-
-        }); 
 
 $('.selectpicker').selectpicker('refresh');

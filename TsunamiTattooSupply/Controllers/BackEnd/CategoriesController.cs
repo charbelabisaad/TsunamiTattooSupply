@@ -507,8 +507,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 
-		[HttpPost]
-		public IActionResult SaveSubCategory(
+	[HttpPost]
+	public IActionResult SaveSubCategory(
 	int ID,
 	int CategoryID,
 	string Description,

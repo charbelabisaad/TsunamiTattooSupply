@@ -284,6 +284,55 @@
             });
 
         }
+ 
+        function SaveRankProduct(){
+
+            const ranks = [];
+
+            $('#rankSelect option').each(function (index) {
+                ranks.push({
+                    ID: $(this).val(),
+                    Rank: index + 1
+                });
+            });
+
+            ShowSaveSpinner();
+
+            $.ajax({
+                url: '@Url.Action("SaveRankProducts", "Products")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ranks),
+                success: function (res) {
+
+                    const table = $.fn.DataTable.isDataTable("#tableProducts")
+                        ? $("#tableProducts").DataTable()
+                        : null;
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to save product rank');
+                        HideSaveSpinner();
+                        return;
+                    }
+
+                    toastr.success(res.message || 'Product ranking saved');
+
+                    // Close modal
+                    const modalEl = document.getElementById('rankModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    if (table) table.ajax.reload(null, false);
+
+
+                    HideSaveSpinner();
+                },
+                error: function () {
+                    toastr.error('Server error while saving product rank');
+                    HideSaveSpinner();
+                }
+            });
+
+        }
 
     });
 

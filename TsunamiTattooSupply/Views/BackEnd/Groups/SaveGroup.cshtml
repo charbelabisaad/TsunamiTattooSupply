@@ -181,9 +181,7 @@
 
                                 <div class="subcardcontent" style="height:300px">
                                     <textarea id="groupDetails"
-                                              class="editornote"
-                                              placeholder="Write details here..."
-                                              style="width:100%; resize:vertical;"></textarea>
+                                              class="editornote"></textarea>
                                 </div>
                             </div>
 
@@ -399,6 +397,15 @@
             });
         }
 
+       
+        $('#groupDetails').summernote({
+
+            height:200,
+            minHeight:200,
+            placeholder: 'Write details here...'
+
+        })
+ 
     });
 
 </script>
