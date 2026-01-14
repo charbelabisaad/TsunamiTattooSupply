@@ -444,10 +444,12 @@
                     </li>
                         <li class="nav-item @((currenctController == "Sizes" || currenctController == "Colors" || currenctController == "Clients" || currenctController == "Artists" 
                                             || currenctController == "PromoCode" || currenctController == "Subscriptions" || currenctController == "Stock" || currenctController == "Orders"
-                                            || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge") ? "menu-open" : string.Empty)">
+                                            || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge")
+                                            || currenctController =="SiteSettings" ? "menu-open" : string.Empty)">
                             <a href="#" class="nav-link @((currenctController == "Sizes" || currenctController == "Colors" || currenctController == "Clients" || currenctController == "Artists" || 
                                                         currenctController == "PromoCode" || currenctController == "Subscriptions" || currenctController == "Stock" || currenctController == "Orders"
-                                                        || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge") ? "active" : string.Empty)">
+                                                        || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge")
+                                                        || currenctController == "SiteSetting" ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-tasks-alt"></i>
                             <p class="font-weight-bold">
                                 Management
@@ -519,6 +521,12 @@
                                     <a asp-area="" asp-controller="DeliveryCharge" asp-action="Index" class="nav-link @((currenctController == "DeliveryCharge" && currenctAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-truck nav-icon"></i>
                                     <p>Delivery Charge</p>
+                                </a>
+                            </li>
+                            <li class="nav-item ml-3">
+                                <a asp-area="" asp-controller="SiteSettings" asp-action="Index" class="nav-link @((currenctController == "SiteSettings" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <i class="fas fa-cogs"></i>
+                                    <p>Site Settings</p>
                                 </a>
                             </li>
                         </ul>

@@ -1,0 +1,165 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Site Settings";
+}
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div id="cardSiteSettings" class="card">
+
+                <div id="cardHeaderSiteSettings" class="card-header font-weight-bold">Application Information</div>
+
+                <div id="card-body">
+
+                    <div class="row p-3">
+
+                        <div class="col-12 col-md-6">
+                            
+                            <label>Application Name</label>
+
+                            <input id="applicationName" type="text" name="applicationname" class="form-control" placeholder="Fill application name" />
+                            
+                        </div>
+
+                        <div class="col-12 col-md-6">
+
+                            <label>Copy Right</label>
+
+                            <input id="applicationCopyRight" type="text" name="applicationcopyright" class="form-control" placeholder="Fill copy right" />
+                             
+                        </div>
+
+                    </div>
+
+                    <div class="row p-3">
+
+                        <div class=" col-12 col-md-3 text-center mb-3">
+
+                            <div class="variation-card">
+
+                                <div class="variation-header text-center p-2">Logo</div>
+                                 
+                                <div class="variation-body p-3">
+
+                                    <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+
+                                    <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                         style="width:100%; height:100%; cursor:pointer;">
+
+                                        <input type="file"
+                                               id="applicationLogo"
+                                               name="application_logo"
+                                               accept="image/png"
+                                               style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" />
+
+                                        <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                            <i class="fas fa-image"></i>
+                                        </span>
+
+                                        <img id="applicationLogoPreview"
+                                             class="img-fluid rounded d-none"
+                                             style="width:100%; height:100%; object-fit:contain;" />
+                                    </div>
+
+                                    <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                        <div class="d-flex gap-4">
+                                            <button type="button" class="overlay-btn btn-clear" data-target="applicationLogo">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+
+                                            <button type="button" class="overlay-btn btn-view" data-preview="applicationLogoPreview">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button type="button" class="overlay-btn btn-browse" data-input="applicationLogo">
+                                                <i class="fas fa-paperclip"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class=" col-12 col-md-3 text-center mb-3">
+
+                            <div class="variation-card">
+
+                                <div class="variation-header text-center p-2">Icon</div>
+
+                                <div class="variation-body p-3">
+
+                                    <div class="image-box-wrapper mx-auto position-relative" style="width:250px; height:250px;">
+
+                                    <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                         style="width:100%; height:100%; cursor:pointer;">
+
+                                        <input type="file"
+                                               id="applicationIcon"
+                                               name="application_icon"
+                                               accept="image/png"
+                                               style="opacity:0; position:absolute; width:100%; height:100%; cursor:pointer;" />
+
+                                        <span class="text-muted placeholder-icon" style="font-size:40px;">
+                                            <i class="fas fa-image"></i>
+                                        </span>
+
+                                        <img id="applicationIconPreview"
+                                             class="img-fluid rounded d-none"
+                                             style="width:100%; height:100%; object-fit:contain;" />
+                                    </div>
+
+                                    <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                        <div class="d-flex gap-4">
+                                            <button type="button" class="overlay-btn btn-clear" data-target="applicationIcon">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+
+                                            <button type="button" class="overlay-btn btn-view" data-preview="applicationIconPreview">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+
+                                            <button type="button" class="overlay-btn btn-browse" data-input="applicationIcon">
+                                                <i class="fas fa-paperclip"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>

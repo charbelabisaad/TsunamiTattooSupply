@@ -12,8 +12,8 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    [Migration("20260112221849_CreateLicenceSiteSetting")]
-    partial class CreateLicenceSiteSetting
+    [Migration("20260114101410_AddFieldCipyRightToSiteSettings")]
+    partial class AddFieldCipyRightToSiteSettings
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -603,6 +603,65 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("Colors");
                 });
 
+            modelBuilder.Entity("TsunamiTattooSupply.Models.Contact", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("CreatedUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreationDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("DeletedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("DeletedUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("EditDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("EditUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TypeID")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("CreatedUserID");
+
+                    b.HasIndex("DeletedUserID");
+
+                    b.HasIndex("EditUserID");
+
+                    b.HasIndex("TypeID");
+
+                    b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.ContactType", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ContactTypes");
+                });
+
             modelBuilder.Entity("TsunamiTattooSupply.Models.Country", b =>
                 {
                     b.Property<int>("ID")
@@ -906,6 +965,26 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("GroupTypes");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.Licence", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Licences");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Notification", b =>
@@ -1745,6 +1824,45 @@ namespace TsunamiTattooSupply.Migrations
                     b.ToTable("Services");
                 });
 
+            modelBuilder.Entity("TsunamiTattooSupply.Models.SiteSetting", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("About")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CopyRight")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("Icon")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("LicenceCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Logo")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Services")
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("SiteSettings");
+                });
+
             modelBuilder.Entity("TsunamiTattooSupply.Models.Size", b =>
                 {
                     b.Property<int>("ID")
@@ -2518,6 +2636,37 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("EditUser");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.Contact", b =>
+                {
+                    b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedUserID");
+
+                    b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
+                        .WithMany()
+                        .HasForeignKey("EditUserID");
+
+                    b.HasOne("TsunamiTattooSupply.Models.ContactType", "ContactType")
+                        .WithMany()
+                        .HasForeignKey("TypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContactType");
+
+                    b.Navigation("CreatedUser");
+
+                    b.Navigation("DeletedUser");
+
+                    b.Navigation("EditUser");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Currency", b =>

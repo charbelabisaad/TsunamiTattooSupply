@@ -18,6 +18,9 @@ namespace TsunamiTattooSupply.Models
 
 		[StringLength(50)]
 		public string? Icon {  get; set; }
+
+		[StringLength(500)]
+		public string ?CopyRight { get; set; }	
 		 
 		[Column(TypeName ="text")]
 		public string? About { get; set; }
