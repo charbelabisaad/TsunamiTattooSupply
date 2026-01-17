@@ -9,8 +9,7 @@ using TsunamiTattooSupply.Functions;
 using System.IO;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
-
-
+ 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	[Authorize]

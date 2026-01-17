@@ -1,9 +1,9 @@
-﻿<div class="modal fade" id="deleteColorModal" tabindex="-1" role="dialog" aria-hidden="true">
+﻿<div class="modal fade" id="deleteProductTypeModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
 
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Delete Color</h5>
+                <h5 class="modal-title">Delete Product Type</h5>
                 <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -11,10 +11,10 @@
 
             <form method="post">
                 <div class="modal-body">
-                    <p class="mb-3" id="deleteColorMessage">
+                    <p class="mb-3" id="deleteProductTypeMessage">
                         Are you sure you want to delete?
                     </p>
-                    <input type="hidden" id="deletedColorId" value="0" />
+                    <input type="hidden" id="deletedProductTypeId" value="0" />
                 </div>
 
                 <div class="modal-footer">
@@ -25,7 +25,7 @@
                             <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
                                 <i class="fas fa-ban"></i> Cancel
                             </button>
-                            <button id="btnConfirmDeleteColor" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                            <button id="btnConfirmDeleteProductType" type="button" class="btn btn-danger ml-1" style="width:100px!important">
                                 <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" role="status" aria-hidden="true"></span>
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -44,47 +44,47 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        $('#btnConfirmDeleteColor').on('click', function (e) {
+        $('#btnConfirmDeleteProductType').on('click', function (e) {
            e.preventDefault();
 
-           const colorId = $("#deletedColorId").val();
+           const producttypeId = $("#deletedProductTypeId").val();
 
            // Reset message
            $("#deleteModalMessage").hide().text('');
 
            // Spinner
            $("#btnDeleteSpinner").removeClass("d-none");
-           $("#btnConfirmDeleteColor i").addClass("d-none");
-           $("#btnConfirmDeleteColor").prop("disabled", true);
+           $("#btnConfirmDeleteProductType i").addClass("d-none");
+           $("#btnConfirmDeleteProductType").prop("disabled", true);
 
            $.ajax({
-               url: '@Url.Action("DeleteColor", "Colors")',
+               url: '@Url.Action("DeleteProductType", "ProductTypes")',
                type: "POST",
-               data: { ID: colorId }
+               data: { ID: producttypeId }
            })
            .done(function (response) {
 
-               const table = $("#tableColors").DataTable();
+               const table = $("#tableProductTypes").DataTable();
 
                if (response.success) {
-                   $("#deleteColorModal").modal("hide");
+                   $("#deleteProductTypeModal").modal("hide");
                    table.ajax.reload(null, false);
-                   toastr.success("Color deleted successfully!");
+                   toastr.success("ProductType deleted successfully!");
                } else {
                    $("#deleteModalMessage")
-                       .text(response.message || "Failed to delete color.")
+                       .text(response.message || "Failed to delete product type.")
                        .show();
                }
            })
            .fail(function () {
                $("#deleteModalMessage")
-                   .text("An unexpected error occurred while deleting the color.")
+                   .text("An unexpected error occurred while deleting the product type.")
                    .show();
            })
            .always(function () {
                $("#btnDeleteSpinner").addClass("d-none");
-               $("#btnConfirmDeleteColor i").removeClass("d-none");
-               $("#btnConfirmDeleteColor").prop("disabled", false);
+               $("#btnConfirmDeleteProductType i").removeClass("d-none");
+               $("#btnConfirmDeleteProductType").prop("disabled", false);
            });
        });
 

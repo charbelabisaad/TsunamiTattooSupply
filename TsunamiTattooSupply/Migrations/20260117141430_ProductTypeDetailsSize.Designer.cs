@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260117141430_ProductTypeDetailsSize")]
+    partial class ProductTypeDetailsSize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1494,13 +1497,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedUserID")
+                    b.Property<int>("DeletedUserID")
                         .HasColumnType("integer");
 
                     b.Property<string>("Description")
@@ -1508,10 +1505,7 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("EditDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("EditUserID")
+                    b.Property<int>("EditUserID")
                         .HasColumnType("integer");
 
                     b.Property<int>("Rank")
@@ -1758,13 +1752,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime>("CreationDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("DeletedUserID")
+                    b.Property<int>("DeletedUserID")
                         .HasColumnType("integer");
 
                     b.Property<string>("Description")
@@ -1772,10 +1760,7 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<DateTime?>("EditDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("EditUserID")
+                    b.Property<int>("EditUserID")
                         .HasColumnType("integer");
 
                     b.Property<int>("Rank")
@@ -3203,11 +3188,15 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
-                        .HasForeignKey("DeletedUserID");
+                        .HasForeignKey("DeletedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
                         .WithMany()
-                        .HasForeignKey("EditUserID");
+                        .HasForeignKey("EditUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()
@@ -3410,11 +3399,15 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
-                        .HasForeignKey("DeletedUserID");
+                        .HasForeignKey("DeletedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
                         .WithMany()
-                        .HasForeignKey("EditUserID");
+                        .HasForeignKey("EditUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()

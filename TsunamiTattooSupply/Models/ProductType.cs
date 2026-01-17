@@ -4,35 +4,24 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("ProductsSizes")]
-	[Index(nameof(ProductID))]
-	[Index(nameof(ProductTypeID))]
-	[Index(nameof(ProductDetailID))]
-	[Index(nameof(SizeID))]
+	[Table("ProudctTypes")]
 	[Index(nameof(StatusID))]
-	public class ProductSize
+	public class ProductType
 	{
+
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int ID { get; set; }
 
 		[Required]
-		public int ProductID { get; set; }
+		[StringLength(100)]
+		public string Description { get; set; }
 
 		[Required]
-		public int ProductTypeID { get; set; }
+		public bool ShowFront { get; set; } = true;
 
 		[Required]
-		public int ProductDetailID { get; set; }
-
-		[Required]
-		public int SizeID { get; set; }
-
-		[Column(TypeName = "decimal(12,2)")]
-		public decimal Sale {  get; set; }
-
-		[Column(TypeName = "decimal(12,2)")]
-		public decimal Raise { get; set; }
+		public int Rank { get; set; }
 
 		[Required]
 		public string StatusID { get; set; }
@@ -48,18 +37,6 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
-
-		[ForeignKey("ProductID")]
-		public Product Product { get; set; }
-
-		[ForeignKey("ProductTypeID")]
-		public ProductType ProductType { get; set; }
-
-		[ForeignKey("ProductDetailID")]
-		public ProductDetail ProductDetail { get; set; }
-
-		[ForeignKey("SizeID")]
-		public Size Size { get; set; }	
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

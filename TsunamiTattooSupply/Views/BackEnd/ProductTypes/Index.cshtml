@@ -1,0 +1,288 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Product Types";
+}
+
+<partial name="SaveProductType" />
+<partial name="DeleteProductType" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">ProductTypes List</h3></div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                            <button id="btnNewProductType" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New ProductType</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="col-sm-12 mt-3">
+                        <table id="tableProductTypes" class="table table-striped w-100">
+                            <thead>
+                                <tr> 
+                                    <th>Description</th>
+                                    <th style="width:100px">Show From</th>
+                                    <th style="width:50px">Status</th>
+                                    <th class="no-export" style="width:50px">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+            $(document).ready(function () {
+
+            var table = $('#tableProductTypes').DataTable({
+            processing: true,
+            responsive: true,
+            ajax: {
+                url: '@Url.Action("ListGetProductTypes", "ProductTypes")',
+                type: 'GET',
+                dataSrc: function (json) {
+
+                    // backend typo: "sucess"
+                    if (json && json.sucess === false) {
+                        toastr.error(json.message || "Failed to load ProductTypes.");
+                        return [];
+                    }
+
+                    // backend uses "Data" (capital D)
+                    if (!json || !json.data) {
+                        toastr.error("Unexpected response from server.");
+                        return [];
+                    }
+
+                    return json.data;
+                }
+            },
+            dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+            language: {
+                search: "",
+                searchPlaceholder: "Search product types..."
+            },
+            buttons: [
+                { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-danger btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    customize: function (doc) {
+                        var tableBody = doc.content[1].table.body;
+                        var colCount = tableBody[0].length;
+                        doc.content[1].table.widths = Array(colCount).fill('*');
+                        doc.defaultStyle.fontSize = 8;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                },
+                { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                {
+                    text: '<i class="fas fa-sync"></i> Refresh',
+                    className: 'btn btn-primary btn-sm',
+                    action: function () {
+                        table.ajax.reload();
+                    }
+                }
+            ],
+            columns: [
+ 
+
+                // Description (Name)
+                {
+                    data: 'description',
+                    className: 'align-middle'
+
+                },
+
+                // IsCustom
+                {
+                    data: 'showFront',
+                    className: 'text-center align-items-center',
+                    render: function (data) {
+                        return data
+                            ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
+                            : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
+                    }
+                },
+
+                // Status (derived frontend-only)
+                { data: 'statusDescription',
+                    className: "align-middle text-center",
+                    render: function (data, type, row) {
+                        return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${row.statusDescription}</div>`;
+                    }
+                },
+
+                // Actions
+                {
+                    data: null,
+                    orderable: false,
+                    searchable: false,
+                    className: 'no-export text-center',
+                    render: function (data, type, row) {
+                        return `
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-light " data-toggle="dropdown">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item btnEditProductType" style="cursor:pointer"
+                                   data-id="${row.id}" 
+                                   data-description="${row.description}"
+                                   data-showFront="${row.showFront}"
+                                   data-statusid="${row.statusID}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
+                                <a class="dropdown-item btnDeleteProductType" style="cursor:pointer"
+                                   data-id="${row.id}">
+                                    <i class="fas fa-trash"></i> Delete
+                                </a>
+                            </div>
+                        </div>`;
+                    }
+                }
+            ]
+        });
+
+        // filter position
+        $('#tableProductTypes_filter').css("position", "relative");
+         
+        const btnNewProductType = document.getElementById("btnNewProductType");
+
+        btnNewProductType.addEventListener("click", function () {
+
+            const modalEl = document.getElementById("saveProductTypeModal");
+            const modal = new bootstrap.Modal(modalEl);
+
+            $("#modalProductTypeTitle").text('Create New Product Type');
+
+            // Reset fields
+            $("#ProductTypeID").val(0);
+            $("#ProductTypeDescription").val('');
+            $("#ProductTypeShowFrontToggle").prop("checked", true);
+            $("#ProductTypeShowFront").val(1);
+
+            // Status
+            $("#ProductTypeStatusID").val('A');
+            $("#ProductTypeStatusToggle").prop("checked", true);
+            $("#ProductTypeStatusLabel").text("Active");
+
+            // Clear validation
+            $("#ProductTypeDescriptionMessage").text('');
+            $("#modalProductTypeMessage").hide();
+            $("#ProductTypeDescription").removeClass('border-danger');
+
+            // ✅ attach BEFORE show
+            $(modalEl).one('shown.bs.modal', function () {
+                setTimeout(() => {
+                    $("#ProductTypeDescription").trigger('focus');
+                }, 100);
+            });
+
+            // ✅ then show modal
+            modal.show();
+        });
+
+        $(document).on('click', '.btnEditProductType', function () {
+
+            $("#modalProductTypeTitle").text('Modify ProductType');
+
+            const modalEl = document.getElementById("saveProductTypeModal");
+            const modal = new bootstrap.Modal(modalEl);
+
+            const ProductTypeID = $(this).data('id');
+            const ProductTypeDescription = $(this).data('description');
+            const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
+            const StatusID = $(this).data('statusid');
+
+            // Fill fields
+            $("#ProductTypeID").val(ProductTypeID);
+            $("#ProductTypeDescription").val(ProductTypeDescription);
+
+            $("#ProductTypeShowFrontToggle").prop("checked", ShowFront);
+            $("#ProductTypeShowFront").val(ShowFront ? 1 : 0);
+
+            // Status
+            $("#ProductTypeStatusID").val(StatusID);
+            $("#ProductTypeStatusToggle").prop("checked", StatusID === 'A');
+            $("#ProductTypeStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
+
+            // Clear validation
+            $("#ProductTypeDescriptionMessage").text('');
+            $("#modalProductTypeMessage").hide();
+            $("#ProductTypeDescription").removeClass('border-danger');
+
+            // ✅ attach FIRST
+            $(modalEl).one('shown.bs.modal', function () {
+                const $input = $(this).find('#ProductTypeDescription');
+                setTimeout(() => $input.trigger('focus'), 100);
+            });
+
+            // ✅ then show
+            modal.show();
+        });
+
+
+            $(document).on("click", ".btnDeleteProductType", function (e) {
+
+                e.preventDefault();
+
+                const productTypeId = $(this).data("id");
+                $("#deletedProductTypeId").val(productTypeId);
+
+                const productTypeDescription = $(this).closest("tr").find("td:nth-child(2)").text();
+
+                $("#deleteProductTypeMessage").html(
+                    `Are you sure you want to delete <strong>${productTypeDescription}</strong>?`
+                );
+
+                $("#deleteProductTypeModal").modal("show");
+
+            });
+
+        });
+
+    </script>
+}
+
+
+
+
+
+
+

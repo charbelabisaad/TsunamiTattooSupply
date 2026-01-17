@@ -70,7 +70,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveColors(int ID, string Code, string Name, bool IsCustom, string StatusID)
+		public IActionResult SaveColor(int ID, string Code, string Name, bool IsCustom, string StatusID)
 		{
 			try
 			{

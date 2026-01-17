@@ -55,8 +55,9 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Licence> Licences { get; set; }
 		public DbSet<SiteSetting> SiteSettings { get; set; }
 		public DbSet<Contact> Contacts { get; set; }
-
-
+		public DbSet<ProductType> ProductTypes { get; set; }
+		public DbSet<ProductDetail> ProductDetails { get; set; }
+		 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
