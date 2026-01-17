@@ -46,5 +46,6 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("DeletedUserID")]
 		public virtual User DeletedUser { get; set; }
+
 	}
 }

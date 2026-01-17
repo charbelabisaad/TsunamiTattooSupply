@@ -347,15 +347,15 @@
                 <!-- Sidebar Menu -->
 				<nav class="mt-2">
 					@{
-						var currenctController = ViewContext.RouteData.Values["controller"]?.ToString();
-						var currenctAction = ViewContext.RouteData.Values["action"]?.ToString();
+						var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+						var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
 					}
 
                     <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
                         <!-- Add icons to the links using the .nav-icon class
                         with font-awesome or any other icon font library -->
-                        <li class="nav-item @(currenctController == "Dashboard" ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link @(currenctController == "Dashboard" ? "active" : string.Empty)">
+                        <li class="nav-item @(currentController == "Dashboard" ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @(currentController == "Dashboard" ? "active" : string.Empty)">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p class="font-weight-bold">
                                     Dashboard
@@ -365,27 +365,27 @@
 
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-									<a asp-area="" asp-controller="Dashboard" asp-action="Index" class="nav-link @((currenctController == "Dashboard" && currenctAction == "Index") ? "active" : string.Empty)">
+									<a asp-area="" asp-controller="Dashboard" asp-action="Index" class="nav-link @((currentController == "Dashboard" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard 1</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index2" class="nav-link @((currenctController == "Dashboard" && currenctAction == "Index2") ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index2" class="nav-link @((currentController == "Dashboard" && currentAction == "Index2") ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard v2</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index3" class="nav-link @((currenctController == "Dashboard" && currenctAction == "Index3") ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Dashboard" asp-action="Index3" class="nav-link @((currentController == "Dashboard" && currentAction == "Index3") ? "active" : string.Empty)">
                                     <i class="far fa-circle nav-icon"></i>
                                     <p>Dashboard v3</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "BannersHome" || currenctController == "BannersPages") ? "menu-open" : string.Empty)">
-                        <a href="#" class="nav-link @((currenctController == "BannersHome" || currenctController == "BannersPages") ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "BannersHome" || currentController == "BannersPages") ? "menu-open" : string.Empty)">
+                        <a href="#" class="nav-link @((currentController == "BannersHome" || currentController == "BannersPages") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-images"></i>
                             <p class="font-weight-bold">
                                 Banners
@@ -394,21 +394,21 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="BannersHome" asp-action="Index" class="nav-link @((currenctController == "BannersHome" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="BannersHome" asp-action="Index" class="nav-link @((currentController == "BannersHome" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-house-door nav-icon"></i>
                                     <p>Home</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="BannersPages" asp-action="Index" class="nav-link @((currenctController == "BannersPages" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="BannersPages" asp-action="Index" class="nav-link @((currentController == "BannersPages" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-journals nav-icon"></i>
                                     <p>Pages</p>
                                 </a>
                             </li> 
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "Categories" || currenctController == "Groups" || currenctController == "ProductTypes" || currenctController == "Products" || currenctController == "BestSellers") ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link @((currenctController == "Categories" || currenctController == "Group" || currenctController == "ProductTypes" || currenctController == "Products" || currenctController == " ") ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "Categories" || currentController == "Groups" || currentController == "ProductTypes" || currentController == "ProductDetails" || currentController == "Products" || currentController == "BestSellers") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @((currentController == "Categories" || currentController == "Group" || currentController == "ProductTypes" || currentController == "ProductDetails" || currentController == "Products" || currentController == " ") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-layer-group"></i>
                             <p class="font-weight-bold">
                                 Collections
@@ -417,45 +417,51 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-								<a asp-area="" asp-controller="Categories" asp-action="Index" class="nav-link @((currenctController == "Categories" && currenctAction == "Index") ? "active" : string.Empty)">
-                                        <i class="bi bi-layers nav-icon"></i>
+								<a asp-area="" asp-controller="Categories" asp-action="Index" class="nav-link @((currentController == "Categories" && currentAction == "Index") ? "active" : string.Empty)">
+                                    <i class="bi bi-layers nav-icon"></i>
                                     <p>Categories</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="Groups" asp-action="Index" class="nav-link @((currenctController == "Groups" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="Groups" asp-action="Index" class="nav-link @((currentController == "Groups" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-tags nav-icon"></i>
                                     <p>Groups</p>
                                 </a>
                                 </li>
                                 <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="ProductTypes" asp-action="Index" class="nav-link @((currenctController == "ProductTypes" && currenctAction == "Index") ? "active" : string.Empty)">
-                                        <i class="bi bi-diagram-3 nav-icon"></i>
+                                    <a asp-area="" asp-controller="ProductTypes" asp-action="Index" class="nav-link @((currentController == "ProductTypes" && currentAction == "Index") ? "active" : string.Empty)">
+                                        <i class="bi bi-inboxes nav-icon"></i>
                                         <p>Product Types</p>
                                     </a>
                                 </li>
+                                <li class="nav-item ml-3">
+                                    <a asp-area="" asp-controller="ProductDetails" asp-action="Index" class="nav-link @((currentController == "ProductDetails" && currentAction == "Index") ? "active" : string.Empty)">
+                                        <i class="bi bi-boxes nav-icon"></i>
+                                        <p>Product Details</p>
+                                    </a>
+                                </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="Products" asp-action="Index" class="nav-link @((currenctController == "Products" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="Products" asp-action="Index" class="nav-link @((currentController == "Products" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-diagram-3 nav-icon"></i>
                                     <p>Products</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="BestSellers" asp-action="Index" class="nav-link @((currenctController == "BestSellers" && currenctAction == "Index") ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="BestSellers" asp-action="Index" class="nav-link @((currentController == "BestSellers" && currentAction == "Index") ? "active" : string.Empty)">
                                         <i class="bi bi-star nav-icon"></i>
                                     <p>Best Sellers</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "Sizes" || currenctController == "Colors" || currenctController == "Clients" || currenctController == "Artists" 
-                                            || currenctController == "PromoCode" || currenctController == "Subscriptions" || currenctController == "Stock" || currenctController == "Orders"
-                                            || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge")
-                                            || currenctController =="SiteSettings" ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link @((currenctController == "Sizes" || currenctController == "Colors" || currenctController == "Clients" || currenctController == "Artists" || 
-                                                        currenctController == "PromoCode" || currenctController == "Subscriptions" || currenctController == "Stock" || currenctController == "Orders"
-                                                        || currenctController == "MoneyTransfers" || currenctController == "PriceSynchronization" || currenctController == "DeliveryCharge")
-                                                        || currenctController == "SiteSetting" ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "Sizes" || currentController == "Colors" || currentController == "Clients" || currentController == "Artists" 
+                                            || currentController == "PromoCode" || currentController == "Subscriptions" || currentController == "Stock" || currentController == "Orders"
+                                            || currentController == "MoneyTransfers" || currentController == "PriceSynchronization" || currentController == "DeliveryCharge")
+                                            || currentController =="SiteSettings" ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @((currentController == "Sizes" || currentController == "Colors" || currentController == "Clients" || currentController == "Artists" || 
+                                                        currentController == "PromoCode" || currentController == "Subscriptions" || currentController == "Stock" || currentController == "Orders"
+                                                        || currentController == "MoneyTransfers" || currentController == "PriceSynchronization" || currentController == "DeliveryCharge")
+                                                        || currentController == "SiteSetting" ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-tasks-alt"></i>
                             <p class="font-weight-bold">
                                 Management
@@ -464,83 +470,83 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="Sizes" asp-action="Index" class="nav-link @((currenctController == "Sizes" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="Sizes" asp-action="Index" class="nav-link @((currentController == "Sizes" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-bounding-box nav-icon"></i>
                                     <p>Sizes</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Colors" asp-action="Index" class="nav-link @((currenctController == "Colors" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Colors" asp-action="Index" class="nav-link @((currentController == "Colors" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-palette nav-icon"></i>
                                         <p>Colors</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Clients" asp-action="Index" class="nav-link @((currenctController == "Clients" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Clients" asp-action="Index" class="nav-link @((currentController == "Clients" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-people nav-icon"></i>
                                     <p>Clients</p>
                                 </a>
 							</li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Artists" asp-action="Index" class="nav-link @((currenctController == "Artists" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Artists" asp-action="Index" class="nav-link @((currentController == "Artists" && currentAction == "Index")  ? "active" : string.Empty)">
 									<i class="bi bi-person-badge nav-icon"></i>
 									<p>Artists</p>
 								</a>
 							</li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="PromoCode" asp-action="Index" class="nav-link @((currenctController == "PromoCode" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="PromoCode" asp-action="Index" class="nav-link @((currentController == "PromoCode" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-ticket-perforated nav-icon"></i>
                                     <p>Promo Code</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Subscriptions" asp-action="Index" class="nav-link @((currenctController == "Subscriptions" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Subscriptions" asp-action="Index" class="nav-link @((currentController == "Subscriptions" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-newspaper nav-icon"></i>
                                     <p>Subscriptions</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Stock" asp-action="Index" class="nav-link @((currenctController == "Stock" && currenctAction == "Index")  ? "active" : string.Empty)">
-                                    <i class="bi bi-boxes nav-icon"></i>
+                                    <a asp-area="" asp-controller="Stock" asp-action="Index" class="nav-link @((currentController == "Stock" && currentAction == "Index")  ? "active" : string.Empty)">
+                                    <i class="bi bi-upc-scan nav-icon"></i>
                                     <p>Stock</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Orders" asp-action="Index" class="nav-link @((currenctController == "Orders" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Orders" asp-action="Index" class="nav-link @((currentController == "Orders" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-receipt nav-icon"></i>
                                     <p>Orders</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="MoneyTransfers" asp-action="Index" class="nav-link @((currenctController == "MoneyTransfers" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="MoneyTransfers" asp-action="Index" class="nav-link @((currentController == "MoneyTransfers" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi-cash-coin nav-icon"></i>
                                     <p>Money Transfers</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="PriceSynchronization" asp-action="Index" class="nav-link @((currenctController == "PriceSynchronization" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="PriceSynchronization" asp-action="Index" class="nav-link @((currentController == "PriceSynchronization" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-arrow-repeat nav-icon"></i>
                                     <p>Price Synchronization</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="DeliveryCharge" asp-action="Index" class="nav-link @((currenctController == "DeliveryCharge" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="DeliveryCharge" asp-action="Index" class="nav-link @((currentController == "DeliveryCharge" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-truck nav-icon"></i>
                                     <p>Delivery Charge</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="SiteSettings" asp-action="Index" class="nav-link @((currenctController == "SiteSettings" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                <a asp-area="" asp-controller="SiteSettings" asp-action="Index" class="nav-link @((currentController == "SiteSettings" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="fas fa-cogs"></i>
                                     <p>Site Settings</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "About" || currenctController == "Contact"|| currenctController == "Services" 
-                                            || currenctController == "Useful" || currenctController == "Situation") ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link@((currenctController == "About" || currenctController == "Contact" || currenctController == "Services"
-                                                        || currenctController == "Useful" || currenctController == "Situation") ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "About" || currentController == "Contact"|| currentController == "Services" 
+                                            || currentController == "Useful" || currentController == "Situation") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link@((currentController == "About" || currentController == "Contact" || currentController == "Services"
+                                                        || currentController == "Useful" || currentController == "Situation") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-info-circle"></i>
                             <p class="font-weight-bold">
                                 Tsunami Information
@@ -549,41 +555,41 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="About" asp-action="Index" class="nav-link @((currenctController == "About" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="About" asp-action="Index" class="nav-link @((currentController == "About" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-info-square nav-icon"></i>
                                     <p>About</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Contact" asp-action="Index" class="nav-link @((currenctController == "Contact" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Contact" asp-action="Index" class="nav-link @((currentController == "Contact" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-phone-vibrate nav-icon"></i>
                                     <p>Contact</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Services" asp-action="Index" class="nav-link @((currenctController == "Services" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Services" asp-action="Index" class="nav-link @((currentController == "Services" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi-tools nav-icon"></i>
                                     <p>Services</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Useful" asp-action="Index" class="nav-link @((currenctController == "Useful" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Useful" asp-action="Index" class="nav-link @((currentController == "Useful" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-journal-text nav-icon"></i>
                                     <p>Useful</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-area="" asp-controller="Situation" asp-action="Index" class="nav-link @((currenctController == "Situation" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="Situation" asp-action="Index" class="nav-link @((currentController == "Situation" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-exclamation-triangle nav-icon"></i>
                                     <p>Situation</p>
                                 </a>
                             </li>
                         </ul>
                     </li>
-                        <li class="nav-item @((currenctController == "Shipping" || currenctController == "Privacy"
-                            || currenctController == "Refund" || currenctController == "TermsConditions") ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link @((currenctController == "Shipping" || currenctController == "Privacy"
-                               || currenctController == "Refund" || currenctController == "TermsConditions") ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "Shipping" || currentController == "Privacy"
+                            || currentController == "Refund" || currentController == "TermsConditions") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @((currentController == "Shipping" || currentController == "Privacy"
+                               || currentController == "Refund" || currentController == "TermsConditions") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-shield"></i>
                             <p class="font-weight-bold">
                                 Policies
@@ -592,33 +598,33 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                    <a asp-controller="Shipping" asp-action="Index" class="nav-link @((currenctController == "Shipping" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="Shipping" asp-action="Index" class="nav-link @((currentController == "Shipping" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-box-seam nav-icon"></i>
                                     <p>Shipping</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-controller="Privacy" asp-action="Index" class="nav-link @((currenctController == "Privacy" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="Privacy" asp-action="Index" class="nav-link @((currentController == "Privacy" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-shield-lock nav-icon"></i>
                                     <p>Privacy</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-controller="Refund" asp-action="Index" class="nav-link @((currenctController == "Refund" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="Refund" asp-action="Index" class="nav-link @((currentController == "Refund" && currentAction == "Index")  ? "active" : string.Empty)">
                                     <i class="bi bi-arrow-counterclockwise nav-icon"></i>
                                     <p>Refund</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">
-                                    <a asp-controller="TermsConditions" asp-action="Index" class="nav-link @((currenctController == "TermsConditions" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="TermsConditions" asp-action="Index" class="nav-link @((currentController == "TermsConditions" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-file-text nav-icon"></i>
                                     <p>Terms & Conditions</p>
                                 </a>
                             </li>
                         </ul>
                     </li> 
-                        <li class="nav-item @((currenctController == "Users" || currenctController == "Roles") ? "menu-open" : string.Empty)">
-                            <a href="#" class="nav-link @((currenctController == "Users" || currenctController == "Roles") ? "active" : string.Empty)">
+                        <li class="nav-item @((currentController == "Users" || currentController == "Roles") ? "menu-open" : string.Empty)">
+                            <a href="#" class="nav-link @((currentController == "Users" || currentController == "Roles") ? "active" : string.Empty)">
 								<i class="nav-icon fa-solid fa-users"></i>
 								<p class="font-weight-bold"> 
                                  Users Management
@@ -627,13 +633,13 @@
                          </a>
                          <ul class="nav nav-treeview"> 
                              <li class="nav-item ml-3">
-                                    <a asp-controller="Users" asp-action="Index" class="nav-link @((currenctController == "Users" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="Users" asp-action="Index" class="nav-link @((currentController == "Users" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-person nav-icon"></i>
 										<p>Users</p> 
                                  </a> 
                              </li> 
                              <li class="nav-item ml-3">
-                                    <a asp-controller="Roles" asp-action="Index" class="nav-link @((currenctController == "Roles" && currenctAction == "Index")  ? "active" : string.Empty)">
+                                    <a asp-controller="Roles" asp-action="Index" class="nav-link @((currentController == "Roles" && currentAction == "Index")  ? "active" : string.Empty)">
                                         <i class="bi bi-person-gear nav-icon"></i>
                                         <p>Roles</p> 
                                  </a> 

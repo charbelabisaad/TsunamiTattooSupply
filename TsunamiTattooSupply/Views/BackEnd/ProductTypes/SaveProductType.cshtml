@@ -174,12 +174,7 @@
                 $('#ProductTypeDescription').addClass("border-danger");
                 requiredValidation = true;
             }
-
-            if (!data.ShowFront && !data.Code) {
-                $('#ProductTypeCodeMessage').text("Product Type code is required!");
-
-            }
-
+             
             if (data.IsCustom === false){
 
                 if ($('#ProductTypeCode').val().trim() == "" || $('#ProductTypeCode').val().trim().length != 6){

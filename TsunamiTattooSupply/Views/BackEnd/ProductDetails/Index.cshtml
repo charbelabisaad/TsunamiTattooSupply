@@ -3,11 +3,11 @@
 *@
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Product Types";
+    ViewData["Title"] = "Product Details";
 }
 
-<partial name="SaveProductType" />
-<partial name="DeleteProductType" />
+<partial name="SaveProductDetail" />
+<partial name="DeleteProductDetail" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -28,9 +28,9 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">ProductTypes List</h3></div>
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">ProductDetails List</h3></div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
-                            <button id="btnNewProductType" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product Type</button>
+                            <button id="btnNewProductDetail" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product Detail</button>
                         </div>
                     </div>
 
@@ -39,9 +39,9 @@
                 <div class="card-body p-0">
 
                     <div class="col-sm-12 mt-3">
-                        <table id="tableProductTypes" class="table table-striped w-100">
+                        <table id="tableProductDetails" class="table table-striped w-100">
                             <thead>
-                                <tr> 
+                                <tr>
                                     <th>Description</th>
                                     <th style="width:100px">Show From</th>
                                     <th style="width:50px">Status</th>
@@ -66,17 +66,17 @@
     <script>
             $(document).ready(function () {
 
-            var table = $('#tableProductTypes').DataTable({
+            var table = $('#tableProductDetails').DataTable({
             processing: true,
             responsive: true,
             ajax: {
-                url: '@Url.Action("ListGetProductTypes", "ProductTypes")',
+                url: '@Url.Action("ListGetProductDetails", "ProductDetails")',
                 type: 'GET',
                 dataSrc: function (json) {
 
                     // backend typo: "sucess"
                     if (json && json.sucess === false) {
-                        toastr.error(json.message || "Failed to load ProductTypes.");
+                        toastr.error(json.message || "Failed to load ProductDetails.");
                         return [];
                     }
 
@@ -92,7 +92,7 @@
             dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
             language: {
                 search: "",
-                searchPlaceholder: "Search product types..."
+                searchPlaceholder: "Search product details..."
             },
             buttons: [
                 { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
@@ -120,7 +120,7 @@
                 }
             ],
             columns: [
- 
+
 
                 // Description (Name)
                 {
@@ -161,14 +161,14 @@
                                 <i class="fas fa-ellipsis-v"></i>
                             </button>
                             <div class="dropdown-menu">
-                                <a class="dropdown-item btnEditProductType" style="cursor:pointer"
-                                   data-id="${row.id}" 
+                                <a class="dropdown-item btnEditProductDetail" style="cursor:pointer"
+                                   data-id="${row.id}"
                                    data-description="${row.description}"
                                    data-showFront="${row.showFront}"
                                    data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
-                                <a class="dropdown-item btnDeleteProductType" style="cursor:pointer"
+                                <a class="dropdown-item btnDeleteProductDetail" style="cursor:pointer"
                                    data-id="${row.id}">
                                     <i class="fas fa-trash"></i> Delete
                                 </a>
@@ -180,37 +180,37 @@
         });
 
         // filter position
-        $('#tableProductTypes_filter').css("position", "relative");
-         
-        const btnNewProductType = document.getElementById("btnNewProductType");
+        $('#tableProductDetails_filter').css("position", "relative");
 
-        btnNewProductType.addEventListener("click", function () {
+        const btnNewProductDetail = document.getElementById("btnNewProductDetail");
 
-            const modalEl = document.getElementById("saveProductTypeModal");
+        btnNewProductDetail.addEventListener("click", function () {
+
+            const modalEl = document.getElementById("saveProductDetailModal");
             const modal = new bootstrap.Modal(modalEl);
 
-            $("#modalProductTypeTitle").text('Create New Product Type');
+            $("#modalProductDetailTitle").text('Create New Product Detail');
 
             // Reset fields
-            $("#ProductTypeID").val(0);
-            $("#ProductTypeDescription").val('');
-            $("#ProductTypeShowFrontToggle").prop("checked", true);
-            $("#ProductTypeShowFront").val(1);
+            $("#ProductDetailID").val(0);
+            $("#ProductDetailDescription").val('');
+            $("#ProductDetailShowFrontToggle").prop("checked", true);
+            $("#ProductDetailShowFront").val(1);
 
             // Status
-            $("#ProductTypeStatusID").val('A');
-            $("#ProductTypeStatusToggle").prop("checked", true);
-            $("#ProductTypeStatusLabel").text("Active");
+            $("#ProductDetailStatusID").val('A');
+            $("#ProductDetailStatusToggle").prop("checked", true);
+            $("#ProductDetailStatusLabel").text("Active");
 
             // Clear validation
-            $("#ProductTypeDescriptionMessage").text('');
-            $("#modalProductTypeMessage").hide();
-            $("#ProductTypeDescription").removeClass('border-danger');
+            $("#ProductDetailDescriptionMessage").text('');
+            $("#modalProductDetailMessage").hide();
+            $("#ProductDetailDescription").removeClass('border-danger');
 
             // ✅ attach BEFORE show
             $(modalEl).one('shown.bs.modal', function () {
                 setTimeout(() => {
-                    $("#ProductTypeDescription").trigger('focus');
+                    $("#ProductDetailDescription").trigger('focus');
                 }, 100);
             });
 
@@ -218,38 +218,38 @@
             modal.show();
         });
 
-        $(document).on('click', '.btnEditProductType', function () {
+        $(document).on('click', '.btnEditProductDetail', function () {
 
-            $("#modalProductTypeTitle").text('Modify Product Type');
+            $("#modalProductDetailTitle").text('Modify ProductDetail');
 
-            const modalEl = document.getElementById("saveProductTypeModal");
+            const modalEl = document.getElementById("saveProductDetailModal");
             const modal = new bootstrap.Modal(modalEl);
 
-            const ProductTypeID = $(this).data('id');
-            const ProductTypeDescription = $(this).data('description');
+            const ProductDetailID = $(this).data('id');
+            const ProductDetailDescription = $(this).data('description');
             const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
             const StatusID = $(this).data('statusid');
 
             // Fill fields
-            $("#ProductTypeID").val(ProductTypeID);
-            $("#ProductTypeDescription").val(ProductTypeDescription);
+            $("#ProductDetailID").val(ProductDetailID);
+            $("#ProductDetailDescription").val(ProductDetailDescription);
 
-            $("#ProductTypeShowFrontToggle").prop("checked", ShowFront);
-            $("#ProductTypeShowFront").val(ShowFront ? 1 : 0);
+            $("#ProductDetailShowFrontToggle").prop("checked", ShowFront);
+            $("#ProductDetailShowFront").val(ShowFront ? 1 : 0);
 
             // Status
-            $("#ProductTypeStatusID").val(StatusID);
-            $("#ProductTypeStatusToggle").prop("checked", StatusID === 'A');
-            $("#ProductTypeStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
+            $("#ProductDetailStatusID").val(StatusID);
+            $("#ProductDetailStatusToggle").prop("checked", StatusID === 'A');
+            $("#ProductDetailStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
 
             // Clear validation
-            $("#ProductTypeDescriptionMessage").text('');
-            $("#modalProductTypeMessage").hide();
-            $("#ProductTypeDescription").removeClass('border-danger');
+            $("#ProductDetailDescriptionMessage").text('');
+            $("#modalProductDetailMessage").hide();
+            $("#ProductDetailDescription").removeClass('border-danger');
 
             // ✅ attach FIRST
             $(modalEl).one('shown.bs.modal', function () {
-                const $input = $(this).find('#ProductTypeDescription');
+                const $input = $(this).find('#ProductDetailDescription');
                 setTimeout(() => $input.trigger('focus'), 100);
             });
 
@@ -258,20 +258,20 @@
         });
 
 
-            $(document).on("click", ".btnDeleteProductType", function (e) {
+            $(document).on("click", ".btnDeleteProductDetail", function (e) {
 
                 e.preventDefault();
 
-                const productTypeId = $(this).data("id");
-                $("#deletedProductTypeId").val(productTypeId);
+                const ProductDetailId = $(this).data("id");
+                $("#deletedProductDetailId").val(ProductDetailId);
 
-                const productTypeDescription = $(this).closest("tr").find("td:nth-child(2)").text();
+                const ProductDetailDescription = $(this).closest("tr").find("td:nth-child(2)").text();
 
-                $("#deleteProductTypeMessage").html(
-                    `Are you sure you want to delete <strong>${productTypeDescription}</strong>?`
+                $("#deleteProductDetailMessage").html(
+                    `Are you sure you want to delete <strong>${ProductDetailDescription}</strong>?`
                 );
 
-                $("#deleteProductTypeModal").modal("show");
+                $("#deleteProductDetailModal").modal("show");
 
             });
 
