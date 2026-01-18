@@ -5,8 +5,10 @@ namespace TsunamiTattooSupply.ViewModels
 {
 	public class ProductPageViewModel
 	{
-		public List<GroupType> groupTypes { get; set; }
-		public List<Category> categories { get; set; }
+		public List<GroupTypeDto> groupTypes { get; set; }
+		public List<CategoryDto> categories { get; set; }
+		public List<ProductTypeDto> productTypes { get; set; }
+		public List<ProductDetailDto> productDetails { get; set; }
 		public List<UnitDto> units { get; set; }
 		public List<SizeDto> sizes { get; set; }
 		public List<ColorDto> colors { get; set; }

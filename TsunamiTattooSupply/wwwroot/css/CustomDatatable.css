@@ -42,7 +42,7 @@
  
 
 .dataTable thead{
-    background-color: gainsboro;
+    background-color: whitesmoke;
     color:#000;
 }
 
@@ -50,19 +50,19 @@
     border:none 
 }
 
-.dataTable tbody td{
-    border:none
+.dataTable tbody td {
+    border-bottom: 1px thin silver;
 }
 
 .dataTable tbody td odd {
-    background-color: whitesmoke;
+    background-color: #ffffff;
 }
 
 .dataTable tbody tr:nth-child(odd){
-    background-color: #e9e7e7;
+    background-color: #ffffff;
 }
 
 
 .dataTable tbody tr:nth-child(even) {
-    background-color: whitesmoke;
+    background-color: #ffffff;
 }

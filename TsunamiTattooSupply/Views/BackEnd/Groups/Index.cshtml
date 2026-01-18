@@ -390,12 +390,11 @@
             $("#ClearImage").val("false");
             $("#GroupID").val(id);
             $("#GroupDescriptionMessage").text("");
-
+               
             // Summernote reset
-            if ($("#groupDetails").summernote) {
-                $("#groupDetails").summernote("code", summary || "");
-            }
-
+            
+            $("#groupDetails").summernote("code", summary || "");
+          
             // ------------------------------------------
             // 🔹 Set Basic Fields
             // ------------------------------------------
@@ -431,7 +430,7 @@
                 clearBtn.hide();
                 viewBtn.hide();
             }
-
+             
             // ------------------------------------------
             // 🔹 Set Modal Title
             // ------------------------------------------
@@ -515,7 +514,20 @@
 
             });
 
-        });
+             $('#groupDetails').summernote({
+
+            height:200,
+            minHeight:200,
+            placeholder: 'Write details here...'
+
+        })
+
+
+
+
+    });
+
+
 
     </script>
 

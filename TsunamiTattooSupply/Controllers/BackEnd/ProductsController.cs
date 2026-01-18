@@ -57,6 +57,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				groupTypes = GetGroupTypes(),
 				categories = GetGategories(),
 				units = GetUnits(),
+				productTypes = GetProductTypes(),
+				productDetails = GetProductDetails(),
 				sizes = GetSizes(),
 				colors = GetColors(),
 				countriessales = GetCountriesSales(),
@@ -79,8 +81,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				products = GetProducts();
 
 				return Json(new { data = products, success = true });
-
-
+				 
 			}
 			catch (Exception ex) { 
 				 
@@ -143,10 +144,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
-		public List<GroupType> GetGroupTypes()
+		public List<GroupTypeDto> GetGroupTypes()
 		{
 			return _dbContext.GroupTypes
-				.Select(gt => new GroupType
+				.Select(gt => new GroupTypeDto
 				{
 					ID = gt.ID,
 					Description = gt.Description
@@ -173,11 +174,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			return Json(groups);
 		}
 
-		public List<Category> GetGategories()
+		public List<CategoryDto> GetGategories()
 		{
 			return _dbContext.Categories
 				.Where(c => c.DeletedDate == null)
-				.Select(c => new Category
+				.Select(c => new CategoryDto
 				{
 					ID = c.ID,
 					Description = c.Description
@@ -203,11 +204,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			return Json(subCategories);
 		}
-		 
+
 		public List<UnitDto> GetUnits()
 		{
 			return _dbContext.Units
-				.Where(u => u.DeletedDate == null)
+				.Where(u => u.DeletedDate == null
+					   && u.StatusID == "A")
 				.Select(u => new UnitDto
 				{
 					ID = u.ID,
@@ -216,8 +218,42 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					StatusID = u.StatusID,
 					StatusDescription = u.Status.Description,
 					StatusColor = u.Status.Color
-				}).ToList();
+				}).ToList(); 
+		}
+		 
+		public List<ProductTypeDto> GetProductTypes()
+		{
+			return _dbContext.ProductTypes
+				.Where(pt =>
+					pt.DeletedDate == null &&
+					pt.StatusID == "A")
+				.OrderBy(pt => pt.Rank)
+				.Select(pt => new ProductTypeDto
+				{
+					ID = pt.ID,
+					Description = pt.Description
+				})
+				.ToList();
 
+			 
+		}
+
+		[HttpGet]
+		public List<ProductDetailDto> GetProductDetails()
+		{
+			var productDetails = _dbContext.ProductDetails
+			.Where(pd =>
+				pd.DeletedDate == null &&
+				pd.StatusID == "A")
+			.OrderBy(pd => pd.Rank)
+			.Select(pd => new ProductDetailDto
+			{
+				ID = pd.ID,
+				Description = pd.Description
+			})
+			.ToList();
+
+			return productDetails;
 		}
 
 		public List<SizeDto> GetSizes()
@@ -441,129 +477,129 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔹 PRODUCT SIZES (SOFT DELETE)
 				// =====================================================
-				var existingSizes = _dbContext.ProductsSizes
-					.Where(x => x.ProductID == productId && x.DeletedDate == null)
-					.ToList();
+				//var existingSizes = _dbContext.ProductsSizes
+				//	.Where(x => x.ProductID == productId && x.DeletedDate == null)
+				//	.ToList();
 
-				foreach (var ps in existingSizes)
-				{
-					if (!sizeIds.Contains(ps.SizeID))
-					{
-						ps.DeletedUserID = userId;
-						ps.DeletedDate = now;
-					}
-				}
+				//foreach (var ps in existingSizes)
+				//{
+				//	if (!sizeIds.Contains(ps.SizeID))
+				//	{
+				//		ps.DeletedUserID = userId;
+				//		ps.DeletedDate = now;
+				//	}
+				//}
 
-				foreach (var sizeId in sizeIds)
-				{
-					decimal sale = decimal.Parse(form[$"Variations[{sizeId}].Sale"]);
-					decimal raise = decimal.Parse(form[$"Variations[{sizeId}].Raise"]);
-					bool isActive = form[$"Variations[{sizeId}].IsActive"] == "on";
+				//foreach (var sizeId in sizeIds)
+				//{
+				//	decimal sale = decimal.Parse(form[$"Variations[{sizeId}].Sale"]);
+				//	decimal raise = decimal.Parse(form[$"Variations[{sizeId}].Raise"]);
+				//	bool isActive = form[$"Variations[{sizeId}].IsActive"] == "on";
 
-					var ps = existingSizes.FirstOrDefault(x => x.SizeID == sizeId);
+				//	var ps = existingSizes.FirstOrDefault(x => x.SizeID == sizeId);
 
-					if (ps == null)
-					{
-						_dbContext.ProductsSizes.Add(new ProductSize
-						{
-							ProductID = productId,
-							SizeID = sizeId,
-							Sale = sale,
-							Raise = raise,
-							StatusID = isActive ? "A" : "I",
-							CreatedUserID = userId,
-							CreationDate = now
-						});
-					}
-					else
-					{
-						ps.Sale = sale;
-						ps.Raise = raise;
-						ps.StatusID = isActive ? "A" : "I";
-						ps.EditUserID = userId;
-						ps.EditDate = now;
-					}
-				}
+				//	if (ps == null)
+				//	{
+				//		_dbContext.ProductsSizes.Add(new ProductSize
+				//		{
+				//			ProductID = productId,
+				//			SizeID = sizeId,
+				//			Sale = sale,
+				//			Raise = raise,
+				//			StatusID = isActive ? "A" : "I",
+				//			CreatedUserID = userId,
+				//			CreationDate = now
+				//		});
+				//	}
+				//	else
+				//	{
+				//		ps.Sale = sale;
+				//		ps.Raise = raise;
+				//		ps.StatusID = isActive ? "A" : "I";
+				//		ps.EditUserID = userId;
+				//		ps.EditDate = now;
+				//	}
+				//}
 
-				// =====================================================
-				// 🔹 PRICES (SOFT DELETE)
-				// =====================================================
-				var existingPrices = _dbContext.Prices
-					.Where(p =>
-						p.ProductID == productId &&
-						p.CountryID == countryId &&
-						p.DeletedDate == null)
-					.ToList();
+				//// =====================================================
+				//// 🔹 PRICES (SOFT DELETE)
+				//// =====================================================
+				//var existingPrices = _dbContext.Prices
+				//	.Where(p =>
+				//		p.ProductID == productId &&
+				//		p.CountryID == countryId &&
+				//		p.DeletedDate == null)
+				//	.ToList();
 
-				var postedPrices = new List<(int SizeID, int CurrencyID)>();
+				//var postedPrices = new List<(int SizeID, int CurrencyID)>();
 
-				foreach (var sizeId in sizeIds)
-				{
-					var priceKeys = form.Keys
-						.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
-						.ToList();
+				//foreach (var sizeId in sizeIds)
+				//{
+				//	var priceKeys = form.Keys
+				//		.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
+				//		.ToList();
 
-					foreach (var key in priceKeys)
-					{
-						int currencyId = int.Parse(key.Split('[', ']')[3]);
-						postedPrices.Add((sizeId, currencyId));
-					}
-				}
+				//	foreach (var key in priceKeys)
+				//	{
+				//		int currencyId = int.Parse(key.Split('[', ']')[3]);
+				//		postedPrices.Add((sizeId, currencyId));
+				//	}
+				//}
 
-				foreach (var price in existingPrices)
-				{
-					bool sizeRemoved = !sizeIds.Contains(price.SizeID);
-					bool priceRemoved = !postedPrices.Any(p =>
-						p.SizeID == price.SizeID &&
-						p.CurrencyID == price.CurrencyID);
+				//foreach (var price in existingPrices)
+				//{
+				//	bool sizeRemoved = !sizeIds.Contains(price.SizeID);
+				//	bool priceRemoved = !postedPrices.Any(p =>
+				//		p.SizeID == price.SizeID &&
+				//		p.CurrencyID == price.CurrencyID);
 
-					if (sizeRemoved || priceRemoved)
-					{
-						price.DeletedUserID = userId;
-						price.DeletedDate = now;
-					}
-				}
+				//	if (sizeRemoved || priceRemoved)
+				//	{
+				//		price.DeletedUserID = userId;
+				//		price.DeletedDate = now;
+				//	}
+				//}
 
-				foreach (var sizeId in sizeIds)
-				{
-					var priceKeys = form.Keys
-						.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
-						.ToList();
+				//foreach (var sizeId in sizeIds)
+				//{
+				//	var priceKeys = form.Keys
+				//		.Where(k => k.StartsWith($"Variations[{sizeId}].Prices["))
+				//		.ToList();
 
-					foreach (var key in priceKeys)
-					{
-						int currencyId = int.Parse(key.Split('[', ']')[3]);
-						decimal amount = decimal.Parse(form[key]);
-						decimal amountNet = decimal.Parse(form[$"Variations[{sizeId}].PricesNet[{currencyId}]"]);
+				//	foreach (var key in priceKeys)
+				//	{
+				//		int currencyId = int.Parse(key.Split('[', ']')[3]);
+				//		decimal amount = decimal.Parse(form[key]);
+				//		decimal amountNet = decimal.Parse(form[$"Variations[{sizeId}].PricesNet[{currencyId}]"]);
 
-						var price = existingPrices.FirstOrDefault(x =>
-							x.SizeID == sizeId &&
-							x.CurrencyID == currencyId);
+				//		var price = existingPrices.FirstOrDefault(x =>
+				//			x.SizeID == sizeId &&
+				//			x.CurrencyID == currencyId);
 
-						if (price == null)
-						{
-							_dbContext.Prices.Add(new Price
-							{
-								ProductID = productId,
-								SizeID = sizeId,
-								CountryID = countryId,
-								CurrencyID = currencyId,
-								Amount = amount,
-								AmountNet = amountNet,
-								StatusID = "A",
-								CreatedUserID = userId,
-								CreationDate = now
-							});
-						}
-						else
-						{
-							price.Amount = amount;
-							price.AmountNet = amountNet;
-							price.EditUserID = userId;
-							price.EditDate = now;
-						}
-					}
-				}
+				//		if (price == null)
+				//		{
+				//			_dbContext.Prices.Add(new Price
+				//			{
+				//				ProductID = productId,
+				//				SizeID = sizeId,
+				//				CountryID = countryId,
+				//				CurrencyID = currencyId,
+				//				Amount = amount,
+				//				AmountNet = amountNet,
+				//				StatusID = "A",
+				//				CreatedUserID = userId,
+				//				CreationDate = now
+				//			});
+				//		}
+				//		else
+				//		{
+				//			price.Amount = amount;
+				//			price.AmountNet = amountNet;
+				//			price.EditUserID = userId;
+				//			price.EditDate = now;
+				//		}
+				//	}
+				//}
 
 				// =====================================================
 				// 🔹 PRODUCTS COLORS (SOFT DELETE)
@@ -679,10 +715,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						img.DeletedDate = now;
 					}
 				}
-
-
 				 
-
 				// =====================================================
 				// 🔹 PRODUCT IMAGES (PER COLOR) — FINAL FIX
 				// =====================================================
@@ -771,9 +804,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						}
 					}
 				}
-
-
-
+				 
 				_dbContext.SaveChanges();
 				transaction.Commit();
 
