@@ -685,7 +685,7 @@
 			rate: @Model.currencyconversion.Rate
 		};
 
-		document.addEventListener('DOMContentLoaded', function () {
+	 
 
 
 			// Picker → HEX
@@ -714,7 +714,7 @@
 			}
 
 
-		$('#ProductSizes').on('changed.bs.select', function () {
+			$('#ProductSizes').on('changed.bs.select', function () {
 
 			//if (isEditLoading) return;
 		  
@@ -1234,160 +1234,157 @@
 
 			$item.remove();
 		});
-	 
-		$(document).on("click", "#btnSaveProduct", function () {
+	$(document).on("click", "#btnSaveProduct", function () {
 
-				// -------------------------------
-				// Elements
-				// -------------------------------
-				let btn     = $(this);
+		// ==================================================
+		// 🔥 FORCE bootstrap-select → real <select> values
+		// ==================================================
+		$('.product-sizes').each(function () {
+			const selected = $(this).selectpicker('val');
+			if (selected && selected.length > 0) {
+				$(this).val(selected);
+			}
+		});
 
-				let spinner = $("#btnSaveProductSpinner");
-				let form    = $("#productForm");
+		$('.product-details').each(function () {
+			const selected = $(this).selectpicker('val');
+			if (selected && selected.length > 0) {
+				$(this).val(selected);
+			}
+		});
 
-				// -------------------------------
-				// Reset validation messages
-				// -------------------------------
-				$("#ProductCodeMessage").text("");
-				$("#ProductNameMessage").text("");
-				$("#ProductSubCategoryMessage").text("");
-				$("#ProductSizesMessage").remove(); // dynamic message
+		$('#ProductTypes').val($('#ProductTypes').selectpicker('val'));
+		$('#ProductColors').val($('#ProductColors').selectpicker('val'));
+		$('#ProductSubCategory').val($('#ProductSubCategory').selectpicker('val'));
 
-				let hasError = false;
+		// ==================================================
+		// Elements
+		// ==================================================
+		let btn     = $(this);
+		let spinner = $("#btnSaveProductSpinner");
+		let form    = $("#productForm");
 
-				// -------------------------------
-				// Required: 
-				// Product Code
-				// -------------------------------
-				let productCode = $("#ProductCode").val().trim();
-				if (!productCode) {
-					$("#ProductCodeMessage").text("Product code is required");
-					hasError = true;
-				}
+		// ==================================================
+		// Reset validation
+		// ==================================================
+		$("#ProductCodeMessage").text("");
+		$("#ProductNameMessage").text("");
+		$("#ProductSubCategoryMessage").text("");
+		$("#ProductSizesMessage").remove();
+		$("#ProductColorsMessage").remove();
 
-				// -------------------------------
-				// Required: Product Name
-				// -------------------------------
-				let productName = $("#ProductName").val().trim();
-				if (!productName) {
-					$("#ProductNameMessage").text("Product name is required");
-					hasError = true;
-				}
+		let hasError = false;
 
-				// -------------------------------
-				// Required: Sub Categories (at least one)
-				// -------------------------------
-				let subCategories = $("#ProductSubCategory").val();
-				if (!subCategories || subCategories.length === 0) {
-					$("#ProductSubCategoryMessage").text("Please select at least one sub category");
-					hasError = true;
-				}
+		// ==================================================
+		// Validation
+		// ==================================================
+		if (!$("#ProductCode").val().trim()) {
+			$("#ProductCodeMessage").text("Product code is required");
+			hasError = true;
+		}
 
-				// -------------------------------
-				// Required: Sizes (at least one)
-				// -------------------------------
-				let sizes = $("#ProductSizes").val();
-				if (!sizes || sizes.length === 0) {
-					if ($("#ProductSizesMessage").length === 0) {
-						$("#ProductSizes")
-							.closest(".col-12")
-							.append('<div id="ProductSizesMessage" class="text-danger fw-normal mt-1">Please select at least one size</div>');
-					}
-					hasError = true;
-				}
+		if (!$("#ProductName").val().trim()) {
+			$("#ProductNameMessage").text("Product name is required");
+			hasError = true;
+		}
 
-					// -------------------------------
-					// Required: Colors (at least one)
-					// -------------------------------
-					let colors = $("#ProductColors").val();
+		let subCategories = $("#ProductSubCategory").val();
+		if (!subCategories || subCategories.length === 0) {
+			$("#ProductSubCategoryMessage")
+				.text("Please select at least one sub category");
+			hasError = true;
+		}
 
-					if (!colors || colors.length === 0) {
-						if ($("#ProductColorsMessage").length === 0) {
-							$("#ProductColors")
-								.closest(".col-12")
-								.append(
-									'<div id="ProductColorsMessage" class="text-danger fw-normal mt-1">' +
-									'Please select at least one color' +
-									'</div>'
-								);
-						}
-						hasError = true;
-					}
+		let colors = $("#ProductColors").val();
+		if (!colors || colors.length === 0) {
+			$("#ProductColors")
+				.closest(".col-12")
+				.append(`
+					<div id="ProductColorsMessage"
+						 class="text-danger fw-normal mt-1">
+						 Please select at least one color
+					</div>
+				`);
+			hasError = true;
+		}
 
+		if (hasError) return;
 
-				// -------------------------------
-				// Stop if validation failed
-				// -------------------------------
-				if (hasError) {
-					return;
-				}
+		// ==================================================
+		// Submit
+		// ==================================================
+		btn.prop("disabled", true);
+		spinner.removeClass("d-none");
 
-				// -------------------------------
-				// Submit via AJAX
-				// -------------------------------
-				btn.prop("disabled", true);
-				spinner.removeClass("d-none");
+		let formData = new FormData(form[0]);
 
-				//$('#productForm input[type="file"][data-dynamic="true"]').remove();
+		// ==================================================
+		// 🔥 Append NEW color images
+		// ==================================================
+		Object.keys(colorImagesBuffer).forEach(colorId => {
 
-					// 🔥 Append buffered color images to the form
-		  
-				let formData = new FormData(form[0]);
-			 
-				Object.keys(colorImagesBuffer).forEach(colorId => {
+			let files = colorImagesBuffer[colorId] || [];
+			let removedSet = removedNewImages[colorId] || new Set();
 
-					let files = colorImagesBuffer[colorId] || [];
-					if (!files.length) return;
+			files.forEach(file => {
+				if (removedSet.has(file.name)) return;
 
-					 let removedSet = removedNewImages[colorId] || new Set();
-
-					files.forEach(file => {
-
-						if (removedSet.has(file.name)) return;
-
-						formData.append(`ProductColorImages[${colorId}][]`, file);
-					});
-				});
-
-				$('.color-image-item[data-image-id]').each(function () {
-					formData.append(
-						'KeptImageIds[]',
-						$(this).data('image-id')
-					);
-				});
-
-				$.ajax({
-					url: '@Url.Action("SaveProduct", "Products")',
-					type: 'POST',
-					data: formData,
-					processData: false,
-					contentType: false,
-					success: function (res) {
-
-						if (res.success) {
-
-							// 🔥 CLEAR BUFFER ONLY AFTER SUCCESS
-							Object.keys(colorImagesBuffer).forEach(k => {
-								colorImagesBuffer[k] = [];
-							});
-
-							toastr.success("Product saved successfully");
-
-							$("#saveProductModal").modal("hide");
-							$("#tableProducts").DataTable().ajax.reload();
-						} else {
-							toastr.error(res.message || "Failed to save product");
-						}
-					},
-					error: function () {
-						toastr.error("Unexpected server error");
-					},
-					complete: function () {
-						btn.prop("disabled", false);
-						spinner.addClass("d-none");
-					}
-				});
+				formData.append(
+					`ProductColorImages[${colorId}][]`,
+					file
+				);
 			});
+		});
+
+		// ==================================================
+		// 🔥 Keep EXISTING images
+		// ==================================================
+		$('.color-image-item[data-image-id]').each(function () {
+			formData.append(
+				'KeptImageIds[]',
+				$(this).data('image-id')
+			);
+		});
+
+		// ==================================================
+		// AJAX
+		// ==================================================
+		$.ajax({
+			url: '@Url.Action("SaveProduct", "Products")',
+			type: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+
+			success: function (res) {
+
+				if (res.success) {
+
+					// clear image buffers
+					Object.keys(colorImagesBuffer).forEach(k => {
+						colorImagesBuffer[k] = [];
+					});
+
+					toastr.success("Product saved successfully");
+
+					$("#saveProductModal").modal("hide");
+					$("#tableProducts").DataTable().ajax.reload(null, false);
+
+				} else {
+					toastr.error(res.message || "Failed to save product");
+				}
+			},
+
+			error: function () {
+				toastr.error("Unexpected server error");
+			},
+
+			complete: function () {
+				btn.prop("disabled", false);
+				spinner.addClass("d-none");
+			}
+		});
+	});
 
 				// Open Size Entry
 				$('#btnNewSize').on('click', function () {
@@ -1620,8 +1617,7 @@
 				$('#ColorNameMessage').text('');
 			});
  
-		});
-
+	 
   
 
 
@@ -1683,8 +1679,7 @@
 									multiple
 									data-live-search="true"
 									data-actions-box="true">
-
-								<option value="">Select detail</option>
+									 
 								${generateDetailsOptions()}
 
 							</select>

@@ -750,6 +750,8 @@
                     });
                 }
 
+
+
         $(document).on('click', '.btnEditProduct', function () {
 
             const modal = new bootstrap.Modal(document.getElementById("saveProductModal"));
@@ -794,6 +796,10 @@
             loadProductEditExtras(productId);
         });
 
+
+          
+
+
         // ✅ Source of truth: all selected subcategory IDs for this product
         let selectedSubCatIds = new Set();
 
@@ -807,6 +813,7 @@
         let sizePricesBySizeId = {};            // sizeId => prices[]
         let isEditLoading = false;
 
+
         function loadProductEditExtras(productId) {
 
             isEditLoading = true;
@@ -815,6 +822,7 @@
                 url: '/Products/GetProductEditExtras',
                 type: 'GET',
                 data: { productId },
+
                 success: function (res) {
 
                     if (!res || !res.success) {
@@ -822,9 +830,9 @@
                         return;
                     }
 
-                    /* =========================
+                    /* ==================================================
                      * SUB CATEGORIES (UNCHANGED)
-                     * ========================= */
+                     * ================================================== */
                     selectedSubCatIds = new Set();
                     subCatMetaById = {};
                     currentCategoryOptionIds = [];
@@ -846,26 +854,9 @@
                         renderTags();
                     }
 
-                    /* =========================
-                     * ✅ SIZES — CORRECT VERSION
-                     * ========================= */
-
-                    selectedSizeIds.clear();
-                    sizePricesBySizeId = {};
-
-                    (res.sizes || []).forEach(s => {
-                        let sizeId = String(s.id);
-                        selectedSizeIds.add(sizeId);
-                        sizePricesBySizeId[sizeId] = s.prices || [];
-                    });
-
-                    $("#ProductSizes")
-                        .selectpicker('val', Array.from(selectedSizeIds));
-
-                    /* =========================
-                     * 🎨 COLORS — SAME PATTERN
-                     * ========================= */
-
+                    /* ==================================================
+                     * 🎨 COLORS
+                     * ================================================== */
                     let selectedColorIds = [];
                     let colorMetaById = {};
 
@@ -882,53 +873,126 @@
                     $("#ProductColors")
                         .selectpicker('val', selectedColorIds);
 
-                    /* =========================
-                     * 🔄 TRIGGER UI BUILD
-                     * ========================= */
+
+                 
+                    /* ==================================================
+                     * 🔥 PRODUCT TYPES
+                     * ================================================== */
+                    let typeIds = [];
+
+                    if (Array.isArray(res.types)) {
+                        typeIds = res.types.map(x => x.toString());
+                    }
+                    else if (res.types !== null && res.types !== undefined) {
+                        typeIds = [res.types.toString()];
+                    }
+
+                    $('#ProductTypes')
+                        .selectpicker()
+                        .selectpicker('val', typeIds)
+                        .trigger('changed.bs.select');
+
+                    /* ==================================================
+                     * 🔥 PRODUCT DETAILS PER TYPE
+                     * ================================================== */
+
+                    if (res.details) {
+
+                        Object.keys(res.details).forEach(typeId => {
+
+                            let detailIds = res.details[typeId].map(x => x.toString());
+
+                            let $detailSelect =
+                                $(`select[name="ProductDetails[${typeId}][]"]`);
+
+                            if (!$detailSelect.length) return;
+
+                            // 🔥 REQUIRED ORDER
+                            $detailSelect.val(detailIds);
+                            $detailSelect.selectpicker('val', detailIds);
+                            $detailSelect.selectpicker('render');
+
+                            // build size UI
+                            $detailSelect.trigger('changed.bs.select');
+                        });
+                    }
+
+ 
+                    /* ==================================================
+                     * 🔥 PRODUCT SIZES PER TYPE + DETAIL
+                                 * ================================================== */
+                        if (res.sizes) {
+
+                            Object.keys(res.sizes).forEach(key => {
+
+                                let [typeId, detailId] = key.split('_');
+
+                                let sizeIds = res.sizes[key].map(x => x.toString());
+
+                                let $sizeSelect =
+                                    $(`select[name="ProductSizes[${typeId}][${detailId}][]"]`);
+
+                                if (!$sizeSelect.length) return;
+
+                                // 🔥 REQUIRED ORDER
+                                $sizeSelect.val(sizeIds);
+                                $sizeSelect.selectpicker('val', sizeIds);
+                                $sizeSelect.selectpicker('render');
+                            });
+                        }
+
+
+
+
+
+
+                    /* ==================================================
+                     * 🔄 WAIT FOR UI BUILD
+                     * ================================================== */
                     setTimeout(function () {
 
-                        // 🔹 Sizes
-                        $("#ProductSizes").trigger('changed.bs.select');
-
-                        Object.keys(sizePricesBySizeId).forEach(sizeId => {
-
-                            let card = $(`.variation-card[data-size-id="${sizeId}"]`);
-                            if (!card.length) return;
-
-                            sizePricesBySizeId[sizeId].forEach(p => {
-
-                                card.find(
-                                    `[name="Variations[${sizeId}].Prices[${p.currencyID}]"]`
-                                ).val(p.price);
-
-                                card.find(
-                                    `[name="Variations[${sizeId}].PricesNet[${p.currencyID}]"]`
-                                ).val(p.priceNet);
-                            });
-                        });
-
-                        // 🔹 Colors
-                        $("#ProductColors").trigger('changed.bs.select');
-
+                        // 🔹 Colors toggles
                         Object.keys(colorMetaById).forEach(colorId => {
-
                             let meta = colorMetaById[colorId];
-
                             $(`#ColorCover_${colorId}`).prop('checked', meta.isCover);
                             $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
                         });
 
-                             renderEditImages(res.images);
+                        // 🔹 Images
+                        renderEditImages(res.images);
 
-                        // ✅ Unlock edit mode AFTER hydration
+                        // ✅ unlock
                         isEditLoading = false;
 
                     }, 0);
                 },
+
                 error: function () {
                     toastr.error("Server error while loading product data");
                 }
             });
+        }
+
+        function updateBootstrapSelectText($select) {
+
+            if (!$select || !$select.length) return;
+
+            let texts = [];
+
+            $select.find('option:selected').each(function () {
+                texts.push($(this).text().trim());
+            });
+
+            let displayText = texts.join(', ');
+
+            if (!displayText.length) {
+                displayText = 'Nothing selected';
+            }
+
+            $select
+                .closest('.bootstrap-select')
+                .find('.filter-option-inner-inner')
+                .text(displayText);
         }
 
         function renderEditImages(images) {
