@@ -887,59 +887,51 @@
                         typeIds = [res.types.toString()];
                     }
 
+                          // 1️⃣ TYPES
                     $('#ProductTypes')
-                        .selectpicker()
                         .selectpicker('val', typeIds)
+                        .selectpicker('render')
                         .trigger('changed.bs.select');
 
-                    /* ==================================================
-                     * 🔥 PRODUCT DETAILS PER TYPE
-                     * ================================================== */
+                    // 2️⃣ DETAILS (AFTER TYPES DOM IS CREATED)
+                    setTimeout(() => {
+                    Object.keys(res.details).forEach(typeId => {
 
-                    if (res.details) {
+                            const detailIds = res.details[typeId].map(String);
 
-                        Object.keys(res.details).forEach(typeId => {
-
-                            let detailIds = res.details[typeId].map(x => x.toString());
-
-                            let $detailSelect =
+                            const $details =
                                 $(`select[name="ProductDetails[${typeId}][]"]`);
 
-                            if (!$detailSelect.length) return;
+                            $details.selectpicker('val', detailIds);
+                            $details.selectpicker('render');
 
-                            // 🔥 REQUIRED ORDER
-                            $detailSelect.val(detailIds);
-                            $detailSelect.selectpicker('val', detailIds);
-                            $detailSelect.selectpicker('render');
-
-                            // build size UI
-                            $detailSelect.trigger('changed.bs.select');
+                            // trigger to build sizes
+                            $details.trigger('changed.bs.select');
                         });
-                    }
 
- 
-                    /* ==================================================
-                     * 🔥 PRODUCT SIZES PER TYPE + DETAIL
-                                 * ================================================== */
-                        if (res.sizes) {
+                    }, 400);
 
-                            Object.keys(res.sizes).forEach(key => {
+                    // 3️⃣ SIZES (AFTER DETAILS BUILD)
+                    setTimeout(() => {
 
-                                let [typeId, detailId] = key.split('_');
+                        Object.keys(res.sizes).forEach(key => {
 
-                                let sizeIds = res.sizes[key].map(x => x.toString());
+                            const [typeId, detailId] = key.split('_');
 
-                                let $sizeSelect =
-                                    $(`select[name="ProductSizes[${typeId}][${detailId}][]"]`);
+                            const sizeIds = res.sizes[key].map(String);
 
-                                if (!$sizeSelect.length) return;
+                            const $sizeSelect =
+                                $(`select[name="ProductSizes[${typeId}][${detailId}][]"]`);
 
-                                // 🔥 REQUIRED ORDER
-                                $sizeSelect.val(sizeIds);
-                                $sizeSelect.selectpicker('val', sizeIds);
-                                $sizeSelect.selectpicker('render');
-                            });
-                        }
+                            if (!$sizeSelect.length) return;
+
+                            $sizeSelect.selectpicker('val', sizeIds);
+                            $sizeSelect.selectpicker('render'); // 🔥
+                        });
+
+                    }, 400);
+
+
 
 
 
