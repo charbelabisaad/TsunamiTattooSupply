@@ -99,6 +99,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		
 			List<ProductDto> products = new List<ProductDto>();
 
+		 
+
 			try
 			{
 				products = _dbContext.Products

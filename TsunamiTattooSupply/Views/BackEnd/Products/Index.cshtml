@@ -344,6 +344,7 @@
                                            data-id="${row.id}"
                                            data-code="${row.code}"
                                            data-name="${row.name}"
+                                           data-description="${row.description}""
                                            data-grouptypeid="${row.groupTypeID}"
                                            data-groupid="${row.groupID}"
                                            data-unitid="${row.unitID}"
@@ -766,6 +767,7 @@
             $("#ProductID").val(productId);
             $("#ProductCode").val(btn.data('code'));
             $("#ProductName").val(btn.data('name'));
+            $("#ProductDescription").val(btn.data('description'));
             $("#ProductUnit").val(btn.data('unitid'));
 
             $("#ProductGroupType").val(groupTypeId);
