@@ -431,9 +431,18 @@
                 // ================================
                 // CLEAR SIZES ✅
                 // ================================
+
                 let $sizes = $('#ProductSizes');
                 $sizes.selectpicker('val', []);
-                $sizes.selectpicker('refresh');
+                $sizes.selectpicker("destroy").selectpicker('render');
+
+                let $details = $('#ProductDetails');
+                $details.selectpicker('val', []);
+                $details.selectpicker("destroy").selectpicker('render');
+
+                let $types = $('#ProductTypes');
+                $types.selectpicker('val', []);
+                $types.selectpicker("destroy").selectpicker('render');
 
                 $('#SizeVariationsContainer').empty();
                 $('#ProductSizesMessage').remove();
@@ -444,6 +453,9 @@
                 let $colors = $('#ProductColors');
                 $colors.selectpicker('val', []);
                 $colors.selectpicker('destroy').selectpicker('render');
+
+
+                
 
                 $('#ColorVariationsContainer').empty();
 
@@ -647,9 +659,7 @@
                 `);
             });
         }
-
-
-
+ 
             // ================================
               // 🔹 Globals
               // ================================
@@ -750,75 +760,87 @@
                         `);
                     });
                 }
+                 
+            $(document).on('click', '.btnEditProduct', function () {
+
+                const modal = new bootstrap.Modal(document.getElementById("saveProductModal"));
+                let btn = $(this);
+
+                let productId   = btn.data('id');
+                let groupTypeId = btn.data('grouptypeid');
+                let groupId     = btn.data('groupid');
+
+                $("#modalProductTitle").text("Edit Product");
+
+                $("#ProductID").val(productId);
+                $("#ProductCode").val(btn.data('code'));
+                $("#ProductName").val(btn.data('name'));
+                $("#ProductDescription").val(btn.data('description'));
+                $("#ProductUnit").val(btn.data('unitid'));
+
+                $("#ProductGroupType").val(groupTypeId);
+                LoadGroups();
+
+                setTimeout(() => {
+                    $("#ProductGroup").val(groupId);
+                }, 300);
+
+                $("#ProductVAT").prop('checked', btn.data('vat') == 1);
+                $("#ProductFeature").prop('checked', btn.data('feature') == 1);
+                $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
+                $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
+
+                $("#ProductStatusID").val(btn.data('statusid'));
+
+                let expiry = btn.data('newarrivaldate');
+                $("#ProductExpiryDate").val(expiry ? moment(expiry).format('YYYY-MM-DD') : '');
+                $("#ProductWarrantyMonths").val(btn.data('warrantymonths') || '');
+
+                // ✅ UI reset ONLY
+                $("#ProductSubCategory").empty();
+                $("#SubCategoryTags").empty();
+
+                modal.show();
 
 
+                $('#saveProductModal')
+                .off('shown.bs.modal')
+                .on('shown.bs.modal', function () {
 
-        $(document).on('click', '.btnEditProduct', function () {
+                    loadProductEditExtras(productId);
 
-            const modal = new bootstrap.Modal(document.getElementById("saveProductModal"));
-            let btn = $(this);
+                });
 
-            let productId   = btn.data('id');
-            let groupTypeId = btn.data('grouptypeid');
-            let groupId     = btn.data('groupid');
+            });
+         
+            // ✅ Source of truth: all selected subcategory IDs for this product
+            let selectedSubCatIds = new Set();
 
-            $("#modalProductTitle").text("Edit Product");
+            // ✅ Store names + categoryId for selected items (and for loaded items)
+            let subCatMetaById = {}; // { "12": { id:12, name:"Ink", categoryId:3 }, ... }
 
-            $("#ProductID").val(productId);
-            $("#ProductCode").val(btn.data('code'));
-            $("#ProductName").val(btn.data('name'));
-            $("#ProductDescription").val(btn.data('description'));
-            $("#ProductUnit").val(btn.data('unitid'));
+            // ✅ IDs available in the dropdown for current category (strings)
+            let currentCategoryOptionIds = [];
 
-            $("#ProductGroupType").val(groupTypeId);
-            LoadGroups();
+            let selectedSizeIds = new Set();        // holds selected size IDs
+            let sizePricesBySizeId = {};            // sizeId => prices[]
+                    let isEditMode        = false; // editing product
+        let isBuildingUI      = false; // DOM being created
 
-            setTimeout(() => {
-                $("#ProductGroup").val(groupId);
-            }, 300);
+            let editTypes   = [];
+            let editDetails = {};
+            let editSizes   = {};
+                let builtTypeTabs = new Set();
 
-            $("#ProductVAT").prop('checked', btn.data('vat') == 1);
-            $("#ProductFeature").prop('checked', btn.data('feature') == 1);
-            $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
-            $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
+                  function loadProductEditExtras(productId) {
 
-            $("#ProductStatusID").val(btn.data('statusid'));
+            // ------------------------------------
+            // RESET STATE
+            // ------------------------------------
+            builtTypeTabs.clear();
 
-            let expiry = btn.data('newarrivaldate');
-            $("#ProductExpiryDate").val(expiry ? moment(expiry).format('YYYY-MM-DD') : '');
-            $("#ProductWarrantyMonths").val(btn.data('warrantymonths') || '');
-
-            // ✅ UI reset ONLY
-            $("#ProductSubCategory").empty();
-            $("#SubCategoryTags").empty();
-
-            modal.show();
-
-            // 🔥 LOAD PRODUCT DATA
-            loadProductEditExtras(productId);
-        });
-
-
-          
-
-
-        // ✅ Source of truth: all selected subcategory IDs for this product
-        let selectedSubCatIds = new Set();
-
-        // ✅ Store names + categoryId for selected items (and for loaded items)
-        let subCatMetaById = {}; // { "12": { id:12, name:"Ink", categoryId:3 }, ... }
-
-        // ✅ IDs available in the dropdown for current category (strings)
-        let currentCategoryOptionIds = [];
-
-        let selectedSizeIds = new Set();        // holds selected size IDs
-        let sizePricesBySizeId = {};            // sizeId => prices[]
-        let isEditLoading = false;
-
-
-        function loadProductEditExtras(productId) {
-
-            isEditLoading = true;
+            isEditMode    = true;
+            isBuildingUI  = true;
 
             $.ajax({
                 url: '/Products/GetProductEditExtras',
@@ -833,7 +855,7 @@
                     }
 
                     /* ==================================================
-                     * SUB CATEGORIES (UNCHANGED)
+                     * SUB CATEGORIES
                      * ================================================== */
                     selectedSubCatIds = new Set();
                     subCatMetaById = {};
@@ -857,108 +879,86 @@
                     }
 
                     /* ==================================================
-                     * 🎨 COLORS
+                     * TYPES / DETAILS / SIZES DATA
                      * ================================================== */
-                    let selectedColorIds = [];
-                    let colorMetaById = {};
+                    editTypes   = res.types   || [];
+                    editDetails = res.details || {};
+                    editSizes   = res.sizes   || {};
+
+                    // remove previous UI
+                    $('#productTypeTabs').remove();
+                    $('#productTypeTabContent').remove();
+
+                    // normalize types
+                    let typeIds = [];
+                    if (Array.isArray(editTypes))
+                        typeIds = editTypes.map(String);
+                    else if (editTypes !== null)
+                        typeIds = [String(editTypes)];
+
+                    // set types picker
+                    $('#ProductTypes')
+                        .selectpicker('val', typeIds)
+                        .selectpicker('render');
+
+                    // build tabs
+                    buildProductTypeTabs(typeIds);
+
+                    /* ==================================================
+                     * PREPARE COLORS DATA
+                     * ================================================== */
+                    const selectedColorIds = [];
+                    const colorMetaById = {};
 
                     (res.colors || []).forEach(c => {
-                        let colorId = String(c.id);
-                        selectedColorIds.push(colorId);
+                        let id = String(c.id);
+                        selectedColorIds.push(id);
 
-                        colorMetaById[colorId] = {
+                        colorMetaById[id] = {
                             isCover: c.isCover,
                             isActive: c.isActive
                         };
                     });
 
-                    $("#ProductColors")
-                        .selectpicker('val', selectedColorIds);
-
-
-                 
                     /* ==================================================
-                     * 🔥 PRODUCT TYPES
+                     * LOAD FIRST TAB
                      * ================================================== */
-                    let typeIds = [];
-
-                    if (Array.isArray(res.types)) {
-                        typeIds = res.types.map(x => x.toString());
-                    }
-                    else if (res.types !== null && res.types !== undefined) {
-                        typeIds = [res.types.toString()];
-                    }
-
-                          // 1️⃣ TYPES
-                    $('#ProductTypes')
-                        .selectpicker('val', typeIds)
-                        .selectpicker('render')
-                        .trigger('changed.bs.select');
-
-                    // 2️⃣ DETAILS (AFTER TYPES DOM IS CREATED)
-                    setTimeout(() => {
-                    Object.keys(res.details).forEach(typeId => {
-
-                            const detailIds = res.details[typeId].map(String);
-
-                            const $details =
-                                $(`select[name="ProductDetails[${typeId}][]"]`);
-
-                            $details.selectpicker('val', detailIds);
-                            $details.selectpicker('render');
-
-                            // trigger to build sizes
-                            $details.trigger('changed.bs.select');
-                        });
-
-                    }, 400);
-
-                    // 3️⃣ SIZES (AFTER DETAILS BUILD)
-                    setTimeout(() => {
-
-                        Object.keys(res.sizes).forEach(key => {
-
-                            const [typeId, detailId] = key.split('_');
-
-                            const sizeIds = res.sizes[key].map(String);
-
-                            const $sizeSelect =
-                                $(`select[name="ProductSizes[${typeId}][${detailId}][]"]`);
-
-                            if (!$sizeSelect.length) return;
-
-                            $sizeSelect.selectpicker('val', sizeIds);
-                            $sizeSelect.selectpicker('render'); // 🔥
-                        });
-
-                    }, 400);
-
-
-
-
-
-
-
+                    $('#productTypeTabs button.active')
+                        .trigger('shown.bs.tab');
 
                     /* ==================================================
-                     * 🔄 WAIT FOR UI BUILD
+                     * WAIT UNTIL FIRST TAB FINISHES BUILDING
                      * ================================================== */
-                    setTimeout(function () {
+                    const waitForUI = setInterval(function () {
 
-                        // 🔹 Colors toggles
-                        Object.keys(colorMetaById).forEach(colorId => {
-                            let meta = colorMetaById[colorId];
-                            $(`#ColorCover_${colorId}`).prop('checked', meta.isCover);
-                            $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
-                        });
+                        if (isBuildingUI) return;
 
-                        // 🔹 Images
-                        renderEditImages(res.images);
+                        clearInterval(waitForUI);
 
-                        // ✅ unlock
-                        isEditLoading = false;
+                        /* =============================
+                         * COLORS
+                         * ============================= */
+                        $("#ProductColors")
+                            .selectpicker('val', selectedColorIds)
+                            .trigger('changed.bs.select');
 
-                    }, 0);
+                        /* =============================
+                         * TOGGLES + IMAGES
+                         * ============================= */
+                        setTimeout(function () {
+
+                            Object.keys(colorMetaById).forEach(colorId => {
+                                const meta = colorMetaById[colorId];
+
+                                $(`#ColorCover_${colorId}`).prop('checked', meta.isCover);
+                                $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
+                            });
+
+                            renderEditImages(res.images);
+
+                        }, 0);
+
+                    }, 10);
                 },
 
                 error: function () {
@@ -966,6 +966,7 @@
                 }
             });
         }
+
 
         function updateBootstrapSelectText($select) {
 
@@ -1066,7 +1067,243 @@
             });
 
         });
-         
+
+
+            ////////////////////////////////////////////////////////////////////////////////////////
+            const productDetailsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.productDetails));
+
+            function generateDetailsOptions() {
+                let html = '';
+                productDetailsData.forEach(d => {
+                    html += `<option value="${d.ID}">${d.Description}</option>`;
+                });
+                return html;
+            }
+
+
+              $(document).on('changed.bs.select', '#ProductTypes', function () {
+
+                      if (isBuildingUI) return;
+
+                  const selectedTypeIds =
+                      ($(this).val() || []).map(String);
+
+                  // -----------------------------------
+                  // REMOVE unselected types
+                  // -----------------------------------
+                  $('#productTypeTabs button').each(function () {
+
+                      const typeId =
+                          $(this).data('bs-target').replace('#type-', '');
+
+                      if (!selectedTypeIds.includes(typeId)) {
+
+                          // remove tab
+                          $(this).parent().remove();
+
+                          // remove tab content
+                          $('#type-' + typeId).remove();
+
+                          // remove memory
+                          builtTypeTabs.delete(typeId);
+                          delete editDetails[typeId];
+
+                          Object.keys(editSizes).forEach(k => {
+                              if (k.startsWith(typeId + '_')) {
+                                  delete editSizes[k];
+                              }
+                          });
+                      }
+                  });
+
+                  // -----------------------------------
+                  // ADD newly selected types
+                  // -----------------------------------
+                  buildProductTypeTabs(selectedTypeIds);
+
+                  // -----------------------------------
+                  // Activate first tab
+                  // -----------------------------------
+                  const $firstTab =
+                      $('#productTypeTabs button').first();
+
+                  if ($firstTab.length) {
+                      new bootstrap.Tab($firstTab[0]).show();
+                  }
+              });
+
+
+        function buildProductTypeTabs(typeIds) {
+
+                 const $container = $('#productDetailsTabsContainer');
+
+                 if (!$container.find('#productTypeTabs').length) {
+                     $container.html(`
+                         <ul class="nav nav-tabs" id="productTypeTabs"></ul>
+                         <div class="tab-content border border-top-0 p-3"
+                              id="productTypeTabContent"></div>
+                     `);
+                 }
+
+                 const $tabs = $('#productTypeTabs');
+                 const $content = $('#productTypeTabContent');
+
+                 typeIds.forEach((typeID, index) => {
+
+                     if ($tabs.find(`[data-bs-target="#type-${typeID}"]`).length)
+                         return;
+
+                     const typeText =
+                         $('#ProductTypes option[value="' + typeID + '"]').text();
+
+                     const isFirst = $tabs.children().length === 0;
+
+                     $tabs.append(`
+                         <li class="nav-item">
+                             <button class="nav-link ${isFirst ? 'active' : ''}"
+                                     data-bs-toggle="tab"
+                                     data-bs-target="#type-${typeID}"
+                                     type="button">
+                                 ${typeText}
+                             </button>
+                         </li>
+                     `);
+
+                     $content.append(`
+                         <div class="tab-pane fade ${isFirst ? 'show active' : ''}"
+                              id="type-${typeID}">
+                             <div class="row mb-3">
+                                 <div class="col-md-6">
+                                     <label>Details</label>
+                                     <select class="form-control selectpicker product-details"
+                                             name="ProductDetails[${typeID}][]"
+                                             multiple
+                                             data-live-search="true"
+                                             data-actions-box="true">
+                                         ${generateDetailsOptions()}
+                                     </select>
+                                 </div>
+                             </div>
+                             <div id="productDetailsContainer${typeID}"></div>
+                         </div>
+                     `);
+                 });
+
+                 $container.find('.selectpicker').selectpicker();
+             }
+
+                 ////////////////////////////////////////////////////////////////////////////////////////
+
+                 const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes));
+
+                     function generateSizesOptions() {
+                         let html = '';
+                         productSizesData.forEach(s => {
+                             html += `<option value="${s.ID}">${s.Description}</option>`;
+                         });
+                         return html;
+                     }
+
+            $(document).on('shown.bs.tab', '#productTypeTabs button', function (e) {
+
+                const pane   = $(e.target.dataset.bsTarget);
+                const typeId = pane.attr('id').replace('type-', '');
+
+                if (builtTypeTabs.has(typeId)) {
+                    pane.find('.selectpicker').selectpicker('render');
+                    return;
+                }
+
+                builtTypeTabs.add(typeId);
+
+                const detailIds = (editDetails[typeId] || []).map(String);
+
+                const $details =
+                    $(`select[name="ProductDetails[${typeId}][]"]`);
+
+                // 🔒 LOCK UI while auto-building
+                isBuildingUI = true;
+
+                $details
+                    .selectpicker('val', detailIds)
+                    .trigger('changed.bs.select');
+            });
+
+
+
+        $(document).on('changed.bs.select', '.product-details', function () {
+
+            const $select = $(this);
+
+            if (isBuildingUI && !isEditMode) return;
+
+          
+
+            const typeId = $select.attr('name').match(/\d+/)[0];
+            const selectedDetails = ($select.val() || []).map(String);
+            const $container = $('#productDetailsContainer' + typeId);
+
+            // REMOVE old
+            $container.find('.detail-block').each(function () {
+                const detailId = String($(this).data('detail-id'));
+                if (!selectedDetails.includes(detailId)) {
+                    $(this).remove();
+                }
+            });
+
+            // ADD new
+            selectedDetails.forEach(detailId => {
+
+                if ($container.find(`[data-detail-id="${detailId}"]`).length)
+                    return;
+
+                const detailText =
+                    $select.find(`option[value="${detailId}"]`).text();
+
+                $container.append(`
+                    <div class="detail-block variation-card"
+                         data-detail-id="${detailId}">
+                        <div class="variation-header px-3 py-2">${detailText}</div>
+                        <div class="variation-body p-3">
+                            <label>Sizes</label>
+                            <select class="form-control selectpicker product-sizes"
+                                name="ProductSizes[${typeId}][${detailId}][]"
+                                multiple
+                                data-live-search="true"
+                                data-actions-box="true">
+                                ${generateSizesOptions()}
+                            </select>
+                        </div>
+                    </div>
+                `);
+            });
+
+            // init new selects
+            $container.find('.selectpicker').selectpicker();
+
+            // restore sizes
+            Object.keys(editSizes).forEach(key => {
+
+                const [tId, dId] = key.split('_');
+
+                if (String(tId) !== String(typeId)) return;
+
+                const $sizes =
+                    $(`select[name="ProductSizes[${tId}][${dId}][]"]`);
+
+                if ($sizes.length) {
+                    $sizes
+                        .selectpicker('val', editSizes[key].map(String))
+                        .selectpicker('render');
+                }
+            });
+
+            // ✅ SAFE UNLOCK POINT
+            isBuildingUI = false;
+        });
+
+
+
     });
      
 
