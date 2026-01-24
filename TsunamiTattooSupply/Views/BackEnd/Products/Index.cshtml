@@ -824,15 +824,15 @@
 
             let selectedSizeIds = new Set();        // holds selected size IDs
             let sizePricesBySizeId = {};            // sizeId => prices[]
-                    let isEditMode        = false; // editing product
-        let isBuildingUI      = false; // DOM being created
+            let isEditMode        = false; // editing product
+            let isBuildingUI      = false; // DOM being created
 
             let editTypes   = [];
             let editDetails = {};
             let editSizes   = {};
                 let builtTypeTabs = new Set();
 
-                  function loadProductEditExtras(productId) {
+            function loadProductEditExtras(productId) {
 
             // ------------------------------------
             // RESET STATE
@@ -904,6 +904,26 @@
                     // build tabs
                     buildProductTypeTabs(typeIds);
 
+                        // IMPORTANT: initialize pickers first
+                    $('#productTypeTabContent .selectpicker').selectpicker();
+
+                    // NOW show first tab (after DOM + plugins ready)
+                    requestAnimationFrame(() => {
+                           const firstTab =
+                            document.querySelector('#productTypeTabs button.nav-link');
+
+                        if (!firstTab) return;
+
+                        const typeId =
+                            firstTab.dataset.bsTarget.replace('#type-', '');
+
+                        // show visually
+                        bootstrap.Tab.getOrCreateInstance(firstTab).show();
+
+                        // 🔥 LOAD DETAILS MANUALLY
+                        loadTypeDetails(typeId);
+                    });
+
                     /* ==================================================
                      * PREPARE COLORS DATA
                      * ================================================== */
@@ -920,24 +940,32 @@
                         };
                     });
 
+                         
+
                     /* ==================================================
                      * LOAD FIRST TAB
                      * ================================================== */
-                    $('#productTypeTabs button.active')
-                        .trigger('shown.bs.tab');
+ 
+
+                   
 
                     /* ==================================================
                      * WAIT UNTIL FIRST TAB FINISHES BUILDING
                      * ================================================== */
+
+                          
                     const waitForUI = setInterval(function () {
 
-                        if (isBuildingUI) return;
+                        
 
                         clearInterval(waitForUI);
 
                         /* =============================
                          * COLORS
                          * ============================= */
+
+                          
+
                         $("#ProductColors")
                             .selectpicker('val', selectedColorIds)
                             .trigger('changed.bs.select');
@@ -967,6 +995,39 @@
             });
         }
 
+        function loadTypeDetails(typeId) {
+
+            if (builtTypeTabs.has(typeId)) return;
+            builtTypeTabs.add(typeId);
+
+            const $details =
+                $(`select[name="ProductDetails[${typeId}][]"]`);
+
+            if (!$details.length) return;
+
+            if (!$details.data('selectpicker')) {
+                $details.selectpicker();
+            }
+
+            isBuildingUI = true;
+
+            const detailIds =
+                (editDetails[typeId] || []).map(String);
+
+            $details
+                .selectpicker('val', detailIds)
+                .selectpicker('render')
+                .trigger('changed.bs.select');
+        }
+
+
+        function showFirstTypeTab() {
+            const firstTabEl = document.querySelector('#productTypeTabs button.nav-link');
+            if (!firstTabEl) return;
+
+            // Bootstrap 5 safe way
+            bootstrap.Tab.getOrCreateInstance(firstTabEl).show();
+        }
 
         function updateBootstrapSelectText($select) {
 
@@ -1209,24 +1270,7 @@
                 const pane   = $(e.target.dataset.bsTarget);
                 const typeId = pane.attr('id').replace('type-', '');
 
-                if (builtTypeTabs.has(typeId)) {
-                    pane.find('.selectpicker').selectpicker('render');
-                    return;
-                }
-
-                builtTypeTabs.add(typeId);
-
-                const detailIds = (editDetails[typeId] || []).map(String);
-
-                const $details =
-                    $(`select[name="ProductDetails[${typeId}][]"]`);
-
-                // 🔒 LOCK UI while auto-building
-                isBuildingUI = true;
-
-                $details
-                    .selectpicker('val', detailIds)
-                    .trigger('changed.bs.select');
+                  loadTypeDetails(typeId);
             });
 
 

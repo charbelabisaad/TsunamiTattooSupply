@@ -463,27 +463,37 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						});
 					}
 				}
-
 				#region PRODUCT SIZE MATRIX SAVE
 
 				// =====================================================
-				// 1️⃣ LOAD ALL EXISTING ROWS (ACTIVE + DELETED)
+				// 1️⃣ LOAD ALL EXISTING ROWS (ACTIVE + SOFT-DELETED)
 				// =====================================================
 				var existingSizes = _dbContext.ProductsSizes
 					.Where(x => x.ProductID == productId)
 					.ToList();
 
+
+				// -----------------------------------------------------
+				// Holds ALL submitted size keys
+				// productId-typeId-detailId-sizeId
+				// -----------------------------------------------------
 				var submittedKeys = new HashSet<string>();
+
+
+				// -----------------------------------------------------
+				// Holds ONLY product types that were submitted
+				// 🔥 CRITICAL FIX
+				// -----------------------------------------------------
+				var submittedTypeIds = new HashSet<int>();
 
 
 				// =====================================================
 				// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES
 				// =====================================================
-				foreach (var key in form.Keys
-					.Where(k => k.StartsWith("ProductDetails[")))
+				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
 				{
 					// -----------------------------------------
-					// Extract ProductTypeID safely
+					// Extract ProductTypeID
 					// ProductDetails[3][]
 					// -----------------------------------------
 					var match = Regex.Match(key, @"ProductDetails\[(\d+)\]");
@@ -493,8 +503,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					int productTypeId = int.Parse(match.Groups[1].Value);
 
+					// 🔥 REGISTER THIS TYPE
+					submittedTypeIds.Add(productTypeId);
+
 					// -----------------------------------------
-					// Detail IDs for this type
+					// Selected details under this type
 					// -----------------------------------------
 					var detailIds = form[key]
 						.Select(int.Parse)
@@ -526,11 +539,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								x.SizeID == sizeId);
 
 							// =====================================================
-							// INSERT
+							// INSERT (NEW)
 							// =====================================================
 							if (existing == null)
 							{
-								// Prevent EF local duplicates
+								// Prevent EF local duplicate tracking
 								bool alreadyTracked =
 									_dbContext.ProductsSizes.Local.Any(x =>
 										x.ProductID == productId &&
@@ -559,7 +572,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							else
 							{
 								// =====================================================
-								// RESTORE IF SOFT-DELETED
+								// RESTORE (if soft-deleted)
 								// =====================================================
 								if (existing.DeletedDate != null)
 								{
@@ -577,10 +590,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 
 				// =====================================================
-				// 3️⃣ SOFT DELETE REMOVED ROWS ONLY
+				// 3️⃣ SOFT DELETE REMOVED ROWS
+				// ❗ ONLY WITHIN SUBMITTED TYPES
 				// =====================================================
 				foreach (var ps in existingSizes)
 				{
+					// 🔥 DO NOT TOUCH TYPES NOT SUBMITTED
+					if (!submittedTypeIds.Contains(ps.ProductTypeID))
+						continue;
+
 					string key =
 						$"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
 
@@ -598,6 +616,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				_dbContext.SaveChanges();
 
 				#endregion
+
 				// =====================================================
 				// 🔹 PRODUCTS COLORS (SOFT DELETE)
 				// =====================================================
