@@ -8,6 +8,7 @@
 
 <partial name="SaveSize" />
 <partial name="DeleteSize" />
+<partial name="Rank" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -31,6 +32,7 @@
                         <div class="col-6 d-flex align-items-center"><h3 class="card-title">Sizes List</h3></div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewSize" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Size</button>
+                            <button id="btnSetRankSize" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -43,6 +45,8 @@
                             <thead>
                                 <tr>
                                     <th>Description</th>
+                                    <th class="d-none">Rank</th>
+                                    <th style="width:100px">Show Front</th>
                                     <th style="width:50px">Status</th>
 									<th class="no-export" style="width:50px">Actions</th>
                                 </tr>
@@ -128,6 +132,19 @@
                             data: 'description',
                             className: 'align-middle'
                         },
+                        {
+                            data: "rank",
+                            className: "align-middle d-none"
+                        },
+                        {
+                            data: 'showFront',
+                            className: 'text-center align-items-center',
+                            render: function (data) {
+                                return data
+                                    ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
+                                    : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
+                            }
+                        },
                         { data: 'statusDescription',
                             class: 'align-middle text-center',
                             render: function (data, type, row) {
@@ -146,7 +163,10 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item btnEditSize" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}"
+                                    <a class="dropdown-item btnEditSize" style="cursor:pointer" 
+                                    data-id="${row.id}"
+                                    data-description="${row.description}"
+                                    data-showFront="${row.showFront}"
                                     data-statusid="${row.statusID}">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
@@ -158,7 +178,8 @@
                                 `;
                             }
                         }
-                    ]
+                    ],
+                    order: [[2,"asc"]]
                 });
 
                 // place export buttons next to search bar
@@ -201,8 +222,12 @@
 
                     $("#SizeDescription").val('');
 
+                    $("#SizeShowFrontToggle").prop("checked", true);
+                    $("#SizeShowFront").val(1);
+
                     $("#SizeStatusID").val('A');
                     $("#SizeStatusToggle").prop("checked", true);
+
                     $("#SizeStatusLabel").text("Active");
 
                     $("#SizeDescriptionMessage").text('');
@@ -225,12 +250,17 @@
 
                     const SizeID = $(this).data('id');
                     const SizeDescription = $(this).data('description');
+                    const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
                     const SizeStatusID = $(this).data('statusid');
                     const modalEl = document.getElementById("saveSizeModal");
                     const modal = new bootstrap.Modal(modalEl);
 
                     $("#SizeID").val(SizeID);
                     $("#SizeDescription").val(SizeDescription);
+
+                    $("#SizeShowFrontToggle").prop("checked", ShowFront);
+                    $("#SizeShowFront").val(ShowFront ? 1 : 0);
+
                     $("#SizeStatusID").val(SizeStatusID);
 
                     $("#DescriptionMessage").text('');
@@ -252,20 +282,60 @@
 
             // Show modal when Delete button clicked
             $(document).on("click", ".btnDeleteSize", function (e) {
-              e.preventDefault();
+                  e.preventDefault();
 
-              const sizeId = $(this).data("id");
-                $("#deletedSizeId").val(sizeId);
+                  const sizeId = $(this).data("id");
+                    $("#deletedSizeId").val(sizeId);
 
-              const sizedescription = $(this).closest("tr").find("td:first").text();
+                  const sizedescription = $(this).closest("tr").find("td:first").text();
 
-              $("#deleteSizeMessage").html(
-                `Are you sure you want to delete <strong>${sizedescription}</strong>?`
-              );
+                  $("#deleteSizeMessage").html(
+                    `Are you sure you want to delete <strong>${sizedescription}</strong>?`
+                  );
 
-              $("#deleteSizeModal").modal("show");
-            });
+                  $("#deleteSizeModal").modal("show");
+                });
 
+                 $(document).on('click', '#btnSetRankSize', function () {
+
+                    const $rankSelect = $('#rankSelect');
+
+                    $rankSelect.empty();
+
+                    var type = "SZ";
+
+                    $("#rankMode").val(type)
+
+                    $.ajax({
+                        url: '@Url.Action("ListGetSizes", "Sizes")',
+                        type: 'GET',
+                        data: { "TypeID": type },
+                        success: function (res) {
+
+                            if (!res.success) {
+                                toastr.error(res.message || 'Failed to load sizes');
+                                return;
+                            }
+
+                            // sort by Rank (safe)
+                            res.data.sort((a, b) => a.rank - b.rank);
+
+                            $.each(res.data, function (index, item) {
+                                $rankSelect.append(
+                                    `<option value="${item.id}">
+                                        ${index + 1}. ${item.description}
+                                    </option>`
+                                );
+                            });
+
+                            $('#rankModal').modal('show');
+                        },
+                        error: function () {
+                            toastr.error('Server error while loading sizes');
+                        }
+                    });
+
+                });
 
         });
 

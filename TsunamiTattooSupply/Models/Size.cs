@@ -21,6 +21,9 @@ namespace TsunamiTattooSupply.Models
 		public int Rank { get; set; } = 0;
 
 		[Required]
+		public bool ShowFront { get; set; } = true;
+
+		[Required]
 		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }

@@ -111,6 +111,11 @@
                 SaveRankSubCategory(CategoryID);
                 break;
 
+            case "SZ":
+
+                SaveRankSize();
+                break;
+                 
             case "BRD":
                 SaveRankGroup(mode);
                 break;
@@ -189,6 +194,54 @@
 
     }
 
+
+        function SaveRankSize() {
+
+            const ranks = [];
+
+            $('#rankSelect option').each(function (index) {
+                ranks.push({
+                    ID: $(this).val(),
+                    Rank: index + 1
+                });
+            });
+
+            ShowSaveSpinner();
+
+            $.ajax({
+                url: '@Url.Action("SaveRankSizes", "Sizes")',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(ranks),
+                success: function (res) {
+
+                    const table = $.fn.DataTable.isDataTable("#tableSizes")
+                        ? $("#tableSizes").DataTable()
+                        : null;
+
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to save size rank');
+                        HideSaveSpinner();
+                        return;
+                    }
+
+                    toastr.success(res.message || 'Size ranking saved');
+
+                    // Close modal
+                    const modalEl = document.getElementById('rankModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    modal.hide();
+                    if (table) table.ajax.reload(null, false);
+
+                    HideSaveSpinner();
+                },
+                error: function () {
+                    toastr.error('Server error while saving size rank');
+                    HideSaveSpinner();
+                }
+            });
+        }
+
         function SaveRankGroup(TypeID) {
 
             const ranks = [];
@@ -214,7 +267,7 @@
                         : null;
 
                     if (!res.success) {
-                        toastr.error(res.message || 'Failed to save gourp rank');
+                        toastr.error(res.message || 'Failed to save group rank');
                         HideSaveSpinner();
                         return;
                     }

@@ -22,7 +22,7 @@
                         </div>
 
                         <!-- 🔹 Input -->
-                        <div class="col-12 col-md-8 d-flex align-items-center">
+                        <div class="col-12 col-md-12 d-flex align-items-center">
                             <div class="w-100">
                                 <input type="text" class="form-control" id="SizeDescription" placeholder="Fill Description" />
                                 <div id="SizeDescriptionMessage" class="text-danger fw-normal"></div>
@@ -30,11 +30,22 @@
                         </div>
 
                         <!-- 🔹 Status Toggle -->
-                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-end">
-                            <div class="custom-control custom-switch m-0">
-                                <input type="checkbox" class="custom-control-input" id="SizeStatusToggle" checked>
-                                <label class="custom-control-label" for="SizeStatusToggle" id="SizeStatusLabel">Active</label>
-                                <input type="hidden" id="SizeStatusID" name="SizeStatusID" value="A">
+                        <div class="col-12 col-md-12 d-flex align-items-center justify-content-md-end">
+
+                            <div>
+
+                                <div class="custom-control custom-switch align-block">
+                                    <input type="checkbox" class="custom-control-input" id="SizeShowFrontToggle" checked>
+                                    <label class="custom-control-label" for="SizeShowFrontToggle" id="SizeShowFrontLabel">Show Front</label>
+                                    <input type="hidden" id="SizeShowFront" name="SizeShowFront" value="1">
+                                </div>
+
+                                <div class="custom-control custom-switch m-0">
+                                    <input type="checkbox" class="custom-control-input" id="SizeStatusToggle" checked>
+                                    <label class="custom-control-label" for="SizeStatusToggle" id="SizeStatusLabel">Active</label>
+                                    <input type="hidden" id="SizeStatusID" name="SizeStatusID" value="A">
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -105,6 +116,7 @@
             var data = {
                 ID: $('#SizeID').val() || 0,
                 Description: $('#SizeDescription').val().trim(),
+                ShowFront: $('#SizeShowFrontToggle').is(':checked'),
                 StatusID: $('#SizeStatusID').val()
             };
 
@@ -170,6 +182,10 @@
                     toastr.error("An error occurred while saving size."); // ✅ fixed missing parenthesis
                 }
             });
+        });
+
+        $('#SizeShowFrontToggle').on('change', function () {
+          $('#SizeShowFront').val(this.checked ? 1 : 0);
         });
 
     });

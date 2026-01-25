@@ -110,7 +110,7 @@
                         <div class="col-6 d-flex align-items-center"><h3 class="card-title">Categories List</h3></div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewCategory" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Category</button>
-                            <button id="btnRankCategory" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                            <button id="btnSetRankCategory" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -1034,7 +1034,7 @@
          
         
 
-        $(document).on('click', '#btnRankCategory', function () {
+        $(document).on('click', '#btnSetRankCategory', function () {
 
             const $rankSelect = $('#rankSelect');
 
@@ -1074,7 +1074,7 @@
 
         });
 
-        $(document).on('click', '#btnRankSubCategory', function () {
+        $(document).on('click', '#btnSetRankSubCategory', function () {
 
             const $rankSelect = $('#rankSelect'); 
             const categoryId =  $("#ParentCategoryID").val();

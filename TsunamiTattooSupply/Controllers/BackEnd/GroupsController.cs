@@ -347,14 +347,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						success = false,
 						message = "No ranking data received",
-						data = new List<CategoryDto>()
+						data = new List<GroupDto>()
 					});
 				}
 
 				// Collect IDs
 				var ids = groups.Select(c => c.ID).ToList();
 
-				// Load affected categories once
+				// Load affected groups once
 				var dbGroups = _dbContext.Groups
 											 .Where(c => ids.Contains(c.ID))
 											 .ToList();
@@ -391,7 +391,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					success = false,
 					message = "An unexpected error occurred while saving the groups rank.",
-					data = new List<CategoryDto>()
+					data = new List<GroupDto>()
 				});
 			}
 		}

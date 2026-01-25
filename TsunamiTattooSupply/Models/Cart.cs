@@ -22,6 +22,12 @@ namespace TsunamiTattooSupply.Models
 		public int ProductID { get; set; }
 
 		[Required]
+		public int ProductTypeID { get; set; }
+
+		[Required]
+		public int ProductDetailID { get; set; }
+
+		[Required]
 		public int SizeID { get; set; }
 
 		[Required]
@@ -47,6 +53,12 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("ProductID")]
 		public Product Product { get; set; }
+
+		[ForeignKey("ProductTypeID")]
+		public ProductType ProductType { get; set; }
+
+		[ForeignKey("ProductDetailID")]
+		public ProductDetail ProductDetail { get; set; }
 
 		[ForeignKey("SizeID")]
 		public Size Size { get; set; }

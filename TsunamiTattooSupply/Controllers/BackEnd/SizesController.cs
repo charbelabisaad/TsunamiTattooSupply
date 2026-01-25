@@ -50,11 +50,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		
 			return  _dbContext.Sizes.
 				Where(s => s.DeletedDate == null)
-				.OrderBy(s => s.Description)
+				.OrderBy(s => s.Rank)
 				.Select(s => new SizeDto { 
 				
 					ID = s.ID,
 					Description = s.Description,
+					Rank = s.Rank,
+					ShowFront = s.ShowFront,
 					StatusID = s.Status.ID,
 					StatusDescription = s.Status.Description,
 					StatusColor = s.Status.Color
@@ -64,7 +66,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveSize(int ID, string Description, string StatusID)
+		public IActionResult SaveSize(int ID, string Description, bool ShowFront, string StatusID)
 		{
 			int SizeID;
 			try
@@ -84,6 +86,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					existingSize.Description = Description;
+					existingSize.ShowFront = ShowFront;
 					existingSize.StatusID = StatusID;
 					existingSize.EditUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 					existingSize.EditDate = DateTime.UtcNow;
@@ -106,6 +109,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					var newSize = new Size
 					{
 						Description = Description,
+						ShowFront = ShowFront,
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),
 						CreationDate = DateTime.UtcNow
@@ -162,5 +166,64 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		[HttpPost]
+		public IActionResult SaveRankSizes([FromBody] List<SizeDto> sizes)
+		{
+			try
+			{
+				if (sizes == null || sizes.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<SizeDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = sizes.Select(c => c.ID).ToList();
+
+				// Load affected Sizes once
+				var dbSizes = _dbContext.Sizes
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbSizes.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in sizes)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var size))
+					{
+						size.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Sizes rank saved successfully",
+					data = GetSizes()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveRankSizes [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the sizes rank.",
+					data = new List<SizeDto>()
+				});
+			}
+		}
 	}
 }

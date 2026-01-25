@@ -109,7 +109,7 @@
                         </div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
-                            <button id="btnRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
+                            <button id="btnSetRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
                         </div>
                     </div>
                 </div>
@@ -1089,7 +1089,7 @@
         let isColorEditLoading = false;
 
 
-         $(document).on('click', '#btnRankProduct', function () {
+         $(document).on('click', '#btnSetRankProduct', function () {
 
             const $rankSelect = $('#rankSelect');
 
