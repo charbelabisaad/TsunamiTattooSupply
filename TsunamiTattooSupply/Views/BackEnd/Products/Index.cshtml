@@ -150,6 +150,10 @@
 
     $(document).ready(function () {
 
+
+
+
+
             var table = $('#tableProducts').DataTable({
                 processing: true,
                 responsive: true,
@@ -432,17 +436,21 @@
                 // CLEAR SIZES ✅
                 // ================================
 
-                let $sizes = $('#ProductSizes');
-                $sizes.selectpicker('val', []);
+
+                let sizes = $('.product-sizes');
+
+                
+
+                sizes.selectpicker('val', []);
                 $sizes.selectpicker("destroy").selectpicker('render');
 
-                let $details = $('#ProductDetails');
-                $details.selectpicker('val', []);
-                $details.selectpicker("destroy").selectpicker('render');
+                let details = $('.product-details');
+                details.selectpicker('val', []);
+                details.selectpicker("destroy").selectpicker('render');
 
-                let $types = $('#ProductTypes');
-                $types.selectpicker('val', []);
-                $types.selectpicker("destroy").selectpicker('render');
+                let types = $('#ProductTypes');
+                types.selectpicker('val', []);
+                types.selectpicker("destroy").selectpicker('render');
 
                 $('#SizeVariationsContainer').empty();
                 $('#ProductSizesMessage').remove();
@@ -454,7 +462,7 @@
                 $colors.selectpicker('val', []);
                 $colors.selectpicker('destroy').selectpicker('render');
 
-
+                loadProductEditExtras(0);
                 
 
                 $('#ColorVariationsContainer').empty();
@@ -1345,6 +1353,10 @@
             // ✅ SAFE UNLOCK POINT
             isBuildingUI = false;
         });
+
+        /////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 
 

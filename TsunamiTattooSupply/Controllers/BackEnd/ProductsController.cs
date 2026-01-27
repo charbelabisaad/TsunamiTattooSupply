@@ -263,6 +263,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			return _dbContext.Sizes
 				.Where(s => s.DeletedDate == null)
+				.OrderBy(s => s.Rank)
 				.Select(s => new SizeDto
 				{
 					ID = s.ID,
@@ -866,6 +867,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				.Where(ps =>
 					ps.ProductID == productId &&
 					ps.DeletedDate == null)
+				.OrderBy(ps => ps.Size.Rank)
 				.Select(ps => new
 				{
 					ps.ProductTypeID,

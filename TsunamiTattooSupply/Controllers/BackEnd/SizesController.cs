@@ -97,7 +97,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 				else
 				{
-					var existingSizeDescription = _dbContext.Sizes.FirstOrDefault(r => r.Description.Trim().ToLower() == Description.Trim().ToLower());
+					var existingSizeDescription = _dbContext.Sizes.FirstOrDefault(r => r.Description.Trim().ToLower() == Description.Trim().ToLower() & r.DeletedDate == null);
 
 					if (existingSizeDescription != null)
 					{

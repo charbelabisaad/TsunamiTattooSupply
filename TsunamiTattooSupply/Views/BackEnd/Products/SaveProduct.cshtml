@@ -44,7 +44,14 @@
 		opacity: 1;
 		visibility: visible;
 	}
- 
+
+	.image-overlay {
+		z-index: 10;
+	}
+
+	.color-image-input {
+		z-index: 1;
+	}
 </style>
 
 <div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true" style="z-index:2000">
@@ -75,7 +82,7 @@
 
 			<div class="modal-header">
 				<h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
-				<button type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+				<button id="btnCloseProduct" type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
 			</div>
 
 			<!-- Form -->
@@ -651,7 +658,7 @@
 				 
                 <!-- ✅ Fixed footer -->
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <button id="btnCancelProduct" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fas fa-ban"></i> Cancel
                     </button>
                     <button id="btnSaveProduct" type="button" class="btn btn-primary">
@@ -1153,6 +1160,29 @@
 			let file = input.files[0];
 			let reader = new FileReader();
 
+			const maxSizeKB = 60;
+			const maxSizeBytes = maxSizeKB * 1024;
+
+			if (file.size > maxSizeBytes) {
+
+				toastr.error("Image size must not exceed 60 KB");
+
+				// Reset input
+				input.value = "";
+
+				// Reset preview
+				preview.src = "";
+				preview.classList.add("d-none");
+				placeholder.classList.remove("d-none");
+
+				clearBtn.style.display = "none";
+				viewBtn.style.display = "none";
+
+				$("#ClearImage").val("false");
+
+				return;
+			}
+
 			reader.onload = function (e) {
 
 				let $box = $card.find('.image-box');
@@ -1176,16 +1206,42 @@
 		});
 
 
-		$(document).on('click', '.btn-clear', function () {
+			$(document).on('click', '.btn-clear', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
 
-			let wrapper = $(this).closest('.image-box-wrapper');
-			wrapper.find('.color-image-input').val('');
-			wrapper.find('.color-image-preview')
-				   .attr('src', '')
-				   .addClass('d-none');
-			wrapper.find('.placeholder-icon').removeClass('d-none');
+		const $item = $(this).closest('.color-image-item');
+		const $card = $(this).closest('.color-card');
+		const colorId = $card.data('color-id');
 
-		});
+		// thumbnail clear
+		if ($item.length) {
+
+			const fileName = $item.data('filename');
+
+			if (fileName) {
+				if (!removedNewImages[colorId]) {
+					removedNewImages[colorId] = new Set();
+				}
+
+				removedNewImages[colorId].add(fileName);
+			}
+
+			$item.remove();
+			return;
+		}
+
+		// main preview clear
+		const $wrapper = $(this).closest('.image-box-wrapper');
+
+		$wrapper.find('.color-image-input').val('');
+		$wrapper.find('.color-image-preview')
+			.attr('src', '')
+			.addClass('d-none');
+
+		$wrapper.find('.placeholder-icon').removeClass('d-none');
+	});
+
 
 		$(document).on('click', '.btn-browse', function (e) {
 			e.preventDefault();
@@ -1197,43 +1253,43 @@
 			$input.trigger('click');
 		});
 
-		$(document).on('click', '.btn-view', function () {
+			$(document).on('click', '.btn-view', function (e) {
+		e.preventDefault();
+		e.stopPropagation();
 
-			let img = $(this).closest('.image-box-wrapper')
-							 .find('.color-image-preview');
+		let src = '';
 
-			if (!img.attr('src')) return;
+		// image inside list
+		if ($(this).closest('.color-image-item').length) {
+			src = $(this).closest('.color-image-item').find('img').attr('src');
+		}
 
-			$('#imageProductViewModalImg').attr('src', img.attr('src'));
-			$('#imageProductViewModal').modal('show');
-		});
+		// image inside main preview box
+		if (!src) {
+			src = $(this)
+				.closest('.image-box-wrapper')
+				.find('.color-image-preview')
+				.attr('src');
+		}
 
+		if (!src) return;
 
-		$(document).on('click', '.color-image-item .btn-view', function () {
-			let src = $(this).closest('.color-image-item').find('img').attr('src');
-			if (!src) return;
+		$('#imageProductViewModalImg').attr('src', src);
+		$('#imageProductViewModal').modal('show');
+	});
 
-			$('#imageProductViewModalImg').attr('src', src);
-			$('#imageProductViewModal').modal('show');
-		});
+		$(document).on('click', '.color-image-item img', function () {
+		const src = $(this).attr('src');
+		if (!src) return;
+
+		$('#imageProductViewModalImg').attr('src', src);
+		$('#imageProductViewModal').modal('show');
+	});
+
+	 
 
 		const removedNewImages = {}; // { colorId: Set(filenames) }
-
-		$(document).on('click', '.color-image-item .btn-clear', function () {
-
-			const $item   = $(this).closest('.color-image-item');
-			const colorId = $item.closest('.color-card').data('color-id');
-			const fileName = $item.data('filename');
-
-			if (fileName) {
-				if (!removedNewImages[colorId]) {
-					removedNewImages[colorId] = new Set();
-				}
-				removedNewImages[colorId].add(fileName);
-			}
-
-			$item.remove();
-		});
+ 
 	$(document).on("click", "#btnSaveProduct", function () {
 
 		// ==================================================
@@ -1370,6 +1426,8 @@
 					$("#saveProductModal").modal("hide");
 					$("#tableProducts").DataTable().ajax.reload(null, false);
 
+					window.location.reload();
+
 				} else {
 					toastr.error(res.message || "Failed to save product");
 				}
@@ -1385,6 +1443,12 @@
 			}
 		});
 	});
+
+		$(document).on("click", "#btnCancelProduct, #btnCloseProduct", function () {
+
+			window.location.reload();
+
+		});
 
 				// Open Size Entry
 				$('#btnNewSize').on('click', function () {
