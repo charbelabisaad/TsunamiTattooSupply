@@ -31,5 +31,6 @@ namespace TsunamiTattooSupply.DTO
 		public bool Native { get; set; } 
  
 		public string? Flag { get; set; }
+		 
 	}
 }

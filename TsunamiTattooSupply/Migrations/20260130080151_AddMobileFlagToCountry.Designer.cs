@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260130080151_AddMobileFlagToCountry")]
+    partial class AddMobileFlagToCountry
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -501,8 +504,14 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int?>("DeletedUserID")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime?>("EditDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("EditUserID")
+                        .HasColumnType("integer");
 
                     b.Property<double>("Latitude")
                         .HasColumnType("double precision");
@@ -539,6 +548,10 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("ClientID");
 
                     b.HasIndex("CountryID");
+
+                    b.HasIndex("DeletedUserID");
+
+                    b.HasIndex("EditUserID");
 
                     b.HasIndex("StatusID");
 
@@ -689,6 +702,10 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("character varying(3)");
+
+                    b.Property<string>("MobileFlag")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
 
                     b.Property<double>("MoneyTransferFees")
                         .HasColumnType("double precision");
@@ -2716,6 +2733,14 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
+                        .WithMany()
+                        .HasForeignKey("DeletedUserID");
+
+                    b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
+                        .WithMany()
+                        .HasForeignKey("EditUserID");
+
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -2725,6 +2750,10 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Client");
 
                     b.Navigation("Country");
+
+                    b.Navigation("DeletedUser");
+
+                    b.Navigation("EditUser");
 
                     b.Navigation("Status");
                 });
