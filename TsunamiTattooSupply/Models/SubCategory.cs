@@ -18,6 +18,10 @@ namespace TsunamiTattooSupply.Models
 		[StringLength(500)]
 		public string Description { get; set; }
 
+		[Required]
+		[StringLength(50)]
+		public string? SpecsLabel { get; set; }	
+
 		[StringLength(500)]
 		public string? BannerImage { get; set; }
 

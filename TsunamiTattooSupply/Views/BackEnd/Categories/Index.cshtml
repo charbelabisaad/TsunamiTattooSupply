@@ -639,6 +639,7 @@
 
             $("#SubCategoryID").val("0");
             $("#SubCategoryDescription").val("");
+            $("#SubCategorySpecsLabel").val("");
             $("#SubCategoryDescriptionMessage").text("");
 
             $("#subcategoryStatusToggle").prop("checked", true);
@@ -737,6 +738,13 @@
                         }   
                     },
                     {
+                        data: "specsLabel",
+                        className: "align-middle",
+                        render: function (data) {
+                            return `<span class="fw-bold">${data}</span>`;
+                        }   
+                    },
+                    {
                         data: "rank",
                         className: "align-middle d-none"
                     },
@@ -768,6 +776,7 @@
                                        style="cursor:pointer"
                                        data-id="${row.id}"
                                        data-description="${row.description}"
+                                       data-specslabel="${row.specsLabel}"
                                        data-webimagepath="${row.webImagePath}"
                                        data-webimage="${row.webImage}"
                                        data-mobileimagepath="${row.mobileImagePath}"
@@ -801,6 +810,9 @@
 
             $('#SubCategoryDescription').removeClass('border-danger');
             $('#SubCategoryDescriptionMessage').text('');
+             
+            $("#SubCategorySpecsLabel").removeClass('border-danger');
+            $("#SubCategorySpecsLabelMessage").text('');
 
             let description = $('#SubCategoryDescription').val().trim();
             if (!description) {
@@ -810,11 +822,21 @@
                 return;
             }
 
+            let specslabel = $('#SubCategorySpecsLabel').val().trim();
+
+            if(!specslabel){
+                $('#SubCategorySpecsLabelMessage').text("Specs Label is required!");
+                $('#SubCategorySpecsLabel').addClass('border-danger');
+                resetSubButton();
+                return;
+            }
+
             let formData = new FormData();
 
             formData.append("ID", $('#SubCategoryID').val());
             formData.append("CategoryID", $('#ParentCategoryID').val());
             formData.append("Description", description);
+            formData.append("SpecsLabel", specslabel)
             formData.append("StatusID", $('#subCategoryStatusID').val());
              
             const attach = (id, key) => {
@@ -828,7 +850,7 @@
             attach("subcategoryMobileImage", "MobileImage");
             attach("subcategoryBannerImage", "BannerImage");
 
-                formData.append("ClearSubWebImage", $("#ClearSubWebImage").val());
+            formData.append("ClearSubWebImage", $("#ClearSubWebImage").val());
             formData.append("ClearSubMobileImage", $("#ClearSubMobileImage").val());
             formData.append("ClearSubBannerImage", $("#ClearSubBannerImage").val());
 
@@ -883,6 +905,7 @@
 
             let id = $(this).data("id");
             let description = $(this).data("description");
+            let specsLabel = $(this).data("specslabel");
             let webPath = $(this).data("webimagepath");
             let webImg = $(this).data("webimage");
             let mobilePath = $(this).data("mobileimagepath");
@@ -892,10 +915,14 @@
             let statusId = $(this).data("statusid");
 
             $("#SubCategoryEntryTitle").text('Edit Sub Category');
-
+             
             $("#SubCategoryID").val(id);
             $("#SubCategoryDescription").val(description);
 
+              
+
+            $("#SubCategorySpecsLabel").val(specsLabel);
+             
             if (statusId === "A") {
                 $("#subcategoryStatusToggle").prop("checked", true);
                 $("#subCategoryStatusLabel").text("Active");

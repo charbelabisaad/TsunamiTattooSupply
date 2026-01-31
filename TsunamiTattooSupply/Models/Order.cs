@@ -9,8 +9,7 @@ namespace TsunamiTattooSupply.Models
 	//[Index(nameof(PaymentCode), IsUnique = true)]
 	[Index(nameof(ClientID))]
 	[Index(nameof(ClientAddressID))]
-	[Index(nameof(CurrencyID))]
-	[Index(nameof(CurrentTrackingOrderStatusID))]
+	[Index(nameof(CurrencyID))] 
 	public class Order
 	{
 		[Key]
@@ -68,11 +67,20 @@ namespace TsunamiTattooSupply.Models
 		public decimal GobalDiscount { get; set; }
 
 		[Required]
-		public int CurrentTrackingOrderStatusID { get; set; }
+		public DateTime PlacedOn {  get; set; }
+		
+		public DateTime? ReceivedOn { get; set; }
+
+		public DateTime? ConfirmedOn { get; set; }
 
 		[Required]
-		[Column(TypeName = "date")]
-		public DateTime CurrentTrackingOrderDate { get; set; }
+		public bool IsConfirmed { get; set; } = false;
+
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal? TotalFixed {  get; set; }
+
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal? TotalNet { get; set; }
 		  
 		public int? EditUserID { get; set; }
 
@@ -90,10 +98,7 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("CurrencyID")]
 		public virtual Currency Currency { get; set; }
-
-		[ForeignKey("CurrentTrackingOrderStatusID")]
-		public virtual TrackingOrderStatus TrackingOrderStatus { get; set; }
-		 
+ 
 		[ForeignKey("EditUserID")]
 		public virtual User EditUser { get; set; }
 

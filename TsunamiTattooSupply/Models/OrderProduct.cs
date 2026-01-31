@@ -20,7 +20,13 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public int ProductID { get; set; }
+		 
+		[Required]
+		public int ProductTypeID { get; set; }
 
+		[Required]
+		public int ProductDetailID { get; set; }
+		 
 		[Required]
 		public int SizeID { get; set; }
 

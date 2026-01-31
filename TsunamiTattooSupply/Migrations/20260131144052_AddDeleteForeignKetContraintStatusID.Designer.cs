@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131144052_AddDeleteForeignKetContraintStatusID")]
+    partial class AddDeleteForeignKetContraintStatusID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1084,12 +1087,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<decimal?>("TotalFixed")
-                        .HasColumnType("decimal(12,2");
-
-                    b.Property<decimal?>("TotalNet")
-                        .HasColumnType("decimat(12,2");
-
                     b.Property<decimal>("VAT")
                         .HasColumnType("decimal(12,2)");
 
@@ -1152,13 +1149,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("PriceNet")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<int>("ProductDetailID")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductTypeID")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Quantity")

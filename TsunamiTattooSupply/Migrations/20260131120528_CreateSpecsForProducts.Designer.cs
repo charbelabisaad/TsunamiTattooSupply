@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260131120528_CreateSpecsForProducts")]
+    partial class CreateSpecsForProducts
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1031,10 +1034,13 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<DateTime?>("ConfirmedOn")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<int>("CurrencyID")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CurrentTrackingOrderDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("CurrentTrackingOrderStatusID")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("Date")
@@ -1055,18 +1061,12 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("GobalDiscount")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<bool>("IsConfirmed")
-                        .HasColumnType("boolean");
-
                     b.Property<decimal>("MoneyTransferFees")
                         .HasColumnType("decimal(12,2)");
 
                     b.Property<string>("PaymentCode")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime>("PlacedOn")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("PromoCode")
                         .IsRequired()
@@ -1075,20 +1075,11 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int>("PromoCodePercentage")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("ReceivedOn")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<decimal>("ShippingCost")
                         .HasColumnType("decimal(12,2)");
 
                     b.Property<decimal>("Tax")
                         .HasColumnType("decimal(12,2)");
-
-                    b.Property<decimal?>("TotalFixed")
-                        .HasColumnType("decimal(12,2");
-
-                    b.Property<decimal?>("TotalNet")
-                        .HasColumnType("decimat(12,2");
 
                     b.Property<decimal>("VAT")
                         .HasColumnType("decimal(12,2)");
@@ -1103,6 +1094,8 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("ClientID");
 
                     b.HasIndex("CurrencyID");
+
+                    b.HasIndex("CurrentTrackingOrderStatusID");
 
                     b.HasIndex("DeletedUserID");
 
@@ -1152,13 +1145,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("PriceNet")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<int>("ProductDetailID")
-                        .HasColumnType("integer");
-
                     b.Property<int>("ProductID")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("ProductTypeID")
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Quantity")
@@ -3045,6 +3032,12 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TsunamiTattooSupply.Models.TrackingOrderStatus", "TrackingOrderStatus")
+                        .WithMany()
+                        .HasForeignKey("CurrentTrackingOrderStatusID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
                         .HasForeignKey("DeletedUserID");
@@ -3062,6 +3055,8 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("DeletedUser");
 
                     b.Navigation("EditUser");
+
+                    b.Navigation("TrackingOrderStatus");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.OrderProduct", b =>

@@ -117,6 +117,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public IActionResult SaveCategory(
 			int ID,
 			string Description,
+			string SpecsLabel,
 			IFormFile? BannerImage,
 			IFormFile? WebImage,
 			IFormFile? AD_Image1,
@@ -128,12 +129,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 			try
 			{
-				string normalizedDescription = Description?.Trim().ToUpper() ?? string.Empty;
+				string normalizedDescription = Description?.Trim() ?? string.Empty;
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
 				// Duplicate check
 				bool exists = _dbContext.Categories.Any(c =>
-					c.Description.ToUpper() == normalizedDescription &&
+					c.Description.ToUpper() == normalizedDescription.ToUpper() &&
 					c.DeletedDate == null &&
 					c.ID != ID);
 
@@ -216,7 +217,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					category = new Category
 					{
-						Description = Description.Trim().ToUpper(),
+						Description = Description.Trim(),
 						Details = Details,
 						StatusID = StatusID,
 						CreatedUserID = userId,
@@ -232,7 +233,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					if (category == null)
 						return Json(new { success = false, error = true, message = "Category not found." });
 
-					category.Description = Description.Trim().ToUpper();
+					category.Description = Description.Trim();
 					category.Details = Details ?? category.Details; // ✅ keep old behavior
 					category.StatusID = StatusID;
 					category.EditUserID = userId;
@@ -477,6 +478,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						ID = sc.ID,
 						Description = sc.Description,
+						SpecsLabel = sc.SpecsLabel,
 						WebImagePath = Global.SubCategoryWebImagePath,
 						WebImage = sc.WebImage,
 						MobileImagePath = Global.SubCategoryMobileImagePath,
@@ -511,6 +513,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	int ID,
 	int CategoryID,
 	string Description,
+	string SpecsLabel,
 	IFormFile? BannerImage,
 	IFormFile? WebImage,
 	IFormFile? MobileImage,
@@ -617,6 +620,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						CategoryID = CategoryID,
 						Description = normalizedDescription,
+						SpecsLabel = SpecsLabel.Trim(),
 						StatusID = StatusID,
 						CreatedUserID = userId,
 						CreationDate = DateTime.UtcNow
@@ -639,6 +643,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					sub.Description = normalizedDescription;
+					sub.SpecsLabel = SpecsLabel.Trim();
 					sub.StatusID = StatusID;
 					sub.EditUserID = userId;
 					sub.EditDate = DateTime.UtcNow;
@@ -675,6 +680,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						sub.ID,
 						sub.Description,
+						sub.SpecsLabel,
 						sub.StatusID,
 						sub.WebImage,
 						sub.BannerImage,

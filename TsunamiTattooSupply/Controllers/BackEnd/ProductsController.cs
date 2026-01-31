@@ -46,7 +46,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			Global.ProductSmallImagePath = fps.GetFilePath("PRDSMLIMG").Description;
 			Global.ProductOriginalImagePath = fps.GetFilePath("PRDORGIMG").Description;
-			Global.CountriesFlagsImagePath = fps.GetFilePath("CNTRYFLG").Description;
+			Global.CountriesFlagsImagePath = fps.GetFilePath("CNTRYFLGIMG").Description;
 
 			int CountryID = cts.getCountryNative().ID;
 

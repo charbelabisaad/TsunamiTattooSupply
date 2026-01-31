@@ -43,6 +43,7 @@
                                                 <th style="width:70px">Web</th>
                                                 <th style="width:70px">Mobile</th>
                                                 <th>Description</th>
+                                                <th>Sepcs Label</th>
                                                 <th class="d-none">Rank</th>
                                                 <th style="width:50px">Status</th>
                                                 <th class="no-export text-center" style="width:50px">Actions</th>
@@ -66,25 +67,38 @@
                                 </div>
 
                                 <div class="card-body p-4">
+
                                     <input id="SubCategoryID" type="hidden" value="0" />
                                     <input id="ParentCategoryID" type="hidden" value="0" />
 
                                     <!-- Description -->
                                     <div class="row align-items-center mb-3">
-                                        <div class="col-12 col-md-3">
-                                            <label for="SubCategoryDescription" class="form-label fw-semibold">Description</label>
-                                        </div>
+                                         
                                         <div class="col-12 col-md-5">
+
+                                            <label for="SubCategoryDescription" class="form-label fw-semibold">Description</label> 
                                             <input type="text" class="form-control" id="SubCategoryDescription" placeholder="Fill Description" />
-                                            <div id="SubCategoryDescriptionMessage" class="text-danger small mt-1"></div>
+                                            <div id="SubCategoryDescriptionMessage" class="text-danger small mt-1" style="height:20px"></div>
+
                                         </div>
-                                        <div class="col-12 col-md-4 d-flex justify-content-md-end">
+
+                                        <div class="col-12 col-md-5">
+
+                                            <label for="SubCategorySpecsLabel" class="form-label fw-semibold">Specs</label>
+                                            <input type="text" class="form-control" id="SubCategorySpecsLabel" placeholder="Fill Specs Label" />
+                                            <div id="SubCategorySpecsMessage" class="text-danger small mt-1" style="height:20px"></div>
+
+                                        </div>
+
+                                        <div class="col-12 col-md-2 justify-content-end text-right">
+                                            <label for="subcategoryStatusLabel" class="form-label fw-semibold"></label>
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="subcategoryStatusToggle" checked />
                                                 <label class="custom-control-label" for="subcategoryStatusToggle" id="subCategoryStatusLabel">Active</label>
                                                 <input type="hidden" id="subCategoryStatusID" name="SubCategoryStatusID" value="A" />
                                             </div>
                                         </div>
+
                                     </div>
 
                                     <!-- IMAGES -->

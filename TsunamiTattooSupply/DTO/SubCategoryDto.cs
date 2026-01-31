@@ -6,6 +6,8 @@
 
 		public string Description { get; set; }
 
+		public string SpecsLabel { get; set; }
+
 		public string? BannerImagePath { get; set; }
 		public string? BannerImage { get; set; }
 

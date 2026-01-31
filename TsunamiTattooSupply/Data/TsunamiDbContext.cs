@@ -57,6 +57,8 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<Contact> Contacts { get; set; }
 		public DbSet<ProductType> ProductTypes { get; set; }
 		public DbSet<ProductDetail> ProductDetails { get; set; }
+		public DbSet<Spec> Specs { get; set; }
+		public DbSet<ProductSpec> ProductsSpecs { get; set; }
 		 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
