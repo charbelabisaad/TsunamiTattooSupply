@@ -1,0 +1,178 @@
+﻿
+
+<div class="modal fade" id="saveSpecModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 id="modalSpecTitle" class="modal-title"></h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="specForm" method="post">
+                <div class="modal-body">
+                    <div class="row align-items-center mb-3">
+                        <input id="SpecID" type="hidden" value="0" />
+
+                        <!-- 🔹 Label -->
+                        <div class="col-12 col-md-2 d-flex align-items-center">
+                            <label for="SpecDescription" class="form-label mb-0">Description</label>
+                        </div>
+
+                        <!-- 🔹 Input -->
+                        <div class="col-12 col-md-8 d-flex align-items-center">
+                            <div class="w-100">
+                                <input type="text" class="form-control" id="SpecDescription" placeholder="Fill Description" />
+                                <div id="SpecDescriptionMessage" class="text-danger fw-normal"></div>
+                            </div>
+                        </div>
+
+                        <!-- 🔹 Status Toggle -->
+                        <div class="col-12 col-md-2 d-flex align-items-center justify-content-md-end">
+                            <div class="custom-control custom-switch m-0">
+                                <input type="checkbox" class="custom-control-input" id="SpecStatusToggle" checked>
+                                <label class="custom-control-label" for="SpecStatusToggle" id="SpecStatusLabel">Active</label>
+                                <input type="hidden" id="SpecStatusID" name="SpecStatusID" value="A">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <div class="row w-100">
+                        <!-- Validation/Error message -->
+                        <div id="modalSpecMessage" class="col-md-7 d-flex align-items-center text-danger" style="display:none;">
+                            <!-- message goes here -->
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="col-md-5 d-flex align-items-center justify-content-end">
+                            <button type="button" class="btn btn-secondary me-2" data-bs-dismiss="modal">
+                                <i class="fas fa-ban"></i> Cancel
+                            </button>
+
+                            <button id="btnSaveSpec" type="button" class="btn btn-primary ml-2">
+                                <span class="spinner-border spinner-border-sm d-none" id="btnSaveSpecSpinner" role="status" aria-hidden="true"></span>
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const toggle = document.getElementById("SpecStatusToggle");
+        const hidden = document.getElementById("SpecStatusID");
+        const label = document.getElementById("SpecStatusLabel");
+
+        if (toggle && hidden && label) {
+            toggle.addEventListener("change", function () {
+                if (toggle.checked) {
+                    label.textContent = "Active";
+                    hidden.value = "A";
+                } else {
+                    label.textContent = "Inactive";
+                    hidden.value = "I";
+                }
+            });
+        }
+
+        $('#btnSaveSpec').on('click', function (e) {
+
+            e.preventDefault(); // ✅ prevent default form submission
+
+            // Reset validation flag
+            let requiredValidation = false;
+
+            // Clear previous errors and borders
+            $('#SpecDescription').removeClass("border-danger");
+            $('#SpecDescriptionMessage').text('');
+
+            // Show spinner while saving
+            $('#btnSaveSpecSpinner').removeClass('d-none');
+            $('#btnSaveSpec i').addClass('d-none');
+
+            // Gather form values
+            var data = {
+                ID: $('#SpecID').val() || 0,
+                Description: $('#SpecDescription').val().trim(),
+                StatusID: $('#SpecStatusID').val()
+            };
+
+            // Basic validation
+            if (!data.Description) {
+                $('#SpecDescriptionMessage').text("Description is required!");
+                $('#SpecDescription').addClass("border-danger");
+                requiredValidation = true;
+            }
+
+            // Stop if validation failed
+            if (requiredValidation) {
+                $('#btnSaveSpecSpinner').addClass('d-none');
+                $('#btnSaveSpec i').removeClass('d-none');
+                return;
+            }
+
+            // ✅ AJAX request
+            $.ajax({
+                url: '@Url.Action("SaveSpec", "Specs")',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+
+                    const table = $("#tableSpecs").DataTable();
+
+                    $('#btnSaveSpecSpinner').addClass('d-none');
+                    $('#btnSaveSpec i').removeClass('d-none');
+                    $('#btnSaveSpec').prop('disabled', true);
+
+                    if (response.exists) {
+                        $('#SpecDescriptionMessage').text(response.message || "Description already exists!");
+                        $('#SpecDescription').addClass("border-danger");
+                        toastr.warning(response.message || "Description already exists!");
+                        $('#btnSaveSpec').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.error) {
+                        $('#modalSpecMessage').text(response.message || "Error saving spec.").show();
+                        toastr.error(response.message || "Error saving spec.");
+                        $('#btnSaveSpec').prop('disabled', false);
+                        return;
+                    }
+
+                    if (response.specs) {
+                        $('#saveSpecModal').modal('hide');
+                        table.ajax.reload(null, false);
+                        toastr.success("Spec saved successfully!");
+                    } else {
+                        $('#modalSpecMessage').text("Unexpected response from server.").show();
+                    }
+
+                    $('#btnSaveSpecSpinner').addClass('d-none');
+                    $('#btnSaveSpec i').removeClass('d-none');
+                    $('#btnSaveSpec').prop('disabled', false);
+                },
+                error: function (xhr, status, error) {
+                    $('#btnSaveSpecSpinner').addClass('d-none');
+                    $('#btnSaveSpec i').removeClass('d-none');
+                    $('#btnSaveSpec').prop('disabled', false);
+                    $('#modalSpecMessage').text("An error occurred while saving spec" ).show();
+                    toastr.error("An error occurred while saving spec."); // ✅ fixed missing parenthesis
+                }
+            });
+        });
+
+    });
+
+
+</script>

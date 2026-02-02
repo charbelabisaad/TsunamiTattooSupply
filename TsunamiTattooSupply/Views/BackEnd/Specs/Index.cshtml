@@ -3,11 +3,11 @@
 *@
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Roles";
+    ViewData["Title"] = "Sepcs";
 }
 
-<partial name="SaveRole" />
-<partial name="DeleteRole" />
+<partial name="SaveSpec" />
+<partial name="DeleteSpec" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -28,9 +28,9 @@
             <div class="card">
                 <div class="card-header">
                     <div class="row">
-                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">Roles List</h3></div>
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">Specs List</h3></div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
-                            <button id="btnNewRole" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Role</button>
+                            <button id="btnNewSpec" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Spec</button>
                         </div>
                     </div>
 
@@ -39,7 +39,7 @@
                 <div class="card-body p-0">
 
                     <div class="col-sm-12 mt-3">
-                        <table id="tableRoles" class="table table-striped w-100 ">
+                        <table id="tableSpecs" class="table table-striped w-100 ">
                             <thead>
                                 <tr>
                                     <th>Description</th> 
@@ -65,15 +65,15 @@
     <script>
             $(document).ready(function () {
 
-                var table = $('#tableRoles').DataTable({
+                var table = $('#tableSpecs').DataTable({
                     processing: true,
                     responsive: true,
                     ajax: {
-                        url: '@Url.Action("ListGetRoles", "Roles")',
+                        url: '@Url.Action("ListGetSpecs", "Specs")',
                             type: 'GET',
                         dataSrc: function (json) {
                         if (json && json.success === false) {
-                            toastr.error(json.message || "Failed to load roles.");
+                            toastr.error(json.message || "Failed to load specs.");
                             return [];
                         }
                         if (!json || !json.data) {
@@ -86,7 +86,7 @@
                     dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
                     language: {
                         search: "",
-                        searchPlaceholder: "Search roles..."
+                        searchPlaceholder: "Search specs..."
                     },
                     buttons: [
                             { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
@@ -128,7 +128,7 @@
                             data: 'description',
                             className: 'align-middle'
                         }, 
-                        { data: 'status',
+                        { data: 'statusDescription',
                             className: 'align-middle text-center',
                             render: function (data, type, row) { 
                               return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${data}</div>`;
@@ -146,11 +146,11 @@
                                     <i class="fas fa-ellipsis-v"></i>
                                 </button>
                                 <div class="dropdown-menu">
-                                    <a class="dropdown-item btnEditRole" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}" 
+                                    <a class="dropdown-item btnEditSpec" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}" 
                                     data-statusid="${row.statusID}">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
-                                        <a class="dropdown-item btnDeleteRole" style="cursor:pointer" data-id="${row.id}">
+                                        <a class="dropdown-item btnDeleteSpec" style="cursor:pointer" data-id="${row.id}">
                                         <i class="fas fa-trash"></i> Delete
                                     </a>   
                                 </div>
@@ -161,87 +161,87 @@
                     ]
                 });
                  
-                var $filter = $('#tableRoles_filter');
+                var $filter = $('#tableSpecs_filter');
 
                 $filter.css("position", "relative");
  
 
-                const btnNewRole = document.getElementById("btnNewRole");
+                const btnNewSpec = document.getElementById("btnNewSpec");
 
-                btnNewRole.addEventListener("click", function () {
+                btnNewSpec.addEventListener("click", function () {
 
-                    const modalEl = document.getElementById("saveRoleModal");
+                    const modalEl = document.getElementById("saveSpecModal");
                     const modal = new bootstrap.Modal(modalEl);
 
-                    $("#modalRoleTitle").text('Create New Role');
+                    $("#modalSpecTitle").text('Create New Spec');
 
-                    $("#RoleID").val(0);
+                    $("#SpecID").val(0);
 
-                    $("#RoleDescription").val(''); 
+                    $("#SpecDescription").val(''); 
                       
-                    $("#RoleStatusID").val('A');
-                    $("#RoleStatusToggle").prop("checked", true);
-                    $("#RoleStatusLabel").text("Active");
+                    $("#SpecStatusID").val('A');
+                    $("#SpecStatusToggle").prop("checked", true);
+                    $("#SpecStatusLabel").text("Active");
 
-                    $("#RoleDescriptionMessage").text(''); 
+                    $("#SpecDescriptionMessage").text(''); 
 
-                    $("#RoleDescription").removeClass('border-danger');
+                    $("#SpecDescription").removeClass('border-danger');
                      
                     modal.show();
 
                     $(modalEl).on('shown.bs.modal', function () {
 
-                        $("#RoleDescription").focus();
+                        $("#SpecDescription").focus();
 
                     });
 
                 });
 
-                $(document).on('click', '.btnEditRole', function(){
+                $(document).on('click', '.btnEditSpec', function(){
 
-                    $("#modalRoleTitle").text('Modify Role');
+                    $("#modalSpecTitle").text('Modify Spec');
                      
-                    const RoleID = $(this).data('id');
-                    const RoleDescription = $(this).data('description'); 
-                    const RoleStatusID = $(this).data('statusid');
-                    const modalEl = document.getElementById("saveRoleModal");
+                    const SpecID = $(this).data('id');
+                    const SpecDescription = $(this).data('description'); 
+                    const SpecStatusID = $(this).data('statusid');
+                    const modalEl = document.getElementById("saveSpecModal");
                     const modal = new bootstrap.Modal(modalEl);
 
-                    $("#RoleID").val(RoleID);
-                    $("#RoleDescription").val(RoleDescription); 
-                    $("#RoleStatusID").val(RoleStatusID);
+                    $("#SpecID").val(SpecID);
+                    $("#SpecDescription").val(SpecDescription); 
+                    $("#SpecStatusID").val(SpecStatusID);
 
                     $("#DescriptionMessage").text(''); 
 
-                    $("#RoleDescription").removeClass('border-danger'); 
+                    $("#SpecDescription").removeClass('border-danger'); 
                      
-                    $("#RoleStatusToggle").prop("checked", RoleStatusID == 'A' ? true : false);
-                    $("#RoleStatusLabel").text(RoleStatusID == 'A' ? 'Active' : 'Inactive');
+                    $("#SpecStatusToggle").prop("checked", SpecStatusID == 'A' ? true : false);
+                    $("#SpecStatusLabel").text(SpecStatusID == 'A' ? 'Active' : 'Inactive');
                       
                     modal.show();
                      
                     $(modalEl).on('shown.bs.modal', function () {
 
-                        $("#RoleDescription").focus();
+                        $("#SpecDescription").focus();
 
                     });
 
                 });
 
             // Show modal when Delete button clicked
-            $(document).on("click", ".btnDeleteRole", function (e) {
+            $(document).on("click", ".btnDeleteSpec", function (e) {
               e.preventDefault();
 
-              const roleId = $(this).data("id");
-                $("#deletedRoleId").val(roleId);
+              const specId = $(this).data("id");
+                $("#deletedSpecId").val(specId);
 
-              const roledescription = $(this).closest("tr").find("td:first").text();
+              const specdescription = $(this).closest("tr").find("td:first").text();
 
-              $("#deleteRoleMessage").html(
-                `Are you sure you want to delete <strong>${roledescription}</strong>?`
+              $("#deleteSpecMessage").html(
+                `Are you sure you want to delete <strong>${specdescription}</strong>?`
               );
 
-              $("#deleteRoleModal").modal("show");
+              $("#deleteSpecModal").modal("show");
             });
 
             
@@ -249,10 +249,3 @@
 
     </script>
 }
-
-
-
-
-
-
-

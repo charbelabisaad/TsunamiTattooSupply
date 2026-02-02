@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Sepcs")]
+	[Table("Specs")]
 	[Index(nameof(StatusID))]
 	public class Spec
 	{
@@ -31,7 +31,7 @@ namespace TsunamiTattooSupply.Models
 
 		public int? DeletedUserID { get; set; }
 
-		public int? DeletedDate { get; set; }
+		public DateTime? DeletedDate { get; set; }
  
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

@@ -1,9 +1,9 @@
-﻿<div class="modal fade" id="deleteRoleModal" tabindex="-1" role="dialog" aria-hidden="true">
+﻿<div class="modal fade" id="deleteSpecModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
 
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Delete Role</h5>
+                <h5 class="modal-title">Delete Spec</h5>
                 <button type="button" class="close text-white" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -11,10 +11,10 @@
 
             <form method="post">
                 <div class="modal-body">
-                    <p class="mb-3" id="deleteRoleMessage">
-                        Are you sure you want to delete this role ?
+                    <p class="mb-3" id="deleteSpecMessage">
+                        Are you sure you want to delete this spec ?
                     </p>
-                    <input type="hidden" id="deletedRoleId" value="0" />
+                    <input type="hidden" id="deletedSpecId" value="0" />
                 </div>
 
                 <div class="modal-footer">
@@ -25,7 +25,7 @@
                             <button type="button" class="btn btn-secondary me-2" style="width:100px !important" data-bs-dismiss="modal">
                                 <i class="fas fa-ban"></i> Cancel
                             </button>
-                            <button id="btnConfirmDeleteRole" type="button" class="btn btn-danger ml-1" style="width:100px!important">
+                            <button id="btnConfirmDeleteSpec" type="button" class="btn btn-danger ml-1" style="width:100px!important">
                                 <span class="spinner-border spinner-border-sm d-none" id="btnDeleteSpinner" role="status" aria-hidden="true"></span>
                                 <i class="fas fa-trash"></i> Delete
                             </button>
@@ -43,45 +43,45 @@
 <script>
 
     document.addEventListener("DOMContentLoaded", function () {
-         
-        $('#btnConfirmDeleteRole').on('click', function (e) {
+
+        $('#btnConfirmDeleteSpec').on('click', function (e) {
             e.preventDefault();
-             
-            const roleId = $("#deletedRoleId").val();
+
+            const specId = $("#deletedSpecId").val();
 
             $("#btnDeleteSpinner").removeClass("d-none");
-            $("#btnConfirmDeleteRole i").addClass("d-none");
-            $("#btnConfirmDeleteRole").prop("disabled", true)
-            //$("#btnConfirmDeleteRole").addClass("disabled")
+            $("#btnConfirmDeleteSpec i").addClass("d-none");
+            $("#btnConfirmDeleteSpec").prop("disabled", true)
+            //$("#btnConfirmDeleteSpec").addClass("disabled")
 
             $.ajax({
-                url: '@Url.Action("DeleteRole", "Roles")',
+                url: '@Url.Action("DeleteSpec", "Specs")',
                 type: "POST",
-                data: { ID: roleId }
+                data: { ID: specId }
             })
             .done(function (response) {
                 if (response.success) {
 
-                    const table = $("#tableRoles").DataTable();
+                    const table = $("#tableSpecs").DataTable();
 
-                    $("#deleteRoleModal").modal("hide");
+                    $("#deleteSpecModal").modal("hide");
                     table.ajax.reload(null, false);
-                    toastr.success("Role deleted successfully!");
+                    toastr.success("Spec deleted successfully!");
                 } else {
                     $("#deleteModalMessage").text(response.message).show();
                 }
                 $("#btnDeleteSpinner").addClass("d-none");
-                $("#btnConfirmDeleteRole i").removeClass("d-none");
-                $("#btnConfirmDeleteRole").prop("disabled", false);
+                $("#btnConfirmDeleteSpec i").removeClass("d-none");
+                $("#btnConfirmDeleteSpec").prop("disabled", false);
             })
             .fail(function () {
-                $("#deleteModalMessage").text("Error deleting roleid.").show();
+                $("#deleteModalMessage").text("Error deleting specid.").show();
             })
             .always(function () {
                 $("#btnDeleteSpinner").addClass("d-none");
-                $("#btnConfirmDeleteRole i").removeClass("d-none");
-                $("#btnConfirmDeleteRole").prop("disabled", false);
-                //$("#btnConfirmDeleteRole").removeClass("disabled");
+                $("#btnConfirmDeleteSpec i").removeClass("d-none");
+                $("#btnConfirmDeleteSpec").prop("disabled", false);
+                //$("#btnConfirmDeleteSpec").removeClass("disabled");
             });
         });
 
