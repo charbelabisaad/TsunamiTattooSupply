@@ -3,6 +3,7 @@ using System.Security.Claims;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Models;
+using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
@@ -19,7 +20,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public IActionResult Index()
 		{
-			return View("~/Views/BackEnd/Specs/Index.cshtml");
+
+			var vm = new SpecPageViewModel
+			{
+				subcategories = GetSubGategories()
+			};
+
+			return View("~/Views/BackEnd/Specs/Index.cshtml", vm);
+		}
+
+		public List<SubCategoryDto> GetSubGategories()
+		{
+			return _dbContext.SubCategories
+				.Where(c => c.DeletedDate == null)
+				.Select(c => new SubCategoryDto
+				{
+					ID = c.ID,
+					Description = c.Description
+				}).ToList();
+
 		}
 
 		public IActionResult ListGetSpecs()
@@ -50,9 +69,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			try
 			{
-
-
-
+ 
 				specs = _dbContext.Specs
 					.Where(s => s.DeletedDate == null)
 					.OrderBy(s => s.Description)
@@ -60,6 +77,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						ID = s.ID,
 						Description = s.Description, 
+						SubCategoryID = s.SubCategory.ID,
+						SubCategoryDescription = s.SubCategory.Description,
 						StatusID = s.Status.ID,
 						StatusDescription = s.Status.Description,
 						StatusColor = s.Status.Color
@@ -76,7 +95,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveSpec(int ID, string Description, string StatusID)
+		public IActionResult SaveSpec(int ID, string Description, int SubCategoryID, string StatusID)
 		{
 
 			int SpecID;
@@ -98,6 +117,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					existingSpec.Description = Description;
+					existingSpec.SubCategoryID = SubCategoryID;
 					existingSpec.StatusID = StatusID;
 					existingSpec.EditUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 					existingSpec.EditDate = DateTime.UtcNow;
@@ -121,6 +141,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					var newSpec = new Spec
 					{
 						Description = Description,
+						SubCategoryID = SubCategoryID,
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),
 						CreationDate = DateTime.UtcNow
