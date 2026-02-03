@@ -1,5 +1,4 @@
 ﻿
- 
 using TsunamiTattooSupply.DTO;
 
 namespace TsunamiTattooSupply.ViewModels
