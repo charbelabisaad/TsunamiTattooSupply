@@ -4,8 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
-	[Table("Specs")]
-	[Index(nameof(SubCategoryID))]
+	[Table("Specs")] 
 	[Index(nameof(StatusID))]
 	public class Spec
 	{
@@ -16,10 +15,7 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(50)]
 		public string Description { get; set; }
-
-		[Required]
-		public int SubCategoryID { get; set; }
-
+		 
 		[Required]
 		public string StatusID { get; set; }
 
@@ -39,10 +35,7 @@ namespace TsunamiTattooSupply.Models
  
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
-
-		[ForeignKey("SubCategoryID")]
-		public virtual SubCategory SubCategory { get; set; }	
-
+		 
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }
 

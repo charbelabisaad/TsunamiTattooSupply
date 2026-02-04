@@ -76,9 +76,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Select(s => new SpecDto
 					{
 						ID = s.ID,
-						Description = s.Description, 
-						SubCategoryID = s.SubCategory.ID,
-						SubCategoryDescription = s.SubCategory.Description,
+						Description = s.Description,  
 						StatusID = s.Status.ID,
 						StatusDescription = s.Status.Description,
 						StatusColor = s.Status.Color
@@ -116,8 +114,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					}
 
-					existingSpec.Description = Description;
-					existingSpec.SubCategoryID = SubCategoryID;
+					existingSpec.Description = Description; 
 					existingSpec.StatusID = StatusID;
 					existingSpec.EditUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 					existingSpec.EditDate = DateTime.UtcNow;
@@ -140,8 +137,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					var newSpec = new Spec
 					{
-						Description = Description,
-						SubCategoryID = SubCategoryID,
+						Description = Description, 
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),
 						CreationDate = DateTime.UtcNow

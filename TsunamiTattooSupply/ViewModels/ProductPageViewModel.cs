@@ -14,6 +14,7 @@ namespace TsunamiTattooSupply.ViewModels
 		public List<ColorDto> colors { get; set; }
 		public List<CountryDto> countriessales { get; set; }
 		public List<CurrencyDto> currencies { get; set; }
+		public List<SpecDto> specs { get; set; }
 		public CurrencyConversionDto currencyconversion { get; set; }
  
 	}

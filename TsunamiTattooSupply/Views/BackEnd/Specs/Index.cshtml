@@ -42,8 +42,7 @@
                         <table id="tableSpecs" class="table table-striped w-100 ">
                             <thead>
                                 <tr>
-                                    <th>Description</th> 
-                                    <th>Sub Category</th>
+                                    <th>Description</th>  
                                     <th style="width:50px">Status</th>
 									<th class="no-export" style="width:50px">Actions</th>
                                 </tr>
@@ -128,11 +127,7 @@
                         { 
                             data: 'description',
                             className: 'align-middle'
-                        },
-                        {
-                            data: 'subCategoryDescription',
-                            className: 'align-middle'
-                        },
+                        }, 
                         { data: 'statusDescription',
                             className: 'align-middle text-center',
                             render: function (data, type, row) { 
@@ -152,8 +147,7 @@
                                 </button>
                                 <div class="dropdown-menu">
                                     <a class="dropdown-item btnEditSpec" style="cursor:pointer" data-id="${row.id}" data-description="${row.description}" 
-                                    data-statusid="${row.statusID}"
-                                    data-subcategoryid="${row.subCategoryID}">
+                                    data-statusid="${row.statusID}">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
                                         <a class="dropdown-item btnDeleteSpec" style="cursor:pointer" data-id="${row.id}">
@@ -183,8 +177,7 @@
 
                     $("#SpecID").val(0);
 
-                    $("#SpecDescription").val('');
-                    $("#SpecSubCategory").prop("selectedIndex", 0);
+                    $("#SpecDescription").val(''); 
                       
                     $("#SpecStatusID").val('A');
                     $("#SpecStatusToggle").prop("checked", true);
@@ -209,15 +202,13 @@
                     $("#modalSpecTitle").text('Modify Spec');
                      
                     const SpecID = $(this).data('id');
-                    const SpecDescription = $(this).data('description');
-                    const SpecSubCategoryID = $(this).data('subcategoryid');
+                    const SpecDescription = $(this).data('description'); 
                     const SpecStatusID = $(this).data('statusid');
                     const modalEl = document.getElementById("saveSpecModal");
                     const modal = new bootstrap.Modal(modalEl);
 
                     $("#SpecID").val(SpecID);
-                    $("#SpecDescription").val(SpecDescription);
-                    $("#SpecSubCategory").val(SpecSubCategoryID);
+                    $("#SpecDescription").val(SpecDescription); 
                     $("#SpecStatusID").val(SpecStatusID);
 
                     $("#DescriptionMessage").text(''); 

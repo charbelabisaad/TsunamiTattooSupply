@@ -194,16 +194,19 @@
 									<div id="SubCategoryTags" class="mt-2 d-flex flex-wrap gap-2"></div>
 								</div>
 
-								@* <div class="col-12 col-md-4 mb-3"> *@
-								@* 	<div> *@
-        @*                                 <label id="ProductSpecsLabel" class="form-label">Specs</label> *@
-        @*                                 <select id="ProductSpecs" name="ProductSpecs[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true"> *@
+								<div class="col-12 col-md-4 mb-3"> 
+									<div> 
+                                        <label id="ProductSpecsLabel" class="form-label">Specs</label>
+                                        <select id="ProductSpecs" name="ProductSpecs[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">  
 										 
-								@* 		</select> *@
-								@* 		<div id="ProductSpecsMessage" class="text-danger fw-normal"></div> *@
-								@* 	</div> *@
-								@* 	<div id="SubCategoryTags" class="mt-2 d-flex flex-wrap gap-2"></div> *@
-								@* </div> *@
+											@foreach(var obj in Model.specs){
+												<option value="@obj.ID">@obj.Description</option>
+											}
+
+										</select> 
+								  		<div id="ProductSpecsMessage" class="text-danger fw-normal"></div> 
+								  	</div> 
+								  </div>
 
 							</div>
 							<div class="row">
@@ -736,9 +739,7 @@
 			$('#ProductSizes').on('changed.bs.select', function () {
 
 			//if (isEditLoading) return;
-		  
-			$("#ProductSizesMessage").remove(); 
-
+		   
 			let container = $('#SizeVariationsContainer');
 
 			// Selected size IDs (as strings)
@@ -1321,6 +1322,7 @@
 			}
 		});
 
+		$('#ProductSpecs').val($('#ProductSpecs').selectpicker('val'));
 		$('#ProductTypes').val($('#ProductTypes').selectpicker('val'));
 		$('#ProductColors').val($('#ProductColors').selectpicker('val'));
 		$('#ProductSubCategory').val($('#ProductSubCategory').selectpicker('val'));
@@ -1337,9 +1339,7 @@
 		// ==================================================
 		$("#ProductCodeMessage").text("");
 		$("#ProductNameMessage").text("");
-		$("#ProductSubCategoryMessage").text("");
-		$("#ProductSizesMessage").remove();
-		$("#ProductColorsMessage").remove();
+		$("#ProductSubCategoryMessage").text("");  
 
 		let hasError = false;
 
@@ -1363,6 +1363,16 @@
 			hasError = true;
 		}
 
+		let specs = $("#ProductSpecs").val();
+		
+		if (!specs || specs.length === 0) {
+			 
+			$("#ProductSpecsMessage")
+				.text("Please select at least one spec");
+			hasError = true;
+		}
+
+ 
 		let colors = $("#ProductColors").val();
 		if (!colors || colors.length === 0) {
 			$("#ProductColors")
@@ -1376,7 +1386,11 @@
 			hasError = true;
 		}
 
+		
+
 		if (hasError) return;
+
+		 
 
 		// ==================================================
 		// Submit
@@ -1413,7 +1427,7 @@
 				$(this).data('image-id')
 			);
 		});
-
+		
 		// ==================================================
 		// AJAX
 		// ==================================================

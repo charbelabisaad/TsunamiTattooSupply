@@ -57,6 +57,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				groupTypes = GetGroupTypes(),
 				categories = GetGategories(),
+				specs = GetSepcs(),
 				units = GetUnits(),
 				productTypes = GetProductTypes(),
 				productDetails = GetProductDetails(),
@@ -181,12 +182,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			return _dbContext.Categories
 				.Where(c => c.DeletedDate == null)
+				.OrderBy(c => c.Rank)
 				.Select(c => new CategoryDto
 				{
 					ID = c.ID,
 					Description = c.Description
 				}).ToList();
 
+		}
+
+		public List<SpecDto> GetSepcs()
+		{
+			return _dbContext.Specs
+				.Where(s => s.DeletedDate == null)
+				.OrderBy(s => s.Description)
+				.Select ( s => new SpecDto
+				{
+					ID = s.ID,
+					Description= s.Description
+				}).ToList ();
 		}
 
 		[HttpGet]
@@ -368,7 +382,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				if (!postedSubCatIds.Any())
 					return Json(new { success = false, message = "At least one Sub Category is required" });
-  
+
+				// =====================================================
+				// 🔹 SUB CATEGORIES (REQUIRED)
+				// =====================================================
+				var postedSpecIds = form["ProductSpecs[]"]
+					.Select(int.Parse)
+					.Distinct()
+					.ToList();
+
+				if (!postedSpecIds.Any())
+					return Json(new { success = false, message = "At least one Spec is required" });
+
 				// =====================================================
 				// 🔹 PRODUCT COLORS (REQUIRED)
 				// =====================================================
@@ -464,6 +489,37 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						});
 					}
 				}
+
+				// =====================================================
+				// 🔹 SPECS (SOFT DELETE)
+				// =====================================================
+				var existingSpecs = _dbContext.ProductsSpecs
+					.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
+					.ToList();
+
+				foreach (var ps in existingSpecs)
+				{
+					if (!postedSpecIds.Contains(ps.SpecID))
+					{
+						ps.DeletedUserID = userId;
+						ps.DeletedDate = now;
+					}
+				}
+				var uid = userId;
+				foreach (var specId in postedSpecIds)
+				{
+					if (!existingSpecs.Any(ps => ps.SpecID == specId))
+					{
+						_dbContext.ProductsSpecs.Add(new ProductSpec
+						{
+							ProductID = productId,
+							SpecID = specId, 
+							CreatedUserID = userId,
+							CreatedDate = now
+						});
+					}
+				}
+
 				#region PRODUCT SIZE MATRIX SAVE
 
 				// =====================================================
@@ -827,11 +883,23 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				return Json(new { success = true });
 			}
+			catch (DbUpdateException ex)
+			{
+				var root = ex.InnerException?.Message ?? ex.Message;
+
+				return Json(new
+				{
+					success = false,
+					message = root
+				});
+			}
 			catch (Exception ex)
 			{
-				transaction.Rollback();
-				_logger.LogError(ex, "SaveProduct failed");
-				return Json(new { success = false, message = "Save failed" });
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
 			}
 		}
 
@@ -858,6 +926,22 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			int? categoryId = subCats.Any()
 				? subCats.First().categoryId
 				: null;
+
+			// ===============================
+			// SPECS (NO IMAGES)
+			// ===============================
+			var specs = _dbContext.ProductsSpecs
+				.AsNoTracking()
+				.Where(pc =>
+					pc.ProductID == productId &&
+					pc.DeletedDate == null)
+				.Select(pc => new
+				{
+					id = pc.SpecID
+				})
+				.ToList();
+
+			 
 
 			// ============================================================
 			// 🔥 PRODUCT TYPES / DETAILS / SIZES
@@ -951,6 +1035,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				success = true,
 				categoryId,
 				subCategories = subCats, // 🔥 OBJECTS, NOT IDS
+				specs = specs,
 				types,
 				details,
 				sizes,

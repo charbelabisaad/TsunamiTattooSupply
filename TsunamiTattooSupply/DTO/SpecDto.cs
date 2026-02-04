@@ -9,9 +9,7 @@ namespace TsunamiTattooSupply.DTO
 		public int ID { get; set; }
 		 
 		public string Description { get; set; }
-		 
-		public int SubCategoryID { get; set; }
-
+		  
 		public string SubCategoryDescription { get; set; }
 
 		public string StatusID { get; set; }

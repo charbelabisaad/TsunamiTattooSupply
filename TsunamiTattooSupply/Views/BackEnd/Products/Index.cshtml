@@ -421,7 +421,7 @@
             $('#saveProductModal').one('shown.bs.modal', function () {
 
                 // LOAD DATA
-                LoadGroups();
+                LoadGroups(0);
                 selectedSubCatIds.clear();   // very important
                 LoadSubCategories({ restoreSelection: false });
 
@@ -434,8 +434,10 @@
             
                 // ================================
                 // CLEAR SIZES ✅
-                // ================================
-
+            // ================================
+                    let $specs = $('#ProductSpecs');
+                    $specs.selectpicker('val', []);
+                    $specs.selectpicker('destroy').selectpicker('render');
 
                 let sizes = $('.product-sizes');
 
@@ -478,9 +480,9 @@
             });
         });
 
-                $(document).on('change', '#ProductGroupType', function () {
+        $(document).on('change', '#ProductGroupType', function () {
 
-           LoadGroups();
+           LoadGroups(0);
 
         });
          
@@ -522,7 +524,9 @@
             excludeWarrantyMonths();
         });
 
-        function LoadGroups(){
+        var selectedGroupId = 0
+
+        function LoadGroups(groupId){
 
                 let groupTypeId = $('#ProductGroupType').val();
                 let groupSelect = $('#ProductGroup');
@@ -533,6 +537,8 @@
 
                 if (!groupTypeId)
                     return;
+
+                selectedGroupId = groupId;
 
                 $.ajax({
                     url: '/Products/GetGroupsByType', // controller action
@@ -546,10 +552,28 @@
                         }
 
                         $.each(groups, function (i, g) {
-                            groupSelect.append(
-                                `<option value="${g.id}">${g.name}</option>`
-                            );
+
+                                if(g.id === selectedGroupId){
+
+                                    groupSelect.append(
+                                        `<option value="${g.id}" selected>${g.name}</option>`
+                                    );
+
+                                }else{
+
+                                    groupSelect.append(
+                                        `<option value="${g.id}">${g.name}</option>`
+                                    );
+
+                                }
                         });
+                         
+
+                              
+                        
+
+                      
+
                     },
                     error: function () {
                         toastr.error('Failed to load groups');
@@ -787,11 +811,14 @@
                 $("#ProductUnit").val(btn.data('unitid'));
 
                 $("#ProductGroupType").val(groupTypeId);
-                LoadGroups();
+                    LoadGroups(groupId);
+                 
+                 
+                  
 
-                setTimeout(() => {
-                    $("#ProductGroup").val(groupId);
-                }, 300);
+                // setTimeout(() => {
+                //     $("#ProductGroup").val(groupId);
+                // }, 300);
 
                 $("#ProductVAT").prop('checked', btn.data('vat') == 1);
                 $("#ProductFeature").prop('checked', btn.data('feature') == 1);
@@ -823,6 +850,10 @@
          
             // ✅ Source of truth: all selected subcategory IDs for this product
             let selectedSubCatIds = new Set();
+
+
+                // ✅ Source of truth: all selected subcategory IDs for this product
+                let selectedSpecsIds = new Set();
 
             // ✅ Store names + categoryId for selected items (and for loaded items)
             let subCatMetaById = {}; // { "12": { id:12, name:"Ink", categoryId:3 }, ... }
@@ -865,26 +896,45 @@
                     /* ==================================================
                      * SUB CATEGORIES
                      * ================================================== */
-                    selectedSubCatIds = new Set();
-                    subCatMetaById = {};
-                    currentCategoryOptionIds = [];
+                   
+                    //subCatMetaById = {};
+                    //currentCategoryOptionIds = [];
+                      
+                          /* ==================================================
+                         * PREPARE COLORS DATA
+                         * ================================================== */
+                        const selectedSpecIds = [];
+                      
+                        (res.specs || []).forEach(ps => {
+                           
+                            let id = String(ps.id);
+                                selectedSpecIds.push(id);
+ 
+                        });
+                       
+                              
 
-                    (res.subCategories || []).forEach(sc => {
-                        let id = String(sc.id);
-                        selectedSubCatIds.add(id);
-                        subCatMetaById[id] = {
-                            id: sc.id,
-                            name: sc.name,
-                            categoryId: sc.categoryId
-                        };
-                    });
+                        $("#ProductSpecs")
+                           .selectpicker('val', selectedSpecIds)
 
-                    if (res.categoryId) {
-                        $("#ProductCategory").val(res.categoryId);
-                        LoadSubCategories();
-                    } else {
-                        renderTags();
-                    }
+                        currentCategoryOptionIds = [];
+
+                        (res.subCategories || []).forEach(sc => {
+                            let id = String(sc.id);
+                            selectedSubCatIds.add(id);
+                            subCatMetaById[id] = {
+                                id: sc.id,
+                                name: sc.name,
+                                categoryId: sc.categoryId
+                            };
+                        });
+
+                        if (res.categoryId) {
+                            $("#ProductCategory").val(res.categoryId);
+                            LoadSubCategories();
+                        } else {
+                            renderTags();
+                        }
 
                     /* ==================================================
                      * TYPES / DETAILS / SIZES DATA

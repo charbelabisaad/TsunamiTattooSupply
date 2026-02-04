@@ -23,9 +23,9 @@ namespace TsunamiTattooSupply.Models
 		public int CreatedUserID { get; set; } 
 
 		[Required]
-		public int CreatedDate { get; set; }
+		public DateTime CreatedDate { get; set; }
 
-		public int? DeleteUserID {  get; set; }
+		public int? DeletedUserID {  get; set; }
 		
 		public DateTime? DeletedDate { get; set; }
 
