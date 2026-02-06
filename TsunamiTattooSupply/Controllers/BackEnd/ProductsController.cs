@@ -111,8 +111,21 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						ID = p.ID,
 						Code = p.Code,
-						ImagePath = null,
-						Image = null,
+						ImagePath =  Global.ProductSmallImagePath,
+						Image = (_dbContext.ProductsImages
+									.Join(_dbContext.ProductsColors,
+									pi => new { pi.ProductID, pi.ColorID },
+									pc => new { pc.ProductID, pc.ColorID },
+									(pi, pc) => new { pi, pc })
+								.Where(x =>
+									x.pi.ProductID == p.ID &&
+									x.pi.IsInitial == true &&
+									x.pi.DeletedDate == null &&
+									x.pc.IsCover == true &&
+									x.pc.DeletedDate == null
+								)
+								.Select(x => x.pi.SmallImage)
+								.FirstOrDefault()),
 						Name = p.Name,
 						Description = p.Description,
 						UnitID = p.Unit.ID,
@@ -693,10 +706,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				// 🔥 Add / Update colors
 				foreach (var colorId in colorIds)
-				{
-					bool isCover = form[$"ProductColorsMeta[{colorId}].IsCover"] == "on";
+				{	
+					int coverColorId = Convert.ToInt32(form["CoverColorID"]);
+					bool isCover = colorId == coverColorId;
 					bool isActive = form[$"ProductColorsMeta[{colorId}].IsActive"] == "on";
-
+ 
 					var pc = existingColors.FirstOrDefault(x => x.ColorID == colorId);
 
 					if (pc == null)
@@ -788,38 +802,36 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						img.DeletedDate = now;
 					}
 				}
-				 
+
 				// =====================================================
 				// 🔹 PRODUCT IMAGES (PER COLOR) — FINAL FIX
 				// =====================================================
-				var uploadedFiles = Request.Form.Files
-				.Where(f => f.Name.Contains("ProductColorImages["))
+
+				var existingImagesAll = _dbContext.ProductsImages
+				.Where(x => x.ProductID == productId && x.DeletedDate == null)
 				.ToList();
+
+				foreach (var img in existingImagesAll)
+					img.IsInitial = false;
+
+				// =====================================================
+				// 🔹 PRODUCT IMAGES UPLOAD
+				// =====================================================
+				var uploadedFiles = Request.Form.Files
+					.Where(f => f.Name.Contains("ProductColorImages["))
+					.ToList();
 
 				if (uploadedFiles.Any())
 				{
-					// Ensure folders exist
-					string originalDir = Path.Combine(
-						_imagesRoot,
-						Global.ProductOriginalImagePath.TrimStart('/')
-					);
+					string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
+					string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
 
-					string smallDir = Path.Combine(
-						_imagesRoot,
-						Global.ProductSmallImagePath.TrimStart('/')
-					);
+					if (!Directory.Exists(originalDir)) Directory.CreateDirectory(originalDir);
+					if (!Directory.Exists(smallDir)) Directory.CreateDirectory(smallDir);
 
-					if (!Directory.Exists(originalDir))
-						Directory.CreateDirectory(originalDir);
-
-					if (!Directory.Exists(smallDir))
-						Directory.CreateDirectory(smallDir);
-
-					// Group files by ColorID
 					var groupedByColor = uploadedFiles.GroupBy(f =>
 					{
-						// ProductColorImages[12][]
-						string key = f.Name;
+						string key = f.Name; // ProductColorImages[12][]
 						int start = key.IndexOf('[') + 1;
 						int end = key.IndexOf(']');
 						return int.Parse(key.Substring(start, end - start));
@@ -828,7 +840,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					foreach (var colorGroup in groupedByColor)
 					{
 						int colorId = colorGroup.Key;
-						bool isFirstImage = true;
 
 						foreach (var file in colorGroup)
 						{
@@ -840,45 +851,91 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							string originalPath = Path.Combine(originalDir, fileName);
 							string smallPath = Path.Combine(smallDir, fileName);
 
-							// 🔹 Save ORIGINAL
+							// save original
 							using (var stream = new FileStream(originalPath, FileMode.Create))
-							{
 								file.CopyTo(stream);
-							}
 
-							// 🔹 Save SMALL (RESIZED)
+							// save resized
 							using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
 							{
-								image.Mutate(x =>
-									x.Resize(new ResizeOptions
-									{
-										Mode = ResizeMode.Max,
-										Size = new SixLabors.ImageSharp.Size(600, 600)
-									})
-								);
+								image.Mutate(x => x.Resize(new ResizeOptions
+								{
+									Mode = ResizeMode.Max,
+									Size = new SixLabors.ImageSharp.Size(600, 600)
+								}));
 
 								image.Save(smallPath);
 							}
 
-							// 🔹 Insert DB record
 							_dbContext.ProductsImages.Add(new ProductImage
 							{
 								ProductID = productId,
 								ColorID = colorId,
 								OriginalImage = fileName,
 								SmallImage = fileName,
-								IsInitial = isFirstImage,
+								IsInitial = false, // will be set later
 								StatusID = "A",
 								CreatedUserID = userId,
 								CreationDate = now
 							});
-
-							isFirstImage = false;
 						}
 					}
 				}
-				 
+
 				_dbContext.SaveChanges();
+
+				// 🔥 DEBUG HERE
+				var allImages = _dbContext.ProductsImages
+		.Where(x => x.ProductID == productId && x.DeletedDate == null)
+		.ToList();
+
+				var colorGroups = allImages.GroupBy(x => x.ColorID).ToList();
+
+				foreach (var colorGroup in colorGroups)
+				{
+					int colorId = colorGroup.Key;
+
+					// check if user sent any initial for this color
+					bool userTouchedThisColor = Request.Form.Keys
+						.Any(k => k.StartsWith($"ColorImageInitial[{colorId}]"));
+
+					if (!userTouchedThisColor)
+						continue; // 🔥 DO NOT TOUCH THIS COLOR
+
+					// reset only this color
+					foreach (var img in colorGroup)
+						img.IsInitial = false;
+
+					// apply user selected
+					foreach (var key in Request.Form.Keys
+							 .Where(k => k.StartsWith($"ColorImageInitial[{colorId}]")))
+					{
+						if (Request.Form[key] != "true") continue;
+
+						// ColorImageInitial[3][53]
+						var parts = key.Split('[', ']');
+						if (parts.Length < 4) continue;
+
+						if (!int.TryParse(parts[3], out int imageId)) continue;
+
+						var selected = colorGroup.FirstOrDefault(x => x.ID == imageId);
+						if (selected != null)
+							selected.IsInitial = true;
+					}
+
+					// safety: if none selected
+					if (!colorGroup.Any(x => x.IsInitial))
+					{
+						var first = colorGroup.FirstOrDefault();
+						if (first != null)
+							first.IsInitial = true;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+
+
 				transaction.Commit();
 
 				return Json(new { success = true });

@@ -1036,7 +1036,8 @@
                             Object.keys(colorMetaById).forEach(colorId => {
                                 const meta = colorMetaById[colorId];
 
-                                $(`#ColorCover_${colorId}`).prop('checked', meta.isCover);
+                                $(`#ColorCoverToggle_${colorId}`).prop('checked', meta.isCover);
+                                $(`#ColorCover_${colorId}`).val(meta.isCover);
                                 $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
                             });
 
@@ -1120,6 +1121,8 @@
                 if (!$list.length) return;
                  
                 let html = `
+                <div class="inline-block">
+
                     <div class="color-image-item position-relative"
                          data-db-id="${img.id}" data-image-id="${img.id}">
 
@@ -1136,12 +1139,42 @@
                             </button>
                         </div>
                     </div>
+
+                <div class="mt-1 text-center">
+                    <label class="mb-0">
+                        <input type="radio"
+                               class="radio-initial"
+                               name="ColorInitial_${img.colorId}"
+                               ${img.isInitial == 1 ? "checked" : ""}
+                               value="1"> Is Initial
+                    </label>
+
+                    <input type="hidden"
+                               name="ColorImageInitial[${img.colorId}][${img.id}]"
+                           value="${img.isInitial == 1 ? 'true' : 'false'}"
+                           class="initial-hidden">
+                </div>
+
+        </div>
+
                 `;
 
                 $list.append(html);
             });
         }
 
+
+
+        $(document).on("change", ".radio-initial", function () {
+             
+            let wrapper = $(this).closest('.inline-block');
+            let colorId = $(this).attr('name').split('_')[1];
+
+            $(`input[name^="ColorImageInitial[${colorId}]"]`).val('false');
+
+            wrapper.find('.initial-hidden').val('true');
+
+        });
 
         let colorImagesByColorId = {}; // edit mode preload
         let isColorEditLoading = false;
@@ -1186,6 +1219,7 @@
             });
 
         });
+               
 
 
             ////////////////////////////////////////////////////////////////////////////////////////

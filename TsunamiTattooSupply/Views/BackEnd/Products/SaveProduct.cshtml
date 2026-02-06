@@ -1,27 +1,40 @@
 ﻿
 <style>
- 
+
 	.color-images-scroll {
 		display: flex;
+		flex-wrap: nowrap;
 		gap: 12px;
 		overflow-x: auto;
 		overflow-y: hidden;
-		 
+		width: 100%;
+		padding-bottom: 6px;
+	}
+
+		/* 🔥 THIS IS THE MAGIC */
+		.color-images-scroll .inline-block {
+			flex: 0 0 auto;
+			min-width: 220px;
+		}
+
+	/* smooth scroll */
+	.color-images-scroll {
 		scroll-behavior: smooth;
 	}
 
-	.color-images-scroll::-webkit-scrollbar {
-		height: 6px;
-	}
+		/* scrollbar style */
+		.color-images-scroll::-webkit-scrollbar {
+			height: 6px;
+		}
 
-	.color-images-scroll::-webkit-scrollbar-thumb {
-		background-color: #c1c1c1;
-		border-radius: 10px;
-	}
+		.color-images-scroll::-webkit-scrollbar-thumb {
+			background: #c1c1c1;
+			border-radius: 10px;
+		}
 
-	.color-images-scroll::-webkit-scrollbar-track {
-		background-color: transparent;
-	}
+		.color-images-scroll::-webkit-scrollbar-track {
+			background: transparent;
+		}
 	/* ---------- IMAGE ITEM ---------- */
 	.color-image-item {
 		position: relative;
@@ -52,6 +65,9 @@
 	.color-image-input {
 		z-index: 1;
 	}
+
+	
+
 </style>
 
 <div class="modal fade" id="imageProductViewModal" tabindex="-1" aria-hidden="true" style="z-index:2000">
@@ -958,7 +974,7 @@
 				let colorCode = opt.data('code');
 
 				let html = `
-			<div class="variation-card color-card" data-color-id="${colorId}" style="overflow:hidden">
+			<div class="variation-card color-card" data-color-id="${colorId}">
 
 			<!-- HEADER -->
 			<div class="variation-header p-2 border-bottom" style="background-color:#ecebeb">
@@ -981,16 +997,19 @@
 
 						<div class="col-12 col-md-6 text-md-right mt-2 mt-md-0">
 
-							<div class="custom-control custom-switch d-inline-block align-middle">
-								<input type="checkbox"
-									   class="custom-control-input"
-									   id="ColorCover_${colorId}"
-									   name="ProductColorsMeta[${colorId}].IsCover">
-								<label class="custom-control-label"
-									   for="ColorCover_${colorId}">
-									Is Cover
-								</label>
-							</div>
+								<input type="radio"
+								   class="color-cover-radio"
+								   name="CoverColorID"
+								   value="${colorId}"
+								   id="ColorCoverToggle_${colorId}">
+
+							<label for="ColorCoverLabel_${colorId}">Is Cover</label>
+
+							<!-- hidden for model binding -->
+							<input id="ColorCover_${colorId}" type="hidden"
+								   name="ProductColorsMeta[${colorId}].IsCover"
+								   class="is-cover-hidden"
+								   value="false">
 
 							<div class="custom-control custom-switch d-inline-block align-middle ml-3">
 								<input type="checkbox"
@@ -1080,7 +1099,8 @@
 				container.append(html);
 			});
 		});
-			$(document).on('click', '.btn-add-color-image', function () {
+
+		$(document).on('click', '.btn-add-color-image', function () {
 
 			let $card   = $(this).closest('.color-card');
 			let colorId = $card.data('color-id');
@@ -1112,25 +1132,49 @@
 
 				reader.onload = function (e) {
 
-					let imageHtml = `
-						<div class="color-image-item position-relative"
-							 style="min-width:200px; height:200px;"
-							 data-filename="${file.name}">
+						let tempId = 'NEW_' + Math.random().toString(36).substring(2,9);
 
-							<img src="${e.target.result}"
-								 class="img-fluid rounded"
-								 style="width:100%; height:100%; object-fit:contain; background:#fff; border:1px solid #ccc;">
+	let imageHtml = `
+	<div class="inline-block">
 
-							<div class="image-overlay d-flex justify-content-center align-items-center">
-								<button type="button" class="overlay-btn btn-view">
-									<i class="fas fa-eye"></i>
-								</button>
-								<button type="button" class="overlay-btn btn-clear">
-									<i class="fas fa-times"></i>
-								</button>
-							</div>
-						</div>
-					`;
+		<div class="color-image-item position-relative"
+			 style="min-width:200px;height:200px;"
+			 data-filename="${file.name}"
+			 data-temp-id="${tempId}">
+
+			<img src="${e.target.result}"
+				 class="img-fluid rounded"
+				 style="width:100%;height:100%;object-fit:contain;background:#fff;border:1px solid #ccc;">
+
+			<div class="image-overlay d-flex justify-content-center align-items-center">
+				<button type="button" class="overlay-btn btn-view">
+					<i class="fas fa-eye"></i>
+				</button>
+				<button type="button" class="overlay-btn btn-clear">
+					<i class="fas fa-times"></i>
+				</button>
+			</div>
+		</div>
+
+		<div class="mt-1 text-center">
+			<label class="mb-0">
+				<input type="radio"
+					   class="radio-initial"
+					   name="ColorInitial_${colorId}">
+				Is Initial
+			</label>
+
+			<input type="hidden"
+				   name="ColorImageInitial[${colorId}][${tempId}]"
+				   value="false"
+				   class="initial-hidden">
+		</div>
+
+	</div>
+	`;
+
+
+
 
 					$list.append(imageHtml);
 				};
@@ -1147,6 +1191,9 @@
 
 			$box.find('.placeholder-icon').removeClass('d-none');
 		});
+
+		 // when selecting initial image per color
+
 
 		$(document).on('change', '.color-image-input', function () {
 
@@ -1219,32 +1266,39 @@
 		});
 
 
-			$(document).on('click', '.btn-clear', function (e) {
+		$(document).on('click', '.btn-clear', function (e) {
 		e.preventDefault();
 		e.stopPropagation();
 
-		const $item = $(this).closest('.color-image-item');
-		const $card = $(this).closest('.color-card');
+		const $item  = $(this).closest('.inline-block');   // 🔥 IMPORTANT (whole block)
+		const $img   = $(this).closest('.color-image-item');
+		const $card  = $(this).closest('.color-card');
 		const colorId = $card.data('color-id');
 
-		// thumbnail clear
-		if ($item.length) {
+		// ============================================
+		// 🟢 THUMBNAIL REMOVE (new or existing)
+		// ============================================
+		if ($img.length) {
 
-			const fileName = $item.data('filename');
+			const fileName = $img.data('filename');
 
+			// 🔴 new uploaded image
 			if (fileName) {
 				if (!removedNewImages[colorId]) {
 					removedNewImages[colorId] = new Set();
 				}
-
 				removedNewImages[colorId].add(fileName);
 			}
 
+			// 🔥 REMOVE WHOLE BLOCK (image + radio + hidden)
 			$item.remove();
+
 			return;
 		}
 
-		// main preview clear
+		// ============================================
+		// 🟡 MAIN PREVIEW CLEAR (big box)
+		// ============================================
 		const $wrapper = $(this).closest('.image-box-wrapper');
 
 		$wrapper.find('.color-image-input').val('');
@@ -1254,6 +1308,7 @@
 
 		$wrapper.find('.placeholder-icon').removeClass('d-none');
 	});
+
 
 
 		$(document).on('click', '.btn-browse', function (e) {
@@ -1427,7 +1482,18 @@
 				$(this).data('image-id')
 			);
 		});
-		
+
+	// ==================================================
+	// 🔥 Append INITIAL flags per image
+	// ==================================================
+	// $('.initial-hidden').each(function () {
+
+	// 	let name = $(this).attr('name');   ColorImageInitial[5][]
+	// 	let val  = $(this).val();          true / false
+
+	// 	formData.append(name, val);
+	// });
+
 		// ==================================================
 		// AJAX
 		// ==================================================
@@ -1469,6 +1535,11 @@
 			}
 		});
 	});
+
+
+ 
+
+	 
 
 		$(document).on("click", "#btnCancelProduct, #btnCloseProduct", function () {
 
@@ -1892,5 +1963,6 @@
 		});
 
 	});
+
 
 </script>
