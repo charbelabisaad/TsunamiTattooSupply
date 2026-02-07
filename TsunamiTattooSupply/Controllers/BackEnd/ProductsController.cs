@@ -107,6 +107,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				products = _dbContext.Products
 					.Where(p => p.DeletedDate == null)
+					.OrderBy(p => p.Name)
 					.Select(p => new ProductDto
 					{
 						ID = p.ID,
@@ -709,8 +710,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{	
 					int coverColorId = Convert.ToInt32(form["CoverColorID"]);
 					bool isCover = colorId == coverColorId;
+					bool showFront = form[$"ProductColorsMeta[{colorId}].ShowFront"] == "on";
 					bool isActive = form[$"ProductColorsMeta[{colorId}].IsActive"] == "on";
- 
+
 					var pc = existingColors.FirstOrDefault(x => x.ColorID == colorId);
 
 					if (pc == null)
@@ -720,6 +722,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							ProductID = productId,
 							ColorID = colorId,
 							IsCover = isCover,
+							ShowFront = showFront,
 							StatusID = isActive ? "A" : "I",
 							CreatedUserID = userId,
 							CreationDate = now
@@ -728,6 +731,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					else
 					{
 						pc.IsCover = isCover;
+						pc.ShowFront = showFront;
 						pc.StatusID = isActive ? "A" : "I";
 						pc.EditUserID = userId;
 						pc.EditDate = now;
@@ -1063,6 +1067,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					id = pc.ColorID,
 					isCover = pc.IsCover,
+					showFront = pc.ShowFront,
 					isActive = pc.StatusID == "A"
 				})
 				.ToList();
@@ -1154,7 +1159,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult CreateColor(string Code, string Name, bool IsCustom, string StatusID)
+		public IActionResult CreateColor(string Code, string Name, int TypeID, string StatusID)
 		{
 
 
@@ -1162,8 +1167,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				Code = Code?.Trim().Replace("#", string.Empty);
 
-				if (IsCustom)
+
+
+				var colortypes = _dbContext.ColorTypes.FirstOrDefault(ct => ct.ID == TypeID);
+
+				// Custom colors must NOT have a code
+				if (colortypes.Code != "SGL")
+				{
 					Code = null;
+				}
 
 				var duplicate = _dbContext.Colors
 						.Any(c => c.Name.ToLower() == Name.ToLower()
@@ -1177,8 +1189,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var newColor = new DbColor
 				{
 					Name = Name,
-					Code = Code,
-					IsCustom = IsCustom,
+					Code = Code, 
+					TypeID = TypeID,
 					StatusID = StatusID,
 					CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),
 					CreationDate = DateTime.UtcNow

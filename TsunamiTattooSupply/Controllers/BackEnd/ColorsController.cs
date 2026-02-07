@@ -4,6 +4,7 @@ using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Models;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using TsunamiTattooSupply.ViewModels;
 
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
@@ -13,8 +14,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	{
 		private readonly TsunamiDbContext _dbcontext;
 		public ILogger<ColorsController> _logger;
-
-
+ 
 		public ColorsController(TsunamiDbContext dbcontext, ILogger<ColorsController> logger)
 		{
 			_dbcontext = dbcontext;
@@ -23,7 +23,27 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public IActionResult Index()
 		{
-			return View("~/Views/BackEnd/Colors/Index.cshtml");
+			var vm = new PageViewModel
+			{
+				colortypes = GetColorTypes()
+			};
+
+			return View("~/Views/BackEnd/Colors/Index.cshtml", vm);
+		}
+
+		public List<ColorTypeDto> GetColorTypes()
+		{
+
+			return _dbcontext.ColorTypes.Select(
+				 ct => new ColorTypeDto
+				 {
+					 ID = ct.ID,
+					 Code = ct.Code,
+					 Description = ct.Description,
+				 }
+				
+				).ToList();
+
 		}
 
 		public IActionResult ListGetColors()
@@ -60,17 +80,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ID = c.ID,
 						Code = c.Code,
 						Name = c.Name,
+						TypeID = c.TypeID,
+						ShowFront = c.ShowFront,
+						TypeCode = c.ColorType.Code,
+						TypeDescription = c.ColorType.Description,	
 						StatusID = c.Status.ID,
 						StatusDescription = c.Status.Description,
 						StatusColor = c.Status.Color,
-						IsCustom = c.IsCustom,
-
 					})).ToList();
 		
 		}
 
 		[HttpPost]
-		public IActionResult SaveColor(int ID, string Code, string Name, bool IsCustom, string StatusID)
+		public IActionResult SaveColor(int ID, string Code, string Name, int TypeID, bool ShowFront, string StatusID)
 		{
 			try
 			{
@@ -78,14 +100,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				Name = Name?.Trim();
 				Code = Code?.Trim().Replace("#", string.Empty);
 
-				// Validation
-				if (!IsCustom && string.IsNullOrEmpty(Code))
-				{
-					return Json(new { error = true, message = "Color code is required." });
-				}
+				var colortypes = _dbcontext.ColorTypes.FirstOrDefault(ct => ct.ID == TypeID);
 
 				// Custom colors must NOT have a code
-				if (IsCustom)
+				if (colortypes.Code != "SGL")
 				{
 					Code = null;
 				}
@@ -112,7 +130,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					existingColor.Name = Name;
 					existingColor.Code = Code;
-					existingColor.IsCustom = IsCustom;
+					existingColor.TypeID = TypeID;
+					existingColor.ShowFront = ShowFront;
 					existingColor.StatusID = StatusID;
 					existingColor.EditUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 					existingColor.EditDate = DateTime.UtcNow;
@@ -134,8 +153,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					var newColor = new Color
 					{
 						Name = Name,
-						Code = Code,
-						IsCustom = IsCustom,
+						Code = Code, 
+						TypeID = TypeID,
+						ShowFront = ShowFront,
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),
 						CreationDate = DateTime.UtcNow

@@ -527,7 +527,7 @@
 												</div>
 
 												<div class="col-12 col-md-1">
-													<button id="btnNewColor" type="button" name="NewColor" class="btn btn-sm btn-primary w-100"><i class="fas fa-file"></i> New</button>
+													<button id="btnNewColor" type="button" name="NewColor" class="btn btn-sm btn-primary w-100 d-none"><i class="fas fa-file"></i> New</button>
 												</div>
 
 											</div>
@@ -1010,6 +1010,18 @@
 								   name="ProductColorsMeta[${colorId}].IsCover"
 								   class="is-cover-hidden"
 								   value="false">
+								    
+							<div class="custom-control custom-switch d-inline-block align-middle ml-3">
+								<input type="checkbox"
+									   class="custom-control-input"
+									   id="ColorShowFront_${colorId}"
+									   name="ProductColorsMeta[${colorId}].ShowFront"
+									   checked>
+								<label class="custom-control-label"
+									   for="ColorShowFront_${colorId}">
+									Show Front
+								</label>
+							</div>
 
 							<div class="custom-control custom-switch d-inline-block align-middle ml-3">
 								<input type="checkbox"
@@ -1024,6 +1036,8 @@
 							</div>
 
 						</div>
+
+
 
 					</div>
 				</div>

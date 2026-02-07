@@ -12,7 +12,13 @@ namespace TsunamiTattooSupply.DTO
 		 
 		public string Name { get; set; }
 		 
-		public bool IsCustom { get; set; }
+		public int TypeID { get; set; }
+
+		public bool ShowFront {  get; set; }
+
+		public string TypeCode { get; set; }
+
+		public string TypeDescription { get; set; }
 
 		public string StatusID { get; set; }
 

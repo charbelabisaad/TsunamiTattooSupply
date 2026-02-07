@@ -7,6 +7,7 @@ namespace TsunamiTattooSupply.Models
 	[Table("Colors")]
 	//[Index(nameof(Code), IsUnique = true)]
 	//[Index(nameof (Name), IsUnique = true)]
+	[Index(nameof(TypeID))]
 	[Index(nameof(StatusID))]
 	public class Color
 	{
@@ -20,15 +21,22 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(300)]
 		public string Name { get; set; }
-		
+		 
 		[Required]
-		public bool IsCustom { get; set; } = false;
+		public int TypeID { get; set; } = 1;
+
+		[Required]
+		public bool ShowFront { get; set; } = true;
 
 		[Required]
 		public string StatusID { get; set; }
 
+		[ForeignKey("TypeID")]
+		public virtual ColorType ColorType { get; set; }	
+
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
+		 
 
 		public int CreatedUserID { get; set; }
 

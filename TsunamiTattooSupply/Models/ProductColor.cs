@@ -19,7 +19,10 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public int ColorID { get; set; }
-		 
+
+		[Required]
+		public bool ShowFront { get; set; } = true;
+
 		[Required]
 		public bool IsCover {  get; set; }
 

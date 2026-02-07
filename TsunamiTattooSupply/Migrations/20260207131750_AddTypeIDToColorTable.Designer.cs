@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260207131750_AddTypeIDToColorTable")]
+    partial class AddTypeIDToColorTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -579,9 +582,6 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("character varying(300)");
-
-                    b.Property<bool>("ShowFront")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("StatusID")
                         .IsRequired()
@@ -1505,9 +1505,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Property<int>("ProductID")
                         .HasColumnType("integer");
-
-                    b.Property<bool>("ShowFront")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("StatusID")
                         .IsRequired()

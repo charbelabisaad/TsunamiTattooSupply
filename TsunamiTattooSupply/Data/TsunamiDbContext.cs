@@ -59,6 +59,7 @@ namespace TsunamiTattooSupply.Data
 		public DbSet<ProductDetail> ProductDetails { get; set; } 
 		public DbSet<Spec> Specs { get; set; }
 		public DbSet<ProductSpec> ProductsSpecs { get; set; }
+		public DbSet<ColorType> ColorTypes { get; set; }
 		 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{

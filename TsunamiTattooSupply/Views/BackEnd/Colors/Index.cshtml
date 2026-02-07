@@ -44,7 +44,8 @@
                                 <tr>
                                     <th style="width:100px">Code</th>
                                     <th>Name</th> 
-                                    <th style="width:50px">IsCustom</th>
+                                    <th style="width:50px">Type</th>
+                                    <th style="width:100px">Show Front</th>
                                     <th style="width:50px">Status</th>
 									<th class="no-export" style="width:50px">Actions</th>
                                 </tr>
@@ -141,7 +142,11 @@
 
                 // IsCustom
                 {
-                    data: 'isCustom',
+                    data: 'typeDescription',
+                    className: 'align-middle', 
+                }, 
+                {
+                    data: 'showFront',
                     className: 'text-center align-items-center',
                     render: function (data) {
                         return data
@@ -149,7 +154,6 @@
                             : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
                     }
                 },
-
                 // Status (derived frontend-only)
                 { data: 'statusDescription',
                     className: "align-middle text-center",
@@ -175,7 +179,9 @@
                                    data-id="${row.id}"
                                    data-code="${row.code}"
                                    data-name="${row.name}"
-                                   data-iscustom="${row.isCustom}"
+                                   data-typeid="${row.typeID}"
+                                   data-typecode="${row.typeCode}"
+                                   data-showfront="${row.showFront}"
                                    data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
@@ -187,7 +193,8 @@
                         </div>`;
                     }
                 }
-            ]
+            ],
+            order: [[1,"asc"]]
         });
 
         // filter position
@@ -214,6 +221,24 @@
                 //     $(this).hide();
                 // });
 
+            $("#ColorType").on("change", function () {
+
+                let typeCode = $("#ColorType option:selected").data("code");
+                   
+                if (typeCode !== "SGL") {
+                    $("#ColorPicker").val("#000000");
+                    $("#ColorCode").val('');
+                    $("#ColorPicker").prop("disabled", true);
+                    $("#ColorCode").prop("readonly", true);
+                }
+                else {
+                    $("#ColorCode").val($("#ColorPicker").val().replace("#",""));
+                    $("#ColorPicker").prop("disabled", false);
+                    $("#ColorCode").prop("readonly", false);
+                }
+
+            });
+
             const btnNewColor = document.getElementById("btnNewColor");
 
             btnNewColor.addEventListener("click", function () {
@@ -226,12 +251,15 @@
                 // Reset fields
                 $("#ColorID").val(0);
                 $("#ColorName").val('');
-                $("#ColorIsCustomToggle").prop("checked", false);
+                $("#ColorType").prop("selectedIndex", 0);
 
                 // Reset picker + code
                 $("#ColorPicker").prop("disabled", false).val("#000000");
                 $("#ColorCode").val("000000");
                 $("#ColorCode").prop("readonly", false);
+                 
+                $("#ColorShowFrontToggle").prop("checked", true);
+                $("#ColorShowFront").val(1);
 
                 // Status
                 $("#ColorStatusID").val('A');
@@ -262,13 +290,18 @@
                 const ColorID     = $(this).data('id');
                 const ColorName   = $(this).data('name');
                 const ColorCode   = '#' + $(this).data('code');
-                const IsCustom    = $(this).data('iscustom') === true || $(this).data('iscustom') === 1;
+                const TypeID    = $(this).data('typeid');
+                const TypeCode  = $(this).data('typecode')
+                const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
                 const StatusID    = $(this).data('statusid');
-
+                 
                 // Fill fields
                 $("#ColorID").val(ColorID);
                 $("#ColorName").val(ColorName);
-                $("#ColorIsCustomToggle").prop("checked", IsCustom);
+                $("#ColorType").val(TypeID);
+
+                $("#SizeShowFrontToggle").prop("checked", ShowFront);
+                $("#SizeShowFront").val(ShowFront ? 1 : 0);
 
                 // Status
                 $("#ColorStatusID").val(StatusID);
@@ -276,17 +309,18 @@
                 $("#ColorStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
 
                 // Color logic
-                if (IsCustom) {
+                if (TypeCode !== "SGL") {  
                     $("#ColorPicker").val("#000000");
                     $("#ColorCode").val('');
-                } else {  
+                    $("#ColorPicker").prop("disabled", true );
+                    $("#ColorCode").prop("readonly", true);
+                } else {
+                    $("#ColorPicker").prop("disabled", false);
+                    $("#ColorCode").prop("readonly", false);
                     $("#ColorPicker").val(ColorCode);
                     $("#ColorCode").val(ColorCode);
                 }
-
-                $("#ColorPicker").prop("disabled", IsCustom);
-                $("#ColorCode").prop("readonly", IsCustom);
-                  
+ 
                 // Clear validation
                 $("#ColorNameMessage").text('');
                 $("#ColorCodeMessage").text('');

@@ -229,8 +229,7 @@
                     }
                 ],
 
-                order: [[3, "asc"]],
-
+             
                 columns: [
                     // 🔹 Product Image
                     {
@@ -372,7 +371,9 @@
                             `;
                         }
                     }
-                ]
+                ],
+                order: [[2, "asc"]] 
+
             });
 
               // =====================================
@@ -994,6 +995,7 @@
 
                         colorMetaById[id] = {
                             isCover: c.isCover,
+                            showFront: c.showFront,
                             isActive: c.isActive
                         };
                     });
@@ -1039,6 +1041,7 @@
                                 $(`#ColorCoverToggle_${colorId}`).prop('checked', meta.isCover);
                                 $(`#ColorCover_${colorId}`).val(meta.isCover);
                                 $(`#ColorActive_${colorId}`).prop('checked', meta.isActive);
+                                $(`#ColorShowFront_${colorId}`).prop('checked', meta.showFront);
                             });
 
                             renderEditImages(res.images);
