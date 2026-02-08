@@ -110,7 +110,17 @@
 
 					<input id="ProductID" name="ProductID" type="hidden" value="0" />
 
-					<div class="card">
+					<div class="row">
+
+						<div class="col-12 col-md-12">
+
+
+
+						</div>
+
+					</div>
+
+					<div id="productIntialInfo" class="card">
 
 						<div class="card-header font-weight-bold">Initial Information</div>
 
@@ -305,22 +315,8 @@
 								</div>
 
 							</div>
-
-							
-
-						</div>
-
-					</div>
-					 
-					<div class="card shadow-sm">
-
-						<!-- CARD HEADER -->
-						<div class="card-header font-weight-bold">
-							Product Details
-						</div>
-
-						<!-- CARD BODY -->
-						<div class="card-body">
+							 
+							<br /> <br />
 
 							<!-- TABS NAV -->
 							<ul class="nav nav-tabs tabs-line mb-3" role="tablist">
@@ -654,49 +650,95 @@
 							</div>
 
 						</div>
+						 
+						<div class="card-footer text-right bg-white border-top">
+
+							<button id="btnSaveProductInitialInfo" type="button" class="btn btn-primary" style="width:100px">
+								<span class="spinner-border spinner-border-sm d-none" id="btnSaveProductInitialInfoSpinner" role="status" aria-hidden="true"></span>
+								<i class="fas fa-save"></i> Save
+							</button>
+
+						</div>
+
 					</div>
 
+					<div id="productDetails" class="row d-none">
 
-					@* <div class="card"> *@
+						<div class="col-12 col-md-6">
 
-					@* 	<div class="card-header font-weight-bold">Colors</div> *@
+							<div id="productPrice" class="card"> 
 
-					@* 	<div class="card-body"> *@
+					 			<div class="card-header font-weight-bold">Price</div> 
 
-					@* 		<div class="row"> *@
+								<div class="card-body">
 
-					@* 			<!-- SIZE (multiple selection) --> *@
-					@* 			<div class="col-12 col-md-12"> *@
-					@* 				<label class="form-label">Sizes</label> *@
-					@* 				<select id="ProductColors" class="form-control selectpicker" data-live-search="true" data-actions-box="true"> *@
-					@* 					@foreach (var obj in Model.sizes) *@
-					@* 					{ *@
-					@* 						<option value="@obj.ID">@obj.Description</option> *@
-					@* 					} *@
-					@* 				</select> *@
-					@* 				<div id="ProductColorsMessage" class="text-danger fw-normal"></div> *@
-					@* 			</div> *@
+					 				<div class="row">  
+
+					 
+										<div class="col-12 col-md-12"> 
+					 						<label class="form-label"> </label>
+					 
+										</div> 
 								 
-					@* 		</div> *@
+					  				</div> 
 
-					@* 	</div> *@
+				 				</div>
 
-					@* </div> *@
+                                <div class="card-footer bg-white border-top text-right">
 
+                                    <button id="btnSaveProductPrice" type="button" class="btn btn-primary" style="width:100px">
+                                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveProductPriceSpinner" role="status" aria-hidden="true"></span>
+                                        <i class="fas fa-save"></i> Save
+                                    </button>
+
+                                </div>
+
+							 </div>
+
+						</div>
+
+						<div class="col-12 col-md-6">
+
+							<div id="productStock" class="card">
+
+								<div class="card-header font-weight-bold">Stock</div>
+
+								<div class="card-body">
+
+									<div class="row">
+										 
+										<div class="col-12 col-md-12">
+											<label class="form-label"> </label> 
+										</div>
+
+									</div>
+
+								</div>
+
+								<div class="card-footer bg-white border-top text-right">
+
+									<button id="btnSaveProductStock" type="button" class="btn btn-primary" style="width:100px">
+										<span class="spinner-border spinner-border-sm d-none" id="btnSaveProductStockSpinner" role="status" aria-hidden="true"></span>
+										<i class="fas fa-save"></i> Save
+									</button>
+
+								</div>
+
+							</div>
+					  
+						</div>
+
+					</div>
 
                 </div>
 
 				 
-                <!-- ✅ Fixed footer -->
-                <div class="modal-footer">
-                    <button id="btnCancelProduct" type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="fas fa-ban"></i> Cancel
-                    </button>
-                    <button id="btnSaveProduct" type="button" class="btn btn-primary">
-                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveProductSpinner" role="status" aria-hidden="true"></span>
-                        <i class="fas fa-save"></i> Save
-                    </button>
-                </div>
+                @* <!-- ✅ Fixed footer --> *@
+                @* <div class="modal-footer"> *@
+                @*     <button id="btnCancelProduct" type="button" class="btn btn-secondary" data-bs-dismiss="modal"> *@
+                @*         <i class="fas fa-ban"></i> Cancel *@
+                @*     </button> *@
+                @* </div> *@
 
             </form>
         </div>
@@ -1372,7 +1414,7 @@
 
 		const removedNewImages = {}; // { colorId: Set(filenames) }
  
-	$(document).on("click", "#btnSaveProduct", function () {
+	$(document).on("click", "#btnSaveProductInitialInfo", function () {
 
 		// ==================================================
 		// 🔥 FORCE bootstrap-select → real <select> values
@@ -1400,7 +1442,7 @@
 		// Elements
 		// ==================================================
 		let btn     = $(this);
-		let spinner = $("#btnSaveProductSpinner");
+		let spinner = $("#btnSaveProductInitialInfoSpinner");
 		let form    = $("#productForm");
 
 		// ==================================================
@@ -1527,12 +1569,17 @@
 						colorImagesBuffer[k] = [];
 					});
 
+					$('#ProductID').val(res.productID);
+
 					toastr.success("Product saved successfully");
 
-					$("#saveProductModal").modal("hide");
-					$("#tableProducts").DataTable().ajax.reload(null, false);
+					//$("#saveProductModal").modal("hide");
+					//$("#tableProducts").DataTable().ajax.reload(null, false);
 
-					window.location.reload();
+					//window.location.reload();
+
+
+					$("#productDetails").removeClass("d-none");
 
 				} else {
 					toastr.error(res.message || "Failed to save product");

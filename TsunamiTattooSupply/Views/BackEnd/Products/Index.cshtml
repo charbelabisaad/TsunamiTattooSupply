@@ -149,11 +149,7 @@
     <script>
 
     $(document).ready(function () {
-
-
-
-
-
+         
             var table = $('#tableProducts').DataTable({
                 processing: true,
                 responsive: true,
@@ -411,6 +407,8 @@
             $("#ProductNewArrival").prop("checked", false);
             $("#ProductWarranty").prop("checked", false);
 
+
+
             // ================================
             // SHOW MODAL FIRST ✅
             // ================================
@@ -436,14 +434,12 @@
                 // ================================
                 // CLEAR SIZES ✅
             // ================================
-                    let $specs = $('#ProductSpecs');
-                    $specs.selectpicker('val', []);
-                    $specs.selectpicker('destroy').selectpicker('render');
+                let $specs = $('#ProductSpecs');
+                $specs.selectpicker('val', []);
+                $specs.selectpicker('destroy').selectpicker('render');
 
                 let sizes = $('.product-sizes');
-
-                
-
+ 
                 sizes.selectpicker('val', []);
                 $sizes.selectpicker("destroy").selectpicker('render');
 
@@ -466,8 +462,7 @@
                 $colors.selectpicker('destroy').selectpicker('render');
 
                 loadProductEditExtras(0);
-                
-
+                 
                 $('#ColorVariationsContainer').empty();
 
                 Object.keys(colorImagesBuffer).forEach(k => {
@@ -478,6 +473,7 @@
 
                 // Focus
                 $("#ProductDescription").focus();
+
             });
         });
 
@@ -835,16 +831,23 @@
                 // ✅ UI reset ONLY
                 $("#ProductSubCategory").empty();
                 $("#SubCategoryTags").empty();
+              
+                $("#productDetails").removeClass("d-none")
 
                 modal.show();
 
 
                 $('#saveProductModal')
                 .off('shown.bs.modal')
+
                 .on('shown.bs.modal', function () {
 
                     loadProductEditExtras(productId);
 
+                    LoadProductPrice(productId);
+
+                    LoadProductStock(productId);
+                     
                 });
 
             });
@@ -870,9 +873,9 @@
             let editTypes   = [];
             let editDetails = {};
             let editSizes   = {};
-                let builtTypeTabs = new Set();
+            let builtTypeTabs = new Set();
 
-            function loadProductEditExtras(productId) {
+        function loadProductEditExtras(productId) {
 
             // ------------------------------------
             // RESET STATE
@@ -1057,6 +1060,8 @@
             });
         }
 
+
+
         function loadTypeDetails(typeId) {
 
             if (builtTypeTabs.has(typeId)) return;
@@ -1178,6 +1183,20 @@
             wrapper.find('.initial-hidden').val('true');
 
         });
+
+
+
+            function LoadProductPrice(ProductID){
+
+
+
+            }
+
+            function LoadProductStock(ProductID){
+
+
+            }
+
 
         let colorImagesByColorId = {}; // edit mode preload
         let isColorEditLoading = false;

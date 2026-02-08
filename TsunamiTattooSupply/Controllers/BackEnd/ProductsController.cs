@@ -100,9 +100,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		
 		
 			List<ProductDto> products = new List<ProductDto>();
-
-		 
-
+			 
 			try
 			{
 				products = _dbContext.Products
@@ -942,7 +940,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				transaction.Commit();
 
-				return Json(new { success = true });
+				return Json(new { ProductID = productId, success = true });
 			}
 			catch (DbUpdateException ex)
 			{
