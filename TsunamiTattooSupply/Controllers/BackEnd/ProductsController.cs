@@ -1272,6 +1272,71 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		public IActionResult GetProductSizesPrice(int ProductID)
+		{
+			try
+			{
+				// 🔵 Load all prices once
+				var prices = _dbContext.Prices
+					.Where(pr => pr.ProductID == ProductID
+							  && pr.DeletedDate == null)
+					.Select(pr => new PriceDto
+					{
+						ID = pr.ID,
+						ProductID = pr.ProductID,
+						SizeID = pr.SizeID,
+						CountryID = pr.CountryID,
+						CurrencyID = pr.CurrencyID,
+						CurrencyCode = pr.Currency.Code,
+						CurrencyDescription = pr.Currency.Description,
+						CurrencySymbol = pr.Currency.Symbol,
+						Amount = pr.Amount,
+						AmountNet = pr.AmountNet
+					})
+					.ToList();
+
+				// 🔵 Load sizes
+				var productSizesPrices = _dbContext.ProductsSizes
+				.Where(ps => ps.ProductID == ProductID
+						  && ps.DeletedDate == null
+						  && ps.StatusID == "A")
+				.GroupBy(ps => new
+				{
+					ps.SizeID,
+					ps.Size.Description,
+					ps.Sale,
+					ps.Raise
+				})
+				.Select(ps => new ProductSizeDto
+				{
+					SizeID = ps.Key.SizeID,
+					SizeDescription = ps.Key.Description,
+					Sale = ps.Key.Sale,
+					Raise = ps.Key.Raise
+
+					//ProductSizePrice = prices.Where(p => p.SizeID == ps.Key.SizeID).ToList()
+
+				})
+				.OrderBy(ps => ps.SizeDescription)
+				.ToList();
+
+
+				return Json(new { data = productSizesPrices, success = true });
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "GetProductSizesPrice [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = $"Error loading product sizes prices{ex.Message}",
+					data = new List<ProductSizeDto>()
+				});
+			}
+		 
+		}
+	 
 	}
 
 }
