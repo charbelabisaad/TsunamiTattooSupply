@@ -662,7 +662,7 @@
 
 					<div id="productDetails" class="row d-none">
 
-						<div class="col-12 col-md-12">
+						<div class="col-12 col-md-6">
 
 							<div id="productPrice" class="card"> 
 
@@ -670,7 +670,7 @@
 
 								<div class="card-body">
 
-					 				 <div id="ProductSizesPrices"></div>
+					 				 <div id="ProductSizesPrices" style="height:500px; overflow-x: hidden; overflow-y: auto"></div>
 
 				 				</div>
 
@@ -687,7 +687,7 @@
 
 						</div>
 
-						<div class="col-12 col-md-12">
+						<div class="col-12 col-md-6">
 
 							<div id="productStock" class="card">
 
@@ -695,7 +695,7 @@
 
 								<div class="card-body">
 
-									 <div id="ProductStock">
+									 <div id="ProductStock" style="height: 500px; overflow-x:hidden; overflow-y:auto">
 
 									 </div>
 
@@ -1550,10 +1550,14 @@
 
 				if (res.success) {
 
+			 
+						
 					// clear image buffers
 					Object.keys(colorImagesBuffer).forEach(k => {
 						colorImagesBuffer[k] = [];
 					});
+
+				
 
 					$('#ProductID').val(res.productID);
 
@@ -1564,8 +1568,11 @@
 
 					//window.location.reload();
 
-
 					$("#productDetails").removeClass("d-none");
+
+					listProductPrice(res.productID);
+					//loadProductStock(res.productID);
+				
 
 				} else {
 					toastr.error(res.message || "Failed to save product");
@@ -1584,7 +1591,123 @@
 	});
 
 
- 
+
+		function listProductPrice(ProductID){
+			   if (!ProductID) return;
+
+			$.ajax({
+				url: '@Url.Action("GetProductSizesPrice", "Products")',
+				type: 'GET',
+				data: { ProductID: ProductID },
+
+				success: function (res) {
+
+					if (!res || !res.success) {
+						toastr.error(res.message || "Failed loading prices");
+						return;
+					}
+
+					let html = "";
+
+					res.data.forEach(size => {
+
+						html += `
+						<div class="variation-card mb-2">
+
+							<div class="variation-header p-2 fw-bold bg-light">
+								${size.sizeDescription}
+
+								<input type="hidden"
+									   name="ProductSizeID[${size.sizeID}]"
+									   value="${size.sizeID}">
+							</div>
+
+							<div class="variation-body p-2">
+
+								<div class="row">
+									<div class="col-12 col-md-2">
+										<label>Sale</label>
+										<input type="number" step="0.01"
+											name="ProductSizeSale[${size.sizeID}]"
+											class="form-control form-control-sm"
+											value="${size.sale ?? 0}">
+									</div>
+
+									<div class="col-12 col-md-2">
+										<label>Raise</label>
+										<input type="number" step="0.01"
+											name="ProductSizeRaise[${size.sizeID}]"
+											class="form-control form-control-sm"
+											value="${size.raise ?? 0}">
+									</div>
+
+						`;
+
+						// =========================================
+						// 🔵 CREATE MAP OF EXISTING PRICES
+						// =========================================
+						let priceMap = {};
+						if (size.productSizePrice) {
+							size.productSizePrice.forEach(p => {
+								priceMap[p.currencyID] = p;
+							});
+						}
+
+						// =========================================
+						// 🔵 LOOP ALL CURRENCIES (IMPORTANT)
+						// =========================================
+						res.currencies.forEach(currency => {
+
+							let existing = priceMap[currency.id];
+
+							let amount = existing ? existing.amount : 0;
+							let amountNet = existing ? existing.amountNet : 0;
+
+							html += `
+
+
+									<input type="hidden"
+										   name="PriceCurrencyID[${size.sizeID}][]"
+										   value="${currency.id}">
+
+									<input type="hidden" name="CurrencyCountryID[${size.sizeID}][]"
+											value="${currency.countryID}" />
+
+								<div class="col-12 col-md-4">
+									<label>Amount (${currency.code})</label>
+									<input type="number" step="0.01"
+										   class="form-control form-control-sm price-input"
+											data-size="${size.sizeID}"
+											data-currency="${currency.id}"
+										   name="Price[${size.sizeID}][${currency.id}]"
+										   value="${amount}">
+								</div>
+
+								<div class="col-12 col-md-4">
+										<label>Amount Net (${currency.code})</label>
+									<input type="number" step="0.01" readonly
+											   class="form-control form-control-sm price-net-input"
+											data-size="${size.sizeID}"
+											data-currency="${currency.id}"
+										   name="PriceNet[${size.sizeID}][${currency.id}]"
+										   value="${amountNet}">
+								</div>
+
+							`;
+						});
+
+						html += `   </div></div></div>`;
+					});
+
+					$("#ProductSizesPrices").html(html);
+				},
+
+				error: function () {
+
+					toastr.error("Server error loading prices");
+				}
+			});
+		}
 
 	 
 
@@ -2008,6 +2131,54 @@
 			// -----------------------------------
 			$container.find('.selectpicker').selectpicker();
 		});
+
+			$(document).on("click", "#btnSaveProductPrice", function (e) {
+
+		e.preventDefault();
+
+		let btn = $("#btnSaveProductPrice");
+		let spinner = $("#btnSaveProductPriceSpinner");
+
+		// disable button + show spinner
+		btn.prop("disabled", true);
+		spinner.removeClass("d-none");
+
+		let formData = new FormData(document.getElementById("productForm"));
+
+		$.ajax({
+			url: '@Url.Action("SavePrice","Products")',
+			type: "POST",
+			data: formData,
+			processData: false,
+			contentType: false,
+
+			success: function (res) {
+
+				btn.prop("disabled", false);
+				spinner.addClass("d-none");
+
+				if (res && res.success) {
+					toastr.success(res.message || "Prices saved successfully");
+
+					// optional reload prices after save
+					// loadProductPrice($("#ProductID").val());
+				}
+				else {
+					toastr.error(res.message || "Error saving prices");
+				}
+			},
+
+			error: function (xhr) {
+
+				btn.prop("disabled", false);
+				spinner.addClass("d-none");
+
+				toastr.error("Server error while saving");
+				console.log(xhr.responseText);
+			}
+		});
+	});
+
 
 	});
 

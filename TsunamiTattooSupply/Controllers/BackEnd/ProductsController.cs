@@ -50,7 +50,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			int CountryID = cts.getCountryNative().ID;
 
-			int DefaultCurrencyID = crs.getCurrencyByPriority("DFLT", null).ID;
+			int DefaultCurrencyID = crs.getCurrencyByPriority("DFLT", 229).ID;
 			int SecondCurrencyID = crs.getCurrencyByPriority("SCND",CountryID).ID;
 
 			var vm = new ProductPageViewModel
@@ -1276,13 +1276,29 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
-				// 🔵 Load all prices once
+				// =====================================================
+				// 🔵 CURRENCIES
+				// =====================================================
+				var currencies = _dbContext.Currencies
+					.Where(c => c.StatusID == "A")
+					.Select(c => new CurrencyDto
+					{
+						ID = c.ID,
+						Code = c.Code,
+						Description = c.Description,
+						Symbol = c.Symbol,
+						CountryID = c.CountryID
+					}).ToList();
+
+				// =====================================================
+				// 🔵 PRICES
+				// =====================================================
 				var prices = _dbContext.Prices
-					.Where(pr => pr.ProductID == ProductID
-							  && pr.DeletedDate == null)
+					.Where(pr => pr.ProductID == ProductID && 
+					pr.DeletedDate == null)
 					.Select(pr => new PriceDto
 					{
-						ID = pr.ID,
+					 
 						ProductID = pr.ProductID,
 						SizeID = pr.SizeID,
 						CountryID = pr.CountryID,
@@ -1295,48 +1311,179 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					})
 					.ToList();
 
-				// 🔵 Load sizes
-				var productSizesPrices = _dbContext.ProductsSizes
-				.Where(ps => ps.ProductID == ProductID
-						  && ps.DeletedDate == null
-						  && ps.StatusID == "A")
-				.GroupBy(ps => new
+				// =====================================================
+				// 🔵 SIZES
+				// =====================================================
+				var sizes = _dbContext.ProductsSizes
+		.Where(ps => ps.ProductID == ProductID
+				  && ps.DeletedDate == null
+				  && ps.StatusID == "A")
+
+		.GroupBy(ps => new
+		{
+			ps.SizeID,
+			ps.Size.Description
+		})
+
+		.Select(g => new ProductSizeDto
+		{
+			SizeID = g.Key.SizeID,
+			SizeDescription = g.Key.Description,
+
+			// take latest sale/raise
+			Sale = g.OrderByDescending(x => x.CreationDate)
+					.Select(x => x.Sale)
+					.FirstOrDefault(),
+
+			Raise = g.OrderByDescending(x => x.CreationDate)
+					 .Select(x => x.Raise)
+					 .FirstOrDefault(),
+
+			ProductSizePrice = new List<PriceDto>()
+		})
+		.OrderBy(x => x.SizeDescription)
+		.ToList();
+
+
+				// =====================================================
+				// 🔵 FAST PRICE LOOKUP
+				// =====================================================
+				var priceLookup = prices
+					.GroupBy(p => p.SizeID)
+					.ToDictionary(g => g.Key, g => g.ToList());
+
+				foreach (var size in sizes)
 				{
-					ps.SizeID,
-					ps.Size.Description,
-					ps.Sale,
-					ps.Raise
-				})
-				.Select(ps => new ProductSizeDto
+					size.ProductSizePrice = priceLookup.ContainsKey(size.SizeID)
+						? priceLookup[size.SizeID]
+						: new List<PriceDto>();
+				}
+
+				return Json(new
 				{
-					SizeID = ps.Key.SizeID,
-					SizeDescription = ps.Key.Description,
-					Sale = ps.Key.Sale,
-					Raise = ps.Key.Raise
-
-					//ProductSizePrice = prices.Where(p => p.SizeID == ps.Key.SizeID).ToList()
-
-				})
-				.OrderBy(ps => ps.SizeDescription)
-				.ToList();
-
-
-				return Json(new { data = productSizesPrices, success = true });
+					success = true,
+					data = sizes,
+					currencies = currencies
+				});
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "GetProductSizesPrice [ERROR]");
+				_logger.LogError(ex, "GetProductSizesPrice ERROR");
 
 				return Json(new
 				{
 					success = false,
-					message = $"Error loading product sizes prices{ex.Message}",
+					message = "Error loading Product Size Price\n\n" + ex.Message,
 					data = new List<ProductSizeDto>()
 				});
 			}
-		 
 		}
-	 
+
+		[HttpPost]
+		public IActionResult SavePrice()
+		{
+			using var transaction = _dbContext.Database.BeginTransaction();
+
+			try
+			{
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+				DateTime now = DateTime.UtcNow;
+
+				var form = Request.Form;
+
+				int productId = Convert.ToInt32(form["ProductID"]);
+
+				// ================================================
+				// 🔵 LOOP SIZES
+				// ================================================
+				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductSizeID[")))
+				{
+					int sizeId = Convert.ToInt32(form[key]);
+
+					// update sale & raise
+					decimal sale = Convert.ToDecimal(form[$"ProductSizeSale[{sizeId}]"]);
+					decimal raise = Convert.ToDecimal(form[$"ProductSizeRaise[{sizeId}]"]);
+
+					var productSize = _dbContext.ProductsSizes
+						.FirstOrDefault(x => x.ProductID == productId && x.SizeID == sizeId && x.DeletedDate == null);
+
+					if (productSize != null)
+					{
+						productSize.Sale = sale;
+						productSize.Raise = raise;
+						productSize.EditUserID = userId;
+						productSize.EditDate = now;
+					}
+
+					// ================================================
+					// 🔵 LOOP CURRENCIES FOR THIS SIZE
+					// ================================================
+					var currencyIds = form[$"PriceCurrencyID[{sizeId}][]"];
+
+					foreach (var currencyIdStr in currencyIds)
+					{
+						int currencyId = Convert.ToInt32(currencyIdStr);
+
+						decimal amount = Convert.ToDecimal(form[$"Price[{sizeId}][{currencyId}]"]);
+						decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{sizeId}][{currencyId}]"]);
+						int countryId = Convert.ToInt32(form[$"CurrencyCountryID[{sizeId}][]"]
+											.FirstOrDefault()); // adjust if many countries
+
+						// check existing price
+						var existing = _dbContext.Prices.FirstOrDefault(p =>
+							p.ProductID == productId &&
+							p.SizeID == sizeId &&
+							p.CurrencyID == currencyId &&
+							p.CountryID == countryId &&
+							p.DeletedDate == null);
+
+						if (existing != null)
+						{
+							// ================= UPDATE =================
+							existing.Amount = amount;
+							existing.AmountNet = amountNet;
+							existing.EditUserID = userId;
+							existing.EditDate = now;
+						}
+						else
+						{
+							// ================= INSERT =================
+							var newPrice = new Price
+							{
+								ProductID = productId,
+								SizeID = sizeId,
+								CurrencyID = currencyId,
+								CountryID = countryId,
+								Amount = amount,
+								AmountNet = amountNet,
+								StatusID = "A",
+								CreatedUserID = userId,
+								CreationDate = now
+							};
+
+							_dbContext.Prices.Add(newPrice);
+						}
+					}
+				}
+
+				_dbContext.SaveChanges();
+				transaction.Commit();
+
+				return Json(new { success = true, message = "Prices saved successfully" });
+			}
+			catch (Exception ex)
+			{
+				transaction.Rollback();
+
+				return Json(new
+				{
+					success = false,
+					message = "Error saving price\n\n" + ex.Message
+				});
+			}
+		}
+
+
 	}
 
 }

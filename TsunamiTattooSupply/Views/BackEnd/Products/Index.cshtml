@@ -1183,122 +1183,170 @@
             wrapper.find('.initial-hidden').val('true');
 
         });
-         
+
+
+
         function loadProductPrice(ProductID){
+             
 
-            //let countryID = $("#CountryID").val(); // adjust if different field
-
-            if (!ProductID) {
-                console.log("No ProductID");
-                return;
-            }
+            if (!ProductID) return;
              
             $.ajax({
-                url: '/Products/GetProductSizesPrice',   // controller/action
+                url: '@Url.Action("GetProductSizesPrice","Products")',
                 type: 'GET',
-                data: {
-                    ProductID: ProductID
-                }, 
+                data: { ProductID: ProductID },
+
                 success: function (res) {
-
-                    $("#priceLoader").addClass("d-none");
-
+                     
                     if (!res || !res.success) {
                         toastr.error(res.message || "Failed loading prices");
                         return;
                     }
 
-                    console.log("Prices result:", res.data);
-
-                    // ===============================================
-                    // 🔵 LOOP SIZES
-                    // ===============================================
-                  
-
-
-                     let html = "";
+                    let html = "";
 
                     res.data.forEach(size => {
 
                         html += `
                         <div class="variation-card mb-2">
 
-                            <div class="variation-header p-2">
+                            <div class="variation-header p-2 fw-bold bg-light">
                                 ${size.sizeDescription}
 
-                                <input 
-                                    id="ProductSizeID_${size.sizeID}" 
-                                    type="hidden" 
-                                    name="ProductSizeID[${size.sizeID}]" 
-                                    value="${size.sizeID}">
+                                <input type="hidden"
+                                       name="ProductSizeID[${size.sizeID}]"
+                                       value="${size.sizeID}">
                             </div>
 
                             <div class="variation-body p-2">
-            
+
                                 <div class="row">
-                                    <div class="col-6 col-md-6">
+                                    <div class="col-12 col-md-2">
                                         <label>Sale</label>
                                         <input type="number" step="0.01"
                                             name="ProductSizeSale[${size.sizeID}]"
-                                            class="form-control"
-                                            value="${size.sale ?? 0}" />
+                                            class="form-control form-control-sm"
+                                            value="${size.sale ?? 0}">
                                     </div>
 
-                                    <div class="col-6 col-md-6">
+                                    <div class="col-12 col-md-2">
                                         <label>Raise</label>
                                         <input type="number" step="0.01"
                                             name="ProductSizeRaise[${size.sizeID}]"
-                                            class="form-control"
-                                            value="${size.raise ?? 0}" />
+                                            class="form-control form-control-sm"
+                                            value="${size.raise ?? 0}">
                                     </div>
-                                </div>
+                             
                         `;
 
-                        // ===========================================
-                        // 🔵 PRICES PER SIZE (if exist)
-                        // ===========================================
-                        // if (size.productSizePrice && size.productSizePrice.length > 0) {
+                        // =========================================
+                        // 🔵 CREATE MAP OF EXISTING PRICES
+                        // =========================================
+                        let priceMap = {};
+                        if (size.productSizePrice) {
+                            size.productSizePrice.forEach(p => {
+                                priceMap[p.currencyID] = p;
+                            });
+                        }
 
-                        //     size.productSizePrice.forEach(price => {
-                        //         html += `
-                        //         <div class="row mt-2">
-                        //             <div class="col-4">
-                        //                 ${price.currencyCode}
-                        //             </div>
+                        // =========================================
+                        // 🔵 LOOP ALL CURRENCIES (IMPORTANT)
+                        // =========================================
+                        res.currencies.forEach(currency => {
 
-                        //             <div class="col-8">
-                        //                 <input type="number" step="0.01"
-                        //                     class="form-control form-control-sm"
-                        //                     name="Price[${size.sizeID}][${price.currencyID}]"
-                        //                     value="${price.amountNet ?? 0}">
-                        //             </div>
-                        //         </div>`;
-                        //     });
+                            let existing = priceMap[currency.id];
 
-                        // } else {
-                        //     html += `<div class="text-danger mt-2">No price</div>`;
-                        // }
+                            let amount = existing ? existing.amount : 0;
+                            let amountNet = existing ? existing.amountNet : 0;
 
-                        // close card
-                        html += `
-                            </div>
-                        </div>`;
+                            html += `
+                             
+                             
+                                    <input type="hidden"
+                                           name="PriceCurrencyID[${size.sizeID}][]"
+                                           value="${currency.id}">
+
+                                    <input type="hidden" name="CurrencyCountryID[${size.sizeID}][]"
+                                            value="${currency.countryID}" />
+                                
+                                <div class="col-12 col-md-4">
+                                    <label>Amount (${currency.code})</label>
+                                    <input type="number" step="0.01"
+                                           class="form-control form-control-sm price-input"
+                                            data-size="${size.sizeID}"
+                                            data-currency="${currency.id}"
+                                           name="Price[${size.sizeID}][${currency.id}]"
+                                           value="${amount}">
+                                </div>
+
+                                <div class="col-12 col-md-4">
+                                        <label>Amount Net (${currency.code})</label>
+                                    <input type="number" step="0.01" readonly
+                                               class="form-control form-control-sm price-net-input"
+                                            data-size="${size.sizeID}"
+                                            data-currency="${currency.id}"
+                                           name="PriceNet[${size.sizeID}][${currency.id}]"
+                                           value="${amountNet}">
+                                </div>
+
+                            `;
+                        });
+
+                        html += `   </div></div></div>`;
                     });
 
-$("#ProductSizesPrices").html(html);
-
-
+                    $("#ProductSizesPrices").html(html);
                 },
-                error: function (xhr) { 
-                    toastr.error("Server error loading prices"); 
+
+                error: function () {
+                  
+                    toastr.error("Server error loading prices");
                 }
             });
-            }
-
-            function loadProductStock(ProductID){
+        }
 
 
-            }
+            // when amount changes
+        $(document).on("keyup change", ".price-input", function () {
+
+            let sizeID = $(this).data("size");
+            let currencyID = $(this).data("currency");
+
+            let amount = parseFloat($(this).val()) || 0;
+
+            // get percentage values
+            let salePerc = parseFloat($(`input[name="ProductSizeSale[${sizeID}]"]`).val()) || 0;
+            let raisePerc = parseFloat($(`input[name="ProductSizeRaise[${sizeID}]"]`).val()) || 0;
+
+            // ===== CALCULATION =====
+            let net = amount
+                + (amount * raisePerc / 100)
+                - (amount * salePerc / 100);
+
+            if (net < 0) net = 0;
+
+            $(`.price-net-input[data-size="${sizeID}"][data-currency="${currencyID}"]`)
+                .val(net.toFixed(2));
+        });
+
+
+        $(document).on("keyup change", "input[name^='ProductSizeSale'], input[name^='ProductSizeRaise']", function () {
+
+            let name = $(this).attr("name");
+            let sizeID = name.match(/\[(.*?)\]/)[1];
+
+            // recalc all amounts of this size
+            $(`.price-input[data-size="${sizeID}"]`).each(function () {
+                $(this).trigger("keyup");
+            });
+        });
+
+
+
+        function loadProductStock(ProductID){
+
+
+        }
 
 
         let colorImagesByColorId = {}; // edit mode preload
