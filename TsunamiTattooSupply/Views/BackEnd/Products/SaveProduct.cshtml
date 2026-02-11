@@ -670,7 +670,7 @@
 
 								<div class="card-body">
 
-					 				 <div id="ProductSizesPrices" style="height:500px; overflow-x: hidden; overflow-y: auto"></div>
+					 				 <div id="ProductSizesPrices" class="p-3" style="height:500px; overflow-x: hidden; overflow-y: auto"></div>
 
 				 				</div>
 
@@ -695,9 +695,7 @@
 
 								<div class="card-body">
 
-									 <div id="ProductStock" style="height: 500px; overflow-x:hidden; overflow-y:auto">
-
-									 </div>
+									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto"></div>
 
 								</div>
 
@@ -1456,8 +1454,7 @@
 		
 		if (!specs || specs.length === 0) {
 			 
-			$("#ProductSpecsMessage")
-				.text("Please select at least one spec");
+			$("#ProductSpecsMessage").text("Please select at least one spec");
 			hasError = true;
 		}
 
@@ -1472,12 +1469,16 @@
 						 Please select at least one color
 					</div>
 				`);
+			toastr.error("Please at lease one color")
 			hasError = true;
 		}
 
 		
 
-		if (hasError) return;
+		if (hasError){
+			toastr.error("Please fill or select the required field!");
+			return;
+		}
 
 		 
 
@@ -1958,36 +1959,33 @@
 		////////////////////////////////////////////////////////////////////////////////////////
 	$(document).on('changed.bs.select', '#ProductTypes', function () {
 
-		const selectedValues = $(this).val() || []; // all selected IDs
+		const selectedValues = $(this).val() || [];
+
+		// if tabs not exist create container
+		if (!$('#productTypeTabs').length) {
+			$('#productDetailsTabsContainer').html(`
+				<ul class="nav nav-tabs" id="productTypeTabs"></ul>
+				<div class="tab-content border border-top-0 p-3" id="productTypeTabContent"></div>
+			`);
+		}
 
 		// ============================================
-		// 🟢 ADD NEW TABS
+		// 🟢 ADD NEW TYPES ONLY (NO REFRESH OLD)
 		// ============================================
-		$(this).find('option:selected').each(function () {
+		selectedValues.forEach((typeID, index) => {
 
-			const typeID = $(this).val();
-			const typeText = $(this).text();
+			if ($('#tab-btn-' + typeID).length) return; // already exists
 
-			// if already exists → skip
-			if ($('#tab-' + typeID).length > 0) return;
+			const typeText = $('#ProductTypes option[value="' + typeID + '"]').text();
 
-			const isFirst = $('#productTypeTabs li').length === 0;
-			const active = isFirst ? 'active' : '';
-			const show = isFirst ? 'show active' : '';
+			const active = $('#productTypeTabs .nav-link.active').length === 0 ? 'active' : '';
+			const show   = active ? 'show active' : '';
 
-			// create container if not exists
-			if ($('#productTypeTabs').length === 0) {
-				$('#productDetailsTabsContainer').append(`
-					<ul class="nav nav-tabs" id="productTypeTabs"></ul>
-					<div class="tab-content border border-top-0 p-3" id="productTypeTabContent"></div>
-				`);
-			}
-
-			// TAB BUTTON
+			// ===== TAB BUTTON
 			$('#productTypeTabs').append(`
-				<li class="nav-item" role="presentation">
+				<li class="nav-item">
 					<button class="nav-link ${active}"
-							id="tab-${typeID}"
+							id="tab-btn-${typeID}"
 							data-bs-toggle="tab"
 							data-bs-target="#type-${typeID}"
 							type="button">
@@ -1996,13 +1994,13 @@
 				</li>
 			`);
 
-			// TAB CONTENT
+			// ===== TAB CONTENT
 			$('#productTypeTabContent').append(`
-				<div class="tab-pane fade ${show}" id="type-${typeID}" role="tabpanel">
+				<div class="tab-pane fade ${show}" id="type-${typeID}">
 
 					<div class="row mb-3">
 						<div class="col-12 col-md-6">
-							<label class="form-label">Details</label>
+							<label>Details</label>
 
 							<select class="form-control selectpicker product-details"
 									name="ProductDetails[${typeID}][]"
@@ -2011,6 +2009,7 @@
 									data-actions-box="true">
 
 								${generateDetailsOptions()}
+
 							</select>
 						</div>
 					</div>
@@ -2020,22 +2019,21 @@
 				</div>
 			`);
 
+			// init only this selectpicker
+			$('#type-' + typeID + ' .selectpicker').selectpicker();
 		});
 
 		// ============================================
-		// 🔴 REMOVE UNSELECTED TABS
+		// 🔴 REMOVE UNSELECTED TYPES ONLY
 		// ============================================
-		$('#productTypeTabs button').each(function () {
+		$('#productTypeTabs .nav-link').each(function () {
 
-			const btnID = $(this).attr('id'); // tab-3
-			const typeID = btnID.replace('tab-', '');
+			const btnId = $(this).attr('id'); // tab-btn-3
+			const typeID = btnId.replace('tab-btn-', '');
 
 			if (!selectedValues.includes(typeID)) {
 
-				// remove tab button
 				$(this).closest('li').remove();
-
-				// remove content
 				$('#type-' + typeID).remove();
 			}
 		});
@@ -2047,11 +2045,6 @@
 			$('#productTypeTabs .nav-link:first').addClass('active');
 			$('#productTypeTabContent .tab-pane:first').addClass('show active');
 		}
-
-		// refresh selectpicker inside tabs
-		setTimeout(function () {
-		$('#type-' + typeID + ' .product-details').selectpicker();
-	}, 50);
 
 	});
 
@@ -2078,6 +2071,13 @@
 		const typeID = $select.attr('name').match(/\d+/)[0];
 		const selectedDetails = $select.val() || [];
 		const $container = $('#productDetailsContainer' + typeID);
+
+			let detailsState = {};
+
+	$('.product-details').each(function () {
+		let name = $(this).attr('name');   // ProductDetails[1][]
+		detailsState[name] = $(this).val() || [];
+	});
 
 		// ==========================================
 		// 🟥 REMOVE ONLY UNSELECTED
@@ -2151,7 +2151,52 @@
 		});
 
 	});
+	$(document).on("click", "#btnSaveProductPrice", function (e) {
 
+		e.preventDefault();
+
+		let btn = $("#btnSaveProductPrice");
+		let spinner = $("#btnSaveProductPriceSpinner");
+
+		// disable button + show spinner
+		btn.prop("disabled", true);
+		spinner.removeClass("d-none");
+
+		let formData = new FormData(document.getElementById("productForm"));
+
+		$.ajax({
+			url: '@Url.Action("SavePrice", "Products")',
+			type: "POST",
+			data: formData,
+			processData: false,
+			contentType: false,
+
+			success: function (res) {
+
+				btn.prop("disabled", false);
+				spinner.addClass("d-none");
+
+				if (res && res.success) {
+					toastr.success(res.message || "Prices saved successfully");
+
+					// optional reload prices after save
+					// loadProductPrice($("#ProductID").val());
+				}
+				else {
+					toastr.error(res.message || "Error saving prices");
+				}
+			},
+
+			error: function (xhr) {
+
+				btn.prop("disabled", false);
+				spinner.addClass("d-none");
+
+				toastr.error("Server error while saving");
+				console.log(xhr.responseText);
+			}
+		});
+	});
 
 
 	});

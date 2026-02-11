@@ -1556,12 +1556,18 @@
                          return html;
                      }
 
+
             $(document).on('shown.bs.tab', '#productTypeTabs button', function (e) {
+
+                if(isEditMode){
+
+             
 
                 const pane   = $(e.target.dataset.bsTarget);
                 const typeId = pane.attr('id').replace('type-', '');
 
-                  loadTypeDetails(typeId);
+                  loadTypeDetails(typeId);  
+                }
             });
 
 
