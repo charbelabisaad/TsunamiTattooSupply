@@ -1221,21 +1221,15 @@
                             <div class="variation-body p-2">
 
                                 <div class="row">
-                                    <div class="col-12 col-md-2">
-                                        <label>Sale</label>
+                                    <div class="col-12 col-md-4">
+                                        <label>Sale (%)</label>
                                         <input type="number" step="0.01"
                                             name="ProductSizeSale[${size.sizeID}]"
                                             class="form-control form-control-sm"
                                             value="${size.sale ?? 0}">
                                     </div>
 
-                                    <div class="col-12 col-md-2">
-                                        <label>Raise</label>
-                                        <input type="number" step="0.01"
-                                            name="ProductSizeRaise[${size.sizeID}]"
-                                            class="form-control form-control-sm"
-                                            value="${size.raise ?? 0}">
-                                    </div>
+                                   
                              
                         `;
 
@@ -1281,7 +1275,7 @@
 
                                 <div class="col-12 col-md-4">
                                         <label>Amount Net (${currency.code})</label>
-                                    <input type="number" step="0.01" readonly
+                                    <input type="number" step="0.01"  
                                                class="form-control form-control-sm price-net-input"
                                             data-size="${size.sizeID}"
                                             data-currency="${currency.id}"
@@ -1306,43 +1300,75 @@
         }
 
 
-            // when amount changes
-        $(document).on("keyup change", ".price-input", function () {
+        $(document).on("change", ".price-input, input[name^='ProductSizeSale']", function () {
 
-            let sizeID = $(this).data("size");
-            let currencyID = $(this).data("currency");
+            let sizeID;
+            let currencyID;
 
-            let amount = parseFloat($(this).val()) || 0;
+            // if amount changed
+            if ($(this).hasClass("price-input")) {
+                sizeID = $(this).data("size");
+                currencyID = $(this).data("currency");
 
-            // get percentage values
-            let salePerc = parseFloat($(`input[name="ProductSizeSale[${sizeID}]"]`).val()) || 0;
-            let raisePerc = parseFloat($(`input[name="ProductSizeRaise[${sizeID}]"]`).val()) || 0;
+                calculateNet(sizeID, currencyID);
+                return;
+            }
 
-            // ===== CALCULATION =====
-            let net = amount
-                + (amount * raisePerc / 100)
-                - (amount * salePerc / 100);
+        
+            let name = $(this).attr("name");
+            sizeID = name.match(/\[(.*?)\]/)[1];
+
+            // recalc all currencies of this size
+            $(`.price-input[data-size="${sizeID}"]`).each(function () {
+                let cur = $(this).data("currency");
+                calculateNet(sizeID, cur);
+            });
+        });
+
+
+        // =====================================================
+        // 🔵 NET CALC FUNCTION
+        // =====================================================
+        function calculateNet(sizeID, currencyID){
+
+            let amount = parseFloat(
+                $(`.price-input[data-size="${sizeID}"][data-currency="${currencyID}"]`).val()
+            ) || 0;
+
+            let salePerc  = parseFloat($(`input[name="ProductSizeSale[${sizeID}]"]`).val()) || 0; 
+
+            let net = amount - (amount * salePerc / 100);
 
             if (net < 0) net = 0;
 
             $(`.price-net-input[data-size="${sizeID}"][data-currency="${currencyID}"]`)
                 .val(net.toFixed(2));
+        }
+
+         $(document).on("change", ".price-net-input", function () {
+
+            let sizeID = $(this).data("size");
+            let currencyID = $(this).data("currency");
+
+            let net = parseFloat($(this).val()) || 0;
+
+            let amount = parseFloat(
+                $(`.price-input[data-size="${sizeID}"][data-currency="${currencyID}"]`).val()
+            ) || 0;
+
+            if (amount <= 0) return;
+
+           
+            let salePerc = ((amount - net) / amount) * 100;
+
+            if (salePerc < 0) salePerc = 0;
+
+            $(`input[name="ProductSizeSale[${sizeID}]"]`)
+                .val(salePerc.toFixed(2));
         });
 
 
-        $(document).on("keyup change", "input[name^='ProductSizeSale'], input[name^='ProductSizeRaise']", function () {
-
-            let name = $(this).attr("name");
-            let sizeID = name.match(/\[(.*?)\]/)[1];
-
-            // recalc all amounts of this size
-            $(`.price-input[data-size="${sizeID}"]`).each(function () {
-                $(this).trigger("keyup");
-            });
-        });
-
-
-
+         
         function loadProductStock(ProductID){
 
 

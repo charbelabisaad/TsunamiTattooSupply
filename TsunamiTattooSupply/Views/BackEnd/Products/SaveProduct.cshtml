@@ -869,15 +869,7 @@
 										   name="Variations[${sizeId}].Sale"
 										   value="0">
 								</div>
-
-								<div class="col-12 col-md-2 mb-2">
-									<label>Raise %</label>
-									<input type="number"
-										   step="0.01"
-										   class="form-control raise-input"
-										   name="Variations[${sizeId}].Raise"
-										   value="0">
-								</div>
+ 
 							</div>
 
 							<div class="row mt-3">
@@ -1632,15 +1624,7 @@
 											class="form-control form-control-sm"
 											value="${size.sale ?? 0}">
 									</div>
-
-									<div class="col-12 col-md-2">
-										<label>Raise</label>
-										<input type="number" step="0.01"
-											name="ProductSizeRaise[${size.sizeID}]"
-											class="form-control form-control-sm"
-											value="${size.raise ?? 0}">
-									</div>
-
+									 
 						`;
 
 						// =========================================
@@ -1685,7 +1669,7 @@
 
 								<div class="col-12 col-md-4">
 										<label>Amount Net (${currency.code})</label>
-									<input type="number" step="0.01" readonly
+									<input type="number" step="0.01" 
 											   class="form-control form-control-sm price-net-input"
 											data-size="${size.sizeID}"
 											data-currency="${currency.id}"
@@ -1962,7 +1946,9 @@
 		const productDetailsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.productDetails));
 
 		function generateDetailsOptions() {
-			let html = '';
+		
+		let html = '';
+
 			productDetailsData.forEach(d => {
 				html += `<option value="${d.ID}">${d.Description}</option>`;
 			});
@@ -1970,35 +1956,48 @@
 		}
 
 		////////////////////////////////////////////////////////////////////////////////////////
-		$(document).on('changed.bs.select', '#ProductTypes', function () {
+	$(document).on('changed.bs.select', '#ProductTypes', function () {
 
-			const selected = $(this).find('option:selected');
+		const selectedValues = $(this).val() || []; // all selected IDs
 
-			let tabsHtml = `<ul class="nav nav-tabs" id="productTypeTabs" role="tablist">`;
-			let contentHtml = `<div class="tab-content border border-top-0 p-3" id="productTypeTabContent">`;
+		// ============================================
+		// 🟢 ADD NEW TABS
+		// ============================================
+		$(this).find('option:selected').each(function () {
 
-			selected.each(function (index) {
+			const typeID = $(this).val();
+			const typeText = $(this).text();
 
-				const typeID = $(this).val();
-				const typeText = $(this).text();
+			// if already exists → skip
+			if ($('#tab-' + typeID).length > 0) return;
 
-				const active = index === 0 ? 'active' : '';
-				const show = index === 0 ? 'show active' : '';
+			const isFirst = $('#productTypeTabs li').length === 0;
+			const active = isFirst ? 'active' : '';
+			const show = isFirst ? 'show active' : '';
 
-				tabsHtml += `
-				  <li class="nav-item" role="presentation">
+			// create container if not exists
+			if ($('#productTypeTabs').length === 0) {
+				$('#productDetailsTabsContainer').append(`
+					<ul class="nav nav-tabs" id="productTypeTabs"></ul>
+					<div class="tab-content border border-top-0 p-3" id="productTypeTabContent"></div>
+				`);
+			}
+
+			// TAB BUTTON
+			$('#productTypeTabs').append(`
+				<li class="nav-item" role="presentation">
 					<button class="nav-link ${active}"
 							id="tab-${typeID}"
 							data-bs-toggle="tab"
 							data-bs-target="#type-${typeID}"
-							type="button"
-							role="tab">
-					  ${typeText}
+							type="button">
+						${typeText}
 					</button>
-				  </li>
-				`;
+				</li>
+			`);
 
-				contentHtml += `
+			// TAB CONTENT
+			$('#productTypeTabContent').append(`
 				<div class="tab-pane fade ${show}" id="type-${typeID}" role="tabpanel">
 
 					<div class="row mb-3">
@@ -2010,9 +2009,8 @@
 									multiple
 									data-live-search="true"
 									data-actions-box="true">
-									 
-								${generateDetailsOptions()}
 
+								${generateDetailsOptions()}
 							</select>
 						</div>
 					</div>
@@ -2020,27 +2018,48 @@
 					<div id="productDetailsContainer${typeID}"></div>
 
 				</div>
-
-				
-
-				`;
-
-			});
-
-			tabsHtml += `</ul>`;
-			contentHtml += `</div>`;
-
-			$('#productDetailsTabsContainer').html(tabsHtml + contentHtml);
-
-			$('#productDetailsTabsContainer .selectpicker').selectpicker();
+			`);
 
 		});
+
+		// ============================================
+		// 🔴 REMOVE UNSELECTED TABS
+		// ============================================
+		$('#productTypeTabs button').each(function () {
+
+			const btnID = $(this).attr('id'); // tab-3
+			const typeID = btnID.replace('tab-', '');
+
+			if (!selectedValues.includes(typeID)) {
+
+				// remove tab button
+				$(this).closest('li').remove();
+
+				// remove content
+				$('#type-' + typeID).remove();
+			}
+		});
+
+		// ============================================
+		// 🟢 ACTIVATE FIRST TAB IF NONE ACTIVE
+		// ============================================
+		if ($('#productTypeTabs .nav-link.active').length === 0) {
+			$('#productTypeTabs .nav-link:first').addClass('active');
+			$('#productTypeTabContent .tab-pane:first').addClass('show active');
+		}
+
+		// refresh selectpicker inside tabs
+		setTimeout(function () {
+		$('#type-' + typeID + ' .product-details').selectpicker();
+	}, 50);
+
+	});
 
 
 
 		////////////////////////////////////////////////////////////////////////////////////////
 
-		const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes));
+		const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes))
 
 			function generateSizesOptions() {
 				let html = '';
@@ -2053,131 +2072,86 @@
 					// =======================================================
 		// DETAILS MULTI SELECT
 		// =======================================================
-		$(document).on('changed.bs.select', '.product-details', function () {
+			$(document).on('changed.bs.select', '.product-details', function () {
 
-			const $select = $(this);
+		const $select = $(this);
+		const typeID = $select.attr('name').match(/\d+/)[0];
+		const selectedDetails = $select.val() || [];
+		const $container = $('#productDetailsContainer' + typeID);
 
-			// Extract type id from name="ProductDetails[ID][]"
-			const typeID = $select.attr('name').match(/\d+/)[0];
+		// ==========================================
+		// 🟥 REMOVE ONLY UNSELECTED
+		// ==========================================
+		$container.find('.detail-block').each(function () {
 
-			const selectedDetails = $select.val() || [];
+			const detailId = String($(this).data('detail-id'));
 
-			const $container = $('#productDetailsContainer' + typeID);
+			if (!selectedDetails.includes(detailId)) {
 
-			// -----------------------------------
-			// REMOVE unselected blocks
-			// -----------------------------------
-			$container.find('.detail-block').each(function () {
+				// destroy selectpicker inside before remove
+				$(this).find('.selectpicker').selectpicker('destroy');
 
-				const detailId = String($(this).data('detail-id'));
-
-				if (!selectedDetails.includes(detailId)) {
-					$(this).remove();
-				}
-			});
-
-			// -----------------------------------
-			// ADD newly selected blocks
-			// -----------------------------------
-			selectedDetails.forEach(detailId => {
-
-				if ($container.find(`.detail-block[data-detail-id="${detailId}"]`).length)
-					return;
-
-				const detailText =
-					$select.find(`option[value="${detailId}"]`).text();
-
-				const html = `
-				<div class="detail-block variation-card"
-					 data-detail-id="${detailId}">
-
-					<div class="variation-header px-3 py-2">
-						<span>${detailText}</span>
-					</div>
-
-					<div class="variation-body p-3">
-
-						<div class="row mb-3">
-							<div class="col-md-12">
-
-								<label>Sizes</label>
-
-								<select class="form-control selectpicker product-sizes"
-										name="ProductSizes[${typeID}][${detailId}][]"
-										multiple
-										data-live-search="true"
-										data-actions-box="true">
-
-									${generateSizesOptions()}
-
-								</select>
-
-							</div>
-						</div>
-
-						<div class="size-variations"
-							 id="sizeVariations_${typeID}_${detailId}">
-						</div>
-
-					</div>
-				</div>
-				`;
-
-				$container.append(html);
-			});
-
-			// -----------------------------------
-			// Initialize ONLY new pickers
-			// -----------------------------------
-			$container.find('.selectpicker').selectpicker();
-		});
-
-			$(document).on("click", "#btnSaveProductPrice", function (e) {
-
-		e.preventDefault();
-
-		let btn = $("#btnSaveProductPrice");
-		let spinner = $("#btnSaveProductPriceSpinner");
-
-		// disable button + show spinner
-		btn.prop("disabled", true);
-		spinner.removeClass("d-none");
-
-		let formData = new FormData(document.getElementById("productForm"));
-
-		$.ajax({
-			url: '@Url.Action("SavePrice","Products")',
-			type: "POST",
-			data: formData,
-			processData: false,
-			contentType: false,
-
-			success: function (res) {
-
-				btn.prop("disabled", false);
-				spinner.addClass("d-none");
-
-				if (res && res.success) {
-					toastr.success(res.message || "Prices saved successfully");
-
-					// optional reload prices after save
-					// loadProductPrice($("#ProductID").val());
-				}
-				else {
-					toastr.error(res.message || "Error saving prices");
-				}
-			},
-
-			error: function (xhr) {
-
-				btn.prop("disabled", false);
-				spinner.addClass("d-none");
-
-				toastr.error("Server error while saving");
-				console.log(xhr.responseText);
+				$(this).remove();
 			}
 		});
+
+		// ==========================================
+		// 🟩 ADD ONLY NEW DETAILS (NO REFRESH OLD)
+		// ==========================================
+		selectedDetails.forEach(detailId => {
+
+			// if already exists → DO NOTHING
+			if ($container.find(`.detail-block[data-detail-id="${detailId}"]`).length)
+				return;
+
+			const detailText = $select.find(`option[value="${detailId}"]`).text();
+
+			const html = `
+			<div class="detail-block variation-card mt-2"
+				 data-detail-id="${detailId}">
+
+				<div class="variation-header px-3 py-2 bg-light">
+					<b>${detailText}</b>
+				</div>
+
+				<div class="variation-body p-3">
+
+					<div class="row mb-3">
+						<div class="col-md-12">
+
+							<label>Sizes</label>
+
+							<select class="form-control selectpicker product-sizes"
+									name="ProductSizes[${typeID}][${detailId}][]"
+									multiple
+									data-live-search="true"
+									data-actions-box="true">
+
+								${generateSizesOptions()}
+
+							</select>
+
+						</div>
+					</div>
+
+					<div class="size-variations"
+						 id="sizeVariations_${typeID}_${detailId}">
+					</div>
+
+				</div>
+			</div>
+			`;
+
+			$container.append(html);
+
+			// init ONLY this new picker
+			$container
+				.find(`.detail-block[data-detail-id="${detailId}"] .selectpicker`)
+				.selectpicker();
+		});
+
 	});
+
 
 
 	});

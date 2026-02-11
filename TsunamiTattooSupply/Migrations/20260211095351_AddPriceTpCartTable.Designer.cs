@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260211095351_AddPriceTpCartTable")]
+    partial class AddPriceTpCartTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -277,17 +280,11 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int>("ColorID")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("CountryID")
-                        .HasColumnType("integer");
-
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<int?>("CurrencyID")
-                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
@@ -331,11 +328,7 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasIndex("ColorID");
 
-                    b.HasIndex("CountryID");
-
                     b.HasIndex("CreatedUserID");
-
-                    b.HasIndex("CurrencyID");
 
                     b.HasIndex("DeletedUserID");
 
@@ -2749,19 +2742,11 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TsunamiTattooSupply.Models.Country", "Country")
-                        .WithMany()
-                        .HasForeignKey("CountryID");
-
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
                         .WithMany()
                         .HasForeignKey("CreatedUserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("TsunamiTattooSupply.Models.Currency", "Currency")
-                        .WithMany()
-                        .HasForeignKey("CurrencyID");
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
@@ -2799,11 +2784,7 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Navigation("Color");
 
-                    b.Navigation("Country");
-
                     b.Navigation("CreatedUser");
-
-                    b.Navigation("Currency");
 
                     b.Navigation("DeletedUser");
 

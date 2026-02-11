@@ -1335,9 +1335,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Select(x => x.Sale)
 					.FirstOrDefault(),
 
-			Raise = g.OrderByDescending(x => x.CreationDate)
-					 .Select(x => x.Raise)
-					 .FirstOrDefault(),
+			Raise = 0,
 
 			ProductSizePrice = new List<PriceDto>()
 		})
@@ -1402,7 +1400,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					// update sale & raise
 					decimal sale = Convert.ToDecimal(form[$"ProductSizeSale[{sizeId}]"]);
-					decimal raise = Convert.ToDecimal(form[$"ProductSizeRaise[{sizeId}]"]);
+					decimal raise = 0;
 
 					var productSize = _dbContext.ProductsSizes
 						.FirstOrDefault(x => x.ProductID == productId && x.SizeID == sizeId && x.DeletedDate == null);
