@@ -1564,7 +1564,7 @@
 					$("#productDetails").removeClass("d-none");
 
 					listProductPrice(res.productID);
-					//loadProductStock(res.productID);
+					loadProductStock(res.productID);
 				
 
 				} else {
@@ -2047,9 +2047,7 @@
 		}
 
 	});
-
-
-
+	 
 		////////////////////////////////////////////////////////////////////////////////////////
 
 		const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes))

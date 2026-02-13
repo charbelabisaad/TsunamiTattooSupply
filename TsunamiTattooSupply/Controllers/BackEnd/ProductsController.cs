@@ -1318,13 +1318,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		.Where(ps => ps.ProductID == ProductID
 				  && ps.DeletedDate == null
 				  && ps.StatusID == "A")
-
+		.OrderBy(ps => ps.Size.Rank)
 		.GroupBy(ps => new
 		{
 			ps.SizeID,
 			ps.Size.Description
 		})
-
+		
 		.Select(g => new ProductSizeDto
 		{
 			SizeID = g.Key.SizeID,
@@ -1339,7 +1339,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			ProductSizePrice = new List<PriceDto>()
 		})
-		.OrderBy(x => x.SizeDescription)
+		 
 		.ToList();
 
 
@@ -1473,6 +1473,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				transaction.Rollback();
 
+				_logger.LogError(ex, "Saving Product [ERROR]", ex);
+
 				return Json(new
 				{
 					success = false,
@@ -1480,6 +1482,92 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+
+		public IActionResult GetProductStock(int productId)
+		{
+			try
+			{
+				// ===============================
+				// 🔵 COLORS
+				// ===============================
+				var colors = _dbContext.ProductsColors
+					.Where(c => c.ProductID == productId && c.DeletedDate == null)
+					.Select(c => new
+					{
+						id = c.ColorID,
+						code = c.Color.Code,
+						name = c.Color.Name
+					})
+					.ToList();
+
+				// ===============================
+				// 🔵 STOCK
+				// ===============================
+				var stocks = _dbContext.Stocks
+					.Where(s => s.ProductID == productId)
+					.Select(s => new StockDto
+					{
+						ID = s.ID,
+						ProductID = s.ProductID,
+						SizeID = s.SizeID,
+						ProductColorID = s.ProductColorID,
+						Barcode = s.Barcode,
+						Quantity = s.Quantity
+					})
+					.ToList();
+
+				// ===============================
+				// 🔵 SIZES
+				// ===============================
+				var sizes = _dbContext.ProductsSizes
+					.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
+					.OrderBy(ps => ps.Size.Rank)
+					.GroupBy(ps => new
+					{
+						ps.SizeID,
+						ps.Size.Description
+					})
+					.Select(g => new ProductSizeDto
+					{
+						SizeID = g.Key.SizeID,
+						SizeDescription = g.Key.Description,
+						ProductSizeStock = new List<StockDto>()
+					})
+					.ToList();
+
+				// ===============================
+				// 🔵 STOCK LOOKUP
+				// ===============================
+				var lookup = stocks
+					.GroupBy(x => x.SizeID)
+					.ToDictionary(g => g.Key, g => g.ToList());
+
+				foreach (var s in sizes)
+				{
+					s.ProductSizeStock = lookup.ContainsKey(s.SizeID)
+						? lookup[s.SizeID]
+						: new List<StockDto>();
+				}
+
+				return Json(new
+				{
+					success = true,
+					data = sizes,
+					colors = colors
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Stock load error");
+
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
+			}
+		}
+
 
 
 	}

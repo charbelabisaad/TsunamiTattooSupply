@@ -1368,10 +1368,94 @@
         });
 
 
-         
         function loadProductStock(ProductID){
 
+            if (!ProductID) return;
 
+            $.ajax({
+                url: '@Url.Action("GetProductStock", "Products")',
+                type: 'GET',
+                data: { productId: ProductID },
+
+                success: function(res){
+
+                    if(!res.success){
+                        toastr.error(res.message);
+                        return;
+                    }
+
+                    let html = "";
+
+                    res.data.forEach(size => {
+
+                        html += `
+                        <div class="variation-card mb-3">
+
+                            <div class="variation-header p-2 fw-bold bg-light">
+                                ${size.sizeDescription}
+                            </div>
+
+                            <div class="variation-body p-2">
+                            <table class="table table-sm table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th style="width:200px">Color</th>
+                                    <th style="width:150px">Qty</th>
+                                    <th style="width:250px">Barcode</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        `;
+
+                        res.colors.forEach(color => {
+
+                            let stock = size.productSizeStock.find(x =>
+                                x.productColorID == color.id
+                            );
+
+                            let qty = stock ? stock.quantity : 0;
+                            let barcode = stock ? stock.barcode : "";
+                            let stockID = stock ? stock.id : 0;
+
+                            html += `
+                            <tr>
+
+                                <td class="align-middle">
+
+                                    <i class="fas fa-square" style="color:#${color.code}; font-size:20px"></i>
+                                    ${color.name}
+
+                                    <input type="hidden" class="stock-id" value="${stockID}">
+                                    <input type="hidden" class="size-id" value="${size.sizeID}">
+                                    <input type="hidden" class="color-id" value="${color.id}">
+                                </td>
+
+                                    <td class="align-middle">
+                                    <input type="number"
+                                           class="form-control form-control-sm qty"
+                                           value="${qty}">
+                                </td>
+
+                                <td class="align-middle">
+                                    <input type="text"
+                                           class="form-control form-control-sm barcode"
+                                           value="${barcode}">
+                                </td>
+
+                            </tr>
+                            `;
+                        });
+
+                        html += `
+                            </tbody>
+                            </table>
+                            </div>
+                        </div>`;
+                    });
+
+                    $("#ProductStock").html(html);
+                }
+            });
         }
 
 

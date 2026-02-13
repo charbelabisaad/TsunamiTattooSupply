@@ -18,6 +18,8 @@ namespace TsunamiTattooSupply.DTO
 		public decimal Raise { get; set; }
 
 		public List<PriceDto> ProductSizePrice { get; set; } = new List<PriceDto>();
+
+		public List<StockDto> ProductSizeStock { get; set; } = new List<StockDto>();
  
 	}
 }

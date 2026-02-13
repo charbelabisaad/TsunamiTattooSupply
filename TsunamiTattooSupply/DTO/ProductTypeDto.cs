@@ -20,5 +20,6 @@ namespace TsunamiTattooSupply.DTO
 
 		public string StatusColor { get; set; }
 
+
 	}
 }
