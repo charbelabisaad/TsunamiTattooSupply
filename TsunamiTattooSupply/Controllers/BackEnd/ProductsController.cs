@@ -1281,6 +1281,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				var currencies = _dbContext.Currencies
 					.Where(c => c.StatusID == "A")
+					.OrderBy(c => c.Code)
 					.Select(c => new CurrencyDto
 					{
 						ID = c.ID,
@@ -1288,59 +1289,75 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Description = c.Description,
 						Symbol = c.Symbol,
 						CountryID = c.CountryID
-					}).ToList();
-
-				// =====================================================
-				// 🔵 PRICES
-				// =====================================================
-				var prices = _dbContext.Prices
-					.Where(pr => pr.ProductID == ProductID && 
-					pr.DeletedDate == null)
-					.Select(pr => new PriceDto
-					{
-					 
-						ProductID = pr.ProductID,
-						SizeID = pr.SizeID,
-						CountryID = pr.CountryID,
-						CurrencyID = pr.CurrencyID,
-						CurrencyCode = pr.Currency.Code,
-						CurrencyDescription = pr.Currency.Description,
-						CurrencySymbol = pr.Currency.Symbol,
-						Amount = pr.Amount,
-						AmountNet = pr.AmountNet
 					})
 					.ToList();
 
+
 				// =====================================================
-				// 🔵 SIZES
+				// 🔵 PRICES ORDERED BY SIZE RANK
+				// =====================================================
+				var prices = _dbContext.Prices
+					.Where(pr => pr.ProductID == ProductID && pr.DeletedDate == null)
+					.Select(pr => new
+					{
+						pr.ProductID,
+						pr.SizeID,
+						pr.CountryID,
+						pr.CurrencyID,
+						CurrencyCode = pr.Currency.Code,
+						CurrencyDescription = pr.Currency.Description,
+						CurrencySymbol = pr.Currency.Symbol,
+						pr.Amount,
+						pr.AmountNet,
+						SizeRank = pr.Size.Rank
+					})
+					.OrderBy(x => x.SizeRank)
+					.ThenBy(x => x.CurrencyCode)
+					.ToList()
+					.Select(x => new PriceDto
+					{
+						ProductID = x.ProductID,
+						SizeID = x.SizeID,
+						CountryID = x.CountryID,
+						CurrencyID = x.CurrencyID,
+						CurrencyCode = x.CurrencyCode,
+						CurrencyDescription = x.CurrencyDescription,
+						CurrencySymbol = x.CurrencySymbol,
+						Amount = x.Amount,
+						AmountNet = x.AmountNet
+					})
+					.ToList();
+
+
+				// =====================================================
+				// 🔵 SIZES ORDERED BY SIZE RANK 🔥
 				// =====================================================
 				var sizes = _dbContext.ProductsSizes
-		.Where(ps => ps.ProductID == ProductID
-				  && ps.DeletedDate == null
-				  && ps.StatusID == "A")
-		.OrderBy(ps => ps.Size.Rank)
-		.GroupBy(ps => new
-		{
-			ps.SizeID,
-			ps.Size.Description
-		})
-		
-		.Select(g => new ProductSizeDto
-		{
-			SizeID = g.Key.SizeID,
-			SizeDescription = g.Key.Description,
+				.Where(ps => ps.ProductID == ProductID
+						  && ps.DeletedDate == null
+						  && ps.StatusID == "A")
+				.GroupBy(ps => new
+				{
+					ps.SizeID,
+					ps.Size.Description,
+					ps.Size.Rank
+				})
+				.Select(g => new ProductSizeDto
+				{
+					SizeID = g.Key.SizeID,
+					SizeDescription = g.Key.Description,
+					SizeRank = g.Key.Rank,
 
-			// take latest sale/raise
-			Sale = g.OrderByDescending(x => x.CreationDate)
-					.Select(x => x.Sale)
-					.FirstOrDefault(),
+					Sale = g.OrderByDescending(x => x.CreationDate)
+							.Select(x => x.Sale)
+							.FirstOrDefault(),
 
-			Raise = 0,
+					Raise = 0,
+					ProductSizePrice = new List<PriceDto>()
+				})
+				.OrderBy(x => x.SizeRank)   // 🔥 ORDER HERE (FINAL PLACE)
+				.ToList();
 
-			ProductSizePrice = new List<PriceDto>()
-		})
-		 
-		.ToList();
 
 
 				// =====================================================
@@ -1357,6 +1374,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						: new List<PriceDto>();
 				}
 
+
+				// =====================================================
+				// 🔵 RETURN (FRONT WILL STAY SAME)
+				// =====================================================
 				return Json(new
 				{
 					success = true,
@@ -1376,6 +1397,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+
+
 
 		[HttpPost]
 		public IActionResult SavePrice()
@@ -1487,9 +1510,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
-				// ===============================
 				// 🔵 COLORS
-				// ===============================
 				var colors = _dbContext.ProductsColors
 					.Where(c => c.ProductID == productId && c.DeletedDate == null)
 					.Select(c => new
@@ -1497,76 +1518,51 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						id = c.ColorID,
 						code = c.Color.Code,
 						name = c.Color.Name
+					}).ToList();
+
+				// 🔵 PRODUCT SIZES (type + detail)
+				var productSizes = _dbContext.ProductsSizes
+					.Where(x => x.ProductID == productId && x.DeletedDate == null && x.StatusID == "A")
+					.Select(x => new
+					{
+						x.SizeID,
+						SizeDescription = x.Size.Description,
+						x.ProductTypeID,
+						ProductTypeDescription = x.ProductType.Description,
+						x.ProductDetailID,
+						ProductDetailDescription = x.ProductDetail.Description
 					})
+					.OrderBy(x => x.SizeDescription)
 					.ToList();
 
-				// ===============================
 				// 🔵 STOCK
-				// ===============================
 				var stocks = _dbContext.Stocks
-					.Where(s => s.ProductID == productId)
-					.Select(s => new StockDto
+					.Where(s => s.ProductID == productId && s.DeletedDate == null)
+					.Select(s => new
 					{
-						ID = s.ID,
-						ProductID = s.ProductID,
-						SizeID = s.SizeID,
-						ProductColorID = s.ProductColorID,
-						Barcode = s.Barcode,
-						Quantity = s.Quantity
-					})
-					.ToList();
-
-				// ===============================
-				// 🔵 SIZES
-				// ===============================
-				var sizes = _dbContext.ProductsSizes
-					.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
-					.OrderBy(ps => ps.Size.Rank)
-					.GroupBy(ps => new
-					{
-						ps.SizeID,
-						ps.Size.Description
-					})
-					.Select(g => new ProductSizeDto
-					{
-						SizeID = g.Key.SizeID,
-						SizeDescription = g.Key.Description,
-						ProductSizeStock = new List<StockDto>()
-					})
-					.ToList();
-
-				// ===============================
-				// 🔵 STOCK LOOKUP
-				// ===============================
-				var lookup = stocks
-					.GroupBy(x => x.SizeID)
-					.ToDictionary(g => g.Key, g => g.ToList());
-
-				foreach (var s in sizes)
-				{
-					s.ProductSizeStock = lookup.ContainsKey(s.SizeID)
-						? lookup[s.SizeID]
-						: new List<StockDto>();
-				}
+						s.ID,
+						s.SizeID,
+						s.ProductColorID,
+						s.ProductTypeID,
+						s.ProductDetailID,
+						s.Quantity,
+						s.Barcode
+					}).ToList();
 
 				return Json(new
 				{
 					success = true,
-					data = sizes,
-					colors = colors
+					colors = colors,
+					productSizes = productSizes,
+					stocks = stocks
 				});
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "Stock load error");
-
-				return Json(new
-				{
-					success = false,
-					message = ex.Message
-				});
+				return Json(new { success = false, message = ex.Message });
 			}
 		}
+
 
 
 

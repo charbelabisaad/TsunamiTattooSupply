@@ -66,9 +66,10 @@
 @section Scripts {
 
     <script>
-            $(document).ready(function () {
 
-                       var table = $('#tableColors').DataTable({
+    $(document).ready(function () {
+
+        var table = $('#tableColors').DataTable({
             processing: true,
             responsive: true,
             ajax: {
@@ -199,28 +200,7 @@
 
         // filter position
         $('#tableColors_filter').css("position", "relative");
-
-
-                // Insert FA icons
-
-                // $filter.append('<i class="fas fa-times" id="clearSearch"></i>');
-
-                // Toggle X on typing
-                // $('#tableColors_filter input').on("input", function () {
-                //     if ($(this).val().length > 0) {
-                //         $('#clearSearch').show();
-                //     } else {
-                //         $('#clearSearch').hide();
-                //     }
-                // });
-
-                // Clear on X click
-                // $('#clearSearch').on("click", function () {
-                //     $('#tableColors_filter input').val('');
-                //     table.search('').draw();
-                //     $(this).hide();
-                // });
-
+         
             $("#ColorType").on("change", function () {
 
                 let typeCode = $("#ColorType option:selected").data("code");

@@ -12,6 +12,8 @@ namespace TsunamiTattooSupply.DTO
 		public int SizeID { get; set; }
 
 		public string SizeDescription { get; set; }
+
+		public int SizeRank { get; set; }
 		 
 		public decimal Sale { get; set; }
 		 

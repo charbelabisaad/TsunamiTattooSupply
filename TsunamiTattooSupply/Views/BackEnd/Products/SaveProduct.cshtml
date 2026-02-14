@@ -695,7 +695,7 @@
 
 								<div class="card-body">
 
-									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto"></div>
+									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto; visibility:hidden"></div>
 
 								</div>
 
@@ -1564,7 +1564,7 @@
 					$("#productDetails").removeClass("d-none");
 
 					listProductPrice(res.productID);
-					loadProductStock(res.productID);
+					//loadProductStock(res.productID);
 				
 
 				} else {
@@ -2063,7 +2063,7 @@
 					// =======================================================
 		// DETAILS MULTI SELECT
 		// =======================================================
-			$(document).on('changed.bs.select', '.product-details', function () {
+	$(document).on('changed.bs.select', '.product-details', function () {
 
 		const $select = $(this);
 		const typeID = $select.attr('name').match(/\d+/)[0];
@@ -2149,6 +2149,7 @@
 		});
 
 	});
+
 	$(document).on("click", "#btnSaveProductPrice", function (e) {
 
 		e.preventDefault();

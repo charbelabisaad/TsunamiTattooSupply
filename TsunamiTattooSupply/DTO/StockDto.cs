@@ -12,9 +12,13 @@ namespace TsunamiTattooSupply.DTO
 		public int SizeID { get; set; }
 		 
 		public int ProductTypeID { get; set; }
-		 
+		
+		public string ProductTypeDescription { get; set; }
+
 		public int ProductDetailID { get; set; }
  
+		public string ProductDetailDescription { get; set; }
+
 		public int ProductColorID { get; set; }
 
 		public string Barcode { get; set; }

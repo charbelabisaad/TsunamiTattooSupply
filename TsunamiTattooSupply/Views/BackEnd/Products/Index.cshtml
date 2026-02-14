@@ -846,7 +846,7 @@
 
                     loadProductPrice(productId);
 
-                    loadProductStock(productId);
+                    //loadProductStock(productId);
                      
                 });
 
@@ -1211,7 +1211,7 @@
                         <div class="variation-card mb-2">
 
                             <div class="variation-header p-2 fw-bold bg-light">
-                                ${size.sizeDescription}
+                                    ${size.sizeDescription} - Rank: ${size.sizeRank}
 
                                 <input type="hidden"
                                        name="ProductSizeID[${size.sizeID}]"
@@ -1400,50 +1400,76 @@
                             <thead class="bg-light">
                                 <tr>
                                     <th style="width:200px">Color</th>
-                                    <th style="width:150px">Qty</th>
-                                    <th style="width:250px">Barcode</th>
+                                    <th style="width:150px">Type</th>
+                                    <th style="width:150px">Detail</th>
+                                    <th style="width:100px">Qty</th>
+                                    <th style="width:160px">Barcode</th>
                                 </tr>
                             </thead>
                             <tbody>
                         `;
 
+                        // 🔵 loop colors
                         res.colors.forEach(color => {
 
-                            let stock = size.productSizeStock.find(x =>
+                            // 🔵 get all stock rows for this size + color
+                            let stocks = size.productSizeStock.filter(x =>
                                 x.productColorID == color.id
                             );
 
-                            let qty = stock ? stock.quantity : 0;
-                            let barcode = stock ? stock.barcode : "";
-                            let stockID = stock ? stock.id : 0;
+                            // if no stock → create empty row
+                            if(stocks.length === 0){
+                                stocks.push({
+                                    id:0,
+                                    productTypeID:"",
+                                    productTypeDescription:"",
+                                    productDetailID:"",
+                                    productDetailDescription:"",
+                                    quantity:0,
+                                    barcode:""
+                                });
+                            }
 
-                            html += `
-                            <tr>
+                            stocks.forEach((stock,index)=>{
 
-                                <td class="align-middle">
-
-                                    <i class="fas fa-square" style="color:#${color.code}; font-size:20px"></i>
-                                    ${color.name}
-
-                                    <input type="hidden" class="stock-id" value="${stockID}">
-                                    <input type="hidden" class="size-id" value="${size.sizeID}">
-                                    <input type="hidden" class="color-id" value="${color.id}">
-                                </td>
+                                html += `
+                                <tr>
 
                                     <td class="align-middle">
-                                    <input type="number"
-                                           class="form-control form-control-sm qty"
-                                           value="${qty}">
-                                </td>
 
-                                <td class="align-middle">
-                                    <input type="text"
-                                           class="form-control form-control-sm barcode"
-                                           value="${barcode}">
-                                </td>
+                                        <i class="fas fa-square"
+                                           style="color:#${color.code}; font-size:18px"></i>
+                                        ${color.name}
 
-                            </tr>
-                            `;
+                                        <input type="hidden" class="stock-id" value="${stock.id}">
+                                        <input type="hidden" class="size-id" value="${size.sizeID}">
+                                        <input type="hidden" class="color-id" value="${color.id}">
+                                    </td>
+
+                                    <td>
+                                        ${stock.productTypeDescription ?? ''}
+                                    </td>
+
+                                    <td>
+                                        ${stock.productDetailDescription ?? ''}
+                                    </td>
+
+                                    <td>
+                                        <input type="number"
+                                               class="form-control form-control-sm qty"
+                                               value="${stock.quantity}">
+                                    </td>
+
+                                    <td>
+                                        <input type="text"
+                                               class="form-control form-control-sm barcode"
+                                               value="${stock.barcode ?? ''}">
+                                    </td>
+
+                                </tr>
+                                `;
+                            });
+
                         });
 
                         html += `
