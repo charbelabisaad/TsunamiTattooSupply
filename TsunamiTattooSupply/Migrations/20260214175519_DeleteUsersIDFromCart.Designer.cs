@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260214175519_DeleteUsersIDFromCart")]
+    partial class DeleteUsersIDFromCart
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -312,9 +315,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.Property<int>("SizeID")
                         .HasColumnType("integer");
-
-                    b.Property<decimal>("SubTotal")
-                        .HasColumnType("decimal(12,2)");
 
                     b.HasKey("ID");
 
@@ -2303,9 +2303,6 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("ColorID")
-                        .HasColumnType("integer");
-
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
@@ -2322,6 +2319,9 @@ namespace TsunamiTattooSupply.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("EditUserID")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductColorID")
                         .HasColumnType("integer");
 
                     b.Property<int>("ProductDetailID")
@@ -2341,13 +2341,13 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ColorID");
-
                     b.HasIndex("CreatedUserID");
 
                     b.HasIndex("DeletedUserID");
 
                     b.HasIndex("EditUserID");
+
+                    b.HasIndex("ProductColorID");
 
                     b.HasIndex("ProductDetailID");
 
@@ -3880,12 +3880,6 @@ namespace TsunamiTattooSupply.Migrations
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Stock", b =>
                 {
-                    b.HasOne("TsunamiTattooSupply.Models.Color", "Color")
-                        .WithMany()
-                        .HasForeignKey("ColorID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
                         .WithMany()
                         .HasForeignKey("CreatedUserID")
@@ -3899,6 +3893,12 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
                         .WithMany()
                         .HasForeignKey("EditUserID");
+
+                    b.HasOne("TsunamiTattooSupply.Models.ProductColor", "ProductColor")
+                        .WithMany()
+                        .HasForeignKey("ProductColorID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.ProductDetail", "ProductDetail")
                         .WithMany()
@@ -3924,8 +3924,6 @@ namespace TsunamiTattooSupply.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Color");
-
                     b.Navigation("CreatedUser");
 
                     b.Navigation("DeletedUser");
@@ -3933,6 +3931,8 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("EditUser");
 
                     b.Navigation("Product");
+
+                    b.Navigation("ProductColor");
 
                     b.Navigation("ProductDetail");
 

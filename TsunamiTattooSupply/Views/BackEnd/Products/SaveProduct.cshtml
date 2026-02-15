@@ -695,7 +695,7 @@
 
 								<div class="card-body">
 
-									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto; visibility:hidden"></div>
+									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto;"></div>
 
 								</div>
 
@@ -1385,10 +1385,8 @@
 		$('#imageProductViewModalImg').attr('src', src);
 		$('#imageProductViewModal').modal('show');
 	});
-
 	 
-
-		const removedNewImages = {}; // { colorId: Set(filenames) }
+	const removedNewImages = {}; // { colorId: Set(filenames) }
  
 	$(document).on("click", "#btnSaveProductInitialInfo", function () {
 
@@ -1564,7 +1562,7 @@
 					$("#productDetails").removeClass("d-none");
 
 					listProductPrice(res.productID);
-					//loadProductStock(res.productID);
+					loadProductStock(res.productID);
 				
 
 				} else {
@@ -1608,7 +1606,10 @@
 						<div class="variation-card mb-2">
 
 							<div class="variation-header p-2 fw-bold bg-light">
-								${size.sizeDescription}
+								<div>
+									<span class="text-primary font-weight-bold">${size.sizeDescription}</span> -
+									<span class="text-muted font-italic font-weight-normal text-left">Rank: ${size.sizeRank}</span>
+								</div>
 
 								<input type="hidden"
 									   name="ProductSizeID[${size.sizeID}]"
@@ -1618,8 +1619,8 @@
 							<div class="variation-body p-2">
 
 								<div class="row">
-									<div class="col-12 col-md-2">
-										<label>Sale</label>
+									<div class="col-12 col-md-4">
+										<label>Sale (%)</label>
 										<input type="number" step="0.01"
 											name="ProductSizeSale[${size.sizeID}]"
 											class="form-control form-control-sm"
@@ -2196,6 +2197,177 @@
 			}
 		});
 	});
+
+	 $(document).on("click", "#btnSaveProductStock", function () {
+		  
+			let btn = $("#btnSaveProductStock");
+			let spinner = $("#btnSaveProductStockSpinner");
+
+			btn.prop("disabled", true);
+			spinner.removeClass("d-none");
+
+			let formData = new FormData();
+			formData.append("ProductID", $("#ProductID").val());
+
+			let index = 0;
+
+			$("#ProductStock tbody tr").each(function () {
+
+				let sizeId = $(this).find(".size-id").val();
+				let colorId = $(this).find(".color-id").val();
+				let typeId = $(this).find(".type-id").val() || 0;
+				let detailId = $(this).find(".detail-id").val() || 0;
+				let qty = $(this).find(".qty").val() || 0;
+				let barcode = $(this).find(".barcode").val() || "";
+
+				formData.append(`StockSizeID[${index}]`, sizeId);
+				formData.append(`StockColorID[${index}]`, colorId);
+				formData.append(`StockTypeID[${index}]`, typeId);
+				formData.append(`StockDetailID[${index}]`, detailId);
+				formData.append(`StockQty[${index}]`, qty);
+				formData.append(`StockBarcode[${index}]`, barcode);
+
+				index++;
+			});
+
+			$.ajax({
+				url: '@Url.Action("SaveStock", "Products")',
+				type: "POST",
+				data: formData,
+				processData: false,
+				contentType: false,
+
+				success: function (res) {
+
+					btn.prop("disabled", false);
+					spinner.addClass("d-none");
+
+					if (res.success) {
+						toastr.success("Stock saved");
+						loadProductStock($("#ProductID").val());
+					} else {
+						toastr.error(res.message);
+					}
+				},
+				error: function () {
+					btn.prop("disabled", false);
+					spinner.addClass("d-none");
+					toastr.error("Server error");
+				}
+			});
+
+		});
+
+
+		function loadProductStock(ProductID){
+
+			if (!ProductID) return;
+
+			$.ajax({
+				url: '@Url.Action("GetProductStock", "Products")',
+				type: 'GET',
+				data: { productId: ProductID },
+
+					success: function(res){
+
+		if(!res.success){
+			toastr.error(res.message);
+			return;
+		}
+
+		let html = "";
+
+		// 🔵 LOOP SIZES
+		res.productSizes.forEach(size => {
+
+			html += `
+			<div class="variation-card mb-3">
+
+				<div class="variation-header p-2 bg-light">
+					<span class="text-primary font-weight-bold">${size.sizeDescription}</span> -
+					<span class="text-muted font-italic">Rank: ${size.sizeRank}</span>
+				</div>
+
+				<div class="variation-body p-2">
+				<table class="table table-sm table-bordered">
+				<thead class="bg-light">
+					<tr>
+						<th style="width:200px">Color</th>
+						<th style="width:150px">Type</th>
+						<th style="width:150px">Detail</th>
+						<th style="width:100px">Qty</th>
+						<th style="width:160px">Barcode</th>
+					</tr>
+				</thead>
+				<tbody>
+			`;
+
+			// 🔵 DETAILS FOR THIS SIZE
+			let details = res.sizeDetails.filter(d => d.sizeID == size.sizeID);
+
+			details.forEach(det => {
+
+				// 🔵 LOOP COLORS
+				res.colors.forEach(color => {
+
+					let stock = res.stocks.find(x =>
+						x.sizeID == size.sizeID &&
+						x.colorID == color.colorID &&
+						x.productTypeID == det.productTypeID &&
+						x.productDetailID == det.productDetailID
+					);
+
+					if(!stock){
+						stock = {
+							id:0,
+							quantity:0,
+							barcode:""
+						};
+					}
+
+					html += `
+					<tr>
+
+						<td class="align-middle">
+							<i class="fas fa-square"
+							   style="color:#${color.code}; font-size:18px"></i>
+							${color.name}
+
+							<input type="hidden" class="stock-id" value="${stock.id}">
+							<input type="hidden" class="size-id" value="${size.sizeID}">
+							<input type="hidden" class="color-id" value="${color.colorID}">
+							<input type="hidden" class="type-id" value="${det.productTypeID}">
+							<input type="hidden" class="detail-id" value="${det.productDetailID}">
+						</td>
+
+						<td>${det.productTypeDescription}</td>
+						<td>${det.productDetailDescription}</td>
+
+						<td>
+							<input type="number"
+								   class="form-control form-control-sm qty"
+								   value="${stock.quantity}">
+						</td>
+
+						<td>
+							<input type="text"
+								   class="form-control form-control-sm barcode"
+								   value="${stock.barcode ?? ''}">
+						</td>
+
+					</tr>`;
+				});
+
+			});
+
+			html += `</tbody></table></div></div>`;
+		});
+
+		$("#ProductStock").html(html);
+	}
+
+			});
+		}
 
 
 	});

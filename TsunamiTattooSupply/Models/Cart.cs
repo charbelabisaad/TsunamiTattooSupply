@@ -50,19 +50,14 @@ namespace TsunamiTattooSupply.Models
 		 
 		[Column(TypeName = "decimal(12,2)")]
 		public decimal PriceNet { get; set; }
-
-		public int CreatedUserID { get; set; }
-
+		 
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal SubTotal { get; set; }
+		  
 		public DateTime CreationDate { get; set; }
-
-		public int? EditUserID { get; set; }
-
+		  
 		public DateTime? EditDate { get; set; }
-
-		public int? DeletedUserID { get; set; }
-
-		public DateTime? DeletedDate { get; set; }
-
+		  
 		[ForeignKey("ClientID")]
 		public Client Client { get; set; }
 
@@ -86,15 +81,6 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("CurrencyID")]
 		public Currency Currency { get; set; }
-		 
-		[ForeignKey("CreatedUserID")]
-		public virtual User CreatedUser { get; set; }
-
-		[ForeignKey("EditUserID")]
-		public virtual User EditUser { get; set; }
-
-		[ForeignKey("DeletedUserID")]
-		public virtual User DeletedUser { get; set; }
- 
+		  
 	}
 }

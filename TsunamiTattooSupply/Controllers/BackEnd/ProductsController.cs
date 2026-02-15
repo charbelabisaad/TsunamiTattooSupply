@@ -1397,9 +1397,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-
-
-
+ 
 		[HttpPost]
 		public IActionResult SavePrice()
 		{
@@ -1510,50 +1508,87 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
+				// =====================================================
 				// 🔵 COLORS
+				// =====================================================
 				var colors = _dbContext.ProductsColors
 					.Where(c => c.ProductID == productId && c.DeletedDate == null)
 					.Select(c => new
 					{
-						id = c.ColorID,
+						id = c.ID,
+						colorID = c.ColorID,
 						code = c.Color.Code,
 						name = c.Color.Name
 					}).ToList();
 
-				// 🔵 PRODUCT SIZES (type + detail)
+
+				// =====================================================
+				// 🔵 SIZES (ONE BLOCK PER SIZE ONLY)
+				// =====================================================
 				var productSizes = _dbContext.ProductsSizes
+					.Where(x => x.ProductID == productId && x.DeletedDate == null && x.StatusID == "A")
+					.GroupBy(x => new
+					{
+						x.SizeID,
+						SizeDescription = x.Size.Description,
+						SizeRank = x.Size.Rank
+					})
+					.Select(g => new
+					{
+						SizeID = g.Key.SizeID,
+						SizeDescription = g.Key.SizeDescription,
+						SizeRank = g.Key.SizeRank
+					})
+					.OrderBy(x => x.SizeRank)
+					.ToList();
+
+
+				// =====================================================
+				// 🔵 TYPE + DETAIL COMBINATIONS PER SIZE
+				// =====================================================
+				var sizeDetails = _dbContext.ProductsSizes
 					.Where(x => x.ProductID == productId && x.DeletedDate == null && x.StatusID == "A")
 					.Select(x => new
 					{
 						x.SizeID,
-						SizeDescription = x.Size.Description,
 						x.ProductTypeID,
 						ProductTypeDescription = x.ProductType.Description,
 						x.ProductDetailID,
 						ProductDetailDescription = x.ProductDetail.Description
 					})
-					.OrderBy(x => x.SizeDescription)
+					.Distinct()
+					.OrderBy(x => x.ProductTypeDescription)
+					.ThenBy(x => x.ProductDetailDescription)
 					.ToList();
 
+
+				// =====================================================
 				// 🔵 STOCK
+				// =====================================================
 				var stocks = _dbContext.Stocks
 					.Where(s => s.ProductID == productId && s.DeletedDate == null)
 					.Select(s => new
 					{
-						s.ID,
-						s.SizeID,
-						s.ProductColorID,
-						s.ProductTypeID,
-						s.ProductDetailID,
-						s.Quantity,
-						s.Barcode
-					}).ToList();
+						id = s.ID,
+						sizeID = s.SizeID,
+						colorID = s.ColorID,
+						productTypeID = s.ProductTypeID,
+						productDetailID = s.ProductDetailID,
+						productTypeDescription = s.ProductType.Description,
+						productDetailDescription = s.ProductDetail.Description,
+						quantity = s.Quantity,
+						barcode = s.Barcode
+					})
+					.ToList();
 
+
+				// =====================================================
 				return Json(new
 				{
 					success = true,
 					colors = colors,
-					productSizes = productSizes,
+					productSizes = productSizes,   // only sizes
+					sizeDetails = sizeDetails,     // type+detail per size
 					stocks = stocks
 				});
 			}
@@ -1563,6 +1598,118 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+
+		[HttpPost]
+		public IActionResult SaveStock()
+		{
+			using var transaction = _dbContext.Database.BeginTransaction();
+
+			try
+			{
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+				DateTime now = DateTime.UtcNow;
+
+				var form = Request.Form;
+				int productId = Convert.ToInt32(form["ProductID"]);
+
+				// =====================================================
+				// 🔵 LOOP ROWS
+				// =====================================================
+				foreach (var key in form.Keys.Where(k => k.StartsWith("StockSizeID[")))
+				{
+					int rowIndex = Convert.ToInt32(key.Replace("StockSizeID[", "").Replace("]", ""));
+
+					int sizeId = Convert.ToInt32(form[$"StockSizeID[{rowIndex}]"]);
+					int colorId = Convert.ToInt32(form[$"StockColorID[{rowIndex}]"]);
+
+					int typeId = string.IsNullOrEmpty(form[$"StockTypeID[{rowIndex}]"])
+						? 0 : Convert.ToInt32(form[$"StockTypeID[{rowIndex}]"]);
+
+					int detailId = string.IsNullOrEmpty(form[$"StockDetailID[{rowIndex}]"])
+						? 0 : Convert.ToInt32(form[$"StockDetailID[{rowIndex}]"]);
+
+					decimal qty = string.IsNullOrEmpty(form[$"StockQty[{rowIndex}]"])
+						? 0 : Convert.ToDecimal(form[$"StockQty[{rowIndex}]"]);
+
+					string barcode = form[$"StockBarcode[{rowIndex}]"];
+
+					// =====================================================
+					// 🔵 FIND EXISTING
+					// =====================================================
+					var existing = _dbContext.Stocks.FirstOrDefault(x =>
+						x.ProductID == productId &&
+						x.SizeID == sizeId &&
+						x.ColorID == colorId &&
+						x.ProductTypeID == typeId &&
+						x.ProductDetailID == detailId &&
+						x.DeletedDate == null);
+
+					// =====================================================
+					// 🔴 DELETE if qty = 0
+					// =====================================================
+					if (qty <= 0)
+					{
+						if (existing != null)
+						{
+							existing.DeletedDate = now;
+							existing.DeletedUserID = userId;
+						}
+
+						continue;
+					}
+
+					// =====================================================
+					// 🟢 UPDATE
+					// =====================================================
+					if (existing != null)
+					{
+						existing.Quantity = qty;
+						existing.Barcode = barcode;
+						existing.EditUserID = userId;
+						existing.EditDate = now;
+					}
+					else
+					{
+						// =====================================================
+						// 🟢 INSERT
+						// =====================================================
+						var stock = new Stock
+						{
+							ProductID = productId,
+							SizeID = sizeId,
+							ColorID = colorId,
+							ProductTypeID = typeId,
+							ProductDetailID = detailId,
+							Quantity = qty,
+							Barcode = barcode,
+							CreatedUserID = userId,
+							CreationDate = now
+						};
+
+						_dbContext.Stocks.Add(stock);
+					}
+				}
+
+				_dbContext.SaveChanges();
+				transaction.Commit();
+
+				return Json(new { success = true, message = "Stock saved successfully" });
+			}
+			catch (Exception ex)
+			{
+				transaction.Rollback();
+
+				string fullError = ex.ToString(); // 🔥 full stack
+				string inner1 = ex.InnerException?.Message ?? "";
+				string inner2 = ex.InnerException?.InnerException?.Message ?? "";
+
+				return Json(new
+				{
+					success = false,
+					message = fullError + "\n\nINNER1:\n" + inner1 + "\n\nINNER2:\n" + inner2
+				});
+			}
+		}
 
 
 

@@ -7,7 +7,7 @@ namespace TsunamiTattooSupply.Models
 	[Table("Stocks")]
 	[Index(nameof(ProductID))]
 	[Index(nameof(SizeID))]
-	[Index(nameof(ProductColorID))]
+	[Index(nameof(ColorID))]
 	[Index(nameof(ProductTypeID))]
 	[Index(nameof(ProductDetailID))]
 	public class Stock
@@ -29,7 +29,7 @@ namespace TsunamiTattooSupply.Models
 		public int ProductDetailID { get; set; }
 
 		[Required]
-		public int ProductColorID { get; set; }
+		public int ColorID { get; set; }
 
 		[StringLength(50)]
 		public string Barcode { get; set; }
@@ -62,8 +62,8 @@ namespace TsunamiTattooSupply.Models
 		[ForeignKey("SizeID")]
 		public Size Size { get; set; }
 
-		[ForeignKey("ProductColorID")]
-		public virtual ProductColor ProductColor { get; set; }
+		[ForeignKey("ColorID")]
+		public virtual Color Color { get; set; }
 
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }

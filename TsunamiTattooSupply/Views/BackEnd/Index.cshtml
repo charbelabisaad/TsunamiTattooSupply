@@ -173,7 +173,15 @@
                     }
                 });
             });
-             
+
+            // 🔥 LOGIN ON ENTER
+            $(document).on('keypress', '#loginForm input', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#btnLogIn').click();
+                }
+            });
+
         });
     </script>
 </body>

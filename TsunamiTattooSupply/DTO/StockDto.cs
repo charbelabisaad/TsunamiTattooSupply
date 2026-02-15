@@ -19,7 +19,7 @@ namespace TsunamiTattooSupply.DTO
  
 		public string ProductDetailDescription { get; set; }
 
-		public int ProductColorID { get; set; }
+		public int ColorID { get; set; }
 
 		public string Barcode { get; set; }
 
