@@ -1601,9 +1601,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[HttpPost]
 		public IActionResult SaveStock()
-		{
-			using var transaction = _dbContext.Database.BeginTransaction();
-
+		{ 
 			try
 			{
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -1643,20 +1641,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						x.ProductTypeID == typeId &&
 						x.ProductDetailID == detailId &&
 						x.DeletedDate == null);
-
-					// =====================================================
-					// 🔴 DELETE if qty = 0
-					// =====================================================
-					if (qty <= 0)
-					{
-						if (existing != null)
-						{
-							existing.DeletedDate = now;
-							existing.DeletedUserID = userId;
-						}
-
-						continue;
-					}
+ 
 
 					// =====================================================
 					// 🟢 UPDATE
@@ -1691,13 +1676,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 
 				_dbContext.SaveChanges();
-				transaction.Commit();
+				 
 
 				return Json(new { success = true, message = "Stock saved successfully" });
 			}
 			catch (Exception ex)
 			{
-				transaction.Rollback();
+				 
 
 				string fullError = ex.ToString(); // 🔥 full stack
 				string inner1 = ex.InnerException?.Message ?? "";
