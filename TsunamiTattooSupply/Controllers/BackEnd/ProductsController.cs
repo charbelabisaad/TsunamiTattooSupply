@@ -540,8 +540,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var existingSizes = _dbContext.ProductsSizes
 					.Where(x => x.ProductID == productId)
 					.ToList();
-
-
+				 
 				// -----------------------------------------------------
 				// Holds ALL submitted size keys
 				// productId-typeId-detailId-sizeId
@@ -555,16 +554,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// -----------------------------------------------------
 				var submittedTypeIds = new HashSet<int>();
 
+				var submittedDetailKeys = new HashSet<string>();    // submitted type-details
 
 				// =====================================================
 				// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES
 				// =====================================================
 				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
 				{
-					// -----------------------------------------
-					// Extract ProductTypeID
-					// ProductDetails[3][]
-					// -----------------------------------------
 					var match = Regex.Match(key, @"ProductDetails\[(\d+)\]");
 
 					if (!match.Success)
@@ -572,33 +568,27 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					int productTypeId = int.Parse(match.Groups[1].Value);
 
-					// 🔥 REGISTER THIS TYPE
+					// 🔥 REGISTER TYPE
 					submittedTypeIds.Add(productTypeId);
 
-					// -----------------------------------------
-					// Selected details under this type
-					// -----------------------------------------
-					var detailIds = form[key]
-						.Select(int.Parse)
-						.ToList();
+					var detailIds = form[key].Select(int.Parse).ToList();
 
 					foreach (var detailId in detailIds)
 					{
-						string sizeKey =
-							$"ProductSizes[{productTypeId}][{detailId}][]";
+						// 🔥 REGISTER DETAIL
+						string detailMap = $"{productId}-{productTypeId}-{detailId}";
+						submittedDetailKeys.Add(detailMap);
+
+						string sizeKey = $"ProductSizes[{productTypeId}][{detailId}][]";
 
 						if (!form.ContainsKey(sizeKey))
 							continue;
 
-						var sizeIds = form[sizeKey]
-							.Select(int.Parse)
-							.ToList();
+						var sizeIds = form[sizeKey].Select(int.Parse).ToList();
 
 						foreach (var sizeId in sizeIds)
 						{
-							string mapKey =
-								$"{productId}-{productTypeId}-{detailId}-{sizeId}";
-
+							string mapKey = $"{productId}-{productTypeId}-{detailId}-{sizeId}";
 							submittedKeys.Add(mapKey);
 
 							var existing = existingSizes.FirstOrDefault(x =>
@@ -607,12 +597,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								x.ProductDetailID == detailId &&
 								x.SizeID == sizeId);
 
-							// =====================================================
-							// INSERT (NEW)
-							// =====================================================
+							// ================= INSERT
 							if (existing == null)
 							{
-								// Prevent EF local duplicate tracking
 								bool alreadyTracked =
 									_dbContext.ProductsSizes.Local.Any(x =>
 										x.ProductID == productId &&
@@ -628,11 +615,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 										ProductTypeID = productTypeId,
 										ProductDetailID = detailId,
 										SizeID = sizeId,
-
 										Sale = 0,
 										Raise = 0,
 										StatusID = "A",
-
 										CreatedUserID = userId,
 										CreationDate = now
 									});
@@ -640,9 +625,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							}
 							else
 							{
-								// =====================================================
-								// RESTORE (if soft-deleted)
-								// =====================================================
+								// RESTORE IF SOFT DELETED
 								if (existing.DeletedDate != null)
 								{
 									existing.DeletedDate = null;
@@ -658,25 +641,61 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 
 
+
 				// =====================================================
-				// 3️⃣ SOFT DELETE REMOVED ROWS
-				// ❗ ONLY WITHIN SUBMITTED TYPES
+				// 3️⃣ SOFT DELETE REMOVED ROWS  (FINAL SAFE VERSION)
 				// =====================================================
+				bool hasSubmittedTypes = submittedTypeIds.Count > 0;
+				bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
+				bool hasSubmittedSizes = submittedKeys.Count > 0;
+
 				foreach (var ps in existingSizes)
 				{
-					// 🔥 DO NOT TOUCH TYPES NOT SUBMITTED
-					if (!submittedTypeIds.Contains(ps.ProductTypeID))
-						continue;
-
-					string key =
-						$"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
-
-					if (!submittedKeys.Contains(key) && ps.DeletedDate == null)
+					// ===============================================
+					// ❌ TYPE REMOVED → DELETE ALL TYPE
+					// ONLY if types were submitted from UI
+					// ===============================================
+					if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
 					{
-						ps.DeletedUserID = userId;
-						ps.DeletedDate = now;
+						if (ps.DeletedDate == null)
+						{
+							ps.DeletedUserID = userId;
+							ps.DeletedDate = now;
+						}
+						continue;
+					}
+
+					// ===============================================
+					// ❌ DETAIL REMOVED → DELETE DETAIL + ALL SIZES
+					// ===============================================
+					string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
+
+					if (hasSubmittedDetails && !submittedDetailKeys.Contains(detailKey))
+					{
+						if (ps.DeletedDate == null)
+						{
+							ps.DeletedUserID = userId;
+							ps.DeletedDate = now;
+						}
+						continue;
+					}
+
+					// ===============================================
+					// ❌ SIZE REMOVED → DELETE SIZE ONLY
+					// ===============================================
+					string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
+
+					if (hasSubmittedSizes && !submittedKeys.Contains(sizeKey))
+					{
+						if (ps.DeletedDate == null)
+						{
+							ps.DeletedUserID = userId;
+							ps.DeletedDate = now;
+						}
 					}
 				}
+
+
 
 
 				// =====================================================
@@ -1597,8 +1616,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
-
-
+		 
 		[HttpPost]
 		public IActionResult SaveStock()
 		{ 

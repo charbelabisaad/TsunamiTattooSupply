@@ -1227,118 +1227,115 @@
 		 // when selecting initial image per color
 
 
-		$(document).on('change', '.color-image-input', function () {
+	$(document).on('change', '.color-image-input', function () {
 
-			let input   = this;
-			let $card   = $(this).closest('.color-card');
-			let colorId = $card.data('color-id');
+		let input   = this;
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
 
-			if (!input.files || !input.files.length) return;
+		if (!input.files || !input.files.length) return;
 
-			// ----------------------------
-			// 1️⃣ BUFFER FILES
-			// ----------------------------
-			if (!colorImagesBuffer[colorId]) {
+		let file = input.files[0];
+
+		const maxSizeKB = 60;
+		const maxSizeBytes = maxSizeKB * 1024;
+
+		// ============================================
+		// 🔴 SIZE VALIDATION FIRST (BEFORE BUFFER)
+		// ============================================
+		if (file.size > maxSizeBytes) {
+
+			toastr.error("Image size must not exceed 60 KB");
+
+			// 🔥 CLEAR BUFFER (IMPORTANT)
+			if (colorImagesBuffer[colorId]) {
 				colorImagesBuffer[colorId] = [];
 			}
 
-			Array.from(input.files).forEach(file => {
-				colorImagesBuffer[colorId].push(file);
-			});
+			// reset input
+			input.value = "";
 
-			// ----------------------------
-			// 2️⃣ PREVIEW FIRST IMAGE
-			// ----------------------------
-			let file = input.files[0];
-			let reader = new FileReader();
+			// reset preview
+			let $box = $card.find('.image-box');
+			let $img = $box.find('.color-image-preview');
+			let $icon = $box.find('.placeholder-icon');
 
-			const maxSizeKB = 60;
-			const maxSizeBytes = maxSizeKB * 1024;
-
-			if (file.size > maxSizeBytes) {
-
-				toastr.error("Image size must not exceed 60 KB");
-
-				// Reset input
-				input.value = "";
-
-				// Reset preview
-				preview.src = "";
-				preview.classList.add("d-none");
-				placeholder.classList.remove("d-none");
-
-				clearBtn.style.display = "none";
-				viewBtn.style.display = "none";
-
-				$("#ClearImage").val("false");
-
-				return;
-			}
-
-			reader.onload = function (e) {
-
-				let $box = $card.find('.image-box');
-				let $img = $box.find('.color-image-preview');
-				let $icon = $box.find('.placeholder-icon');
-
-				$img.attr('src', e.target.result)
-					.removeClass('d-none');
-
-				$icon.addClass('d-none');
-			};
-
-			reader.readAsDataURL(file);
-
-			// ----------------------------
-			// 3️⃣ RESET INPUT (important)
-			// ----------------------------
-			input.value = '';
-
-			toastr.success('Image selected. Click "Add Image".');
-		});
-
-
-		$(document).on('click', '.btn-clear', function (e) {
-		e.preventDefault();
-		e.stopPropagation();
-
-		const $item  = $(this).closest('.inline-block');   // 🔥 IMPORTANT (whole block)
-		const $img   = $(this).closest('.color-image-item');
-		const $card  = $(this).closest('.color-card');
-		const colorId = $card.data('color-id');
-
-		// ============================================
-		// 🟢 THUMBNAIL REMOVE (new or existing)
-		// ============================================
-		if ($img.length) {
-
-			const fileName = $img.data('filename');
-
-			// 🔴 new uploaded image
-			if (fileName) {
-				if (!removedNewImages[colorId]) {
-					removedNewImages[colorId] = new Set();
-				}
-				removedNewImages[colorId].add(fileName);
-			}
-
-			// 🔥 REMOVE WHOLE BLOCK (image + radio + hidden)
-			$item.remove();
+			$img.attr('src','').addClass("d-none");
+			$icon.removeClass("d-none");
 
 			return;
 		}
 
 		// ============================================
-		// 🟡 MAIN PREVIEW CLEAR (big box)
+		// 🟢 BUFFER FILE ONLY IF VALID
 		// ============================================
-		const $wrapper = $(this).closest('.image-box-wrapper');
+		if (!colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] = [];
+		}
 
-		$wrapper.find('.color-image-input').val('');
-		$wrapper.find('.color-image-preview')
-			.attr('src', '')
-			.addClass('d-none');
+		colorImagesBuffer[colorId].push(file);
 
-		$wrapper.find('.placeholder-icon').removeClass('d-none');
+		// ============================================
+		// 🟢 PREVIEW
+		// ============================================
+		let reader = new FileReader();
+
+		reader.onload = function (e) {
+
+			let $box = $card.find('.image-box');
+			let $img = $box.find('.color-image-preview');
+			let $icon = $box.find('.placeholder-icon');
+
+			$img.attr('src', e.target.result).removeClass('d-none');
+			$icon.addClass('d-none');
+		};
+
+		reader.readAsDataURL(file);
+
+		// reset input (allow reselect same file)
+		input.value = '';
+
+		toastr.success('Image selected. Click "Add Image".');
+	});
+
+
+
+		$(document).on('click', '.btn-clear', function (e) {
+
+			e.preventDefault();
+			e.stopPropagation();
+
+			const $card   = $(this).closest('.color-card');
+			const colorId = $card.data('color-id');
+
+			// ============================================
+			// 🟥 REMOVE ALL FILES FROM BUFFER (MAIN FIX)
+			// ============================================
+			if (colorImagesBuffer[colorId]) {
+				colorImagesBuffer[colorId] = [];   // 🔥 EMPTY BUFFER
+			}
+
+			// ============================================
+			// 🟥 CLEAR FILE INPUT
+			// ============================================
+			const $fileInput = $card.find('.color-image-input');
+			$fileInput.val('');
+			$fileInput.get(0).value = '';
+
+			// ============================================
+			// 🟥 REMOVE ALL THUMBNAILS
+			// ============================================
+			$card.find('.color-image-list').html('');
+
+			// ============================================
+			// 🟥 RESET PREVIEW
+			// ============================================
+			const $preview = $card.find('.color-image-preview');
+			const $icon    = $card.find('.placeholder-icon');
+
+			$preview.attr('src','').addClass('d-none');
+			$icon.removeClass('d-none');
+
 	});
 
 
