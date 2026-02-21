@@ -10,6 +10,14 @@ namespace TsunamiTattooSupply.DTO
 		 
 		public int ProductID { get; set; }
 		 
+		public int ProductTypeID { get; set; }
+
+		public string ProductTypeDescription { get; set; }
+
+		public int ProductDetailID { get; set; }
+
+		public int ProductDetailDescription { get; set; }
+
 		public int SizeID { get; set; }
 		 
 		public int CountryID { get; set; }

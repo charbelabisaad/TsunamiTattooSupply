@@ -1179,10 +1179,10 @@
 				 style="width:100%;height:100%;object-fit:contain;background:#fff;border:1px solid #ccc;">
 
 			<div class="image-overlay d-flex justify-content-center align-items-center">
-				<button type="button" class="overlay-btn btn-view">
+				<button type="button" class="overlay-btn btn-view-image">
 					<i class="fas fa-eye"></i>
 				</button>
-				<button type="button" class="overlay-btn btn-clear">
+				<button type="button" class="overlay-btn btn-clear-image">
 					<i class="fas fa-times"></i>
 				</button>
 			</div>
@@ -1298,7 +1298,80 @@
 		toastr.success('Image selected. Click "Add Image".');
 	});
 
+		$(document).on('click', '.btn-view-image', function (e) {
 
+			e.preventDefault();
+			e.stopPropagation();
+
+			let $imageItem = $(this).closest('.color-image-item');
+			let imgSrc = $imageItem.find('img').attr('src');
+
+			if (!imgSrc) return;
+
+			// 🔵 open preview modal or new tab
+			showImagePreview(imgSrc);
+
+		});
+
+	function showImagePreview(src){
+
+		let html = `
+		<div class="modal fade" id="imagePreviewModal" tabindex="-1">
+			<div class="modal-dialog modal-dialog-centered modal-lg">
+				<div class="modal-content bg-dark">
+
+					<div class="modal-header border-0">
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+					</div>
+
+					<div class="modal-body text-center">
+						<img src="${src}" style="max-width:100%; max-height:70vh; border-radius:10px;">
+					</div>
+
+				</div>
+			</div>
+		</div>`;
+
+		$("#imagePreviewModal").remove();
+		$("body").append(html);
+		$("#imagePreviewModal").modal("show");
+	}
+
+		$(document).on('click', '.btn-clear-image', function (e) {
+
+		e.preventDefault();
+		e.stopPropagation();
+
+		let $imageItem = $(this).closest('.color-image-item');
+		let $card      = $(this).closest('.color-card');
+
+		let colorId  = $card.data('color-id');
+		let fileName = $imageItem.data('filename');
+		let tempId   = $imageItem.data('temp-id');
+
+		// =====================================
+		// 🟥 Remove from UI
+		// =====================================
+		$imageItem.closest('.inline-block').remove();
+
+		// =====================================
+		// 🟥 Remove from buffer
+		// =====================================
+		if (colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] =
+				colorImagesBuffer[colorId].filter(f => f.name !== fileName);
+		}
+
+		// =====================================
+		// 🟥 Prevent re-adding same file
+		// =====================================
+		if (!removedNewImages[colorId]) {
+			removedNewImages[colorId] = new Set();
+		}
+
+		removedNewImages[colorId].add(fileName);
+
+	});
 
 		$(document).on('click', '.btn-clear', function (e) {
 
@@ -1581,7 +1654,10 @@
 
 
 		function listProductPrice(ProductID){
-			   if (!ProductID) return;
+
+		  if (!ProductID) return;
+
+			if (!ProductID) return;
 
 			$.ajax({
 				url: '@Url.Action("GetProductSizesPrice", "Products")',
@@ -1599,19 +1675,32 @@
 
 					res.data.forEach(size => {
 
+						   let key = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
+
 						html += `
 						<div class="variation-card mb-2">
 
-							<div class="variation-header p-2 fw-bold bg-light">
-								<div>
-									<span class="text-primary font-weight-bold">${size.sizeDescription}</span> -
-									<span class="text-muted font-italic font-weight-normal text-left">Rank: ${size.sizeRank}</span>
-								</div>
+								<div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
 
-								<input type="hidden"
-									   name="ProductSizeID[${size.sizeID}]"
-									   value="${size.sizeID}">
-							</div>
+									<div>
+										<span class="badge bg-primary me-1">${size.productTypeDescription}</span>
+										<i class="fas fa-arrow-right text-muted mx-1"></i>
+
+										<span class="badge bg-info me-1">${size.productDetailDescription}</span>
+										<i class="fas fa-arrow-right text-muted mx-1"></i>
+
+										<span class="badge bg-success">${size.sizeDescription}</span>
+									</div>
+
+									<div>
+										<span class="text-muted small">Rank: ${size.sizeRank}</span>
+									</div>
+
+									<input type="hidden" name="ProductTypeID[${key}]" value="${size.productTypeID}">
+									<input type="hidden" name="ProductDetailID[${key}]" value="${size.productDetailID}">
+									<input type="hidden" name="SizeID[${key}]" value="${size.sizeID}">
+
+								</div>
 
 							<div class="variation-body p-2">
 
@@ -1619,22 +1708,21 @@
 									<div class="col-12 col-md-4">
 										<label>Sale (%)</label>
 										<input type="number" step="0.01"
-											name="ProductSizeSale[${size.sizeID}]"
+												name="ProductSizeSale[${key}]"
 											class="form-control form-control-sm"
 											value="${size.sale ?? 0}">
 									</div>
-									 
+
 						`;
 
 						// =========================================
 						// 🔵 CREATE MAP OF EXISTING PRICES
 						// =========================================
 						let priceMap = {};
-						if (size.productSizePrice) {
-							size.productSizePrice.forEach(p => {
-								priceMap[p.currencyID] = p;
-							});
-						}
+
+						(size.productSizePrice || []).forEach(p => {
+							priceMap[p.currencyID] = p;
+						});
 
 						// =========================================
 						// 🔵 LOOP ALL CURRENCIES (IMPORTANT)
@@ -1648,31 +1736,36 @@
 
 							html += `
 
-
 									<input type="hidden"
-										   name="PriceCurrencyID[${size.sizeID}][]"
+											   name="PriceCurrencyID[${key}][]"
 										   value="${currency.id}">
 
-									<input type="hidden" name="CurrencyCountryID[${size.sizeID}][]"
+										<input type="hidden" name="CurrencyCountryID[${key}][]"
 											value="${currency.countryID}" />
 
 								<div class="col-12 col-md-4">
 									<label>Amount (${currency.code})</label>
 									<input type="number" step="0.01"
 										   class="form-control form-control-sm price-input"
+											data-type="${size.productTypeID}"
+											data-detail="${size.productDetailID}"
 											data-size="${size.sizeID}"
+											data-key="${key}"
 											data-currency="${currency.id}"
-										   name="Price[${size.sizeID}][${currency.id}]"
+											   name="Price[${key}][${currency.id}]"
 										   value="${amount}">
 								</div>
 
 								<div class="col-12 col-md-4">
 										<label>Amount Net (${currency.code})</label>
-									<input type="number" step="0.01" 
-											   class="form-control form-control-sm price-net-input"
+									<input type="number" step="0.01"
+											class="form-control form-control-sm price-net-input"
+											data-type="${size.productTypeID}"
+											data-detail="${size.productDetailID}"
 											data-size="${size.sizeID}"
+											data-key="${key}"
 											data-currency="${currency.id}"
-										   name="PriceNet[${size.sizeID}][${currency.id}]"
+											   name="PriceNet[${key}][${currency.id}]"
 										   value="${amountNet}">
 								</div>
 
@@ -1690,6 +1783,7 @@
 					toastr.error("Server error loading prices");
 				}
 			});
+
 		}
 
 	 
@@ -2216,13 +2310,15 @@
 				let detailId = $(this).find(".detail-id").val() || 0;
 				let qty = $(this).find(".qty").val() || 0;
 				let barcode = $(this).find(".barcode").val() || "";
-
+				let stockInUse = $(this).find('.useinstock').is(':checked') ? 1 : 0;
+				 
 				formData.append(`StockSizeID[${index}]`, sizeId);
 				formData.append(`StockColorID[${index}]`, colorId);
 				formData.append(`StockTypeID[${index}]`, typeId);
 				formData.append(`StockDetailID[${index}]`, detailId);
 				formData.append(`StockQty[${index}]`, qty);
 				formData.append(`StockBarcode[${index}]`, barcode);
+				formData.append(`StockInUse[${index}]`, stockInUse);
 
 				index++;
 			});
@@ -2294,6 +2390,7 @@
 						<th style="width:150px">Detail</th>
 						<th style="width:100px">Qty</th>
 						<th style="width:160px">Barcode</th>
+						<th style="width:50px">Used</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -2337,19 +2434,30 @@
 							<input type="hidden" class="detail-id" value="${det.productDetailID}">
 						</td>
 
-						<td>${det.productTypeDescription}</td>
-						<td>${det.productDetailDescription}</td>
+						<td class="align-middle">${det.productTypeDescription}</td>
+						<td class="align-middle">${det.productDetailDescription}</td>
 
 						<td>
 							<input type="number"
-								   class="form-control form-control-sm qty"
-								   value="${stock.quantity}">
+								   class="form-control form-control-sm qty" min="0"
+								   value="${stock.quantity}"
+								   ${!stock.useInStock ? 'disabled' : ''}>
 						</td>
 
 						<td>
 							<input type="text"
 								   class="form-control form-control-sm barcode"
-								   value="${stock.barcode ?? ''}">
+								   value="${stock.barcode ?? ''}"
+								   ${!stock.useInStock ? 'disabled' : ''}>
+						</td>
+
+						<td class="text-center">
+								<div class="form-check form-switch d-flex justify-content-center">
+									<input type="checkbox"
+										   class="form-check-input useinstock"
+										   ${stock.useInStock ? 'checked' : ''}
+										   ${stock.quantity > 0 ? 'disabled' : '' }>
+								</div>
 						</td>
 
 					</tr>`;

@@ -23,6 +23,9 @@ namespace TsunamiTattooSupply.Models
 		public bool IsRead { get; set; } = false;
 
 		[Required]
+		public string Title { get; set; } = string.Empty;
+
+		[Required]
 		[Column(TypeName = "text")]
 		public string Message { get; set; }
 

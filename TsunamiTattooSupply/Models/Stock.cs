@@ -20,16 +20,19 @@ namespace TsunamiTattooSupply.Models
 		public int ProductID { get; set; }
 
 		[Required]
-		public int SizeID { get; set; }
-
-		[Required]
 		public int ProductTypeID { get; set; }
 
 		[Required]
 		public int ProductDetailID { get; set; }
 
 		[Required]
+		public int SizeID { get; set; }
+
+		[Required]
 		public int ColorID { get; set; }
+
+		[Required]
+		public bool UseInStock { get; set; } = false;
 
 		[StringLength(50)]
 		public string Barcode { get; set; }

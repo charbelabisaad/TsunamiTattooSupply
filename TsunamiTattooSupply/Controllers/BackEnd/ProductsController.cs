@@ -14,8 +14,7 @@ using DbColor = TsunamiTattooSupply.Models.Color;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using System.Text.RegularExpressions;
-
-
+ 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	[Authorize]
@@ -50,7 +49,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			int CountryID = cts.getCountryNative().ID;
 
-			int DefaultCurrencyID = crs.getCurrencyByPriority("DFLT", 229).ID;
+			int DefaultCurrencyID = crs.getCurrencyByPriority("DFLT", 116).ID;
 			int SecondCurrencyID = crs.getCurrencyByPriority("SCND",CountryID).ID;
 
 			var vm = new ProductPageViewModel
@@ -1321,6 +1320,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						pr.ProductID,
 						pr.SizeID,
+						pr.ProductTypeID,
+						pr.ProductDetailID,
 						pr.CountryID,
 						pr.CurrencyID,
 						CurrencyCode = pr.Currency.Code,
@@ -1336,6 +1337,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Select(x => new PriceDto
 					{
 						ProductID = x.ProductID,
+						ProductTypeID = x.ProductTypeID,
+						ProductDetailID = x.ProductDetailID,
 						SizeID = x.SizeID,
 						CountryID = x.CountryID,
 						CurrencyID = x.CurrencyID,
@@ -1357,15 +1360,30 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						  && ps.StatusID == "A")
 				.GroupBy(ps => new
 				{
+					ps.ProductID,
+					ps.ProductTypeID,
+					ProductTypeDescription = ps.ProductType.Description,
+
+					ps.ProductDetailID,
+					ProductDetailDescription = ps.ProductDetail.Description,
+
 					ps.SizeID,
-					ps.Size.Description,
-					ps.Size.Rank
+					SizeDescription = ps.Size.Description,
+
+					SizeRank = ps.Size.Rank
 				})
 				.Select(g => new ProductSizeDto
 				{
 					SizeID = g.Key.SizeID,
-					SizeDescription = g.Key.Description,
-					SizeRank = g.Key.Rank,
+					SizeDescription = g.Key.SizeDescription,
+
+					ProductTypeID = g.Key.ProductTypeID,
+					ProductTypeDescription = g.Key.ProductTypeDescription,
+
+					ProductDetailID = g.Key.ProductDetailID,
+					ProductDetailDescription = g.Key.ProductDetailDescription,
+
+					SizeRank = g.Key.SizeRank,
 
 					Sale = g.OrderByDescending(x => x.CreationDate)
 							.Select(x => x.Sale)
@@ -1374,48 +1392,53 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Raise = 0,
 					ProductSizePrice = new List<PriceDto>()
 				})
-				.OrderBy(x => x.SizeRank)   // 🔥 ORDER HERE (FINAL PLACE)
+				.OrderBy(x => x.SizeRank)
 				.ToList();
-
-
-
+				 
 				// =====================================================
 				// 🔵 FAST PRICE LOOKUP
 				// =====================================================
 				var priceLookup = prices
-					.GroupBy(p => p.SizeID)
+					.GroupBy(p => new { p.SizeID, p.ProductTypeID, p.ProductDetailID })
 					.ToDictionary(g => g.Key, g => g.ToList());
 
-				foreach (var size in sizes)
-				{
-					size.ProductSizePrice = priceLookup.ContainsKey(size.SizeID)
-						? priceLookup[size.SizeID]
-						: new List<PriceDto>();
-				}
+								foreach (var size in sizes)
+								{
+									var key = new
+									{
+										size.SizeID,
+										size.ProductTypeID,
+										size.ProductDetailID
+									};
+
+									size.ProductSizePrice = priceLookup.ContainsKey(key)
+										? priceLookup[key]
+										: new List<PriceDto>();
+								}
 
 
-				// =====================================================
-				// 🔵 RETURN (FRONT WILL STAY SAME)
-				// =====================================================
-				return Json(new
-				{
-					success = true,
-					data = sizes,
-					currencies = currencies
-				});
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "GetProductSizesPrice ERROR");
+								// =====================================================
+								// 🔵 RETURN (FRONT WILL STAY SAME)
+								// =====================================================
+								return Json(new
+								{
+									success = true,
+									data = sizes,
+									currencies = currencies
+								});
+							}
+							catch (Exception ex)
+							{
+								_logger.LogError(ex, "GetProductSizesPrice ERROR");
 
-				return Json(new
-				{
-					success = false,
-					message = "Error loading Product Size Price\n\n" + ex.Message,
-					data = new List<ProductSizeDto>()
-				});
-			}
-		}
+								return Json(new
+								{
+									success = false,
+									message = "Error loading Product Size Price\n\n" + ex.Message,
+									data = new List<ProductSizeDto>()
+								});
+							}
+						}
  
 		[HttpPost]
 		public IActionResult SavePrice()
@@ -1428,48 +1451,52 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				DateTime now = DateTime.UtcNow;
 
 				var form = Request.Form;
-
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// ================================================
-				// 🔵 LOOP SIZES
-				// ================================================
-				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductSizeID[")))
+				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductTypeID[")))
 				{
-					int sizeId = Convert.ToInt32(form[key]);
+					string cleanKey = key.Replace("ProductTypeID[", "").Replace("]", "");
 
-					// update sale & raise
-					decimal sale = Convert.ToDecimal(form[$"ProductSizeSale[{sizeId}]"]);
-					decimal raise = 0;
+					int typeId = Convert.ToInt32(form[$"ProductTypeID[{cleanKey}]"]);
+					int detailId = Convert.ToInt32(form[$"ProductDetailID[{cleanKey}]"]);
+					int sizeId = Convert.ToInt32(form[$"SizeID[{cleanKey}]"]);
 
-					var productSize = _dbContext.ProductsSizes
-						.FirstOrDefault(x => x.ProductID == productId && x.SizeID == sizeId && x.DeletedDate == null);
+					decimal sale = Convert.ToDecimal(form[$"ProductSizeSale[{cleanKey}]"]);
+
+				
+
+					var productSize = _dbContext.ProductsSizes.FirstOrDefault(x =>
+						x.ProductID == productId &&
+						x.SizeID == sizeId &&
+						x.ProductTypeID == typeId &&
+						x.ProductDetailID == detailId &&
+						x.DeletedDate == null);
 
 					if (productSize != null)
 					{
 						productSize.Sale = sale;
-						productSize.Raise = raise;
+						productSize.Raise = 0;
 						productSize.EditUserID = userId;
 						productSize.EditDate = now;
 					}
 
-					// ================================================
-					// 🔵 LOOP CURRENCIES FOR THIS SIZE
-					// ================================================
-					var currencyIds = form[$"PriceCurrencyID[{sizeId}][]"];
+					var currencyIds = form[$"PriceCurrencyID[{cleanKey}][]"];
 
 					foreach (var currencyIdStr in currencyIds)
 					{
 						int currencyId = Convert.ToInt32(currencyIdStr);
 
-						decimal amount = Convert.ToDecimal(form[$"Price[{sizeId}][{currencyId}]"]);
-						decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{sizeId}][{currencyId}]"]);
-						int countryId = Convert.ToInt32(form[$"CurrencyCountryID[{sizeId}][]"]
-											.FirstOrDefault()); // adjust if many countries
+						decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}][{currencyId}]"]);
+						decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}][{currencyId}]"]);
 
-						// check existing price
+						int countryId = Convert.ToInt32(
+							form[$"CurrencyCountryID[{cleanKey}][]"].FirstOrDefault()
+						);
+
 						var existing = _dbContext.Prices.FirstOrDefault(p =>
 							p.ProductID == productId &&
+							p.ProductTypeID == typeId &&
+							p.ProductDetailID == detailId &&
 							p.SizeID == sizeId &&
 							p.CurrencyID == currencyId &&
 							p.CountryID == countryId &&
@@ -1477,7 +1504,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 						if (existing != null)
 						{
-							// ================= UPDATE =================
 							existing.Amount = amount;
 							existing.AmountNet = amountNet;
 							existing.EditUserID = userId;
@@ -1485,10 +1511,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						}
 						else
 						{
-							// ================= INSERT =================
-							var newPrice = new Price
+							_dbContext.Prices.Add(new Price
 							{
 								ProductID = productId,
+								ProductTypeID = typeId,
+								ProductDetailID = detailId,
 								SizeID = sizeId,
 								CurrencyID = currencyId,
 								CountryID = countryId,
@@ -1497,9 +1524,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								StatusID = "A",
 								CreatedUserID = userId,
 								CreationDate = now
-							};
-
-							_dbContext.Prices.Add(newPrice);
+							});
 						}
 					}
 				}
@@ -1512,17 +1537,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			catch (Exception ex)
 			{
 				transaction.Rollback();
+				_logger.LogError(ex, "SavePrice ERROR");
 
-				_logger.LogError(ex, "Saving Product [ERROR]", ex);
-
-				return Json(new
-				{
-					success = false,
-					message = "Error saving price\n\n" + ex.Message
-				});
+				return Json(new { success = false, message = ex.Message });
 			}
 		}
-
 		public IActionResult GetProductStock(int productId)
 		{
 			try
@@ -1596,7 +1615,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						productTypeDescription = s.ProductType.Description,
 						productDetailDescription = s.ProductDetail.Description,
 						quantity = s.Quantity,
-						barcode = s.Barcode
+						barcode = s.Barcode,
+						useInStock = s.UseInStock,
 					})
 					.ToList();
 
@@ -1649,6 +1669,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					string barcode = form[$"StockBarcode[{rowIndex}]"];
 
+					bool useInStock = form[$"StockInUse[{rowIndex}]"] == "1";
+					 
 					// =====================================================
 					// 🔵 FIND EXISTING
 					// =====================================================
@@ -1668,6 +1690,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						existing.Quantity = qty;
 						existing.Barcode = barcode;
+						existing.UseInStock = useInStock;
 						existing.EditUserID = userId;
 						existing.EditDate = now;
 					}
@@ -1685,6 +1708,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							ProductDetailID = detailId,
 							Quantity = qty,
 							Barcode = barcode,
+							UseInStock = useInStock,
 							CreatedUserID = userId,
 							CreationDate = now
 						};
