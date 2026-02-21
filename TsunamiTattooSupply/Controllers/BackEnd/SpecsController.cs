@@ -86,7 +86,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			catch (Exception ex)
 			{
 				specs = null;
-				_logger.LogError(ex, "Fetch Specs [ERROR]!");
+				_logger.LogError(ex, "Fetch Specs [ERROR]!", ex);
 			}
 			return specs;
 

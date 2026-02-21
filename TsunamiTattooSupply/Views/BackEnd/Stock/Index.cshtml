@@ -21,7 +21,314 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+
+            <div class="card">
+
+                <div class="card-header font-weight-bold">Stock List</div>
+
+                <div class="card-body">
+
+                    <div class="col-sm-12 mt-3">
+
+                        <table id="tableStock" class="table table-striped w-100">
+                            <thead>
+                                <tr style="vertical-align:middle"> 
+                                    <th>Product</th>
+                                    <th style="width:100px">Brand</th>
+                                    <th style="width:200px">Color</th>
+                                    <th style="width:150px">Type</th>
+                                    <th style="width:150px">Detail</th>
+                                    <th style="width:150px">Size</th>
+                                    <th style="width:100px">Quantity</th> 
+                                    <th style="width:150px">Barcode</th>
+                                    <th style="width:100px">Save</th>
+                                </tr>
+                            </thead>
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </section>
+
+    @section Scripts{
+
+        <script>
+
+            $(document).ready( function(){
+
+                var tableStock = $('#tableStock').DataTable({
+                    processing: true,
+                    responsive: true,
+
+                    ajax: {
+                        url: '@Url.Action("ListGetStock", "Stock")',
+                        type: 'GET',
+                        dataSrc: function (json) {
+
+                            if (json && json.success === false) {
+                                toastr.error(json.message || "Failed to load stock.");
+                                return [];
+                            }
+
+                            if (!json || !json.data) {
+                                toastr.error("Unexpected response from server.");
+                                return [];
+                            }
+
+                            return json.data;
+                        }
+                    },
+
+                    // SAME DOM layout as Groups
+                    dom:
+                        '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                        '<"row mt-2 mb-2 d-flex align-items-center"' +
+                        '<"col-md-6 d-flex align-items-center" l>' +
+                        '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                        '<"col-md-2 d-flex justify-content-end" p>' +
+                        '>',
+
+
+                    language: {
+                        search: "",
+                        searchPlaceholder: "Search stock..."
+                    },
+
+                    buttons: [
+                        {
+                            extend: 'copy',
+                            className: 'btn btn-secondary btn-sm',
+                            exportOptions: { columns: ':visible:not(.no-export)' },
+                            text: '<i class="fas fa-copy"></i> Copy'
+                        },
+                           {
+                                extend: 'excel',
+                                className: 'btn btn-success btn-sm',
+                                text: '<i class="fas fa-file-excel"></i> Excel',
+                                exportOptions: {
+                                    columns: ':visible:not(.no-export)',
+                                               format: {
+                                                body: function (data, row, column, node) {
+
+                                                    // 1️⃣ If textbox → return value
+                                                    var input = $(node).find('input');
+                                                    if (input.length > 0) {
+                                                        return input.val();
+                                                    }
+
+                                                    // 2️⃣ If color column contains HTML → return only text
+                                                    var text = $(node).text().trim();
+                                                    if (text !== "") {
+                                                        return text;
+                                                    }
+
+                                                    return data;
+                                                }
+                                            }
+                                }
+                            },
+                            {
+                            extend: 'pdfHtml5',
+                            className: 'btn btn-danger btn-sm',
+                            text: '<i class="fas fa-file-pdf"></i> PDF',
+                            orientation: 'landscape',
+                            pageSize: 'A4',
+
+                            exportOptions: {
+                                columns: ':visible:not(.no-export)',
+                                format: {
+                                    body: function (data, row, column, node) {
+
+                                        // textbox values
+                                        var input = $(node).find('input');
+                                        if (input.length > 0) {
+                                            return input.val();
+                                        }
+
+                                        // remove html → keep text only
+                                        return $(node).text().trim();
+                                    }
+                                }
+                            },
+
+                            customize: function (doc) {
+
+                                var tableBody = doc.content[1].table.body;
+                                var colCount = tableBody[0].length;
+
+                                var colWidths = [];
+                                for (var i = 0; i < colCount; i++) colWidths.push('*');
+
+                                doc.content[1].table.widths = colWidths;
+
+                                doc.styles.tableBodyEven.alignment = 'center';
+                                doc.styles.tableBodyOdd.alignment = 'center';
+                                doc.styles.tableHeader.alignment = 'center';
+                                doc.defaultStyle.fontSize = 8;
+                                doc.pageMargins = [10, 10, 10, 10];
+                            }
+                        },
+                        {
+                            extend: 'print',
+                            className: 'btn btn-dark btn-sm',
+                            exportOptions: { columns: ':visible:not(.no-export)' },
+                            text: '<i class="fas fa-print"></i> Print'
+                        },
+                        {
+                            text: '<i class="fas fa-sync"></i> Refresh',
+                            className: 'btn btn-primary btn-sm',
+                            action: function () {
+                                tableStock.ajax.reload();
+                            }
+                        }
+                    ],
+
+                    columns: [
+
+                        // 🔵 PRODUCT
+                        {
+                            data: "productName",
+                            className: "align-middle"
+                        },
+
+                        {
+                            data: "groupName",
+                            className: "align-middle"
+                        },
+
+                        // 🔵 COLOR
+                        {
+                            data: "colorName",
+                            className: "align-middle",
+                            render: function(data, type, row){
+                                return `<i class="fas fa-square" style="color:#${row.colorCode}; font-size:18px"></i> ${data}`;
+                            }
+                        },
+
+                        // 🔵 TYPE
+                        {
+                            data: "productTypeDescription",
+                            className: "align-middle"
+                        },
+
+                        // 🔵 SIZE
+                        {
+                            data: "sizeDescription",
+                            className: "align-middle"
+                        },
+
+                        // 🔵 DETAIL
+                        {
+                            data: "productDetailDescription",
+                            className: "align-middle"
+                        },
+
+                        // 🔵 QUANTITY EDITABLE
+                        {
+                            data: "quantity",
+                            className: "align-middle text-center",
+                            render: function(data, type, row){
+                                return `
+                                <input type="number"
+                                       class="form-control form-control-sm w-100 stockquantity"
+                                       data-id="${row.id}" min="0"
+                                       value="${data ?? 0}"  
+                                       style="width:90px;margin:auto;text-align:center">
+                                `;
+                            }
+                        },
+
+                        // 🔵 BARCODE EDITABLE
+                        {
+                            data: "barcode",
+                            className: "align-middle text-center",
+                            render: function(data, type, row){
+                                return `
+                                <input type="text"
+                                       class="form-control form-control-sm w-100 stockbarcode"
+                                       data-id="${row.id}"
+                                       value="${data ?? ''}" placeholder="Enter a barcode"
+                                       style="width:140px;margin:auto;text-align:center">
+                                `;
+                            }
+                        },
+
+                        // 🔵 SAVE BUTTON
+                        {
+                            data: null,
+                            orderable: false,
+                            searchable: false,
+                            className: "no-export text-center align-middle",
+                            render: function(data,type,row){
+                                return `
+                                <button class="btn btn-primary btn-sm btnSaveStock" style="width:100px"
+                                        data-id="${row.id}">
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+                                `;
+                            }
+                        }
+                    ],
+
+                    order:[[0,"asc"]]
+                });
+
+                // ================= SAVE STOCK =================
+                $(document).on("click",".btnSaveStock",function(){
+
+                    let btn = $(this)
+
+                    let ID = $(this).data("id");
+
+                    let row = $(this).closest("tr");
+
+                    let qty = row.find(".stockquantity").val();
+                    let barcode = row.find(".stockbarcode").val();
+                              // 🔵 show spinner + disable
+                    btn.prop("disabled", true);
+                    btn.html('<span class="spinner-border spinner-border-sm"></span> Saving');
+
+                    $.ajax({
+                        url: '@Url.Action("SaveStock", "Stock")',
+                        type: 'POST',
+                        data: {
+                            ID:ID,
+                            quantity:qty,
+                            barcode:barcode
+                        },
+
+                        success:function(res){
+
+
+                            if(res.success){
+                                toastr.success("Saved successfully");
+
+                            }
+                            else{
+                                toastr.error(res.message);
+                            }
+                        },
+                        error:function(){
+                            toastr.error("Server error");
+                        },
+                        complete:function(){
+               
+                            btn.prop("disabled", false);
+                            btn.html('<i class="fas fa-save"></i> Save');
+                        }
+                    });
+
+                });
+
+            });
+
+        </script>
+
+    }
 
 </div>
