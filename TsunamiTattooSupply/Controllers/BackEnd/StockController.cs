@@ -47,44 +47,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<StockDto> GetStock()
 		{
-
 			List<StockDto> stocks = new List<StockDto>();
 
 			try
 			{
+				stocks = (
+					from s in _dbContext.Stocks
+					join ps in _dbContext.ProductsSizes
+						on new
+						{
+							s.ProductID,
+							s.SizeID,
+							s.ProductTypeID,
+							s.ProductDetailID
+						}
+						equals new
+						{
+							ps.ProductID,
+							ps.SizeID,
+							ps.ProductTypeID,
+							ps.ProductDetailID
+						}
 
-				stocks = _dbContext.Stocks
-					.Where(s => s.UseInStock == true
-					&  s.DeletedDate == null)
-					.Select(s => new StockDto
+					where s.UseInStock == true
+						&& s.DeletedDate == null
+						&& ps.DeletedDate == null
+						&& ps.StatusID == "A"
+
+					select new StockDto
 					{
 						ID = s.ID,
 						ProductID = s.ProductID,
 						ProductName = s.Product.Name,
+
 						GroupID = s.Product.Group.ID,
 						GroupName = s.Product.Group.Name,
+
 						ProductTypeID = s.ProductType.ID,
 						ProductTypeDescription = s.ProductType.Description,
+
 						ProductDetailID = s.ProductDetail.ID,
 						ProductDetailDescription = s.ProductDetail.Description,
+
 						SizeID = s.Size.ID,
 						SizeDescription = s.Size.Description,
+
 						ColorID = s.Color.ID,
 						ColorName = s.Color.Name,
 						ColorCode = s.Color.Code,
+
 						Quantity = s.Quantity,
 						Barcode = s.Barcode
-
-					}).ToList();
-
+					}
+				).ToList();
 			}
-			catch (Exception ex) {
-
+			catch (Exception ex)
+			{
 				stocks = null;
-
 				_logger.LogError(ex, "Fetch Stock! [ERROR]");
-
 			}
+
 			return stocks;
 		}
 

@@ -690,6 +690,44 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						{
 							ps.DeletedUserID = userId;
 							ps.DeletedDate = now;
+
+							// ===============================================
+							// 🔥 CASCADE SOFT DELETE STOCKS
+							// ===============================================
+							var relatedStocks = _dbContext.Stocks
+								.Where(s =>
+									s.ProductID == ps.ProductID &&
+									s.ProductTypeID == ps.ProductTypeID &&
+									s.ProductDetailID == ps.ProductDetailID &&
+									s.SizeID == ps.SizeID &&
+									s.DeletedDate == null)
+								.ToList();
+
+							foreach (var stock in relatedStocks)
+							{
+								stock.DeletedUserID = userId;
+								stock.DeletedDate = now;
+							}
+
+
+							// ===============================================
+							// 🔥 CASCADE SOFT DELETE PRICES
+							// ===============================================
+							var relatedPrices = _dbContext.Prices
+								.Where(p =>
+									p.ProductID == ps.ProductID &&
+									p.ProductTypeID == ps.ProductTypeID &&
+									p.ProductDetailID == ps.ProductDetailID &&
+									p.SizeID == ps.SizeID &&
+									p.DeletedDate == null)
+								.ToList();
+
+							foreach (var price in relatedPrices)
+							{
+								price.DeletedUserID = userId;
+								price.DeletedDate = now;
+							}
+
 						}
 					}
 				}
@@ -1603,9 +1641,28 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 🔵 STOCK
 				// =====================================================
-				var stocks = _dbContext.Stocks
-					.Where(s => s.ProductID == productId && s.DeletedDate == null)
-					.Select(s => new
+				var stocks = (
+					from s in _dbContext.Stocks
+					join ps in _dbContext.ProductsSizes
+						on new
+						{
+							s.ProductID,
+							s.SizeID,
+							s.ProductTypeID,
+							s.ProductDetailID
+						}
+						equals new
+						{
+							ps.ProductID,
+							ps.SizeID,
+							ps.ProductTypeID,
+							ps.ProductDetailID
+						}
+					where s.ProductID == productId
+						  && s.DeletedDate == null
+						  && ps.DeletedDate == null
+						  && ps.StatusID == "A"
+					select new
 					{
 						id = s.ID,
 						sizeID = s.SizeID,
@@ -1616,10 +1673,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						productDetailDescription = s.ProductDetail.Description,
 						quantity = s.Quantity,
 						barcode = s.Barcode,
-						useInStock = s.UseInStock,
-					})
-					.ToList();
-
+						useInStock = s.UseInStock
+					}
+				).ToList();
 
 				// =====================================================
 				return Json(new
@@ -1676,10 +1732,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					// =====================================================
 					var existing = _dbContext.Stocks.FirstOrDefault(x =>
 						x.ProductID == productId &&
-						x.SizeID == sizeId &&
-						x.ColorID == colorId &&
 						x.ProductTypeID == typeId &&
 						x.ProductDetailID == detailId &&
+						x.SizeID == sizeId &&
+						x.ColorID == colorId &&
 						x.DeletedDate == null);
  
 
@@ -1702,10 +1758,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						var stock = new Stock
 						{
 							ProductID = productId,
-							SizeID = sizeId,
-							ColorID = colorId,
 							ProductTypeID = typeId,
 							ProductDetailID = detailId,
+							SizeID = sizeId,
+							ColorID = colorId,
 							Quantity = qty,
 							Barcode = barcode,
 							UseInStock = useInStock,
