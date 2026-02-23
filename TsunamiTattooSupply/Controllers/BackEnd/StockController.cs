@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 
@@ -115,10 +116,43 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
-				var stock = _dbContext.Stocks.FirstOrDefault(x => x.ID == id);
+				var stock = _dbContext.Stocks
+					.Include(x => x.Product)
+					.FirstOrDefault(x => x.ID == id);
+
 				if (stock == null)
 					return Json(new { success = false, message = "Stock not found" });
 
+				// =====================================================
+				// 🔴 GLOBAL BARCODE CHECK
+				// =====================================================
+				if (!string.IsNullOrWhiteSpace(barcode))
+				{
+					var existingBarcode = _dbContext.Stocks
+						.Include(x => x.Product)
+						.Where(x => x.Barcode == barcode
+									&& x.DeletedDate == null
+									&& x.ID != id) // exclude same row
+						.Select(x => new
+						{
+							x.ProductID,
+							ProductName = x.Product.Name
+						})
+						.FirstOrDefault();
+
+					if (existingBarcode != null)
+					{
+						return Json(new
+						{
+							success = false,
+							message = $"Barcode '{barcode}' already exists in product: {existingBarcode.ProductName}"
+						});
+					}
+				}
+
+				// =====================================================
+				// 🟢 UPDATE
+				// =====================================================
 				stock.Quantity = quantity;
 				stock.Barcode = barcode;
 
@@ -131,7 +165,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				_logger.LogError(ex, "SaveStock error");
 				return Json(new { success = false, message = ex.Message });
 			}
-
 		}
 	}
 }

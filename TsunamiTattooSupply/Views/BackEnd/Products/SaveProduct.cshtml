@@ -2289,67 +2289,132 @@
 		});
 	});
 
-	 $(document).on("click", "#btnSaveProductStock", function () {
-		  
-			let btn = $("#btnSaveProductStock");
-			let spinner = $("#btnSaveProductStockSpinner");
+	$(document).on("click", "#btnSaveProductStock", function () {
 
-			btn.prop("disabled", true);
-			spinner.removeClass("d-none");
+	let btn = $("#btnSaveProductStock");
+	let spinner = $("#btnSaveProductStockSpinner");
 
-			let formData = new FormData();
-			formData.append("ProductID", $("#ProductID").val());
+	// =========================================
+	// 🛑 PREVENT DOUBLE CLICK
+	// =========================================
+	if (btn.data("loading")) return;
+	btn.data("loading", true);
 
-			let index = 0;
+	// =========================================
+	// 🔵 CHECK DUPLICATE BARCODE INSIDE PAGE
+	// =========================================
+	let barcodeMap = {};
+	let hasDuplicate = false;
 
-			$("#ProductStock tbody tr").each(function () {
+	$(".barcode").each(function () {
 
-				let sizeId = $(this).find(".size-id").val();
-				let colorId = $(this).find(".color-id").val();
-				let typeId = $(this).find(".type-id").val() || 0;
-				let detailId = $(this).find(".detail-id").val() || 0;
-				let qty = $(this).find(".qty").val() || 0;
-				let barcode = $(this).find(".barcode").val() || "";
-				let stockInUse = $(this).find('.useinstock').is(':checked') ? 1 : 0;
-				 
-				formData.append(`StockSizeID[${index}]`, sizeId);
-				formData.append(`StockColorID[${index}]`, colorId);
-				formData.append(`StockTypeID[${index}]`, typeId);
-				formData.append(`StockDetailID[${index}]`, detailId);
-				formData.append(`StockQty[${index}]`, qty);
-				formData.append(`StockBarcode[${index}]`, barcode);
-				formData.append(`StockInUse[${index}]`, stockInUse);
+		let input = $(this);
+		let value = input.val().trim();
 
-				index++;
-			});
+		input.removeClass("border-danger");
 
-			$.ajax({
-				url: '@Url.Action("SaveStock", "Products")',
-				type: "POST",
-				data: formData,
-				processData: false,
-				contentType: false,
+		if (!value) return;
 
-				success: function (res) {
+		if (barcodeMap[value]) {
+			input.addClass("border-danger");
+			barcodeMap[value].addClass("border-danger");
+			hasDuplicate = true;
+		} else {
+			barcodeMap[value] = input;
+		}
+	});
 
-					btn.prop("disabled", false);
-					spinner.addClass("d-none");
+	if (hasDuplicate) {
+		toastr.error("Duplicate barcode exists in table");
+		btn.data("loading", false);
+		return;
+	}
 
-					if (res.success) {
-						toastr.success("Stock saved");
-						loadProductStock($("#ProductID").val());
-					} else {
-						toastr.error(res.message);
-					}
-				},
-				error: function () {
-					btn.prop("disabled", false);
-					spinner.addClass("d-none");
-					toastr.error("Server error");
+	// =========================================
+	// 🔵 PREPARE FORM DATA
+	// =========================================
+	btn.prop("disabled", true);
+	spinner.removeClass("d-none");
+
+	let formData = new FormData();
+	formData.append("ProductID", $("#ProductID").val());
+
+	let index = 0;
+
+	$("#ProductStock tbody tr").each(function () {
+
+		let row = $(this);
+
+		let sizeId = row.find(".size-id").val();
+		let colorId = row.find(".color-id").val();
+		let typeId = row.find(".type-id").val() || 0;
+		let detailId = row.find(".detail-id").val() || 0;
+		let qty = row.find(".qty").val() || 0;
+		let barcode = row.find(".barcode").val() || "";
+		let stockInUse = row.find('.useinstock').is(':checked') ? 1 : 0;
+
+		formData.append(`StockSizeID[${index}]`, sizeId);
+		formData.append(`StockColorID[${index}]`, colorId);
+		formData.append(`StockTypeID[${index}]`, typeId);
+		formData.append(`StockDetailID[${index}]`, detailId);
+		formData.append(`StockQty[${index}]`, qty);
+		formData.append(`StockBarcode[${index}]`, barcode);
+		formData.append(`StockInUse[${index}]`, stockInUse);
+
+		index++;
+	});
+
+	// =========================================
+	// 🔵 AJAX SAVE
+	// =========================================
+	$.ajax({
+		url: '@Url.Action("SaveStock", "Products")',
+		type: "POST",
+		data: formData,
+		processData: false,
+		contentType: false,
+
+		success: function (res) {
+
+			btn.prop("disabled", false);
+			spinner.addClass("d-none");
+			btn.data("loading", false);
+
+			if (res.success) {
+				toastr.success("Stock saved successfully");
+				loadProductStock($("#ProductID").val());
+			}
+			else {
+				toastr.error(res.message || "Error saving");
+
+				// 🔴 highlight barcode from backend message
+				if (res.message && res.message.includes("Barcode")) {
+					let barcode = res.message.split(":")[1]?.trim();
+
+					$(".barcode").each(function () {
+						if ($(this).val() === barcode) {
+							$(this).addClass("border-danger");
+							$('html,body').animate({
+								scrollTop: $(this).offset().top - 150
+							}, 400);
+						}
+					});
 				}
-			});
+			}
+		},
 
-		});
+		error: function () {
+
+			btn.prop("disabled", false);
+			spinner.addClass("d-none");
+			btn.data("loading", false);
+
+			toastr.error("Server error while saving");
+		}
+	});
+
+	});
+
 
 
 		function loadProductStock(ProductID){

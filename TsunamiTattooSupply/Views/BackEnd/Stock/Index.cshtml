@@ -285,16 +285,19 @@
 
                 // ================= SAVE STOCK =================
                 $(document).on("click",".btnSaveStock",function(){
-
-                    let btn = $(this)
-
-                    let ID = $(this).data("id");
-
-                    let row = $(this).closest("tr");
+ 
+                    let btn = $(this);
+                    let ID = btn.data("id");
+                    let row = btn.closest("tr");
 
                     let qty = row.find(".stockquantity").val();
-                    let barcode = row.find(".stockbarcode").val();
-                              // 🔵 show spinner + disable
+                    let barcodeInput = row.find(".stockbarcode");
+                    let barcode = barcodeInput.val();
+
+                    // reset border before save
+                    barcodeInput.removeClass("border-danger");
+
+                    // disable button + spinner
                     btn.prop("disabled", true);
                     btn.html('<span class="spinner-border spinner-border-sm"></span> Saving');
 
@@ -302,33 +305,38 @@
                         url: '@Url.Action("SaveStock", "Stock")',
                         type: 'POST',
                         data: {
-                            ID:ID,
-                            quantity:qty,
-                            barcode:barcode
+                            ID: ID,
+                            quantity: qty,
+                            barcode: barcode
                         },
 
                         success:function(res){
 
-
                             if(res.success){
                                 toastr.success("Saved successfully");
-
                             }
                             else{
                                 toastr.error(res.message);
+
+                                // 🔴 make border red if barcode exists
+                                if(res.message && res.message.toLowerCase().includes("barcode")){
+                                    barcodeInput.addClass("border-danger");
+                                }
                             }
                         },
+
                         error:function(){
                             toastr.error("Server error");
                         },
+
                         complete:function(){
-               
                             btn.prop("disabled", false);
                             btn.html('<i class="fas fa-save"></i> Save');
                         }
                     });
-
+            
                 });
+
 
             });
 

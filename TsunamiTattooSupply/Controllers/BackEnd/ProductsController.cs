@@ -104,7 +104,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				products = _dbContext.Products
 					.Where(p => p.DeletedDate == null)
-					.OrderBy(p => p.Name)
+					.OrderBy(p => p.Rank)
 					.Select(p => new ProductDto
 					{
 						ID = p.ID,
@@ -1726,7 +1726,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					string barcode = form[$"StockBarcode[{rowIndex}]"];
 
 					bool useInStock = form[$"StockInUse[{rowIndex}]"] == "1";
-					 
+
+					// =====================================================
+					// 🔴 GLOBAL BARCODE UNIQUE CHECK
+					// =====================================================
+					if (!string.IsNullOrWhiteSpace(barcode))
+					{
+						var existingBarcode = _dbContext.Stocks
+							.Where(x => x.Barcode == barcode && x.DeletedDate == null)
+							.Select(x => new
+							{
+								x.ProductID,
+								ProductName = x.Product.Name
+							})
+							.FirstOrDefault();
+
+						if (existingBarcode != null &&
+							!(existingBarcode.ProductID == productId))
+						{
+							return Json(new
+							{
+								success = false,
+								message = $"Barcode '{barcode}' already exists in product: <b>{existingBarcode.ProductName}</b>"
+							});
+						}
+					}
+
 					// =====================================================
 					// 🔵 FIND EXISTING
 					// =====================================================
@@ -1794,7 +1819,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		[HttpPost]
+		public IActionResult CheckBarcode(string barcode)
+		{
+			if (string.IsNullOrWhiteSpace(barcode))
+				return Json(new { exists = false });
 
+			var existing = _dbContext.Stocks
+				.Where(x => x.Barcode == barcode && x.DeletedDate == null)
+				.Select(x => new
+				{
+					x.ProductID,
+					ProductName = x.Product.Name
+				})
+				.FirstOrDefault();
+
+			if (existing != null)
+			{
+				return Json(new
+				{
+					exists = true,
+					product = existing.ProductName
+				});
+			}
+
+			return Json(new { exists = false });
+		}
 
 	}
 
