@@ -1,9 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TsunamiTattooSupply.Models
 {
 	[Table("Prices")]
+	[Index(nameof(ProductID))]
+	[Index(nameof(ProductTypeID))]
+	[Index(nameof(ProductDetailID))]
+	[Index(nameof(SizeID))]
+	[Index(nameof(ColorID))] 
+	[Index(nameof(StatusID))]
 	public class Price
 	{
 		[Key]
@@ -21,6 +28,8 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public int SizeID { get; set; }
+		 
+		public int? ColorID { get; set; } 
 
 		[Required]
 		public int CountryID { get; set; }
@@ -57,6 +66,9 @@ namespace TsunamiTattooSupply.Models
 		[ForeignKey("SizeID")]
 		public Size Size { get; set; }
 
+		[ForeignKey("ColorID")]
+		public virtual Color Color { get; set; }
+
 		[ForeignKey("CountryID")]
 		public Country Country { get; set; }
 
@@ -65,6 +77,7 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
+
 
 		[ForeignKey("CreatedUserID")]
 		public virtual User CreatedUser { get; set; }

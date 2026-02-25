@@ -96,8 +96,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		public List<ProductDto> GetProducts() { 
-		
-		
+		 
 			List<ProductDto> products = new List<ProductDto>();
 			 
 			try

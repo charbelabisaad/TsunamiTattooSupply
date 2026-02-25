@@ -20,6 +20,8 @@ namespace TsunamiTattooSupply.DTO
 
 		public int SizeID { get; set; }
 		 
+		public int ColorID { get; set; }
+
 		public int CountryID { get; set; }
 		 
 		public int CurrencyID { get; set; }
