@@ -835,8 +835,7 @@
                 $("#productDetails").removeClass("d-none")
 
                 modal.show();
-
-
+                 
                 $('#saveProductModal')
                 .off('shown.bs.modal')
 
@@ -1184,20 +1183,18 @@
 
         });
 
-
-
         function loadProductPrice(ProductID){
-              
+
             if (!ProductID) return;
-             
+
             $.ajax({
-                url: '@Url.Action("GetProductSizesPrice","Products")',
+                url: '@Url.Action("GetProductSizesPrice", "Products")',
                 type: 'GET',
                 data: { ProductID: ProductID },
 
-                success: function (res) {
-                     
-                    if (!res || !res.success) {
+                success: function (res){
+
+                    if (!res || !res.success){
                         toastr.error(res.message || "Failed loading prices");
                         return;
                     }
@@ -1206,183 +1203,180 @@
 
                     res.data.forEach(size => {
 
-                           let key = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
+                        let baseKey = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
 
                         html += `
                         <div class="variation-card mb-2">
 
-                                <div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
-
-                                    <div>
-                                        <span class="badge bg-primary me-1">${size.productTypeDescription}</span>
-                                        <i class="fas fa-arrow-right text-muted mx-1"></i>
-
-                                        <span class="badge bg-info me-1">${size.productDetailDescription}</span>
-                                        <i class="fas fa-arrow-right text-muted mx-1"></i>
-
-                                        <span class="badge bg-success">${size.sizeDescription}</span>
-                                    </div>
-
-                                    <div>
-                                        <span class="text-muted small">Rank: ${size.sizeRank}</span>
-                                    </div>
-
-                                    <input type="hidden" name="ProductTypeID[${key}]" value="${size.productTypeID}">
-                                    <input type="hidden" name="ProductDetailID[${key}]" value="${size.productDetailID}">
-                                    <input type="hidden" name="SizeID[${key}]" value="${size.sizeID}">
-
+                            <div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="badge bg-primary me-1">${size.productTypeDescription}</span>
+                                    <i class="fas fa-arrow-right text-muted mx-1"></i>
+                                    <span class="badge bg-info me-1">${size.productDetailDescription}</span>
+                                    <i class="fas fa-arrow-right text-muted mx-1"></i>
+                                    <span class="badge bg-success">${size.sizeDescription}</span>
                                 </div>
+
+                                <div>
+                                    <span class="text-muted small">Rank: ${size.sizeRank}</span>
+                                </div>
+                            </div>
 
                             <div class="variation-body p-2">
-
-                                <div class="row">
-                                    <div class="col-12 col-md-4">
-                                        <label>Sale (%)</label>
-                                        <input type="number" step="0.01"
-                                                name="ProductSizeSale[${key}]"
-                                            class="form-control form-control-sm"
-                                            value="${size.sale ?? 0}">
-                                    </div>
-                                     
                         `;
- 
-                        // =========================================
-                        // 🔵 CREATE MAP OF EXISTING PRICES
-                        // =========================================
-                        let priceMap = {};
+
+                        // ======================
+                        // GROUP BY COLOR
+                        // ======================
+                        let colorGroups = {};
 
                         (size.productSizePrice || []).forEach(p => {
-                            priceMap[p.currencyID] = p;
+
+                            if (!colorGroups[p.colorID]){
+                                colorGroups[p.colorID] = {
+                                    colorName: p.colorName,
+                                    colorCode: p.colorCode,
+                                    prices: []
+                                };
+                            }
+
+                            colorGroups[p.colorID].prices.push(p);
                         });
 
-                        // =========================================
-                        // 🔵 LOOP ALL CURRENCIES (IMPORTANT)
-                        // =========================================
-                        res.currencies.forEach(currency => {
+                        // ======================
+                        // COLOR ROWS
+                        // ======================
+                        Object.keys(colorGroups).forEach(colorID => {
 
-                            let existing = priceMap[currency.id];
+                            let color = colorGroups[colorID];
 
-                            let amount = existing ? existing.amount : 0;
-                            let amountNet = existing ? existing.amountNet : 0;
+                            color.prices.forEach(price => {
 
-                            html += `
-                              
-                                    <input type="hidden"
-                                               name="PriceCurrencyID[${key}][]"
-                                           value="${currency.id}">
+                                let key = `${price.productTypeID}_${price.productDetailID}_${price.sizeID}_${price.colorID}_${price.currencyID}`;
 
-                                        <input type="hidden" name="CurrencyCountryID[${key}][]"
-                                            value="${currency.countryID}" />
-                                
-                                <div class="col-12 col-md-4">
-                                    <label>Amount (${currency.code})</label>
-                                    <input type="number" step="0.01"
-                                           class="form-control form-control-sm price-input"
-                                            data-type="${size.productTypeID}"
-                                            data-detail="${size.productDetailID}"
-                                            data-size="${size.sizeID}"
+                                html += `<div class="row align-items-end mb-2 border-top pt-2">`;
+
+                                // COLOR
+                                html += `
+                                    <div class="col-md-4">
+                                        <label>Color</label>
+                                        <div>
+                                            <i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
+                                            ${color.colorName}
+                                        </div>
+                                    </div>
+                                `;
+
+                                // SALE (PER PRICE)
+                                html += `
+                                    <div class="col-md-2">
+                                        <label>Sale %</label>
+                                        <input type="number" step="0.01"
+                                            class="form-control form-control-sm sale-input"
+                                            name="Sale[${key}]"
                                             data-key="${key}"
-                                            data-currency="${currency.id}"
-                                               name="Price[${key}][${currency.id}]"
-                                           value="${amount}">
-                                </div>
+                                            value="${price.sale ?? 0}">
+                                    </div>
+                                `;
 
-                                <div class="col-12 col-md-4">
-                                        <label>Amount Net (${currency.code})</label>
-                                    <input type="number" step="0.01"  
+                                // AMOUNT
+                                html += `
+                                    <div class="col-md-3">
+                                        <label>Amount (${price.currencyCode})</label>
+                                        <input type="number" step="0.01"
+                                            class="form-control form-control-sm price-input"
+                                            name="Price[${key}]"
+                                            data-key="${key}"
+                                            data-currency="${price.currencyID}"
+                                            value="${price.amount}">
+                                    </div>
+                                `;
+
+                                // NET
+                                html += `
+                                    <div class="col-md-3">
+                                        <label>Net (${price.currencyCode})</label>
+                                        <input type="number" step="0.01"
                                             class="form-control form-control-sm price-net-input"
-                                            data-type="${size.productTypeID}"
-                                            data-detail="${size.productDetailID}"
-                                            data-size="${size.sizeID}"
+                                                name="PriceNet[${key}]"
                                             data-key="${key}"
-                                            data-currency="${currency.id}"
-                                               name="PriceNet[${key}][${currency.id}]"
-                                           value="${amountNet}">
-                                </div>
+                                            data-currency="${price.currencyID}"
+                                            value="${price.amountNet}">
+                                    </div>
+                                `;
 
-                            `;
+                                html += `<input type="hidden"
+                                name="CountryID[${key}]"
+                                value="${price.countryID}" />`
+
+                                html += `</div>`;
+                            });
+
                         });
 
-                        html += `   </div></div></div>`;
+                        html += `</div></div>`;
                     });
 
                     $("#ProductSizesPrices").html(html);
                 },
 
-                error: function () {
-                  
+                error:function(){
                     toastr.error("Server error loading prices");
                 }
             });
 
         }
 
+               // =====================================================
+        // 🔵 Recalc Net when Amount OR Sale changes (per row)
+        // =====================================================
+        $(document).on("change", ".price-input, .sale-input", function () {
 
-        $(document).on("change", ".price-input, input[name^='ProductSizeSale']", function () {
+            let key = $(this).data("key");
+            if (!key) return;
 
-            let key;
-            let currencyID;
-
-            // 🔵 amount changed
-            if ($(this).hasClass("price-input")) {
-
-                key = $(this).data("key");
-                currencyID = $(this).data("currency");
-
-                calculateNet(key, currencyID);
-                return;
-            }
-
-            // 🔵 sale changed
-            let name = $(this).attr("name");
-            key = name.match(/\[(.*?)\]/)[1];
-
-            // recalc all currencies for this key
-            $(`.price-input[data-key="${key}"]`).each(function () {
-
-                let cur = $(this).data("currency");
-                calculateNet(key, cur);
-
-            });
+            calculateNet(key);
         });
-
-
+         
         // =====================================================
-        // 🔵 NET CALC FUNCTION
+        // 🔵 NET CALC FUNCTION (Sale per row)
         // =====================================================
-        function calculateNet(key, currencyID){
+        function calculateNet(key) {
 
-            let amount = parseFloat(
-                $(`.price-input[data-key="${key}"][data-currency="${currencyID}"]`).val()
-            ) || 0;
+            let amount = parseFloat($(`.price-input[data-key="${key}"]`).val()) || 0;
+            let salePerc = parseFloat($(`.sale-input[data-key="${key}"]`).val()) || 0;
 
-            let salePerc  = parseFloat($(`input[name="ProductSizeSale[${key}]"]`).val()) || 0;
+            if (salePerc < 0) salePerc = 0;
+            if (salePerc > 100) salePerc = 100;
 
             let net = amount - (amount * salePerc / 100);
             if (net < 0) net = 0;
 
-            $(`.price-net-input[data-key="${key}"][data-currency="${currencyID}"]`)
-                .val(net.toFixed(2));
+            $(`.price-net-input[data-key="${key}"]`).val(net.toFixed(2));
         }
 
+
+        // =====================================================
+        // 🔵 If Net changes -> update Sale for same row
+        // =====================================================
         $(document).on("change", ".price-net-input", function () {
 
             let key = $(this).data("key");
-            let currencyID = $(this).data("currency");
+            if (!key) return;
 
             let net = parseFloat($(this).val()) || 0;
-
-            let amount = parseFloat(
-                $(`.price-input[data-key="${key}"][data-currency="${currencyID}"]`).val()
-            ) || 0;
+            let amount = parseFloat($(`.price-input[data-key="${key}"]`).val()) || 0;
 
             if (amount <= 0) return;
 
             let salePerc = ((amount - net) / amount) * 100;
             if (salePerc < 0) salePerc = 0;
+            if (salePerc > 100) salePerc = 100;
 
-            $(`input[name="ProductSizeSale[${key}]"]`)
-                .val(salePerc.toFixed(2));
+            $(`.sale-input[data-key="${key}"]`).val(salePerc.toFixed(2));
+
+            // Optional: keep net consistent with rounding
+            calculateNet(key);
         });
 
 

@@ -1655,8 +1655,6 @@
 
 		function listProductPrice(ProductID){
 
-		  if (!ProductID) return;
-
 			if (!ProductID) return;
 
 			$.ajax({
@@ -1664,9 +1662,9 @@
 				type: 'GET',
 				data: { ProductID: ProductID },
 
-				success: function (res) {
+				success: function (res){
 
-					if (!res || !res.success) {
+					if (!res || !res.success){
 						toastr.error(res.message || "Failed loading prices");
 						return;
 					}
@@ -1675,119 +1673,130 @@
 
 					res.data.forEach(size => {
 
-						   let key = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
+						let baseKey = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
 
 						html += `
 						<div class="variation-card mb-2">
 
-								<div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
-
-									<div>
-										<span class="badge bg-primary me-1">${size.productTypeDescription}</span>
-										<i class="fas fa-arrow-right text-muted mx-1"></i>
-
-										<span class="badge bg-info me-1">${size.productDetailDescription}</span>
-										<i class="fas fa-arrow-right text-muted mx-1"></i>
-
-										<span class="badge bg-success">${size.sizeDescription}</span>
-									</div>
-
-									<div>
-										<span class="text-muted small">Rank: ${size.sizeRank}</span>
-									</div>
-
-									<input type="hidden" name="ProductTypeID[${key}]" value="${size.productTypeID}">
-									<input type="hidden" name="ProductDetailID[${key}]" value="${size.productDetailID}">
-									<input type="hidden" name="SizeID[${key}]" value="${size.sizeID}">
-
+							<div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
+								<div>
+									<span class="badge bg-primary me-1">${size.productTypeDescription}</span>
+									<i class="fas fa-arrow-right text-muted mx-1"></i>
+									<span class="badge bg-info me-1">${size.productDetailDescription}</span>
+									<i class="fas fa-arrow-right text-muted mx-1"></i>
+									<span class="badge bg-success">${size.sizeDescription}</span>
 								</div>
+
+								<div>
+									<span class="text-muted small">Rank: ${size.sizeRank}</span>
+								</div>
+							</div>
 
 							<div class="variation-body p-2">
-
-								<div class="row">
-									<div class="col-12 col-md-4">
-										<label>Sale (%)</label>
-										<input type="number" step="0.01"
-												name="ProductSizeSale[${key}]"
-											class="form-control form-control-sm"
-											value="${size.sale ?? 0}">
-									</div>
-
 						`;
 
-						// =========================================
-						// 🔵 CREATE MAP OF EXISTING PRICES
-						// =========================================
-						let priceMap = {};
+						// ======================
+						// GROUP BY COLOR
+						// ======================
+						let colorGroups = {};
 
 						(size.productSizePrice || []).forEach(p => {
-							priceMap[p.currencyID] = p;
+
+							if (!colorGroups[p.colorID]){
+								colorGroups[p.colorID] = {
+									colorName: p.colorName,
+									colorCode: p.colorCode,
+									prices: []
+								};
+							}
+
+							colorGroups[p.colorID].prices.push(p);
 						});
 
-						// =========================================
-						// 🔵 LOOP ALL CURRENCIES (IMPORTANT)
-						// =========================================
-						res.currencies.forEach(currency => {
+						// ======================
+						// COLOR ROWS
+						// ======================
+						Object.keys(colorGroups).forEach(colorID => {
 
-							let existing = priceMap[currency.id];
+							let color = colorGroups[colorID];
 
-							let amount = existing ? existing.amount : 0;
-							let amountNet = existing ? existing.amountNet : 0;
+							color.prices.forEach(price => {
 
-							html += `
+								let key = `${price.productTypeID}_${price.productDetailID}_${price.sizeID}_${price.colorID}_${price.currencyID}`;
 
-									<input type="hidden"
-											   name="PriceCurrencyID[${key}][]"
-										   value="${currency.id}">
+								html += `<div class="row align-items-end mb-2 border-top pt-2">`;
 
-										<input type="hidden" name="CurrencyCountryID[${key}][]"
-											value="${currency.countryID}" />
+								// COLOR
+								html += `
+									<div class="col-md-4">
+										<label>Color</label>
+										<div>
+											<i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
+											${color.colorName}
+										</div>
+									</div>
+								`;
 
-								<div class="col-12 col-md-4">
-									<label>Amount (${currency.code})</label>
-									<input type="number" step="0.01"
-										   class="form-control form-control-sm price-input"
-											data-type="${size.productTypeID}"
-											data-detail="${size.productDetailID}"
-											data-size="${size.sizeID}"
+								// SALE (PER PRICE)
+								html += `
+									<div class="col-md-2">
+										<label>Sale %</label>
+										<input type="number" step="0.01"
+											class="form-control form-control-sm sale-input"
+											name="Sale[${key}]"
 											data-key="${key}"
-											data-currency="${currency.id}"
-											   name="Price[${key}][${currency.id}]"
-										   value="${amount}">
-								</div>
+											value="${price.sale ?? 0}">
+									</div>
+								`;
 
-								<div class="col-12 col-md-4">
-										<label>Amount Net (${currency.code})</label>
-									<input type="number" step="0.01"
+								// AMOUNT
+								html += `
+									<div class="col-md-3">
+										<label>Amount (${price.currencyCode})</label>
+										<input type="number" step="0.01"
+											class="form-control form-control-sm price-input"
+											name="Price[${key}]"
+											data-key="${key}"
+											data-currency="${price.currencyID}"
+											value="${price.amount}">
+									</div>
+								`;
+
+								// NET
+								html += `
+									<div class="col-md-3">
+										<label>Net (${price.currencyCode})</label>
+										<input type="number" step="0.01"
 											class="form-control form-control-sm price-net-input"
-											data-type="${size.productTypeID}"
-											data-detail="${size.productDetailID}"
-											data-size="${size.sizeID}"
+												name="PriceNet[${key}]"
 											data-key="${key}"
-											data-currency="${currency.id}"
-											   name="PriceNet[${key}][${currency.id}]"
-										   value="${amountNet}">
-								</div>
+											data-currency="${price.currencyID}"
+											value="${price.amountNet}">
+									</div>
+								`;
 
-							`;
+								html += `<input type="hidden"
+								name="CountryID[${key}]"
+								value="${price.countryID}" />`
+
+								html += `</div>`;
+							});
+
 						});
 
-						html += `   </div></div></div>`;
+						html += `</div></div>`;
 					});
 
 					$("#ProductSizesPrices").html(html);
 				},
 
-				error: function () {
-
+				error:function(){
 					toastr.error("Server error loading prices");
 				}
 			});
 
 		}
-
-	 
-
+		 
 		$(document).on("click", "#btnCancelProduct, #btnCloseProduct", function () {
 
 			window.location.reload();

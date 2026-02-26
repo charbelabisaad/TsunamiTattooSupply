@@ -1326,7 +1326,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-
 		public IActionResult GetProductSizesPrice(int ProductID)
 		{
 			try
@@ -1344,139 +1343,145 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Description = c.Description,
 						Symbol = c.Symbol,
 						CountryID = c.CountryID
-					})
-					.ToList();
-
+					}).ToList();
 
 				// =====================================================
-				// 🔵 PRICES ORDERED BY SIZE RANK
+				// 🔵 COLORS (LIKE STOCK)
+				// =====================================================
+				var colors = _dbContext.ProductsColors
+					.Where(c => c.ProductID == ProductID && c.DeletedDate == null && c.StatusID == "A")
+					.Select(c => new
+					{
+						c.ColorID,
+						ColorName = c.Color.Name,
+						ColorCode = c.Color.Code
+					}).ToList();
+
+				// =====================================================
+				// 🔵 EXISTING PRICES
 				// =====================================================
 				var prices = _dbContext.Prices
 					.Where(pr => pr.ProductID == ProductID && pr.DeletedDate == null)
-					.Select(pr => new
+					.Select(pr => new PriceDto
 					{
-						pr.ProductID,
-						pr.SizeID,
-						pr.ProductTypeID,
-						pr.ProductDetailID,
-						pr.CountryID,
-						pr.CurrencyID,
+						ProductID = pr.ProductID,
+						ProductTypeID = pr.ProductTypeID,
+						ProductDetailID = pr.ProductDetailID,
+						SizeID = pr.SizeID,
+						ColorID = pr.ColorID,
+						ColorName = pr.Color.Name,
+						ColorCode = pr.Color.Code,
+						CountryID = pr.CountryID,
+						CurrencyID = pr.CurrencyID,
 						CurrencyCode = pr.Currency.Code,
 						CurrencyDescription = pr.Currency.Description,
 						CurrencySymbol = pr.Currency.Symbol,
-						pr.Amount,
-						pr.AmountNet,
-						SizeRank = pr.Size.Rank
-					})
-					.OrderBy(x => x.SizeRank)
-					.ThenBy(x => x.CurrencyCode)
-					.ToList()
-					.Select(x => new PriceDto
-					{
-						ProductID = x.ProductID,
-						ProductTypeID = x.ProductTypeID,
-						ProductDetailID = x.ProductDetailID,
-						SizeID = x.SizeID,
-						CountryID = x.CountryID,
-						CurrencyID = x.CurrencyID,
-						CurrencyCode = x.CurrencyCode,
-						CurrencyDescription = x.CurrencyDescription,
-						CurrencySymbol = x.CurrencySymbol,
-						Amount = x.Amount,
-						AmountNet = x.AmountNet
-					})
-					.ToList();
-
+						Sale = pr.Sale,
+						Raise = pr.Raise,
+						Amount = pr.Amount,
+						AmountNet = pr.AmountNet
+					}).ToList();
 
 				// =====================================================
-				// 🔵 SIZES ORDERED BY SIZE RANK 🔥
+				// 🔵 SIZES + TYPE + DETAIL
 				// =====================================================
 				var sizes = _dbContext.ProductsSizes
-				.Where(ps => ps.ProductID == ProductID
-						  && ps.DeletedDate == null
-						  && ps.StatusID == "A")
-				.GroupBy(ps => new
-				{
-					ps.ProductID,
-					ps.ProductTypeID,
-					ProductTypeDescription = ps.ProductType.Description,
+					.Where(ps => ps.ProductID == ProductID
+							  && ps.DeletedDate == null
+							  && ps.StatusID == "A")
+					.GroupBy(ps => new
+					{
+						ps.ProductTypeID,
+						ProductTypeDescription = ps.ProductType.Description,
 
-					ps.ProductDetailID,
-					ProductDetailDescription = ps.ProductDetail.Description,
+						ps.ProductDetailID,
+						ProductDetailDescription = ps.ProductDetail.Description,
 
-					ps.SizeID,
-					SizeDescription = ps.Size.Description,
+						ps.SizeID,
+						SizeDescription = ps.Size.Description,
+						SizeRank = ps.Size.Rank
+					})
+					.Select(g => new ProductSizeDto
+					{
+						SizeID = g.Key.SizeID,
+						SizeDescription = g.Key.SizeDescription,
+						ProductTypeID = g.Key.ProductTypeID,
+						ProductTypeDescription = g.Key.ProductTypeDescription,
+						ProductDetailID = g.Key.ProductDetailID,
+						ProductDetailDescription = g.Key.ProductDetailDescription,
+						SizeRank = g.Key.SizeRank, 
+						ProductSizePrice = new List<PriceDto>()
+					})
+					.OrderBy(x => x.SizeRank)
+					.ToList();
 
-					SizeRank = ps.Size.Rank
-				})
-				.Select(g => new ProductSizeDto
-				{
-					SizeID = g.Key.SizeID,
-					SizeDescription = g.Key.SizeDescription,
-
-					ProductTypeID = g.Key.ProductTypeID,
-					ProductTypeDescription = g.Key.ProductTypeDescription,
-
-					ProductDetailID = g.Key.ProductDetailID,
-					ProductDetailDescription = g.Key.ProductDetailDescription,
-
-					SizeRank = g.Key.SizeRank,
-
-					Sale = g.OrderByDescending(x => x.CreationDate)
-							.Select(x => x.Sale)
-							.FirstOrDefault(),
-
-					Raise = 0,
-					ProductSizePrice = new List<PriceDto>()
-				})
-				.OrderBy(x => x.SizeRank)
-				.ToList();
-				 
 				// =====================================================
-				// 🔵 FAST PRICE LOOKUP
+				// 🔥 BUILD FULL MATRIX LIKE STOCK
 				// =====================================================
-				var priceLookup = prices
-					.GroupBy(p => new { p.SizeID, p.ProductTypeID, p.ProductDetailID })
-					.ToDictionary(g => g.Key, g => g.ToList());
+				foreach (var size in sizes)
+				{
+					var list = new List<PriceDto>();
 
-								foreach (var size in sizes)
-								{
-									var key = new
-									{
-										size.SizeID,
-										size.ProductTypeID,
-										size.ProductDetailID
-									};
+					foreach (var color in colors)
+					{
+						foreach (var cur in currencies)
+						{
+							var existing = prices.FirstOrDefault(p =>
+								p.ProductTypeID == size.ProductTypeID &&
+								p.ProductDetailID == size.ProductDetailID &&
+								p.SizeID == size.SizeID &&
+								p.ColorID == color.ColorID &&
+								p.CurrencyID == cur.ID
+							);
 
-									size.ProductSizePrice = priceLookup.ContainsKey(key)
-										? priceLookup[key]
-										: new List<PriceDto>();
-								}
-
-
-								// =====================================================
-								// 🔵 RETURN (FRONT WILL STAY SAME)
-								// =====================================================
-								return Json(new
-								{
-									success = true,
-									data = sizes,
-									currencies = currencies
-								});
-							}
-							catch (Exception ex)
+							if (existing != null)
 							{
-								_logger.LogError(ex, "GetProductSizesPrice ERROR");
-
-								return Json(new
+								list.Add(existing);
+							}
+							else
+							{
+								// 🔵 zero price if not exists
+								list.Add(new PriceDto
 								{
-									success = false,
-									message = "Error loading Product Size Price\n\n" + ex.Message,
-									data = new List<ProductSizeDto>()
+									ProductID = ProductID,
+									ProductTypeID = size.ProductTypeID,
+									ProductDetailID = size.ProductDetailID,
+									SizeID = size.SizeID,
+									ColorID = color.ColorID,
+									ColorName = color.ColorName,
+									ColorCode = color.ColorCode,
+									CountryID = cur.CountryID ?? 0,
+									CurrencyID = cur.ID,
+									CurrencyCode = cur.Code,
+									CurrencyDescription = cur.Description,
+									CurrencySymbol = cur.Symbol,
+									Sale = 0,
+									Raise = 0,
+									Amount = 0,
+									AmountNet = 0
 								});
 							}
 						}
- 
+					}
+
+					size.ProductSizePrice = list
+						.OrderBy(x => x.ColorName)
+						.ThenBy(x => x.CurrencyCode)
+						.ToList();
+				}
+
+				return Json(new
+				{
+					success = true,
+					data = sizes,
+					currencies = currencies
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new { success = false, message = ex.Message });
+			}
+		}
 		[HttpPost]
 		public IActionResult SavePrice()
 		{
@@ -1490,79 +1495,79 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var form = Request.Form;
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductTypeID[")))
+				// loop by Amount keys
+				foreach (var amountKey in form.Keys.Where(k => k.StartsWith("Price[")))
 				{
-					string cleanKey = key.Replace("ProductTypeID[", "").Replace("]", "");
+					// Price[1_2_5_3_1]
+					string cleanKey = amountKey.Replace("Price[", "").Replace("]", "");
 
-					int typeId = Convert.ToInt32(form[$"ProductTypeID[{cleanKey}]"]);
-					int detailId = Convert.ToInt32(form[$"ProductDetailID[{cleanKey}]"]);
-					int sizeId = Convert.ToInt32(form[$"SizeID[{cleanKey}]"]);
+					var parts = cleanKey.Split('_');
+					if (parts.Length != 5) continue;
 
-					decimal sale = Convert.ToDecimal(form[$"ProductSizeSale[{cleanKey}]"]);
+					int typeId = Convert.ToInt32(parts[0]);
+					int detailId = Convert.ToInt32(parts[1]);
+					int sizeId = Convert.ToInt32(parts[2]);
+					int colorId = Convert.ToInt32(parts[3]);
+					int currencyId = Convert.ToInt32(parts[4]);
 
-				
+					decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}]"]);
+					decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}]"]);
 
-					var productSize = _dbContext.ProductsSizes.FirstOrDefault(x =>
-						x.ProductID == productId &&
-						x.SizeID == sizeId &&
-						x.ProductTypeID == typeId &&
-						x.ProductDetailID == detailId &&
-						x.DeletedDate == null);
+					// Sale is per price row
+					decimal sale = 0;
+					if (form.ContainsKey($"Sale[{cleanKey}]"))
+						sale = Convert.ToDecimal(form[$"Sale[{cleanKey}]"]);
 
-					if (productSize != null)
+					// CountryID (sent from UI)
+					int countryId = 0;
+					if (form.ContainsKey($"CountryID[{cleanKey}]"))
+						countryId = Convert.ToInt32(form[$"CountryID[{cleanKey}]"]);
+					else
 					{
-						productSize.Sale = sale;
-						productSize.Raise = 0;
-						productSize.EditUserID = userId;
-						productSize.EditDate = now;
+						// fallback: derive from Currency table if you prefer
+						countryId = (_dbContext.Currencies
+							.Where(c => c.ID == currencyId)
+							.Select(c => c.CountryID)
+							.FirstOrDefault()) ?? 0;
 					}
 
-					var currencyIds = form[$"PriceCurrencyID[{cleanKey}][]"];
+					var existing = _dbContext.Prices.FirstOrDefault(p =>
+						p.ProductID == productId &&
+						p.ProductTypeID == typeId &&
+						p.ProductDetailID == detailId &&
+						p.SizeID == sizeId &&
+						p.ColorID == colorId &&                 // ✅ IMPORTANT
+						p.CurrencyID == currencyId &&
+						p.CountryID == countryId &&
+						p.DeletedDate == null
+					);
 
-					foreach (var currencyIdStr in currencyIds)
+					if (existing != null)
 					{
-						int currencyId = Convert.ToInt32(currencyIdStr);
-
-						decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}][{currencyId}]"]);
-						decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}][{currencyId}]"]);
-
-						int countryId = Convert.ToInt32(
-							form[$"CurrencyCountryID[{cleanKey}][]"].FirstOrDefault()
-						);
-
-						var existing = _dbContext.Prices.FirstOrDefault(p =>
-							p.ProductID == productId &&
-							p.ProductTypeID == typeId &&
-							p.ProductDetailID == detailId &&
-							p.SizeID == sizeId &&
-							p.CurrencyID == currencyId &&
-							p.CountryID == countryId &&
-							p.DeletedDate == null);
-
-						if (existing != null)
+						existing.Sale = sale;
+						existing.Amount = amount;
+						existing.AmountNet = amountNet;
+						existing.EditUserID = userId;
+						existing.EditDate = now;
+					}
+					else
+					{
+						_dbContext.Prices.Add(new Price
 						{
-							existing.Amount = amount;
-							existing.AmountNet = amountNet;
-							existing.EditUserID = userId;
-							existing.EditDate = now;
-						}
-						else
-						{
-							_dbContext.Prices.Add(new Price
-							{
-								ProductID = productId,
-								ProductTypeID = typeId,
-								ProductDetailID = detailId,
-								SizeID = sizeId,
-								CurrencyID = currencyId,
-								CountryID = countryId,
-								Amount = amount,
-								AmountNet = amountNet,
-								StatusID = "A",
-								CreatedUserID = userId,
-								CreationDate = now
-							});
-						}
+							ProductID = productId,
+							ProductTypeID = typeId,
+							ProductDetailID = detailId,
+							SizeID = sizeId,
+							ColorID = colorId,                   // ✅ IMPORTANT
+							CurrencyID = currencyId,
+							CountryID = countryId,
+							Sale = sale,
+							Amount = amount,
+							AmountNet = amountNet,
+							StatusID = "A",
+							CreatedUserID = userId,
+							CreationDate = now
+						});
 					}
 				}
 
@@ -1575,7 +1580,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				transaction.Rollback();
 				_logger.LogError(ex, "SavePrice ERROR");
-
 				return Json(new { success = false, message = ex.Message });
 			}
 		}

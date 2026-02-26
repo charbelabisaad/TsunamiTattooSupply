@@ -28,8 +28,9 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public int SizeID { get; set; }
-		 
-		public int? ColorID { get; set; } 
+
+		[Required]
+		public int ColorID { get; set; } 
 
 		[Required]
 		public int CountryID { get; set; }
@@ -37,6 +38,12 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		public int CurrencyID { get; set; }
 
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal Sale { get; set; } = 0;
+
+		[Column(TypeName = "decimal(12,2)")]
+		public decimal Raise { get; set; } = 0;
+ 
 		[Required]
 		[Column(TypeName = "decimal(12,2)")]
 		public decimal Amount {  get; set; }

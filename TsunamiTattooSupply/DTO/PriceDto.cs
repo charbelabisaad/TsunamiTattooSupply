@@ -22,6 +22,10 @@ namespace TsunamiTattooSupply.DTO
 		 
 		public int ColorID { get; set; }
 
+		public string ColorName { get; set; }
+
+		public string ColorCode { get; set; }
+
 		public int CountryID { get; set; }
 		 
 		public int CurrencyID { get; set; }
@@ -31,7 +35,11 @@ namespace TsunamiTattooSupply.DTO
 		public string CurrencyDescription { get; set; }
 
 		public string CurrencySymbol {  get; set; }
-  
+		 
+		public decimal Sale { get; set; }
+		 
+		public decimal Raise { get; set; }
+		 
 		public decimal Amount { get; set; }
  
 		public decimal AmountNet { get; set; }
