@@ -367,12 +367,12 @@
                     // =====================================
                     // ✅ IMAGE SIZE VALIDATION (60 KB)
                     // =====================================
-                    const maxSizeKB = 40;
+                    const maxSizeKB = 60;
                     const maxSizeBytes = maxSizeKB * 1024;
 
                     if (file.size > maxSizeBytes) {
 
-                        toastr.error("Image size must not exceed 40 KB");
+                        toastr.error("Image size must not exceed 60 KB");
 
                         // Reset input
                         input.value = "";

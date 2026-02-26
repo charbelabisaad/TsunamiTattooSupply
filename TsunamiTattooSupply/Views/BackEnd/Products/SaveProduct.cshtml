@@ -17,10 +17,10 @@
 			min-width: 220px;
 		}
 
-	/* smooth scroll */
-	.color-images-scroll {
-		scroll-behavior: smooth;
-	}
+		/* smooth scroll */
+		.color-images-scroll {
+			scroll-behavior: smooth;
+		}
 
 		/* scrollbar style */
 		.color-images-scroll::-webkit-scrollbar {
@@ -1237,7 +1237,7 @@
 
 		let file = input.files[0];
 
-		const maxSizeKB = 60;
+		const maxSizeKB = 100;
 		const maxSizeBytes = maxSizeKB * 1024;
 
 		// ============================================
@@ -1245,7 +1245,7 @@
 		// ============================================
 		if (file.size > maxSizeBytes) {
 
-			toastr.error("Image size must not exceed 60 KB");
+			toastr.error("Image size must not exceed 100 KB");
 
 			// 🔥 CLEAR BUFFER (IMPORTANT)
 			if (colorImagesBuffer[colorId]) {

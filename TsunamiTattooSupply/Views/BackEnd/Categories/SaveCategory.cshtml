@@ -549,14 +549,14 @@
 
         if (!file) return true;
 
-        const maxSize = 40 * 1024;
+        const maxSize = 60 * 1024;
 
         if (file.size > maxSize) {
 
             if (typeof toastr !== "undefined") {
-                toastr.error("Image size must not exceed 40 KB");
+                toastr.error("Image size must not exceed 60 KB");
             } else {
-                alert("Image size must not exceed 40 KB");
+                alert("Image size must not exceed 60 KB");
             }
 
             return false;
