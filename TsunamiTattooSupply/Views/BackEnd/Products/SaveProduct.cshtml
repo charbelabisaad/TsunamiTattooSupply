@@ -66,6 +66,22 @@
 		z-index: 1;
 	}
 
+	.modal-loader {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(255,255,255,0.75);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		z-index: 1055;
+	}
+
+	.loader-content {
+		text-align: center;
+	}
 	
 
 </style>
@@ -94,7 +110,11 @@
 
 <div class="modal fade fullmodal-right" id="saveProductModal" tabindex="-1" aria-hidden="true">
 	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
+
+
+
+        <div class="modal-content" style="position:relative">
+
 
 			<div class="modal-header">
 				<h5 id="modalProductTitle" class="modal-title">Create New Product</h5>
@@ -725,6 +745,13 @@
                 @* </div> *@
 
             </form>
+
+            <div id="modalLoader" class="modal-loader d-none">
+                <div class="loader-content text-center">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="mt-2 font-weight-bold">Loading...</div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1632,7 +1659,7 @@
 					$("#productDetails").removeClass("d-none");
 
 					listProductPrice(res.productID);
-					loadProductStock(res.productID);
+					listProductStock(res.productID);
 				
 
 				} else {
@@ -1728,7 +1755,7 @@
 
 								// COLOR
 								html += `
-									<div class="col-md-4">
+									<div class="col-md-3">
 										<label>Color</label>
 										<div>
 											<i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
@@ -1745,7 +1772,7 @@
 											class="form-control form-control-sm sale-input"
 											name="Sale[${key}]"
 											data-key="${key}"
-											value="${price.sale ?? 0}">
+											value="${price.sale ?? 0}" ${price.useInPrice === false ? 'disabled' : ''}>
 									</div>
 								`;
 
@@ -1758,7 +1785,7 @@
 											name="Price[${key}]"
 											data-key="${key}"
 											data-currency="${price.currencyID}"
-											value="${price.amount}">
+											value="${price.amount}" ${price.useInPrice === false ? 'disabled' : ''}>
 									</div>
 								`;
 
@@ -1771,9 +1798,30 @@
 												name="PriceNet[${key}]"
 											data-key="${key}"
 											data-currency="${price.currencyID}"
-											value="${price.amountNet}">
-									</div>
-								`;
+											value="${price.amountNet}" ${price.useInPrice === false ? 'disabled' : ''}>
+									</div>`;
+
+									 html += `
+											<div class="col-md-1">
+
+												<label class="font-weight-bold d-block">Used</label>
+
+												<input type="hidden"
+													   name="PriceInUse[${key}]"
+													   value="${price.useInPrice === true ? 'true' : 'false'}"
+													   class="price-hidden"
+													   data-key="${key}">
+
+												<div class="custom-control custom-switch">
+														<input type="checkbox" ${price.useInPrice === true ? 'checked' : ''}
+														   class="custom-control-input useinprice"
+														   id="use_${key}"
+														   data-key="${key}">
+													<label class="custom-control-label" for="use_${key}"></label>
+												</div>
+
+											</div>
+										`;
 
 								html += `<input type="hidden"
 								name="CountryID[${key}]"
@@ -2391,7 +2439,7 @@
 
 			if (res.success) {
 				toastr.success("Stock saved successfully");
-				loadProductStock($("#ProductID").val());
+				listProductStock($("#ProductID").val());
 			}
 			else {
 				toastr.error(res.message || "Error saving");
@@ -2426,7 +2474,7 @@
 
 
 
-		function loadProductStock(ProductID){
+		function listProductStock(ProductID){
 
 			if (!ProductID) return;
 
@@ -2525,13 +2573,15 @@
 								   ${!stock.useInStock ? 'disabled' : ''}>
 						</td>
 
-						<td class="text-center">
-								<div class="form-check form-switch d-flex justify-content-center">
-									<input type="checkbox"
-										   class="form-check-input useinstock"
-										   ${stock.useInStock ? 'checked' : ''}
-										   ${stock.quantity > 0 ? 'disabled' : '' }>
-								</div>
+						<td class="align-middle text-center">
+							  <div class="custom-control custom-switch d-inline-block">
+								<input type="checkbox"
+									   class="custom-control-input useinstock"
+									   id="stock_${stock.id}"
+									   ${stock.useInStock ? 'checked' : ''}
+									   ${stock.quantity > 0 ? 'disabled' : ''}>
+								<label class="custom-control-label" for="stock_${stock.id}"></label>
+							</div>
 						</td>
 
 					</tr>`;
@@ -2547,6 +2597,7 @@
 
 			});
 		}
+
 
 
 	});

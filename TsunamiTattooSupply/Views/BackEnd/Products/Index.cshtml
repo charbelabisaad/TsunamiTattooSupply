@@ -407,74 +407,57 @@
             $("#ProductNewArrival").prop("checked", false);
             $("#ProductWarranty").prop("checked", false);
 
-
-
             // ================================
             // SHOW MODAL FIRST ✅
             // ================================
             modal.show();
 
+                showModalLoader();
+
             // ================================
             // AFTER MODAL IS VISIBLE ✅
             // ================================
-            $('#saveProductModal').one('shown.bs.modal', function () {
+                    $('#saveProductModal').one('shown.bs.modal', function () {
 
-                // LOAD DATA
-                LoadGroups(0);
-                selectedSubCatIds.clear();   // very important
-                LoadSubCategories({ restoreSelection: false });
+            Promise.all([
+                LoadGroups(0),
+                LoadSubCategories({ restoreSelection: false }),
+                loadProductEditExtras(0)
+            ])
+            .then(function () {
+
+                // After ALL finished
 
                 excludeExpiryDate();
                 excludeWarrantyMonths();
 
-                // ================================
-                // CLEAR SUBCATEGORIES ✅
-                // ================================
-            
-                // ================================
-                // CLEAR SIZES ✅
-            // ================================
+                // Clear Specs
                 let $specs = $('#ProductSpecs');
                 $specs.selectpicker('val', []);
                 $specs.selectpicker('destroy').selectpicker('render');
 
-                let sizes = $('.product-sizes');
- 
-                sizes.selectpicker('val', []);
-                $sizes.selectpicker("destroy").selectpicker('render');
-
-                let details = $('.product-details');
-                details.selectpicker('val', []);
-                details.selectpicker("destroy").selectpicker('render');
-
+                // Clear Types
                 let types = $('#ProductTypes');
                 types.selectpicker('val', []);
-                types.selectpicker("destroy").selectpicker('render');
+                types.selectpicker('destroy').selectpicker('render');
 
                 $('#SizeVariationsContainer').empty();
-                $('#ProductSizesMessage').remove();
-
-                // ================================
-                // CLEAR COLORS ✅ (NO DESTROY)
-                // ================================
-                let $colors = $('#ProductColors');
-                $colors.selectpicker('val', []);
-                $colors.selectpicker('destroy').selectpicker('render');
-
-                loadProductEditExtras(0);
-                 
                 $('#ColorVariationsContainer').empty();
 
-                Object.keys(colorImagesBuffer).forEach(k => {
-                    colorImagesBuffer[k] = [];
-                });
-
-                $('#ProductColorsMessage').text('');
-
-                // Focus
                 $("#ProductDescription").focus();
 
+            })
+            .catch(function (error) {
+                console.error("Modal loading error:", error);
+                toastr.error("Error loading data");
+            })
+            .finally(function () {
+
+                hideModalLoader();   // 🔥 hide spinner here
+
             });
+
+        });
         });
 
         $(document).on('change', '#ProductGroupType', function () {
@@ -789,67 +772,80 @@
                         `);
                     });
                 }
-                 
-            $(document).on('click', '.btnEditProduct', function () {
 
-                const modal = new bootstrap.Modal(document.getElementById("saveProductModal"));
-                let btn = $(this);
+                                  $(document).on('click', '.btnEditProduct', function () {
 
-                let productId   = btn.data('id');
-                let groupTypeId = btn.data('grouptypeid');
-                let groupId     = btn.data('groupid');
+            const modalEl = document.getElementById("saveProductModal");
+            const modal   = new bootstrap.Modal(modalEl);
 
-                $("#modalProductTitle").text("Edit Product");
+            let btn = $(this);
 
-                $("#ProductID").val(productId);
-                $("#ProductCode").val(btn.data('code'));
-                $("#ProductName").val(btn.data('name'));
-                $("#ProductDescription").val(btn.data('description'));
-                $("#ProductUnit").val(btn.data('unitid'));
+            let productId   = btn.data('id');
+            let groupTypeId = btn.data('grouptypeid');
+            let groupId     = btn.data('groupid');
 
-                $("#ProductGroupType").val(groupTypeId);
-                    LoadGroups(groupId);
-                 
-                 
-                  
+            // ================================
+            // BASIC FILL
+            // ================================
+            $("#modalProductTitle").text("Edit Product");
 
-                // setTimeout(() => {
-                //     $("#ProductGroup").val(groupId);
-                // }, 300);
+            $("#ProductID").val(productId);
+            $("#ProductCode").val(btn.data('code'));
+            $("#ProductName").val(btn.data('name'));
+            $("#ProductDescription").val(btn.data('description'));
+            $("#ProductUnit").val(btn.data('unitid'));
+            $("#ProductGroupType").val(groupTypeId);
 
-                $("#ProductVAT").prop('checked', btn.data('vat') == 1);
-                $("#ProductFeature").prop('checked', btn.data('feature') == 1);
-                $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
-                $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
+            $("#ProductVAT").prop('checked', btn.data('vat') == 1);
+            $("#ProductFeature").prop('checked', btn.data('feature') == 1);
+            $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
+            $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
 
-                $("#ProductStatusID").val(btn.data('statusid'));
+            $("#ProductStatusID").val(btn.data('statusid'));
 
-                let expiry = btn.data('newarrivaldate');
-                $("#ProductExpiryDate").val(expiry ? moment(expiry).format('YYYY-MM-DD') : '');
-                $("#ProductWarrantyMonths").val(btn.data('warrantymonths') || '');
+            let expiry = btn.data('newarrivaldate');
+            $("#ProductExpiryDate").val(expiry ? moment(expiry).format('YYYY-MM-DD') : '');
+            $("#ProductWarrantyMonths").val(btn.data('warrantymonths') || '');
 
-                // ✅ UI reset ONLY
-                $("#ProductSubCategory").empty();
-                $("#SubCategoryTags").empty();
-              
-                $("#productDetails").removeClass("d-none")
+            $("#ProductSubCategory").empty();
+            $("#SubCategoryTags").empty();
 
-                modal.show();
-                 
-                $('#saveProductModal')
-                .off('shown.bs.modal')
+            $("#productDetails").removeClass("d-none");
 
-                .on('shown.bs.modal', function () {
+            // ================================
+            // SHOW MODAL
+            // ================================
+            modal.show();
 
-                    loadProductEditExtras(productId);
+            // 🔥 SHOW SPINNER IMMEDIATELY
+            showModalLoader();
 
-                    loadProductPrice(productId);
+            // ================================
+            // AFTER MODAL FULLY SHOWN
+            // ================================
+            $('#saveProductModal').one('shown.bs.modal', function () {
 
-                    loadProductStock(productId);
-                     
+                Promise.all([
+                    LoadGroups(groupId),
+                    loadProductEditExtras(productId),
+                    loadProductPrice(productId),
+                    loadProductStock(productId)
+                ])
+                .catch(function (error) {
+
+                    console.error("Edit load error:", error);
+                    toastr.error("Error loading product data");
+
+                })
+                .finally(function () {
+
+                    hideModalLoader();   // 🔥 hide spinner
+
                 });
 
             });
+
+        });
          
             // ✅ Source of truth: all selected subcategory IDs for this product
             let selectedSubCatIds = new Set();
@@ -1258,7 +1254,7 @@
 
                                 // COLOR
                                 html += `
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <label>Color</label>
                                         <div>
                                             <i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
@@ -1275,7 +1271,7 @@
                                             class="form-control form-control-sm sale-input"
                                             name="Sale[${key}]"
                                             data-key="${key}"
-                                            value="${price.sale ?? 0}">
+                                            value="${price.sale ?? 0}" ${price.useInPrice === false ? 'disabled' : ''}>
                                     </div>
                                 `;
 
@@ -1288,7 +1284,7 @@
                                             name="Price[${key}]"
                                             data-key="${key}"
                                             data-currency="${price.currencyID}"
-                                            value="${price.amount}">
+                                            value="${price.amount}" ${price.useInPrice === false ? 'disabled' : ''}>
                                     </div>
                                 `;
 
@@ -1301,14 +1297,35 @@
                                                 name="PriceNet[${key}]"
                                             data-key="${key}"
                                             data-currency="${price.currencyID}"
-                                            value="${price.amountNet}">
-                                    </div>
-                                `;
+                                            value="${price.amountNet}" ${price.useInPrice === false ? 'disabled' : ''}>
+                                    </div>`;
+                                     
+                                     html += `
+                                            <div class="col-md-1">
+
+                                                <label class="font-weight-bold d-block">Used</label>
+
+                                                <input type="hidden"
+                                                       name="PriceInUse[${key}]"
+                                                       value="${price.useInPrice === true ? 'true' : 'false'}"
+                                                       class="price-hidden"
+                                                       data-key="${key}">
+
+                                                <div class="custom-control custom-switch">
+                                                        <input type="checkbox" ${price.useInPrice === true ? 'checked' : ''}
+                                                           class="custom-control-input useinprice"
+                                                           id="use_${key}"
+                                                           data-key="${key}">
+                                                    <label class="custom-control-label" for="use_${key}"></label>
+                                                </div>
+
+                                            </div>
+                                        `;
 
                                 html += `<input type="hidden"
                                 name="CountryID[${key}]"
                                 value="${price.countryID}" />`
-
+                                 
                                 html += `</div>`;
                             });
 
@@ -1327,30 +1344,65 @@
 
         }
 
-               // =====================================================
-        // 🔵 Recalc Net when Amount OR Sale changes (per row)
-        // =====================================================
-        $(document).on("change", ".price-input, .sale-input", function () {
+
+
+           $(document).on('change', '.useinprice', function () {
+
+                let key = $(this).data('key');
+                let isChecked = $(this).is(':checked');
+
+                let saleInput  = $(`.sale-input[data-key="${key}"]`);
+                let amountInput = $(`.price-input[data-key="${key}"]`);
+                let netInput   = $(`.price-net-input[data-key="${key}"]`);
+                let hiddenInput = $(`.price-hidden[data-key="${key}"]`);
+
+                if (isChecked) {
+
+                    // Enable inputs
+                    saleInput.prop('disabled', false);
+                    amountInput.prop('disabled', false);
+                    netInput.prop('disabled', false);
+
+                    hiddenInput.val(1);
+
+                } else {
+
+                    // Disable inputs
+                    saleInput.prop('disabled', true);
+                    amountInput.prop('disabled', true);
+                    netInput.prop('disabled', true);
+
+                    // Reset values to 0
+                    saleInput.val(0);
+                    amountInput.val(0);
+                    netInput.val(0);
+
+                    hiddenInput.val(0);
+                }
+
+            });
+
+        $(document).on("input", ".sale-input, .price-input", function () {
 
             let key = $(this).data("key");
             if (!key) return;
 
             calculateNet(key);
+
         });
-         
+
         // =====================================================
         // 🔵 NET CALC FUNCTION (Sale per row)
         // =====================================================
-        function calculateNet(key) {
+            function calculateNet(key) {
 
             let amount = parseFloat($(`.price-input[data-key="${key}"]`).val()) || 0;
             let salePerc = parseFloat($(`.sale-input[data-key="${key}"]`).val()) || 0;
 
-            if (salePerc < 0) salePerc = 0;
-            if (salePerc > 100) salePerc = 100;
+            salePerc = Math.max(0, Math.min(100, salePerc));
 
             let net = amount - (amount * salePerc / 100);
-            if (net < 0) net = 0;
+            net = Math.max(0, net);
 
             $(`.price-net-input[data-key="${key}"]`).val(net.toFixed(2));
         }
@@ -1359,7 +1411,7 @@
         // =====================================================
         // 🔵 If Net changes -> update Sale for same row
         // =====================================================
-        $(document).on("change", ".price-net-input", function () {
+              $(document).on("input", ".price-net-input", function () {
 
             let key = $(this).data("key");
             if (!key) return;
@@ -1367,16 +1419,16 @@
             let net = parseFloat($(this).val()) || 0;
             let amount = parseFloat($(`.price-input[data-key="${key}"]`).val()) || 0;
 
-            if (amount <= 0) return;
+            if (amount <= 0) {
+                $(`.sale-input[data-key="${key}"]`).val(0);
+                return;
+            }
 
             let salePerc = ((amount - net) / amount) * 100;
-            if (salePerc < 0) salePerc = 0;
-            if (salePerc > 100) salePerc = 100;
+            salePerc = Math.max(0, Math.min(100, salePerc));
 
             $(`.sale-input[data-key="${key}"]`).val(salePerc.toFixed(2));
 
-            // Optional: keep net consistent with rounding
-            calculateNet(key);
         });
 
 
@@ -1462,8 +1514,8 @@
                             <input type="hidden" class="detail-id" value="${det.productDetailID}">
                         </td>
 
-                        <td>${det.productTypeDescription}</td>
-                        <td>${det.productDetailDescription}</td>
+                        <td class="align-middle">${det.productTypeDescription}</td>
+                        <td class="align-middle">${det.productDetailDescription}</td>
 
                         <td class="align-middle">
                                <input type="number"
@@ -1478,12 +1530,14 @@
                                    value="${stock.barcode ?? ''}"
                                    ${!stock.useInStock ? 'disabled' : ''}>
                         </td>
-                        <td class="text-center">
-                            <div class="form-check form-switch d-flex justify-content-center">
+                        <td class="align-center text-center">
+                            <div class="custom-control custom-switch d-inline-block">
                                 <input type="checkbox"
-                                       class="form-check-input useinstock"
+                                       class="custom-control-input useinstock"
+                                       id="stock_${stock.id}"
                                        ${stock.useInStock ? 'checked' : ''}
-                                       ${stock.quantity > 0 ? 'disabled' : '' }>
+                                       ${stock.quantity > 0 ? 'disabled' : ''}>
+                                <label class="custom-control-label" for="stock_${stock.id}"></label>
                             </div>
                         </td>
                     </tr>`;
@@ -1786,31 +1840,40 @@
             }
 
         });
-         
+
+        $(document).on('keyup change', '.qty', function () {
+
+            let $row = $(this).closest('tr');
+            let qty = parseFloat($(this).val()) || 0;
+
+            let $use = $row.find('.useinstock');
+            let $barcode = $row.find('.barcode');
+
+            if (qty > 0) {
+                // auto enable + lock checkbox
+                $use.prop('checked', true);
+                $use.prop('disabled', true);
+
+                $barcode.prop('disabled', false);
+            }
+            else {
+                // qty = 0 → allow user to change
+                $use.prop('disabled', false);
+                $barcode.prop('disabled', true);
+            }
+
+        });
+
+        function showModalLoader() {
+            $("#modalLoader").removeClass("d-none");
+        }
+        function hideModalLoader() {
+            $("#modalLoader").addClass("d-none");
+        }
     });
 
-    $(document).on('keyup change', '.qty', function () {
+   
 
-        let $row = $(this).closest('tr');
-        let qty = parseFloat($(this).val()) || 0;
-
-        let $use = $row.find('.useinstock');
-        let $barcode = $row.find('.barcode');
-
-        if (qty > 0) {
-            // auto enable + lock checkbox
-            $use.prop('checked', true);
-            $use.prop('disabled', true);
-
-            $barcode.prop('disabled', false);
-        }
-        else {
-            // qty = 0 → allow user to change
-            $use.prop('disabled', false);
-            $barcode.prop('disabled', true);
-        }
-
-    });
 
     </script>
 

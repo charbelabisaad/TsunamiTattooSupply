@@ -1379,7 +1379,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Sale = pr.Sale,
 						Raise = pr.Raise,
 						Amount = pr.Amount,
-						AmountNet = pr.AmountNet
+						AmountNet = pr.AmountNet,
+						UseInPrice = pr.UseInPrice,
 					}).ToList();
 
 				// =====================================================
@@ -1458,7 +1459,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 									Sale = 0,
 									Raise = 0,
 									Amount = 0,
-									AmountNet = 0
+									AmountNet = 0,
+									UseInPrice = false,
 								});
 							}
 						}
@@ -1513,6 +1515,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}]"]);
 					decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}]"]);
 
+					bool useInPrice = form[$"PriceInUse[{cleanKey}]"] == "true";
+
+
 					// Sale is per price row
 					decimal sale = 0;
 					if (form.ContainsKey($"Sale[{cleanKey}]"))
@@ -1547,6 +1552,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						existing.Sale = sale;
 						existing.Amount = amount;
 						existing.AmountNet = amountNet;
+						existing.UseInPrice = useInPrice;
 						existing.EditUserID = userId;
 						existing.EditDate = now;
 					}
@@ -1564,6 +1570,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							Sale = sale,
 							Amount = amount,
 							AmountNet = amountNet,
+							UseInPrice = useInPrice,
 							StatusID = "A",
 							CreatedUserID = userId,
 							CreationDate = now
@@ -1583,6 +1590,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
+
 		public IActionResult GetProductStock(int productId)
 		{
 			try

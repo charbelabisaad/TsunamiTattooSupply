@@ -53,6 +53,9 @@ namespace TsunamiTattooSupply.Models
 		public decimal AmountNet { get; set; }
 
 		[Required]
+		public bool UseInPrice { get; set; } = false;
+		 
+		[Required]
 		public string StatusID { get; set; }
 
 		public int CreatedUserID { get; set; }

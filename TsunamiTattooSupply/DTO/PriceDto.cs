@@ -43,5 +43,8 @@ namespace TsunamiTattooSupply.DTO
 		public decimal Amount { get; set; }
  
 		public decimal AmountNet { get; set; }
+		 
+		public bool UseInPrice { get; set; } 
+ 
 	}
 }
