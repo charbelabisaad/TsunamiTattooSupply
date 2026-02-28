@@ -1515,7 +1515,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}]"]);
 					decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}]"]);
 
-					bool useInPrice = form[$"PriceInUse[{cleanKey}]"] == "true";
+					string value = form[$"PriceInUse[{cleanKey}]"];
+					bool useInPrice = value == "1";
 
 
 					// Sale is per price row

@@ -1271,7 +1271,7 @@
                                             class="form-control form-control-sm sale-input"
                                             name="Sale[${key}]"
                                             data-key="${key}"
-                                            value="${price.sale ?? 0}" ${price.useInPrice === false ? 'disabled' : ''}>
+                                            value="${price.sale ?? 0}" ${price.useInPrice === false ? 'readonly' : ''}>
                                     </div>
                                 `;
 
@@ -1284,7 +1284,7 @@
                                             name="Price[${key}]"
                                             data-key="${key}"
                                             data-currency="${price.currencyID}"
-                                            value="${price.amount}" ${price.useInPrice === false ? 'disabled' : ''}>
+                                            value="${price.amount}" ${price.useInPrice === false ? 'readonly' : ''}>
                                     </div>
                                 `;
 
@@ -1297,7 +1297,7 @@
                                                 name="PriceNet[${key}]"
                                             data-key="${key}"
                                             data-currency="${price.currencyID}"
-                                            value="${price.amountNet}" ${price.useInPrice === false ? 'disabled' : ''}>
+                                            value="${price.amountNet}" ${price.useInPrice === false ? 'readonly' : ''}>
                                     </div>`;
                                      
                                      html += `
@@ -1307,8 +1307,8 @@
 
                                                 <input type="hidden"
                                                        name="PriceInUse[${key}]"
-                                                       value="${price.useInPrice === true ? 'true' : 'false'}"
-                                                       class="price-hidden"
+                                                       value="${price.useInPrice === true ? '1' : '0'}"
+                                                       class="useinprice-hidden"
                                                        data-key="${key}">
 
                                                 <div class="custom-control custom-switch">
@@ -1346,41 +1346,28 @@
 
 
 
-           $(document).on('change', '.useinprice', function () {
+        $(document).on('change', '.useinprice', function () {
 
-                let key = $(this).data('key');
-                let isChecked = $(this).is(':checked');
+            const key = $(this).data('key');
+            const isChecked = this.checked;
 
-                let saleInput  = $(`.sale-input[data-key="${key}"]`);
-                let amountInput = $(`.price-input[data-key="${key}"]`);
-                let netInput   = $(`.price-net-input[data-key="${key}"]`);
-                let hiddenInput = $(`.price-hidden[data-key="${key}"]`);
+            const saleInput   = $(`.sale-input[data-key="${key}"]`);
+            const amountInput = $(`.price-input[data-key="${key}"]`);
+            const netInput    = $(`.price-net-input[data-key="${key}"]`);
+            const hiddenInput = $(`.useinprice-hidden[data-key="${key}"]`);
 
-                if (isChecked) {
+            const inputs = saleInput.add(amountInput).add(netInput);
 
-                    // Enable inputs
-                    saleInput.prop('disabled', false);
-                    amountInput.prop('disabled', false);
-                    netInput.prop('disabled', false);
+            // Enable / Disable all at once
+            inputs.prop('readonly', !isChecked);
 
-                    hiddenInput.val(1);
+            if (!isChecked) {
+                inputs.val(0);
+            }
 
-                } else {
-
-                    // Disable inputs
-                    saleInput.prop('disabled', true);
-                    amountInput.prop('disabled', true);
-                    netInput.prop('disabled', true);
-
-                    // Reset values to 0
-                    saleInput.val(0);
-                    amountInput.val(0);
-                    netInput.val(0);
-
-                    hiddenInput.val(0);
-                }
-
-            });
+            hiddenInput.val(isChecked ? 1 : 0);
+             
+        });
 
         $(document).on("input", ".sale-input, .price-input", function () {
 
@@ -1521,14 +1508,14 @@
                                <input type="number"
                                    class="form-control form-control-sm qty" min="0"
                                    value="${stock.quantity}"
-                                   ${!stock.useInStock ? 'disabled' : ''}>
+                                   ${!stock.useInStock ? 'readonly' : ''}>
                         </td>
 
                         <td class="align-middle">
                             <input type="text"
                                    class="form-control form-control-sm barcode"
                                    value="${stock.barcode ?? ''}"
-                                   ${!stock.useInStock ? 'disabled' : ''}>
+                                   ${!stock.useInStock ? 'readonly' : ''}>
                         </td>
                         <td class="align-center text-center">
                             <div class="custom-control custom-switch d-inline-block">
@@ -1832,11 +1819,11 @@
             let $barcode = $row.find('.barcode');
 
             if ($(this).is(':checked')) {
-                $qty.prop('disabled', false);
-                $barcode.prop('disabled', false);
+                $qty.prop('readonly', false);
+                $barcode.prop('readonly', false);
             } else { 
-                $qty.prop('disabled', true);
-                $barcode.prop('disabled', true);
+                $qty.prop('readonly', true);
+                $barcode.prop('readonly', true);
             }
 
         });
@@ -1854,12 +1841,12 @@
                 $use.prop('checked', true);
                 $use.prop('disabled', true);
 
-                $barcode.prop('disabled', false);
+                $barcode.prop('readonly', false);
             }
             else {
                 // qty = 0 → allow user to change
                 $use.prop('disabled', false);
-                $barcode.prop('disabled', true);
+                $barcode.prop('readonly', true);
             }
 
         });

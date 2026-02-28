@@ -1772,7 +1772,7 @@
 											class="form-control form-control-sm sale-input"
 											name="Sale[${key}]"
 											data-key="${key}"
-											value="${price.sale ?? 0}" ${price.useInPrice === false ? 'disabled' : ''}>
+											value="${price.sale ?? 0}" ${price.useInPrice === false ? 'readonly' : ''}>
 									</div>
 								`;
 
@@ -1785,7 +1785,7 @@
 											name="Price[${key}]"
 											data-key="${key}"
 											data-currency="${price.currencyID}"
-											value="${price.amount}" ${price.useInPrice === false ? 'disabled' : ''}>
+											value="${price.amount}" ${price.useInPrice === false ? 'readonly' : ''}>
 									</div>
 								`;
 
@@ -1798,18 +1798,18 @@
 												name="PriceNet[${key}]"
 											data-key="${key}"
 											data-currency="${price.currencyID}"
-											value="${price.amountNet}" ${price.useInPrice === false ? 'disabled' : ''}>
+											value="${price.amountNet}" ${price.useInPrice === false ? 'readonly' : ''}>
 									</div>`;
 
-									 html += `
+									  html += `
 											<div class="col-md-1">
 
 												<label class="font-weight-bold d-block">Used</label>
 
 												<input type="hidden"
 													   name="PriceInUse[${key}]"
-													   value="${price.useInPrice === true ? 'true' : 'false'}"
-													   class="price-hidden"
+													   value="${price.useInPrice === true ? '1' : '0'}"
+													   class="useinprice-hidden"
 													   data-key="${key}">
 
 												<div class="custom-control custom-switch">
@@ -2563,14 +2563,14 @@
 							<input type="number"
 								   class="form-control form-control-sm qty" min="0"
 								   value="${stock.quantity}"
-								   ${!stock.useInStock ? 'disabled' : ''}>
+								   ${!stock.useInStock ? 'readonly' : ''}>
 						</td>
 
 						<td>
 							<input type="text"
 								   class="form-control form-control-sm barcode"
 								   value="${stock.barcode ?? ''}"
-								   ${!stock.useInStock ? 'disabled' : ''}>
+								   ${!stock.useInStock ? 'readonly' : ''}>
 						</td>
 
 						<td class="align-middle text-center">

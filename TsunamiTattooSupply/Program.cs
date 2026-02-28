@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -37,6 +38,12 @@ builder.Services.AddAuthentication(
 	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 });
 
+builder.Services.Configure<FormOptions>(options =>
+{
+	options.ValueCountLimit = 10000;     // increase max form keys
+	options.ValueLengthLimit = int.MaxValue;
+	options.MultipartBodyLengthLimit = 104857600; // optional (100MB)
+});
 
 // ✅ Add Session BEFORE builder.Build()
 builder.Services.AddSession(options =>
