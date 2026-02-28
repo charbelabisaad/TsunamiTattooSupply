@@ -352,7 +352,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[HttpPost]
 		[ValidateAntiForgeryToken]
-		public IActionResult SaveProduct()
+		public async Task<IActionResult> SaveProduct()
 		{
 			using var transaction = _dbContext.Database.BeginTransaction();
 
@@ -444,7 +444,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					};
 
 					_dbContext.Products.Add(product);
-					_dbContext.SaveChanges();
+					await _dbContext.SaveChangesAsync();
 					productId = product.ID;
 				}
 				else
@@ -737,7 +737,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =====================================================
 				// 4️⃣ SAVE
 				// =====================================================
-				_dbContext.SaveChanges();
+				await _dbContext.SaveChangesAsync();
 
 				#endregion
 
@@ -747,6 +747,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var existingColors = _dbContext.ProductsColors
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
+
+				var existingColorsMap = existingColors.ToDictionary(x => x.ColorID);
 
 				// 🔥 Soft delete removed colors
 				foreach (var pc in existingColors)
@@ -758,19 +760,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
-				// 🔥 Add / Update colors
+				int coverColorId = Convert.ToInt32(form["CoverColorID"]);
+
 				foreach (var colorId in colorIds)
-				{	
-					int coverColorId = Convert.ToInt32(form["CoverColorID"]);
+				{
 					bool isCover = colorId == coverColorId;
 					bool showFront = form[$"ProductColorsMeta[{colorId}].ShowFront"] == "on";
 					bool isActive = form[$"ProductColorsMeta[{colorId}].IsActive"] == "on";
 
-					var pc = existingColors.FirstOrDefault(x => x.ColorID == colorId);
+					existingColorsMap.TryGetValue(colorId, out var pc);
 
 					if (pc == null)
 					{
-						_dbContext.ProductsColors.Add(new ProductColor
+						var newColor = new ProductColor
 						{
 							ProductID = productId,
 							ColorID = colorId,
@@ -779,7 +781,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							StatusID = isActive ? "A" : "I",
 							CreatedUserID = userId,
 							CreationDate = now
-						});
+						};
+
+						_dbContext.ProductsColors.Add(newColor);
+						existingColorsMap[colorId] = newColor;
 					}
 					else
 					{
@@ -910,7 +915,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 							// save original
 							using (var stream = new FileStream(originalPath, FileMode.Create))
-								file.CopyTo(stream);
+								await file.CopyToAsync(stream);
 
 							// save resized
 							using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
@@ -939,7 +944,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
-				_dbContext.SaveChanges();
+				await _dbContext.SaveChangesAsync();
 
 				// 🔥 DEBUG HERE
 				var allImages = _dbContext.ProductsImages
@@ -989,7 +994,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
-				_dbContext.SaveChanges();
+				await _dbContext.SaveChangesAsync();
 
 
 
@@ -1484,10 +1489,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
+
 		[HttpPost]
-		public IActionResult SavePrice()
+		public async Task<IActionResult> SavePrice()
 		{
-			using var transaction = _dbContext.Database.BeginTransaction();
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
 			try
 			{
@@ -1497,14 +1503,34 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var form = Request.Form;
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// loop by Amount keys
+				// -------------------------------------------------
+				// 1️⃣ Load ALL existing prices once
+				// -------------------------------------------------
+				var existingPrices = await _dbContext.Prices
+					.Where(p => p.ProductID == productId && p.DeletedDate == null)
+					.ToListAsync();
+
+				// Dictionary for O(1) lookup
+				var priceMap = existingPrices.ToDictionary(
+					p => (p.ProductTypeID,
+						  p.ProductDetailID,
+						  p.SizeID,
+						  p.ColorID,
+						  p.CurrencyID,
+						  p.CountryID)
+				);
+
+				// -------------------------------------------------
+				// 2️⃣ Process submitted prices
+				// -------------------------------------------------
 				foreach (var amountKey in form.Keys.Where(k => k.StartsWith("Price[")))
 				{
 					// Price[1_2_5_3_1]
 					string cleanKey = amountKey.Replace("Price[", "").Replace("]", "");
 
 					var parts = cleanKey.Split('_');
-					if (parts.Length != 5) continue;
+					if (parts.Length != 5)
+						continue;
 
 					int typeId = Convert.ToInt32(parts[0]);
 					int detailId = Convert.ToInt32(parts[1]);
@@ -1515,37 +1541,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}]"]);
 					decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}]"]);
 
-					string value = form[$"PriceInUse[{cleanKey}]"];
-					bool useInPrice = value == "1";
+					bool useInPrice = form[$"PriceInUse[{cleanKey}]"] == "1";
 
-
-					// Sale is per price row
 					decimal sale = 0;
 					if (form.ContainsKey($"Sale[{cleanKey}]"))
 						sale = Convert.ToDecimal(form[$"Sale[{cleanKey}]"]);
 
-					// CountryID (sent from UI)
 					int countryId = 0;
+
 					if (form.ContainsKey($"CountryID[{cleanKey}]"))
+					{
 						countryId = Convert.ToInt32(form[$"CountryID[{cleanKey}]"]);
+					}
 					else
 					{
-						// fallback: derive from Currency table if you prefer
-						countryId = (_dbContext.Currencies
+						countryId = await _dbContext.Currencies
 							.Where(c => c.ID == currencyId)
-							.Select(c => c.CountryID)
-							.FirstOrDefault()) ?? 0;
+							.Select(c => c.CountryID ?? 0)
+							.FirstOrDefaultAsync();
 					}
 
-					var existing = _dbContext.Prices.FirstOrDefault(p =>
-						p.ProductID == productId &&
-						p.ProductTypeID == typeId &&
-						p.ProductDetailID == detailId &&
-						p.SizeID == sizeId &&
-						p.ColorID == colorId &&                 // ✅ IMPORTANT
-						p.CurrencyID == currencyId &&
-						p.CountryID == countryId &&
-						p.DeletedDate == null
+					// -------------------------------------------------
+					// 🔥 Fast lookup (no DB hit)
+					// -------------------------------------------------
+					priceMap.TryGetValue(
+						(typeId, detailId, sizeId, colorId, currencyId, countryId),
+						out var existing
 					);
 
 					if (existing != null)
@@ -1559,13 +1580,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 					else
 					{
-						_dbContext.Prices.Add(new Price
+						var newPrice = new Price
 						{
 							ProductID = productId,
 							ProductTypeID = typeId,
 							ProductDetailID = detailId,
 							SizeID = sizeId,
-							ColorID = colorId,                   // ✅ IMPORTANT
+							ColorID = colorId,
 							CurrencyID = currencyId,
 							CountryID = countryId,
 							Sale = sale,
@@ -1575,19 +1596,28 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							StatusID = "A",
 							CreatedUserID = userId,
 							CreationDate = now
-						});
+						};
+
+						await _dbContext.Prices.AddAsync(newPrice);
+
+						// Add to dictionary to prevent duplicates in same request
+						priceMap[(typeId, detailId, sizeId, colorId, currencyId, countryId)] = newPrice;
 					}
 				}
 
-				_dbContext.SaveChanges();
-				transaction.Commit();
+				// -------------------------------------------------
+				// 3️⃣ Save once
+				// -------------------------------------------------
+				await _dbContext.SaveChangesAsync();
+				await transaction.CommitAsync();
 
 				return Json(new { success = true, message = "Prices saved successfully" });
 			}
 			catch (Exception ex)
 			{
-				transaction.Rollback();
+				await transaction.RollbackAsync();
 				_logger.LogError(ex, "SavePrice ERROR");
+
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
@@ -1704,10 +1734,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
-		 
+
 		[HttpPost]
-		public IActionResult SaveStock()
-		{ 
+		public async Task<IActionResult> SaveStock()
+		{
 			try
 			{
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -1716,9 +1746,37 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var form = Request.Form;
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// =====================================================
-				// 🔵 LOOP ROWS
-				// =====================================================
+				// -----------------------------------------------
+				// 1️⃣ Load all existing stocks once
+				// -----------------------------------------------
+				var existingStocks = await _dbContext.Stocks
+					.Where(x => x.ProductID == productId && x.DeletedDate == null)
+					.ToListAsync();
+
+				var stockMap = existingStocks.ToDictionary(
+					x => (x.ProductTypeID, x.ProductDetailID, x.SizeID, x.ColorID)
+				);
+
+				// -----------------------------------------------
+				// 2️⃣ Load ALL barcodes once
+				// -----------------------------------------------
+				var allBarcodes = await _dbContext.Stocks
+					.Where(x => x.DeletedDate == null && x.Barcode != null)
+					.Select(x => new
+					{
+						x.Barcode,
+						x.ProductID,
+						ProductName = x.Product.Name
+					})
+					.ToListAsync();
+
+				var barcodeMap = allBarcodes
+					.GroupBy(x => x.Barcode)
+					.ToDictionary(g => g.Key, g => g.First());
+
+				// -----------------------------------------------
+				// 3️⃣ Process rows
+				// -----------------------------------------------
 				foreach (var key in form.Keys.Where(k => k.StartsWith("StockSizeID[")))
 				{
 					int rowIndex = Convert.ToInt32(key.Replace("StockSizeID[", "").Replace("]", ""));
@@ -1736,49 +1794,34 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						? 0 : Convert.ToDecimal(form[$"StockQty[{rowIndex}]"]);
 
 					string barcode = form[$"StockBarcode[{rowIndex}]"];
-
 					bool useInStock = form[$"StockInUse[{rowIndex}]"] == "1";
 
-					// =====================================================
-					// 🔴 GLOBAL BARCODE UNIQUE CHECK
-					// =====================================================
+					// -----------------------------------------------
+					// 🔴 Barcode validation (no DB hit now)
+					// -----------------------------------------------
 					if (!string.IsNullOrWhiteSpace(barcode))
 					{
-						var existingBarcode = _dbContext.Stocks
-							.Where(x => x.Barcode == barcode && x.DeletedDate == null)
-							.Select(x => new
-							{
-								x.ProductID,
-								ProductName = x.Product.Name
-							})
-							.FirstOrDefault();
-
-						if (existingBarcode != null &&
-							!(existingBarcode.ProductID == productId))
+						if (barcodeMap.TryGetValue(barcode, out var existingBarcode))
 						{
-							return Json(new
+							if (existingBarcode.ProductID != productId)
 							{
-								success = false,
-								message = $"Barcode '{barcode}' already exists in product: <b>{existingBarcode.ProductName}</b>"
-							});
+								return Json(new
+								{
+									success = false,
+									message = $"Barcode '{barcode}' already exists in product: <b>{existingBarcode.ProductName}</b>"
+								});
+							}
 						}
 					}
 
-					// =====================================================
-					// 🔵 FIND EXISTING
-					// =====================================================
-					var existing = _dbContext.Stocks.FirstOrDefault(x =>
-						x.ProductID == productId &&
-						x.ProductTypeID == typeId &&
-						x.ProductDetailID == detailId &&
-						x.SizeID == sizeId &&
-						x.ColorID == colorId &&
-						x.DeletedDate == null);
- 
+					// -----------------------------------------------
+					// 🔵 Fast lookup
+					// -----------------------------------------------
+					stockMap.TryGetValue(
+						(typeId, detailId, sizeId, colorId),
+						out var existing
+					);
 
-					// =====================================================
-					// 🟢 UPDATE
-					// =====================================================
 					if (existing != null)
 					{
 						existing.Quantity = qty;
@@ -1789,10 +1832,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 					else
 					{
-						// =====================================================
-						// 🟢 INSERT
-						// =====================================================
-						var stock = new Stock
+						var newStock = new Stock
 						{
 							ProductID = productId,
 							ProductTypeID = typeId,
@@ -1806,27 +1846,22 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							CreationDate = now
 						};
 
-						_dbContext.Stocks.Add(stock);
+						await _dbContext.Stocks.AddAsync(newStock);
+
+						stockMap[(typeId, detailId, sizeId, colorId)] = newStock;
 					}
 				}
 
-				_dbContext.SaveChanges();
-				 
+				await _dbContext.SaveChangesAsync();
 
 				return Json(new { success = true, message = "Stock saved successfully" });
 			}
 			catch (Exception ex)
 			{
-				 
-
-				string fullError = ex.ToString(); // 🔥 full stack
-				string inner1 = ex.InnerException?.Message ?? "";
-				string inner2 = ex.InnerException?.InnerException?.Message ?? "";
-
 				return Json(new
 				{
 					success = false,
-					message = fullError + "\n\nINNER1:\n" + inner1 + "\n\nINNER2:\n" + inner2
+					message = ex.ToString()
 				});
 			}
 		}
