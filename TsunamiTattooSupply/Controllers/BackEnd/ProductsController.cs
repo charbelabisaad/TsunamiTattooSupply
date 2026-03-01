@@ -538,88 +538,75 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var existingSizes = _dbContext.ProductsSizes
 					.Where(x => x.ProductID == productId)
 					.ToList();
-				 
+
+				// 🔥 Build dictionary for O(1) lookup (no FirstOrDefault scans)
+				var existingSizeMap = existingSizes.ToDictionary(
+					x => (x.ProductTypeID, x.ProductDetailID, x.SizeID)
+				);
+
 				// -----------------------------------------------------
-				// Holds ALL submitted size keys
+				// Holds ALL submitted size keys (for delete step later)
 				// productId-typeId-detailId-sizeId
 				// -----------------------------------------------------
 				var submittedKeys = new HashSet<string>();
 
-
 				// -----------------------------------------------------
 				// Holds ONLY product types that were submitted
-				// 🔥 CRITICAL FIX
 				// -----------------------------------------------------
 				var submittedTypeIds = new HashSet<int>();
 
-				var submittedDetailKeys = new HashSet<string>();    // submitted type-details
+				// submitted type-details
+				var submittedDetailKeys = new HashSet<string>();
 
 				// =====================================================
-				// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES
+				// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES  (FAST VERSION)
 				// =====================================================
 				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
 				{
 					var match = Regex.Match(key, @"ProductDetails\[(\d+)\]");
-
-					if (!match.Success)
-						continue;
+					if (!match.Success) continue;
 
 					int productTypeId = int.Parse(match.Groups[1].Value);
-
-					// 🔥 REGISTER TYPE
 					submittedTypeIds.Add(productTypeId);
 
 					var detailIds = form[key].Select(int.Parse).ToList();
 
 					foreach (var detailId in detailIds)
 					{
-						// 🔥 REGISTER DETAIL
-						string detailMap = $"{productId}-{productTypeId}-{detailId}";
-						submittedDetailKeys.Add(detailMap);
+						submittedDetailKeys.Add($"{productId}-{productTypeId}-{detailId}");
 
-						string sizeKey = $"ProductSizes[{productTypeId}][{detailId}][]";
+						string sizesFormKey = $"ProductSizes[{productTypeId}][{detailId}][]";
+						if (!form.ContainsKey(sizesFormKey)) continue;
 
-						if (!form.ContainsKey(sizeKey))
-							continue;
-
-						var sizeIds = form[sizeKey].Select(int.Parse).ToList();
+						var sizeIds = form[sizesFormKey].Select(int.Parse).ToList();
 
 						foreach (var sizeId in sizeIds)
 						{
-							string mapKey = $"{productId}-{productTypeId}-{detailId}-{sizeId}";
-							submittedKeys.Add(mapKey);
+							// keep your submittedKeys logic (used later for soft delete)
+							submittedKeys.Add($"{productId}-{productTypeId}-{detailId}-{sizeId}");
 
-							var existing = existingSizes.FirstOrDefault(x =>
-								x.ProductID == productId &&
-								x.ProductTypeID == productTypeId &&
-								x.ProductDetailID == detailId &&
-								x.SizeID == sizeId);
+							// 🔥 FAST lookup
+							existingSizeMap.TryGetValue((productTypeId, detailId, sizeId), out var existing);
 
-							// ================= INSERT
 							if (existing == null)
 							{
-								bool alreadyTracked =
-									_dbContext.ProductsSizes.Local.Any(x =>
-										x.ProductID == productId &&
-										x.ProductTypeID == productTypeId &&
-										x.ProductDetailID == detailId &&
-										x.SizeID == sizeId);
-
-								if (!alreadyTracked)
+								var newSize = new ProductSize
 								{
-									_dbContext.ProductsSizes.Add(new ProductSize
-									{
-										ProductID = productId,
-										ProductTypeID = productTypeId,
-										ProductDetailID = detailId,
-										SizeID = sizeId,
-										Sale = 0,
-										Raise = 0,
-										StatusID = "A",
-										CreatedUserID = userId,
-										CreationDate = now
-									});
-								}
+									ProductID = productId,
+									ProductTypeID = productTypeId,
+									ProductDetailID = detailId,
+									SizeID = sizeId,
+									Sale = 0,
+									Raise = 0,
+									StatusID = "A",
+									CreatedUserID = userId,
+									CreationDate = now
+								};
+
+								_dbContext.ProductsSizes.Add(newSize);
+
+								// 🔥 Add to dictionary so duplicates in the same request are prevented
+								existingSizeMap[(productTypeId, detailId, sizeId)] = newSize;
 							}
 							else
 							{
@@ -641,17 +628,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 
 				// =====================================================
-				// 3️⃣ SOFT DELETE REMOVED ROWS  (FINAL SAFE VERSION)
+				// 3️⃣ SOFT DELETE REMOVED ROWS  (OPTIMIZED VERSION)
 				// =====================================================
 				bool hasSubmittedTypes = submittedTypeIds.Count > 0;
 				bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
 				bool hasSubmittedSizes = submittedKeys.Count > 0;
 
+				// 🔥 Collect removed size combinations for batch delete
+				var removedSizeKeys = new List<(int TypeId, int DetailId, int SizeId)>();
+
 				foreach (var ps in existingSizes)
 				{
 					// ===============================================
-					// ❌ TYPE REMOVED → DELETE ALL TYPE
-					// ONLY if types were submitted from UI
+					// ❌ TYPE REMOVED
 					// ===============================================
 					if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
 					{
@@ -664,7 +653,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					// ===============================================
-					// ❌ DETAIL REMOVED → DELETE DETAIL + ALL SIZES
+					// ❌ DETAIL REMOVED
 					// ===============================================
 					string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
 
@@ -679,7 +668,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 
 					// ===============================================
-					// ❌ SIZE REMOVED → DELETE SIZE ONLY
+					// ❌ SIZE REMOVED
 					// ===============================================
 					string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
 
@@ -690,47 +679,53 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							ps.DeletedUserID = userId;
 							ps.DeletedDate = now;
 
-							// ===============================================
-							// 🔥 CASCADE SOFT DELETE STOCKS
-							// ===============================================
-							var relatedStocks = _dbContext.Stocks
-								.Where(s =>
-									s.ProductID == ps.ProductID &&
-									s.ProductTypeID == ps.ProductTypeID &&
-									s.ProductDetailID == ps.ProductDetailID &&
-									s.SizeID == ps.SizeID &&
-									s.DeletedDate == null)
-								.ToList();
-
-							foreach (var stock in relatedStocks)
-							{
-								stock.DeletedUserID = userId;
-								stock.DeletedDate = now;
-							}
-
-
-							// ===============================================
-							// 🔥 CASCADE SOFT DELETE PRICES
-							// ===============================================
-							var relatedPrices = _dbContext.Prices
-								.Where(p =>
-									p.ProductID == ps.ProductID &&
-									p.ProductTypeID == ps.ProductTypeID &&
-									p.ProductDetailID == ps.ProductDetailID &&
-									p.SizeID == ps.SizeID &&
-									p.DeletedDate == null)
-								.ToList();
-
-							foreach (var price in relatedPrices)
-							{
-								price.DeletedUserID = userId;
-								price.DeletedDate = now;
-							}
-
+							// 🔥 Collect for batch cascade delete
+							removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
 						}
 					}
 				}
 
+				// =====================================================
+				// 🔥 BATCH CASCADE DELETE (ONLY 2 DB QUERIES)
+				// =====================================================
+				if (removedSizeKeys.Any())
+				{
+					var typeIds = removedSizeKeys.Select(x => x.TypeId).ToHashSet();
+					var detailIds = removedSizeKeys.Select(x => x.DetailId).ToHashSet();
+					var sizeIds = removedSizeKeys.Select(x => x.SizeId).ToHashSet();
+
+					// 🔵 Delete Stocks in ONE query
+					var stocksToDelete = _dbContext.Stocks
+						.Where(s =>
+							s.ProductID == productId &&
+							typeIds.Contains(s.ProductTypeID) &&
+							detailIds.Contains(s.ProductDetailID) &&
+							sizeIds.Contains(s.SizeID) &&
+							s.DeletedDate == null)
+						.ToList();
+
+					foreach (var stock in stocksToDelete)
+					{
+						stock.DeletedUserID = userId;
+						stock.DeletedDate = now;
+					}
+
+					// 🔵 Delete Prices in ONE query
+					var pricesToDelete = _dbContext.Prices
+						.Where(p =>
+							p.ProductID == productId &&
+							typeIds.Contains(p.ProductTypeID) &&
+							detailIds.Contains(p.ProductDetailID) &&
+							sizeIds.Contains(p.SizeID) &&
+							p.DeletedDate == null)
+						.ToList();
+
+					foreach (var price in pricesToDelete)
+					{
+						price.DeletedUserID = userId;
+						price.DeletedDate = now;
+					}
+				}
 
 
 
