@@ -2483,7 +2483,7 @@
 				type: 'GET',
 				data: { productId: ProductID },
 
-					success: function(res){
+				   success: function(res){
 
 		if(!res.success){
 			toastr.error(res.message);
@@ -2559,22 +2559,21 @@
 						<td class="align-middle">${det.productTypeDescription}</td>
 						<td class="align-middle">${det.productDetailDescription}</td>
 
-						<td>
-							<input type="number"
+						<td class="align-middle">
+							   <input type="number"
 								   class="form-control form-control-sm qty" min="0"
 								   value="${stock.quantity}"
 								   ${!stock.useInStock ? 'readonly' : ''}>
 						</td>
 
-						<td>
+						<td class="align-middle">
 							<input type="text"
 								   class="form-control form-control-sm barcode"
 								   value="${stock.barcode ?? ''}"
 								   ${!stock.useInStock ? 'readonly' : ''}>
 						</td>
-
-						<td class="align-middle text-center">
-							  <div class="custom-control custom-switch d-inline-block">
+						<td class="align-center text-center">
+							<div class="custom-control custom-switch d-inline-block">
 								<input type="checkbox"
 									   class="custom-control-input useinstock"
 									   id="stock_${stock.id}"
@@ -2583,7 +2582,6 @@
 								<label class="custom-control-label" for="stock_${stock.id}"></label>
 							</div>
 						</td>
-
 					</tr>`;
 				});
 

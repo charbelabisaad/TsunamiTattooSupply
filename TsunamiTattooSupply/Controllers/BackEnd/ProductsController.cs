@@ -737,7 +737,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				#endregion
 
 				// =====================================================
-				// 🔹 PRODUCTS COLORS (SOFT DELETE)
+				// 🔹 PRODUCTS COLORS (SOFT DELETE + UPSERT)
 				// =====================================================
 				var existingColors = _dbContext.ProductsColors
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
@@ -745,7 +745,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				var existingColorsMap = existingColors.ToDictionary(x => x.ColorID);
 
-				// 🔥 Soft delete removed colors
+				// Soft delete removed colors
 				foreach (var pc in existingColors)
 				{
 					if (!colorIds.Contains(pc.ColorID))
@@ -767,7 +767,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					if (pc == null)
 					{
-						var newColor = new ProductColor
+						_dbContext.ProductsColors.Add(new ProductColor
 						{
 							ProductID = productId,
 							ColorID = colorId,
@@ -776,10 +776,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							StatusID = isActive ? "A" : "I",
 							CreatedUserID = userId,
 							CreationDate = now
-						};
-
-						_dbContext.ProductsColors.Add(newColor);
-						existingColorsMap[colorId] = newColor;
+						});
 					}
 					else
 					{
@@ -791,89 +788,87 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 				}
 
+
 				// =====================================================
-				// 🔥 SOFT DELETE REMOVED IMAGES + MOVE FILES
+				// 🔹 IMAGES (DELETE + UPLOAD + INITIAL) — CORRECTED
 				// =====================================================
-				var keptImageIds = Request.Form["KeptImageIds[]"]
-					.Select(int.Parse)
+
+				// 1) Load all images once
+				var allImages = _dbContext.ProductsImages
+					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
-				var imagesToDelete = _dbContext.ProductsImages
-					.Where(pi =>
-						pi.ProductID == productId &&
-						pi.DeletedDate == null &&
-						!keptImageIds.Contains(pi.ID))
-					.ToList();
+				// 2) Safe kept ids (IMPORTANT: if key missing => don't delete)
+				bool hasKeptIds = Request.Form.ContainsKey("KeptImageIds[]");
 
-				if (imagesToDelete.Any())
+				var keptImageIds = hasKeptIds
+					? Request.Form["KeptImageIds[]"].Select(int.Parse).ToHashSet()
+					: new HashSet<int>();
+
+				// 3) Soft delete removed images ONLY if UI sent KeptImageIds[]
+				if (hasKeptIds)
 				{
-					string originalDeletedDir = Path.Combine(
-						_imagesRoot,
-						Global.ProductOriginalImagePath.TrimStart('/'),
-						"DELETED"
-					);
+					var imagesToDelete = allImages
+						.Where(pi => !keptImageIds.Contains(pi.ID))
+						.ToList();
 
-					string smallDeletedDir = Path.Combine(
-						_imagesRoot,
-						Global.ProductSmallImagePath.TrimStart('/'),
-						"DELETED"
-					);
-
-					Directory.CreateDirectory(originalDeletedDir);
-					Directory.CreateDirectory(smallDeletedDir);
-
-					foreach (var img in imagesToDelete)
+					if (imagesToDelete.Any())
 					{
-						// 🔹 Move ORIGINAL
-						if (!string.IsNullOrEmpty(img.OriginalImage))
+						string originalDeletedDir = Path.Combine(
+							_imagesRoot,
+							Global.ProductOriginalImagePath.TrimStart('/'),
+							"DELETED"
+						);
+
+						string smallDeletedDir = Path.Combine(
+							_imagesRoot,
+							Global.ProductSmallImagePath.TrimStart('/'),
+							"DELETED"
+						);
+
+						Directory.CreateDirectory(originalDeletedDir);
+						Directory.CreateDirectory(smallDeletedDir);
+
+						foreach (var img in imagesToDelete)
 						{
-							string src = Path.Combine(
-								_imagesRoot,
-								Global.ProductOriginalImagePath.TrimStart('/'),
-								img.OriginalImage
-							);
+							if (!string.IsNullOrEmpty(img.OriginalImage))
+							{
+								string src = Path.Combine(
+									_imagesRoot,
+									Global.ProductOriginalImagePath.TrimStart('/'),
+									img.OriginalImage
+								);
 
-							string dest = Path.Combine(originalDeletedDir, img.OriginalImage);
+								string dest = Path.Combine(originalDeletedDir, img.OriginalImage);
 
-							if (System.IO.File.Exists(src))
-								System.IO.File.Move(src, dest, true);
+								if (System.IO.File.Exists(src))
+									System.IO.File.Move(src, dest, true);
+							}
+
+							if (!string.IsNullOrEmpty(img.SmallImage))
+							{
+								string src = Path.Combine(
+									_imagesRoot,
+									Global.ProductSmallImagePath.TrimStart('/'),
+									img.SmallImage
+								);
+
+								string dest = Path.Combine(smallDeletedDir, img.SmallImage);
+
+								if (System.IO.File.Exists(src))
+									System.IO.File.Move(src, dest, true);
+							}
+
+							img.DeletedUserID = userId;
+							img.DeletedDate = now;
 						}
 
-						// 🔹 Move SMALL
-						if (!string.IsNullOrEmpty(img.SmallImage))
-						{
-							string src = Path.Combine(
-								_imagesRoot,
-								Global.ProductSmallImagePath.TrimStart('/'),
-								img.SmallImage
-							);
-
-							string dest = Path.Combine(smallDeletedDir, img.SmallImage);
-
-							if (System.IO.File.Exists(src))
-								System.IO.File.Move(src, dest, true);
-						}
-
-						// 🔹 SOFT DELETE DB
-						img.DeletedUserID = userId;
-						img.DeletedDate = now;
+						// keep in-memory list consistent
+						allImages = allImages.Except(imagesToDelete).ToList();
 					}
 				}
 
-				// =====================================================
-				// 🔹 PRODUCT IMAGES (PER COLOR) — FINAL FIX
-				// =====================================================
-
-				var existingImagesAll = _dbContext.ProductsImages
-				.Where(x => x.ProductID == productId && x.DeletedDate == null)
-				.ToList();
-
-				foreach (var img in existingImagesAll)
-					img.IsInitial = false;
-
-				// =====================================================
-				// 🔹 PRODUCT IMAGES UPLOAD
-				// =====================================================
+				// 4) Upload new images
 				var uploadedFiles = Request.Form.Files
 					.Where(f => f.Name.Contains("ProductColorImages["))
 					.ToList();
@@ -883,8 +878,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
 					string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
 
-					if (!Directory.Exists(originalDir)) Directory.CreateDirectory(originalDir);
-					if (!Directory.Exists(smallDir)) Directory.CreateDirectory(smallDir);
+					Directory.CreateDirectory(originalDir);
+					Directory.CreateDirectory(smallDir);
 
 					var groupedByColor = uploadedFiles.GroupBy(f =>
 					{
@@ -924,75 +919,89 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								image.Save(smallPath);
 							}
 
-							_dbContext.ProductsImages.Add(new ProductImage
+							var newImg = new ProductImage
 							{
 								ProductID = productId,
 								ColorID = colorId,
 								OriginalImage = fileName,
 								SmallImage = fileName,
-								IsInitial = false, // will be set later
+								IsInitial = false, // will be set below
 								StatusID = "A",
 								CreatedUserID = userId,
 								CreationDate = now
-							});
+							};
+
+							_dbContext.ProductsImages.Add(newImg);
+
+							// add to in-memory list so initial logic sees it
+							allImages.Add(newImg);
 						}
 					}
 				}
 
-				await _dbContext.SaveChangesAsync();
+				// 5) Set IsInitial per color (safe + deterministic)
+				//
+				// IMPORTANT CHANGE:
+				// - Do NOT reset IsInitial globally then "continue".
+				// - Always ensure at least 1 initial per color.
+				// - If user selected initial => use it. Otherwise => keep existing initial if any, else set first.
+				var groups = allImages
+					.Where(x => x.DeletedDate == null) // includes newly added (DeletedDate is null)
+					.GroupBy(x => x.ColorID)
+					.ToList();
 
-				// 🔥 DEBUG HERE
-				var allImages = _dbContext.ProductsImages
-		.Where(x => x.ProductID == productId && x.DeletedDate == null)
-		.ToList();
-
-				var colorGroups = allImages.GroupBy(x => x.ColorID).ToList();
-
-				foreach (var colorGroup in colorGroups)
+				foreach (var group in groups)
 				{
-					int colorId = colorGroup.Key;
+					int colorId = group.Key;
 
-					// check if user sent any initial for this color
-					bool userTouchedThisColor = Request.Form.Keys
-						.Any(k => k.StartsWith($"ColorImageInitial[{colorId}]"));
+					// keys like: ColorImageInitial[3][53] = true
+					var selectedKeys = Request.Form.Keys
+						.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
+						.ToList();
 
-					if (!userTouchedThisColor)
-						continue; // 🔥 DO NOT TOUCH THIS COLOR
+					// if user selected something for this color, apply it
+					bool userSelectedForThisColor = false;
 
-					// reset only this color
-					foreach (var img in colorGroup)
-						img.IsInitial = false;
-
-					// apply user selected
-					foreach (var key in Request.Form.Keys
-							 .Where(k => k.StartsWith($"ColorImageInitial[{colorId}]")))
+					if (selectedKeys.Any())
 					{
-						if (Request.Form[key] != "true") continue;
+						// reset only this color
+						foreach (var img in group)
+							img.IsInitial = false;
 
-						// ColorImageInitial[3][53]
-						var parts = key.Split('[', ']');
-						if (parts.Length < 4) continue;
+						foreach (var key in selectedKeys)
+						{
+							if (Request.Form[key] != "true") continue;
 
-						if (!int.TryParse(parts[3], out int imageId)) continue;
+							var parts = key.Split('[', ']'); // ColorImageInitial, colorId, imageId
+							if (parts.Length < 4) continue;
 
-						var selected = colorGroup.FirstOrDefault(x => x.ID == imageId);
-						if (selected != null)
-							selected.IsInitial = true;
+							if (!int.TryParse(parts[3], out int imageId)) continue;
+
+							var selected = group.FirstOrDefault(x => x.ID == imageId);
+							if (selected != null)
+							{
+								selected.IsInitial = true;
+								userSelectedForThisColor = true;
+							}
+						}
 					}
 
-					// safety: if none selected
-					if (!colorGroup.Any(x => x.IsInitial))
+					// if user did not select, keep current initial if exists
+					if (!userSelectedForThisColor)
 					{
-						var first = colorGroup.FirstOrDefault();
-						if (first != null)
-							first.IsInitial = true;
+						// if none is initial, set first
+						if (!group.Any(x => x.IsInitial))
+						{
+							var first = group.FirstOrDefault();
+							if (first != null)
+								first.IsInitial = true;
+						}
 					}
 				}
 
+				// ✅ Single save at end
 				await _dbContext.SaveChangesAsync();
-
-
-
+				 
 				transaction.Commit();
 
 				return Json(new { ProductID = productId, success = true });
@@ -1625,14 +1634,16 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// 🔵 COLORS
 				// =====================================================
 				var colors = _dbContext.ProductsColors
-					.Where(c => c.ProductID == productId && c.DeletedDate == null)
-					.Select(c => new
-					{
-						id = c.ID,
-						colorID = c.ColorID,
-						code = c.Color.Code,
-						name = c.Color.Name
-					}).ToList();
+				.Where(c => c.ProductID == productId && c.DeletedDate == null)
+				.OrderBy(c => c.Color.Name)   // 🔥 IMPORTANT
+				.Select(c => new
+				{
+					id = c.ID,
+					colorID = c.ColorID,
+					code = c.Color.Code,
+					name = c.Color.Name
+				})
+				.ToList();
 
 
 				// =====================================================
@@ -1679,40 +1690,52 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// 🔵 STOCK
 				// =====================================================
 				var stocks = (
-					from s in _dbContext.Stocks
-					join ps in _dbContext.ProductsSizes
-						on new
-						{
-							s.ProductID,
-							s.SizeID,
-							s.ProductTypeID,
-							s.ProductDetailID
-						}
-						equals new
-						{
-							ps.ProductID,
-							ps.SizeID,
-							ps.ProductTypeID,
-							ps.ProductDetailID
-						}
-					where s.ProductID == productId
-						  && s.DeletedDate == null
-						  && ps.DeletedDate == null
-						  && ps.StatusID == "A"
-					select new
-					{
-						id = s.ID,
-						sizeID = s.SizeID,
-						colorID = s.ColorID,
-						productTypeID = s.ProductTypeID,
-						productDetailID = s.ProductDetailID,
-						productTypeDescription = s.ProductType.Description,
-						productDetailDescription = s.ProductDetail.Description,
-						quantity = s.Quantity,
-						barcode = s.Barcode,
-						useInStock = s.UseInStock
-					}
-				).ToList();
+		from s in _dbContext.Stocks
+
+		join ps in _dbContext.ProductsSizes
+			on new
+			{
+				s.ProductID,
+				s.SizeID,
+				s.ProductTypeID,
+				s.ProductDetailID
+			}
+			equals new
+			{
+				ps.ProductID,
+				ps.SizeID,
+				ps.ProductTypeID,
+				ps.ProductDetailID
+			}
+
+		join size in _dbContext.Sizes
+			on s.SizeID equals size.ID
+
+		join color in _dbContext.Colors
+			on s.ColorID equals color.ID
+
+		where s.ProductID == productId
+			  && s.DeletedDate == null
+			  && ps.DeletedDate == null
+			  && ps.StatusID == "A"
+
+		orderby size.Rank, color.Name   // 🔥 ORDER HERE
+
+		select new
+		{
+			id = s.ID,
+			sizeID = s.SizeID,
+			colorID = s.ColorID,
+			productTypeID = s.ProductTypeID,
+			productDetailID = s.ProductDetailID,
+			productTypeDescription = s.ProductType.Description,
+			productDetailDescription = s.ProductDetail.Description,
+			quantity = s.Quantity,
+			barcode = s.Barcode,
+			useInStock = s.UseInStock
+		}
+
+	).ToList();
 
 				// =====================================================
 				return Json(new
