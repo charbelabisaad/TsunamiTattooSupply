@@ -798,18 +798,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToList();
 
-				// 2) Safe kept ids (IMPORTANT: if key missing => don't delete)
-				bool hasKeptIds = Request.Form.ContainsKey("KeptImageIds[]");
+				// =====================================================
+				// 🔹 SOFT DELETE ONLY EXPLICITLY DELETED IMAGES
+				// =====================================================
 
-				var keptImageIds = hasKeptIds
-					? Request.Form["KeptImageIds[]"].Select(int.Parse).ToHashSet()
-					: new HashSet<int>();
+				List<int> deletedIds = new();
 
-				// 3) Soft delete removed images ONLY if UI sent KeptImageIds[]
-				if (hasKeptIds)
+				if (Request.Form.ContainsKey("DeletedImageIds[]") &&
+					Request.Form["DeletedImageIds[]"].Count > 0)
+				{
+					deletedIds = Request.Form["DeletedImageIds[]"]
+						.Where(x => !string.IsNullOrWhiteSpace(x))
+						.Select(int.Parse)
+						.ToList();
+				}
+
+				if (deletedIds.Any())
 				{
 					var imagesToDelete = allImages
-						.Where(pi => !keptImageIds.Contains(pi.ID))
+						.Where(x => deletedIds.Contains(x.ID))
 						.ToList();
 
 					if (imagesToDelete.Any())
@@ -842,7 +849,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								string dest = Path.Combine(originalDeletedDir, img.OriginalImage);
 
 								if (System.IO.File.Exists(src))
-									System.IO.File.Move(src, dest, true);
+								{
+									if (!System.IO.File.Exists(dest))
+										System.IO.File.Move(src, dest);
+								}
 							}
 
 							if (!string.IsNullOrEmpty(img.SmallImage))
@@ -856,14 +866,16 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								string dest = Path.Combine(smallDeletedDir, img.SmallImage);
 
 								if (System.IO.File.Exists(src))
-									System.IO.File.Move(src, dest, true);
+								{
+									if (!System.IO.File.Exists(dest))
+										System.IO.File.Move(src, dest);
+								}
 							}
 
 							img.DeletedUserID = userId;
 							img.DeletedDate = now;
 						}
 
-						// keep in-memory list consistent
 						allImages = allImages.Except(imagesToDelete).ToList();
 					}
 				}
@@ -1507,32 +1519,51 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var form = Request.Form;
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// -------------------------------------------------
-				// 1️⃣ Load ALL existing prices once
-				// -------------------------------------------------
+				//-------------------------------------------------
+				// 1️⃣ Load existing prices once
+				//-------------------------------------------------
 				var existingPrices = await _dbContext.Prices
 					.Where(p => p.ProductID == productId && p.DeletedDate == null)
 					.ToListAsync();
 
-				// Dictionary for O(1) lookup
-				var priceMap = existingPrices.ToDictionary(
-					p => (p.ProductTypeID,
-						  p.ProductDetailID,
-						  p.SizeID,
-						  p.ColorID,
-						  p.CurrencyID,
-						  p.CountryID)
-				);
+				// Composite key including currency & country
+				var priceMap = existingPrices
+					.GroupBy(p => (
+						p.ProductID,
+						p.ProductTypeID,
+						p.ProductDetailID,
+						p.SizeID,
+						p.ColorID,
+						p.CurrencyID,
+						p.CountryID))
+					.ToDictionary(g => g.Key, g => g.First());
 
-				// -------------------------------------------------
-				// 2️⃣ Process submitted prices
-				// -------------------------------------------------
+				//-------------------------------------------------
+				// 2️⃣ Preload currency-country mapping (OPTIMIZED)
+				//-------------------------------------------------
+				var currencyIds = form.Keys
+					.Where(k => k.StartsWith("Price["))
+					.Select(k =>
+					{
+						var parts = k.Replace("Price[", "").Replace("]", "").Split('_');
+						return parts.Length == 5 ? Convert.ToInt32(parts[4]) : 0;
+					})
+					.Where(id => id > 0)
+					.Distinct()
+					.ToList();
+
+				var currencyCountryMap = await _dbContext.Currencies
+					.Where(c => currencyIds.Contains(c.ID))
+					.ToDictionaryAsync(c => c.ID, c => c.CountryID ?? 0);
+
+				//-------------------------------------------------
+				// 3️⃣ Process submitted prices
+				//-------------------------------------------------
 				foreach (var amountKey in form.Keys.Where(k => k.StartsWith("Price[")))
 				{
-					// Price[1_2_5_3_1]
 					string cleanKey = amountKey.Replace("Price[", "").Replace("]", "");
-
 					var parts = cleanKey.Split('_');
+
 					if (parts.Length != 5)
 						continue;
 
@@ -1544,37 +1575,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					decimal amount = Convert.ToDecimal(form[$"Price[{cleanKey}]"]);
 					decimal amountNet = Convert.ToDecimal(form[$"PriceNet[{cleanKey}]"]);
-
 					bool useInPrice = form[$"PriceInUse[{cleanKey}]"] == "1";
 
 					decimal sale = 0;
 					if (form.ContainsKey($"Sale[{cleanKey}]"))
 						sale = Convert.ToDecimal(form[$"Sale[{cleanKey}]"]);
 
-					int countryId = 0;
+					int countryId = form.ContainsKey($"CountryID[{cleanKey}]")
+						? Convert.ToInt32(form[$"CountryID[{cleanKey}]"])
+						: currencyCountryMap.GetValueOrDefault(currencyId, 0);
 
-					if (form.ContainsKey($"CountryID[{cleanKey}]"))
-					{
-						countryId = Convert.ToInt32(form[$"CountryID[{cleanKey}]"]);
-					}
-					else
-					{
-						countryId = await _dbContext.Currencies
-							.Where(c => c.ID == currencyId)
-							.Select(c => c.CountryID ?? 0)
-							.FirstOrDefaultAsync();
-					}
-
-					// -------------------------------------------------
-					// 🔥 Fast lookup (no DB hit)
-					// -------------------------------------------------
-					priceMap.TryGetValue(
-						(typeId, detailId, sizeId, colorId, currencyId, countryId),
-						out var existing
+					var key = (
+						productId,
+						typeId,
+						detailId,
+						sizeId,
+						colorId,
+						currencyId,
+						countryId
 					);
 
-					if (existing != null)
+					//-------------------------------------------------
+					// 🔥 UPSERT
+					//-------------------------------------------------
+					if (priceMap.TryGetValue(key, out var existing))
 					{
+						// UPDATE
 						existing.Sale = sale;
 						existing.Amount = amount;
 						existing.AmountNet = amountNet;
@@ -1584,6 +1610,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 					else
 					{
+						// INSERT
 						var newPrice = new Price
 						{
 							ProductID = productId,
@@ -1603,15 +1630,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						};
 
 						await _dbContext.Prices.AddAsync(newPrice);
-
-						// Add to dictionary to prevent duplicates in same request
-						priceMap[(typeId, detailId, sizeId, colorId, currencyId, countryId)] = newPrice;
+						priceMap[key] = newPrice;
 					}
 				}
 
-				// -------------------------------------------------
-				// 3️⃣ Save once
-				// -------------------------------------------------
+				//-------------------------------------------------
+				// 4️⃣ Save once
+				//-------------------------------------------------
 				await _dbContext.SaveChangesAsync();
 				await transaction.CommitAsync();
 

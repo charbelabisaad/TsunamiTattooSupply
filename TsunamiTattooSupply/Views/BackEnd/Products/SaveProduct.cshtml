@@ -755,9 +755,17 @@
         </div>
     </div>
 </div>
+
 <script>
 
+		const colorImagesBuffer = {};
+		const deletedExistingImages = []; 
+		const removedNewImages = {}; // { colorId: Set(filenames) }
+ 
+
 	document.addEventListener('DOMContentLoaded', function () {
+
+
 
 		const currencies = [
 		@foreach (var obj in Model.currencies)
@@ -987,8 +995,6 @@
 					$(this).val(calculated.toFixed(2));
 				});
 			});
-
-		const colorImagesBuffer = {};
 
 		$(document).on('changed.bs.select', '#ProductColors', function () {
 
@@ -1364,7 +1370,7 @@
 		$("#imagePreviewModal").modal("show");
 	}
 
-		$(document).on('click', '.btn-clear-image', function (e) {
+			$(document).on('click', '.btn-clear-image', function (e) {
 
 		e.preventDefault();
 		e.stopPropagation();
@@ -1375,29 +1381,33 @@
 		let colorId  = $card.data('color-id');
 		let fileName = $imageItem.data('filename');
 		let tempId   = $imageItem.data('temp-id');
+		let dbId     = $imageItem.data('image-id'); // 🔥 important
+
+		// =====================================
+		// 🟥 If EXISTING image (from DB)
+		// =====================================
+		if (dbId) {
+			deletedExistingImages.push(dbId);
+		}
+
+		// =====================================
+		// 🟥 If NEW image (not saved yet)
+		// =====================================
+		if (fileName && colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] =
+				colorImagesBuffer[colorId].filter(f => f.name !== fileName);
+
+			if (!removedNewImages[colorId]) {
+				removedNewImages[colorId] = new Set();
+			}
+
+			removedNewImages[colorId].add(fileName);
+		}
 
 		// =====================================
 		// 🟥 Remove from UI
 		// =====================================
 		$imageItem.closest('.inline-block').remove();
-
-		// =====================================
-		// 🟥 Remove from buffer
-		// =====================================
-		if (colorImagesBuffer[colorId]) {
-			colorImagesBuffer[colorId] =
-				colorImagesBuffer[colorId].filter(f => f.name !== fileName);
-		}
-
-		// =====================================
-		// 🟥 Prevent re-adding same file
-		// =====================================
-		if (!removedNewImages[colorId]) {
-			removedNewImages[colorId] = new Set();
-		}
-
-		removedNewImages[colorId].add(fileName);
-
 	});
 
 		$(document).on('click', '.btn-clear', function (e) {
@@ -1482,9 +1492,7 @@
 		$('#imageProductViewModalImg').attr('src', src);
 		$('#imageProductViewModal').modal('show');
 	});
-	 
-	const removedNewImages = {}; // { colorId: Set(filenames) }
- 
+
 	$(document).on("click", "#btnSaveProductInitialInfo", function () {
 
 		// ==================================================
@@ -1588,30 +1596,40 @@
 		// ==================================================
 		// 🔥 Append NEW color images
 		// ==================================================
-		Object.keys(colorImagesBuffer).forEach(colorId => {
+			// ==================================================
+	// 🔥 Append NEW color images
+	// ==================================================
+	Object.keys(colorImagesBuffer).forEach(colorId => {
 
-			let files = colorImagesBuffer[colorId] || [];
-			let removedSet = removedNewImages[colorId] || new Set();
+		let files = colorImagesBuffer[colorId] || [];
+		let removedSet = removedNewImages[colorId] || new Set();
 
-			files.forEach(file => {
-				if (removedSet.has(file.name)) return;
+		files.forEach(file => {
+			if (removedSet.has(file.name)) return;
 
-				formData.append(
-					`ProductColorImages[${colorId}][]`,
-					file
-				);
-			});
+			formData.append(
+				`ProductColorImages[${colorId}][]`,
+				file
+			);
 		});
+	});
+
+	// ==================================================
+	// 🔥 Append deleted existing images (soft delete)
+	// ==================================================
+	deletedExistingImages.forEach(id => {
+		formData.append("DeletedImageIds[]", id);
+	});
 
 		// ==================================================
 		// 🔥 Keep EXISTING images
 		// ==================================================
-		$('.color-image-item[data-image-id]').each(function () {
-			formData.append(
-				'KeptImageIds[]',
-				$(this).data('image-id')
-			);
-		});
+		// $('.color-image-item[data-image-id]').each(function () {
+		// 	formData.append(
+		// 		'KeptImageIds[]',
+		// 		$(this).data('image-id')
+		// 	);
+		// });
 
 	// ==================================================
 	// 🔥 Append INITIAL flags per image
@@ -1627,6 +1645,9 @@
 		// ==================================================
 		// AJAX
 		// ==================================================
+
+	 
+
 		$.ajax({
 			url: '@Url.Action("SaveProduct", "Products")',
 			type: 'POST',
@@ -1660,7 +1681,7 @@
 
 					listProductPrice(res.productID);
 					listProductStock(res.productID);
-				
+					deletedExistingImages.length = 0;
 
 				} else {
 					toastr.error(res.message || "Failed to save product");
