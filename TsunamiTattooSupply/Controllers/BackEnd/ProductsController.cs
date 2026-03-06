@@ -350,686 +350,733 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}).ToList();
 		}
 
+		//[HttpPost]
+		//[ValidateAntiForgeryToken]
+		//public async Task<IActionResult> SaveProduct()
+		//{
+		//	await using var transaction = await _dbContext.Database.BeginTransactionAsync();
+
+		//	try
+		//	{
+
+		//		// =====================================================
+		//		// 🔹 CONTEXT DATA
+		//		// =====================================================
+		//		int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+		//		DateTime now = DateTime.UtcNow;
+		//		var form = Request.Form;
+
+		//		int countryId = _dbContext.Countries
+		//			.Where(c => c.Native)
+		//			.Select(c => c.ID)
+		//			.FirstOrDefault();
+
+		//		int productId = Convert.ToInt32(form["ProductID"]);
+
+		//		// =====================================================
+		//		// 🔴 REQUIRED SERVER-SIDE VALIDATION
+		//		// =====================================================
+		//		if (string.IsNullOrWhiteSpace(form["ProductCode"]))
+		//			return Json(new { success = false, message = "Product Code is required" });
+
+		//		if (string.IsNullOrWhiteSpace(form["ProductName"]))
+		//			return Json(new { success = false, message = "Product Name is required" });
+
+		//		// =====================================================
+		//		// 🔹 SUB CATEGORIES (REQUIRED)
+		//		// =====================================================
+		//		var postedSubCatIds = form.Keys
+		//			.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
+		//			.Select(k => Convert.ToInt32(form[k]))
+		//			.ToList();
+
+		//		if (!postedSubCatIds.Any())
+		//			return Json(new { success = false, message = "At least one Sub Category is required" });
+
+		//		// =====================================================
+		//		// 🔹 SUB CATEGORIES (REQUIRED)
+		//		// =====================================================
+		//		var postedSpecIds = form["ProductSpecs[]"]
+		//			.Select(int.Parse)
+		//			.Distinct()
+		//			.ToList();
+
+		//		if (!postedSpecIds.Any())
+		//			return Json(new { success = false, message = "At least one Spec is required" });
+
+		//		// =====================================================
+		//		// 🔹 PRODUCT COLORS (REQUIRED)
+		//		// =====================================================
+		//		var colorIds = form["ProductColors[]"]
+		//			.Select(int.Parse)
+		//			.Distinct()
+		//			.ToList();
+
+		//		if (!colorIds.Any())
+		//			return Json(new { success = false, message = "At least one Color is required" });
+
+
+		//		// =====================================================
+		//		// 🔹 PRODUCT (INSERT / UPDATE)
+		//		// =====================================================
+		//		Product product;
+
+		//		if (productId == 0)
+		//		{
+		//			product = new Product
+		//			{
+		//				Code = form["ProductCode"],
+		//				Name = form["ProductName"],
+		//				Description = form["ProductDescription"],
+		//				UnitID = Convert.ToInt32(form["ProductUnit"]),
+		//				GroupID = Convert.ToInt32(form["ProductGroup"]),
+		//				VAT = form["ProductVAT"] == "on",
+		//				Feature = form["ProductFeature"] == "on",
+		//				NewArrival = form["ProductNewArrival"] == "on",
+		//				NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]),
+		//				Warranty = form["ProductWarranty"] == "on",
+		//				WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
+		//					? 0
+		//					: Convert.ToInt32(form["ProductWarrantyMonths"]),
+		//				StatusID = form["ProductStatusID"],
+		//				CreatedUserID = userId,
+		//				CreationDate = now
+		//			};
+
+		//			_dbContext.Products.Add(product);
+		//			await _dbContext.SaveChangesAsync();
+		//			productId = product.ID;
+		//		}
+		//		else
+		//		{
+		//			product = _dbContext.Products.First(x => x.ID == productId);
+
+		//			product.Code = form["ProductCode"];
+		//			product.Name = form["ProductName"];
+		//			product.Description = form["ProductDescription"];
+		//			product.UnitID = Convert.ToInt32(form["ProductUnit"]);
+		//			product.GroupID = Convert.ToInt32(form["ProductGroup"]);
+		//			product.VAT = form["ProductVAT"] == "on";
+		//			product.Feature = form["ProductFeature"] == "on";
+		//			product.NewArrival = form["ProductNewArrival"] == "on";
+		//			product.NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]);
+		//			product.Warranty = form["ProductWarranty"] == "on";
+		//			product.WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
+		//				? 0
+		//				: Convert.ToInt32(form["ProductWarrantyMonths"]);
+		//			product.StatusID = form["ProductStatusID"];
+		//			product.EditUserID = userId;
+		//			product.EditDate = now;
+		//		}
+
+		//		// =====================================================
+		//		// 🔹 PRODUCT SUB CATEGORIES (SOFT DELETE)
+		//		// =====================================================
+		//		var existingSubCats = _dbContext.ProductsSubCategories
+		//			.Where(x => x.ProductID == productId && x.DeletedDate == null)
+		//			.ToList();
+
+		//		foreach (var sc in existingSubCats)
+		//		{
+		//			if (!postedSubCatIds.Contains(sc.SubCategoryID))
+		//			{
+		//				sc.DeletedUserID = userId;
+		//				sc.DeletedDate = now;
+		//			}
+		//		}
+
+		//		foreach (var subCatId in postedSubCatIds)
+		//		{
+		//			if (!existingSubCats.Any(x => x.SubCategoryID == subCatId))
+		//			{
+		//				_dbContext.ProductsSubCategories.Add(new ProductSubCategory
+		//				{
+		//					ProductID = productId,
+		//					SubCategoryID = subCatId,
+		//					StatusID = "A",
+		//					CreatedUserID = userId,
+		//					CreationDate = now
+		//				});
+		//			}
+		//		}
+
+		//		// =====================================================
+		//		// 🔹 SPECS (SOFT DELETE)
+		//		// =====================================================
+		//		var existingSpecs = _dbContext.ProductsSpecs
+		//			.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
+		//			.ToList();
+
+		//		foreach (var ps in existingSpecs)
+		//		{
+		//			if (!postedSpecIds.Contains(ps.SpecID))
+		//			{
+		//				ps.DeletedUserID = userId;
+		//				ps.DeletedDate = now;
+		//			}
+		//		}
+		//		var uid = userId;
+		//		foreach (var specId in postedSpecIds)
+		//		{
+		//			if (!existingSpecs.Any(ps => ps.SpecID == specId))
+		//			{
+		//				_dbContext.ProductsSpecs.Add(new ProductSpec
+		//				{
+		//					ProductID = productId,
+		//					SpecID = specId, 
+		//					CreatedUserID = userId,
+		//					CreatedDate = now
+		//				});
+		//			}
+		//		}
+
+		//		#region PRODUCT SIZE MATRIX SAVE
+
+		//		// =====================================================
+		//		// 1️⃣ LOAD ALL EXISTING ROWS (ACTIVE + SOFT-DELETED)
+		//		// =====================================================
+		//		var existingSizes = _dbContext.ProductsSizes
+		//			.Where(x => x.ProductID == productId)
+		//			.ToList();
+
+		//		// 🔥 Build dictionary for O(1) lookup (no FirstOrDefault scans)
+		//		var existingSizeMap = existingSizes.ToDictionary(
+		//			x => (x.ProductTypeID, x.ProductDetailID, x.SizeID)
+		//		);
+
+		//		// -----------------------------------------------------
+		//		// Holds ALL submitted size keys (for delete step later)
+		//		// productId-typeId-detailId-sizeId
+		//		// -----------------------------------------------------
+		//		var submittedKeys = new HashSet<string>();
+
+		//		// -----------------------------------------------------
+		//		// Holds ONLY product types that were submitted
+		//		// -----------------------------------------------------
+		//		var submittedTypeIds = new HashSet<int>();
+
+		//		// submitted type-details
+		//		var submittedDetailKeys = new HashSet<string>();
+
+		//		// =====================================================
+		//		// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES  (FAST VERSION)
+		//		// =====================================================
+		//		foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
+		//		{
+		//			var match = Regex.Match(key, @"ProductDetails\[(\d+)\]");
+		//			if (!match.Success) continue;
+
+		//			int productTypeId = int.Parse(match.Groups[1].Value);
+		//			submittedTypeIds.Add(productTypeId);
+
+		//			var detailIds = form[key].Select(int.Parse).ToList();
+
+		//			foreach (var detailId in detailIds)
+		//			{
+		//				submittedDetailKeys.Add($"{productId}-{productTypeId}-{detailId}");
+
+		//				string sizesFormKey = $"ProductSizes[{productTypeId}][{detailId}][]";
+		//				if (!form.ContainsKey(sizesFormKey)) continue;
+
+		//				var sizeIds = form[sizesFormKey].Select(int.Parse).ToList();
+
+		//				foreach (var sizeId in sizeIds)
+		//				{
+		//					// keep your submittedKeys logic (used later for soft delete)
+		//					submittedKeys.Add($"{productId}-{productTypeId}-{detailId}-{sizeId}");
+
+		//					// 🔥 FAST lookup
+		//					existingSizeMap.TryGetValue((productTypeId, detailId, sizeId), out var existing);
+
+		//					if (existing == null)
+		//					{
+		//						var newSize = new ProductSize
+		//						{
+		//							ProductID = productId,
+		//							ProductTypeID = productTypeId,
+		//							ProductDetailID = detailId,
+		//							SizeID = sizeId,
+		//							Sale = 0,
+		//							Raise = 0,
+		//							StatusID = "A",
+		//							CreatedUserID = userId,
+		//							CreationDate = now
+		//						};
+
+		//						_dbContext.ProductsSizes.Add(newSize);
+
+		//						// 🔥 Add to dictionary so duplicates in the same request are prevented
+		//						existingSizeMap[(productTypeId, detailId, sizeId)] = newSize;
+		//					}
+		//					else
+		//					{
+		//						// RESTORE IF SOFT DELETED
+		//						if (existing.DeletedDate != null)
+		//						{
+		//							existing.DeletedDate = null;
+		//							existing.DeletedUserID = null;
+		//						}
+
+		//						existing.StatusID = "A";
+		//						existing.EditUserID = userId;
+		//						existing.EditDate = now;
+		//					}
+		//				}
+		//			}
+		//		}
+
+
+
+		//		// =====================================================
+		//		// 3️⃣ SOFT DELETE REMOVED ROWS  (OPTIMIZED VERSION)
+		//		// =====================================================
+		//		bool hasSubmittedTypes = submittedTypeIds.Count > 0;
+		//		bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
+		//		bool hasSubmittedSizes = submittedKeys.Count > 0;
+
+		//		// 🔥 Collect removed size combinations for batch delete
+		//		var removedSizeKeys = new List<(int TypeId, int DetailId, int SizeId)>();
+
+		//		foreach (var ps in existingSizes)
+		//		{
+		//			// ===============================================
+		//			// ❌ TYPE REMOVED
+		//			// ===============================================
+		//			if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
+		//			{
+		//				if (ps.DeletedDate == null)
+		//				{
+		//					ps.DeletedUserID = userId;
+		//					ps.DeletedDate = now;
+		//				}
+		//				continue;
+		//			}
+
+		//			// ===============================================
+		//			// ❌ DETAIL REMOVED
+		//			// ===============================================
+		//			string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
+
+		//			if (hasSubmittedDetails && !submittedDetailKeys.Contains(detailKey))
+		//			{
+		//				if (ps.DeletedDate == null)
+		//				{
+		//					ps.DeletedUserID = userId;
+		//					ps.DeletedDate = now;
+		//				}
+		//				continue;
+		//			}
+
+		//			// ===============================================
+		//			// ❌ SIZE REMOVED
+		//			// ===============================================
+		//			string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
+
+		//			if (hasSubmittedSizes && !submittedKeys.Contains(sizeKey))
+		//			{
+		//				if (ps.DeletedDate == null)
+		//				{
+		//					ps.DeletedUserID = userId;
+		//					ps.DeletedDate = now;
+
+		//					// 🔥 Collect for batch cascade delete
+		//					removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
+		//				}
+		//			}
+		//		}
+
+		//		// =====================================================
+		//		// 🔥 BATCH CASCADE DELETE (ONLY 2 DB QUERIES)
+		//		// =====================================================
+		//		if (removedSizeKeys.Any())
+		//		{
+		//			var typeIds = removedSizeKeys.Select(x => x.TypeId).ToHashSet();
+		//			var detailIds = removedSizeKeys.Select(x => x.DetailId).ToHashSet();
+		//			var sizeIds = removedSizeKeys.Select(x => x.SizeId).ToHashSet();
+
+		//			// 🔵 Delete Stocks in ONE query
+		//			var stocksToDelete = _dbContext.Stocks
+		//				.Where(s =>
+		//					s.ProductID == productId &&
+		//					typeIds.Contains(s.ProductTypeID) &&
+		//					detailIds.Contains(s.ProductDetailID) &&
+		//					sizeIds.Contains(s.SizeID) &&
+		//					s.DeletedDate == null)
+		//				.ToList();
+
+		//			foreach (var stock in stocksToDelete)
+		//			{
+		//				stock.DeletedUserID = userId;
+		//				stock.DeletedDate = now;
+		//			}
+
+		//			// 🔵 Delete Prices in ONE query
+		//			var pricesToDelete = _dbContext.Prices
+		//				.Where(p =>
+		//					p.ProductID == productId &&
+		//					typeIds.Contains(p.ProductTypeID) &&
+		//					detailIds.Contains(p.ProductDetailID) &&
+		//					sizeIds.Contains(p.SizeID) &&
+		//					p.DeletedDate == null)
+		//				.ToList();
+
+		//			foreach (var price in pricesToDelete)
+		//			{
+		//				price.DeletedUserID = userId;
+		//				price.DeletedDate = now;
+		//			}
+		//		}
+
+
+
+		//		// =====================================================
+		//		// 4️⃣ SAVE
+		//		// =====================================================
+		//		await _dbContext.SaveChangesAsync();
+
+		//		#endregion
+
+		//		// =====================================================
+		//		// 🔹 PRODUCTS COLORS (SOFT DELETE + UPSERT)
+		//		// =====================================================
+		//		var existingColors = _dbContext.ProductsColors
+		//			.Where(x => x.ProductID == productId && x.DeletedDate == null)
+		//			.ToList();
+
+		//		var existingColorsMap = existingColors.ToDictionary(x => x.ColorID);
+
+		//		// Soft delete removed colors
+		//		foreach (var pc in existingColors)
+		//		{
+		//			if (!colorIds.Contains(pc.ColorID))
+		//			{
+		//				pc.DeletedUserID = userId;
+		//				pc.DeletedDate = now;
+		//			}
+		//		}
+
+		//		int coverColorId = Convert.ToInt32(form["CoverColorID"]);
+
+		//		foreach (var colorId in colorIds)
+		//		{
+		//			bool isCover = colorId == coverColorId;
+		//			bool showFront = form[$"ProductColorsMeta[{colorId}].ShowFront"] == "on";
+		//			bool isActive = form[$"ProductColorsMeta[{colorId}].IsActive"] == "on";
+
+		//			existingColorsMap.TryGetValue(colorId, out var pc);
+
+		//			if (pc == null)
+		//			{
+		//				_dbContext.ProductsColors.Add(new ProductColor
+		//				{
+		//					ProductID = productId,
+		//					ColorID = colorId,
+		//					IsCover = isCover,
+		//					ShowFront = showFront,
+		//					StatusID = isActive ? "A" : "I",
+		//					CreatedUserID = userId,
+		//					CreationDate = now
+		//				});
+		//			}
+		//			else
+		//			{
+		//				pc.IsCover = isCover;
+		//				pc.ShowFront = showFront;
+		//				pc.StatusID = isActive ? "A" : "I";
+		//				pc.EditUserID = userId;
+		//				pc.EditDate = now;
+		//			}
+		//		}
+
+
+		//		// =====================================================
+		//		// 🔹 IMAGES (DELETE + UPLOAD + INITIAL) — CORRECTED
+		//		// =====================================================
+
+		//		// 1) Load all images once
+		//		var allImages = _dbContext.ProductsImages
+		//			.Where(x => x.ProductID == productId && x.DeletedDate == null)
+		//			.ToList();
+
+		//		// =====================================================
+		//		// 🔹 SOFT DELETE ONLY EXPLICITLY DELETED IMAGES
+		//		// =====================================================
+
+		//		List<int> deletedIds = new();
+
+		//		if (Request.Form.ContainsKey("DeletedImageIds[]") &&
+		//			Request.Form["DeletedImageIds[]"].Count > 0)
+		//		{
+		//			deletedIds = Request.Form["DeletedImageIds[]"]
+		//				.Where(x => !string.IsNullOrWhiteSpace(x))
+		//				.Select(int.Parse)
+		//				.ToList();
+		//		}
+
+		//		if (deletedIds.Any())
+		//		{
+		//			var imagesToDelete = allImages
+		//				.Where(x => deletedIds.Contains(x.ID))
+		//				.ToList();
+
+		//			if (imagesToDelete.Any())
+		//			{
+		//				string originalDeletedDir = Path.Combine(
+		//					_imagesRoot,
+		//					Global.ProductOriginalImagePath.TrimStart('/'),
+		//					"DELETED"
+		//				);
+
+		//				string smallDeletedDir = Path.Combine(
+		//					_imagesRoot,
+		//					Global.ProductSmallImagePath.TrimStart('/'),
+		//					"DELETED"
+		//				);
+
+		//				Directory.CreateDirectory(originalDeletedDir);
+		//				Directory.CreateDirectory(smallDeletedDir);
+
+		//				foreach (var img in imagesToDelete)
+		//				{
+		//					if (!string.IsNullOrEmpty(img.OriginalImage))
+		//					{
+		//						string src = Path.Combine(
+		//							_imagesRoot,
+		//							Global.ProductOriginalImagePath.TrimStart('/'),
+		//							img.OriginalImage
+		//						);
+
+		//						string dest = Path.Combine(originalDeletedDir, img.OriginalImage);
+
+		//						if (System.IO.File.Exists(src))
+		//						{
+		//							if (!System.IO.File.Exists(dest))
+		//								System.IO.File.Move(src, dest);
+		//						}
+		//					}
+
+		//					if (!string.IsNullOrEmpty(img.SmallImage))
+		//					{
+		//						string src = Path.Combine(
+		//							_imagesRoot,
+		//							Global.ProductSmallImagePath.TrimStart('/'),
+		//							img.SmallImage
+		//						);
+
+		//						string dest = Path.Combine(smallDeletedDir, img.SmallImage);
+
+		//						if (System.IO.File.Exists(src))
+		//						{
+		//							if (!System.IO.File.Exists(dest))
+		//								System.IO.File.Move(src, dest);
+		//						}
+		//					}
+
+		//					img.DeletedUserID = userId;
+		//					img.DeletedDate = now;
+		//				}
+
+		//				allImages = allImages.Except(imagesToDelete).ToList();
+		//			}
+		//		}
+
+		//		// 4) Upload new images
+		//		var uploadedFiles = Request.Form.Files
+		//			.Where(f => f.Name.Contains("ProductColorImages["))
+		//			.ToList();
+
+		//		if (uploadedFiles.Any())
+		//		{
+		//			string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
+		//			string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
+
+		//			Directory.CreateDirectory(originalDir);
+		//			Directory.CreateDirectory(smallDir);
+
+		//			var groupedByColor = uploadedFiles.GroupBy(f =>
+		//			{
+		//				string key = f.Name; // ProductColorImages[12][]
+		//				int start = key.IndexOf('[') + 1;
+		//				int end = key.IndexOf(']');
+		//				return int.Parse(key.Substring(start, end - start));
+		//			});
+
+		//			foreach (var colorGroup in groupedByColor)
+		//			{
+		//				int colorId = colorGroup.Key;
+
+		//				foreach (var file in colorGroup)
+		//				{
+		//					if (file.Length == 0) continue;
+
+		//					string ext = Path.GetExtension(file.FileName);
+		//					string fileName = $"{Guid.NewGuid()}{ext}";
+
+		//					string originalPath = Path.Combine(originalDir, fileName);
+		//					string smallPath = Path.Combine(smallDir, fileName);
+
+		//					// save original
+		//					using (var stream = new FileStream(originalPath, FileMode.Create))
+		//						await file.CopyToAsync(stream);
+
+		//					// save resized
+		//					using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
+		//					{
+		//						image.Mutate(x => x.Resize(new ResizeOptions
+		//						{
+		//							Mode = ResizeMode.Max,
+		//							Size = new SixLabors.ImageSharp.Size(600, 600)
+		//						}));
+
+		//						image.Save(smallPath);
+		//					}
+
+		//					var newImg = new ProductImage
+		//					{
+		//						ProductID = productId,
+		//						ColorID = colorId,
+		//						OriginalImage = fileName,
+		//						SmallImage = fileName,
+		//						IsInitial = false, // will be set below
+		//						StatusID = "A",
+		//						CreatedUserID = userId,
+		//						CreationDate = now
+		//					};
+
+		//					_dbContext.ProductsImages.Add(newImg);
+
+		//					// add to in-memory list so initial logic sees it
+		//					allImages.Add(newImg);
+		//				}
+		//			}
+		//		}
+
+		//		// 5) Set IsInitial per color (safe + deterministic)
+		//		//
+		//		// IMPORTANT CHANGE:
+		//		// - Do NOT reset IsInitial globally then "continue".
+		//		// - Always ensure at least 1 initial per color.
+		//		// - If user selected initial => use it. Otherwise => keep existing initial if any, else set first.
+		//		var groups = allImages
+		//			.Where(x => x.DeletedDate == null) // includes newly added (DeletedDate is null)
+		//			.GroupBy(x => x.ColorID)
+		//			.ToList();
+
+		//		foreach (var group in groups)
+		//		{
+		//			int colorId = group.Key;
+
+		//			// keys like: ColorImageInitial[3][53] = true
+		//			var selectedKeys = Request.Form.Keys
+		//				.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
+		//				.ToList();
+
+		//			// if user selected something for this color, apply it
+		//			bool userSelectedForThisColor = false;
+
+		//			if (selectedKeys.Any())
+		//			{
+		//				// reset only this color
+		//				foreach (var img in group)
+		//					img.IsInitial = false;
+
+		//				foreach (var key in selectedKeys)
+		//				{
+		//					if (Request.Form[key] != "true") continue;
+
+		//					var parts = key.Split('[', ']'); // ColorImageInitial, colorId, imageId
+		//					if (parts.Length < 4) continue;
+
+		//					if (!int.TryParse(parts[3], out int imageId)) continue;
+
+		//					var selected = group.FirstOrDefault(x => x.ID == imageId);
+		//					if (selected != null)
+		//					{
+		//						selected.IsInitial = true;
+		//						userSelectedForThisColor = true;
+		//					}
+		//				}
+		//			}
+
+		//			// if user did not select, keep current initial if exists
+		//			if (!userSelectedForThisColor)
+		//			{
+		//				// if none is initial, set first
+		//				if (!group.Any(x => x.IsInitial))
+		//				{
+		//					var first = group.FirstOrDefault();
+		//					if (first != null)
+		//						first.IsInitial = true;
+		//				}
+		//			}
+		//		}
+
+		//		// ✅ Single save at end
+		//		await _dbContext.SaveChangesAsync();
+
+		//		transaction.Commit();
+
+		//		return Json(new { ProductID = productId, success = true });
+		//	}
+		//	catch (DbUpdateException ex)
+		//	{
+		//		var root = ex.InnerException?.Message ?? ex.Message;
+
+		//		return Json(new
+		//		{
+		//			success = false,
+		//			message = root
+		//		});
+		//	}
+		//	catch (Exception ex)
+		//	{
+		//		return Json(new
+		//		{
+		//			success = false,
+		//			message = ex.Message
+		//		});
+		//	}
+		//}
+
 		[HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> SaveProduct()
 		{
-			using var transaction = _dbContext.Database.BeginTransaction();
+			await using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
 			try
 			{
-			
-				// =====================================================
-				// 🔹 CONTEXT DATA
-				// =====================================================
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 				DateTime now = DateTime.UtcNow;
 				var form = Request.Form;
-				 
-				int countryId = _dbContext.Countries
-					.Where(c => c.Native)
-					.Select(c => c.ID)
-					.First();
 
 				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// =====================================================
-				// 🔴 REQUIRED SERVER-SIDE VALIDATION
-				// =====================================================
-				if (string.IsNullOrWhiteSpace(form["ProductCode"]))
-					return Json(new { success = false, message = "Product Code is required" });
+				productId = await SaveProductBasic(productId, form, userId, now);
 
-				if (string.IsNullOrWhiteSpace(form["ProductName"]))
-					return Json(new { success = false, message = "Product Name is required" });
+				var subCats = GetSubCategories(form);
+				await SaveSubCategories(productId, subCats, userId, now);
 
-				// =====================================================
-				// 🔹 SUB CATEGORIES (REQUIRED)
-				// =====================================================
-				var postedSubCatIds = form.Keys
-					.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
-					.Select(k => Convert.ToInt32(form[k]))
-					.ToList();
+				var specs = GetSpecs(form);
+				await SaveSpecs(productId, specs, userId, now);
 
-				if (!postedSubCatIds.Any())
-					return Json(new { success = false, message = "At least one Sub Category is required" });
+				var colors = GetColors(form);
+				await SaveColors(productId, colors, form, userId, now);
 
-				// =====================================================
-				// 🔹 SUB CATEGORIES (REQUIRED)
-				// =====================================================
-				var postedSpecIds = form["ProductSpecs[]"]
-					.Select(int.Parse)
-					.Distinct()
-					.ToList();
+				await SaveProductSizes(productId, form, userId, now);
 
-				if (!postedSpecIds.Any())
-					return Json(new { success = false, message = "At least one Spec is required" });
+				await SaveImages(productId, userId, now);
 
-				// =====================================================
-				// 🔹 PRODUCT COLORS (REQUIRED)
-				// =====================================================
-				var colorIds = form["ProductColors[]"]
-					.Select(int.Parse)
-					.Distinct()
-					.ToList();
-
-				if (!colorIds.Any())
-					return Json(new { success = false, message = "At least one Color is required" });
-
-
-				// =====================================================
-				// 🔹 PRODUCT (INSERT / UPDATE)
-				// =====================================================
-				Product product;
-				 
-				if (productId == 0)
-				{
-					product = new Product
-					{
-						Code = form["ProductCode"],
-						Name = form["ProductName"],
-						Description = form["ProductDescription"],
-						UnitID = Convert.ToInt32(form["ProductUnit"]),
-						GroupID = Convert.ToInt32(form["ProductGroup"]),
-						VAT = form["ProductVAT"] == "on",
-						Feature = form["ProductFeature"] == "on",
-						NewArrival = form["ProductNewArrival"] == "on",
-						NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]),
-						Warranty = form["ProductWarranty"] == "on",
-						WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
-							? 0
-							: Convert.ToInt32(form["ProductWarrantyMonths"]),
-						StatusID = form["ProductStatusID"],
-						CreatedUserID = userId,
-						CreationDate = now
-					};
-
-					_dbContext.Products.Add(product);
-					await _dbContext.SaveChangesAsync();
-					productId = product.ID;
-				}
-				else
-				{
-					product = _dbContext.Products.First(x => x.ID == productId);
-
-					product.Code = form["ProductCode"];
-					product.Name = form["ProductName"];
-					product.Description = form["ProductDescription"];
-					product.UnitID = Convert.ToInt32(form["ProductUnit"]);
-					product.GroupID = Convert.ToInt32(form["ProductGroup"]);
-					product.VAT = form["ProductVAT"] == "on";
-					product.Feature = form["ProductFeature"] == "on";
-					product.NewArrival = form["ProductNewArrival"] == "on";
-					product.NewArrivalDateExpiryDate = ParseUtcDate(form["ProductExpiryDate"]);
-					product.Warranty = form["ProductWarranty"] == "on";
-					product.WarrantyMonths = string.IsNullOrEmpty(form["ProductWarrantyMonths"])
-						? 0
-						: Convert.ToInt32(form["ProductWarrantyMonths"]);
-					product.StatusID = form["ProductStatusID"];
-					product.EditUserID = userId;
-					product.EditDate = now;
-				}
-
-				// =====================================================
-				// 🔹 PRODUCT SUB CATEGORIES (SOFT DELETE)
-				// =====================================================
-				var existingSubCats = _dbContext.ProductsSubCategories
-					.Where(x => x.ProductID == productId && x.DeletedDate == null)
-					.ToList();
-
-				foreach (var sc in existingSubCats)
-				{
-					if (!postedSubCatIds.Contains(sc.SubCategoryID))
-					{
-						sc.DeletedUserID = userId;
-						sc.DeletedDate = now;
-					}
-				}
-
-				foreach (var subCatId in postedSubCatIds)
-				{
-					if (!existingSubCats.Any(x => x.SubCategoryID == subCatId))
-					{
-						_dbContext.ProductsSubCategories.Add(new ProductSubCategory
-						{
-							ProductID = productId,
-							SubCategoryID = subCatId,
-							StatusID = "A",
-							CreatedUserID = userId,
-							CreationDate = now
-						});
-					}
-				}
-
-				// =====================================================
-				// 🔹 SPECS (SOFT DELETE)
-				// =====================================================
-				var existingSpecs = _dbContext.ProductsSpecs
-					.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
-					.ToList();
-
-				foreach (var ps in existingSpecs)
-				{
-					if (!postedSpecIds.Contains(ps.SpecID))
-					{
-						ps.DeletedUserID = userId;
-						ps.DeletedDate = now;
-					}
-				}
-				var uid = userId;
-				foreach (var specId in postedSpecIds)
-				{
-					if (!existingSpecs.Any(ps => ps.SpecID == specId))
-					{
-						_dbContext.ProductsSpecs.Add(new ProductSpec
-						{
-							ProductID = productId,
-							SpecID = specId, 
-							CreatedUserID = userId,
-							CreatedDate = now
-						});
-					}
-				}
-
-				#region PRODUCT SIZE MATRIX SAVE
-
-				// =====================================================
-				// 1️⃣ LOAD ALL EXISTING ROWS (ACTIVE + SOFT-DELETED)
-				// =====================================================
-				var existingSizes = _dbContext.ProductsSizes
-					.Where(x => x.ProductID == productId)
-					.ToList();
-
-				// 🔥 Build dictionary for O(1) lookup (no FirstOrDefault scans)
-				var existingSizeMap = existingSizes.ToDictionary(
-					x => (x.ProductTypeID, x.ProductDetailID, x.SizeID)
-				);
-
-				// -----------------------------------------------------
-				// Holds ALL submitted size keys (for delete step later)
-				// productId-typeId-detailId-sizeId
-				// -----------------------------------------------------
-				var submittedKeys = new HashSet<string>();
-
-				// -----------------------------------------------------
-				// Holds ONLY product types that were submitted
-				// -----------------------------------------------------
-				var submittedTypeIds = new HashSet<int>();
-
-				// submitted type-details
-				var submittedDetailKeys = new HashSet<string>();
-
-				// =====================================================
-				// 2️⃣ LOOP PRODUCT TYPES → DETAILS → SIZES  (FAST VERSION)
-				// =====================================================
-				foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
-				{
-					var match = Regex.Match(key, @"ProductDetails\[(\d+)\]");
-					if (!match.Success) continue;
-
-					int productTypeId = int.Parse(match.Groups[1].Value);
-					submittedTypeIds.Add(productTypeId);
-
-					var detailIds = form[key].Select(int.Parse).ToList();
-
-					foreach (var detailId in detailIds)
-					{
-						submittedDetailKeys.Add($"{productId}-{productTypeId}-{detailId}");
-
-						string sizesFormKey = $"ProductSizes[{productTypeId}][{detailId}][]";
-						if (!form.ContainsKey(sizesFormKey)) continue;
-
-						var sizeIds = form[sizesFormKey].Select(int.Parse).ToList();
-
-						foreach (var sizeId in sizeIds)
-						{
-							// keep your submittedKeys logic (used later for soft delete)
-							submittedKeys.Add($"{productId}-{productTypeId}-{detailId}-{sizeId}");
-
-							// 🔥 FAST lookup
-							existingSizeMap.TryGetValue((productTypeId, detailId, sizeId), out var existing);
-
-							if (existing == null)
-							{
-								var newSize = new ProductSize
-								{
-									ProductID = productId,
-									ProductTypeID = productTypeId,
-									ProductDetailID = detailId,
-									SizeID = sizeId,
-									Sale = 0,
-									Raise = 0,
-									StatusID = "A",
-									CreatedUserID = userId,
-									CreationDate = now
-								};
-
-								_dbContext.ProductsSizes.Add(newSize);
-
-								// 🔥 Add to dictionary so duplicates in the same request are prevented
-								existingSizeMap[(productTypeId, detailId, sizeId)] = newSize;
-							}
-							else
-							{
-								// RESTORE IF SOFT DELETED
-								if (existing.DeletedDate != null)
-								{
-									existing.DeletedDate = null;
-									existing.DeletedUserID = null;
-								}
-
-								existing.StatusID = "A";
-								existing.EditUserID = userId;
-								existing.EditDate = now;
-							}
-						}
-					}
-				}
-
-
-
-				// =====================================================
-				// 3️⃣ SOFT DELETE REMOVED ROWS  (OPTIMIZED VERSION)
-				// =====================================================
-				bool hasSubmittedTypes = submittedTypeIds.Count > 0;
-				bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
-				bool hasSubmittedSizes = submittedKeys.Count > 0;
-
-				// 🔥 Collect removed size combinations for batch delete
-				var removedSizeKeys = new List<(int TypeId, int DetailId, int SizeId)>();
-
-				foreach (var ps in existingSizes)
-				{
-					// ===============================================
-					// ❌ TYPE REMOVED
-					// ===============================================
-					if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
-					{
-						if (ps.DeletedDate == null)
-						{
-							ps.DeletedUserID = userId;
-							ps.DeletedDate = now;
-						}
-						continue;
-					}
-
-					// ===============================================
-					// ❌ DETAIL REMOVED
-					// ===============================================
-					string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
-
-					if (hasSubmittedDetails && !submittedDetailKeys.Contains(detailKey))
-					{
-						if (ps.DeletedDate == null)
-						{
-							ps.DeletedUserID = userId;
-							ps.DeletedDate = now;
-						}
-						continue;
-					}
-
-					// ===============================================
-					// ❌ SIZE REMOVED
-					// ===============================================
-					string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
-
-					if (hasSubmittedSizes && !submittedKeys.Contains(sizeKey))
-					{
-						if (ps.DeletedDate == null)
-						{
-							ps.DeletedUserID = userId;
-							ps.DeletedDate = now;
-
-							// 🔥 Collect for batch cascade delete
-							removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
-						}
-					}
-				}
-
-				// =====================================================
-				// 🔥 BATCH CASCADE DELETE (ONLY 2 DB QUERIES)
-				// =====================================================
-				if (removedSizeKeys.Any())
-				{
-					var typeIds = removedSizeKeys.Select(x => x.TypeId).ToHashSet();
-					var detailIds = removedSizeKeys.Select(x => x.DetailId).ToHashSet();
-					var sizeIds = removedSizeKeys.Select(x => x.SizeId).ToHashSet();
-
-					// 🔵 Delete Stocks in ONE query
-					var stocksToDelete = _dbContext.Stocks
-						.Where(s =>
-							s.ProductID == productId &&
-							typeIds.Contains(s.ProductTypeID) &&
-							detailIds.Contains(s.ProductDetailID) &&
-							sizeIds.Contains(s.SizeID) &&
-							s.DeletedDate == null)
-						.ToList();
-
-					foreach (var stock in stocksToDelete)
-					{
-						stock.DeletedUserID = userId;
-						stock.DeletedDate = now;
-					}
-
-					// 🔵 Delete Prices in ONE query
-					var pricesToDelete = _dbContext.Prices
-						.Where(p =>
-							p.ProductID == productId &&
-							typeIds.Contains(p.ProductTypeID) &&
-							detailIds.Contains(p.ProductDetailID) &&
-							sizeIds.Contains(p.SizeID) &&
-							p.DeletedDate == null)
-						.ToList();
-
-					foreach (var price in pricesToDelete)
-					{
-						price.DeletedUserID = userId;
-						price.DeletedDate = now;
-					}
-				}
-
-
-
-				// =====================================================
-				// 4️⃣ SAVE
-				// =====================================================
 				await _dbContext.SaveChangesAsync();
 
-				#endregion
+				await transaction.CommitAsync();
 
-				// =====================================================
-				// 🔹 PRODUCTS COLORS (SOFT DELETE + UPSERT)
-				// =====================================================
-				var existingColors = _dbContext.ProductsColors
-					.Where(x => x.ProductID == productId && x.DeletedDate == null)
-					.ToList();
-
-				var existingColorsMap = existingColors.ToDictionary(x => x.ColorID);
-
-				// Soft delete removed colors
-				foreach (var pc in existingColors)
-				{
-					if (!colorIds.Contains(pc.ColorID))
-					{
-						pc.DeletedUserID = userId;
-						pc.DeletedDate = now;
-					}
-				}
-
-				int coverColorId = Convert.ToInt32(form["CoverColorID"]);
-
-				foreach (var colorId in colorIds)
-				{
-					bool isCover = colorId == coverColorId;
-					bool showFront = form[$"ProductColorsMeta[{colorId}].ShowFront"] == "on";
-					bool isActive = form[$"ProductColorsMeta[{colorId}].IsActive"] == "on";
-
-					existingColorsMap.TryGetValue(colorId, out var pc);
-
-					if (pc == null)
-					{
-						_dbContext.ProductsColors.Add(new ProductColor
-						{
-							ProductID = productId,
-							ColorID = colorId,
-							IsCover = isCover,
-							ShowFront = showFront,
-							StatusID = isActive ? "A" : "I",
-							CreatedUserID = userId,
-							CreationDate = now
-						});
-					}
-					else
-					{
-						pc.IsCover = isCover;
-						pc.ShowFront = showFront;
-						pc.StatusID = isActive ? "A" : "I";
-						pc.EditUserID = userId;
-						pc.EditDate = now;
-					}
-				}
-
-
-				// =====================================================
-				// 🔹 IMAGES (DELETE + UPLOAD + INITIAL) — CORRECTED
-				// =====================================================
-
-				// 1) Load all images once
-				var allImages = _dbContext.ProductsImages
-					.Where(x => x.ProductID == productId && x.DeletedDate == null)
-					.ToList();
-
-				// =====================================================
-				// 🔹 SOFT DELETE ONLY EXPLICITLY DELETED IMAGES
-				// =====================================================
-
-				List<int> deletedIds = new();
-
-				if (Request.Form.ContainsKey("DeletedImageIds[]") &&
-					Request.Form["DeletedImageIds[]"].Count > 0)
-				{
-					deletedIds = Request.Form["DeletedImageIds[]"]
-						.Where(x => !string.IsNullOrWhiteSpace(x))
-						.Select(int.Parse)
-						.ToList();
-				}
-
-				if (deletedIds.Any())
-				{
-					var imagesToDelete = allImages
-						.Where(x => deletedIds.Contains(x.ID))
-						.ToList();
-
-					if (imagesToDelete.Any())
-					{
-						string originalDeletedDir = Path.Combine(
-							_imagesRoot,
-							Global.ProductOriginalImagePath.TrimStart('/'),
-							"DELETED"
-						);
-
-						string smallDeletedDir = Path.Combine(
-							_imagesRoot,
-							Global.ProductSmallImagePath.TrimStart('/'),
-							"DELETED"
-						);
-
-						Directory.CreateDirectory(originalDeletedDir);
-						Directory.CreateDirectory(smallDeletedDir);
-
-						foreach (var img in imagesToDelete)
-						{
-							if (!string.IsNullOrEmpty(img.OriginalImage))
-							{
-								string src = Path.Combine(
-									_imagesRoot,
-									Global.ProductOriginalImagePath.TrimStart('/'),
-									img.OriginalImage
-								);
-
-								string dest = Path.Combine(originalDeletedDir, img.OriginalImage);
-
-								if (System.IO.File.Exists(src))
-								{
-									if (!System.IO.File.Exists(dest))
-										System.IO.File.Move(src, dest);
-								}
-							}
-
-							if (!string.IsNullOrEmpty(img.SmallImage))
-							{
-								string src = Path.Combine(
-									_imagesRoot,
-									Global.ProductSmallImagePath.TrimStart('/'),
-									img.SmallImage
-								);
-
-								string dest = Path.Combine(smallDeletedDir, img.SmallImage);
-
-								if (System.IO.File.Exists(src))
-								{
-									if (!System.IO.File.Exists(dest))
-										System.IO.File.Move(src, dest);
-								}
-							}
-
-							img.DeletedUserID = userId;
-							img.DeletedDate = now;
-						}
-
-						allImages = allImages.Except(imagesToDelete).ToList();
-					}
-				}
-
-				// 4) Upload new images
-				var uploadedFiles = Request.Form.Files
-					.Where(f => f.Name.Contains("ProductColorImages["))
-					.ToList();
-
-				if (uploadedFiles.Any())
-				{
-					string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
-					string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
-
-					Directory.CreateDirectory(originalDir);
-					Directory.CreateDirectory(smallDir);
-
-					var groupedByColor = uploadedFiles.GroupBy(f =>
-					{
-						string key = f.Name; // ProductColorImages[12][]
-						int start = key.IndexOf('[') + 1;
-						int end = key.IndexOf(']');
-						return int.Parse(key.Substring(start, end - start));
-					});
-
-					foreach (var colorGroup in groupedByColor)
-					{
-						int colorId = colorGroup.Key;
-
-						foreach (var file in colorGroup)
-						{
-							if (file.Length == 0) continue;
-
-							string ext = Path.GetExtension(file.FileName);
-							string fileName = $"{Guid.NewGuid()}{ext}";
-
-							string originalPath = Path.Combine(originalDir, fileName);
-							string smallPath = Path.Combine(smallDir, fileName);
-
-							// save original
-							using (var stream = new FileStream(originalPath, FileMode.Create))
-								await file.CopyToAsync(stream);
-
-							// save resized
-							using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
-							{
-								image.Mutate(x => x.Resize(new ResizeOptions
-								{
-									Mode = ResizeMode.Max,
-									Size = new SixLabors.ImageSharp.Size(600, 600)
-								}));
-
-								image.Save(smallPath);
-							}
-
-							var newImg = new ProductImage
-							{
-								ProductID = productId,
-								ColorID = colorId,
-								OriginalImage = fileName,
-								SmallImage = fileName,
-								IsInitial = false, // will be set below
-								StatusID = "A",
-								CreatedUserID = userId,
-								CreationDate = now
-							};
-
-							_dbContext.ProductsImages.Add(newImg);
-
-							// add to in-memory list so initial logic sees it
-							allImages.Add(newImg);
-						}
-					}
-				}
-
-				// 5) Set IsInitial per color (safe + deterministic)
-				//
-				// IMPORTANT CHANGE:
-				// - Do NOT reset IsInitial globally then "continue".
-				// - Always ensure at least 1 initial per color.
-				// - If user selected initial => use it. Otherwise => keep existing initial if any, else set first.
-				var groups = allImages
-					.Where(x => x.DeletedDate == null) // includes newly added (DeletedDate is null)
-					.GroupBy(x => x.ColorID)
-					.ToList();
-
-				foreach (var group in groups)
-				{
-					int colorId = group.Key;
-
-					// keys like: ColorImageInitial[3][53] = true
-					var selectedKeys = Request.Form.Keys
-						.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
-						.ToList();
-
-					// if user selected something for this color, apply it
-					bool userSelectedForThisColor = false;
-
-					if (selectedKeys.Any())
-					{
-						// reset only this color
-						foreach (var img in group)
-							img.IsInitial = false;
-
-						foreach (var key in selectedKeys)
-						{
-							if (Request.Form[key] != "true") continue;
-
-							var parts = key.Split('[', ']'); // ColorImageInitial, colorId, imageId
-							if (parts.Length < 4) continue;
-
-							if (!int.TryParse(parts[3], out int imageId)) continue;
-
-							var selected = group.FirstOrDefault(x => x.ID == imageId);
-							if (selected != null)
-							{
-								selected.IsInitial = true;
-								userSelectedForThisColor = true;
-							}
-						}
-					}
-
-					// if user did not select, keep current initial if exists
-					if (!userSelectedForThisColor)
-					{
-						// if none is initial, set first
-						if (!group.Any(x => x.IsInitial))
-						{
-							var first = group.FirstOrDefault();
-							if (first != null)
-								first.IsInitial = true;
-						}
-					}
-				}
-
-				// ✅ Single save at end
-				await _dbContext.SaveChangesAsync();
-				 
-				transaction.Commit();
-
-				return Json(new { ProductID = productId, success = true });
-			}
-			catch (DbUpdateException ex)
-			{
-				var root = ex.InnerException?.Message ?? ex.Message;
-
-				return Json(new
-				{
-					success = false,
-					message = root
-				});
+				return Json(new { success = true, ProductID = productId });
 			}
 			catch (Exception ex)
 			{
+				await transaction.RollbackAsync();
+
 				return Json(new
 				{
 					success = false,
@@ -1037,7 +1084,485 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+		private async Task<int> SaveProductBasic(int productId, IFormCollection form, int userId, DateTime now)
+		{
+			Product product;
 
+			if (productId == 0)
+			{
+				product = new Product
+				{
+					Code = form["ProductCode"],
+					Name = form["ProductName"],
+					Description = form["ProductDescription"],
+					UnitID = Convert.ToInt32(form["ProductUnit"]),
+					GroupID = Convert.ToInt32(form["ProductGroup"]),
+					VAT = form["ProductVAT"] == "on",
+					Feature = form["ProductFeature"] == "on",
+					NewArrival = form["ProductNewArrival"] == "on",
+					Warranty = form["ProductWarranty"] == "on",
+					StatusID = form["ProductStatusID"],
+					CreatedUserID = userId,
+					CreationDate = now
+				};
+
+				_dbContext.Products.Add(product);
+				await _dbContext.SaveChangesAsync();
+
+				return product.ID;
+			}
+			else
+			{
+				product = await _dbContext.Products.FirstAsync(x => x.ID == productId);
+
+				product.Code = form["ProductCode"];
+				product.Name = form["ProductName"];
+				product.Description = form["ProductDescription"];
+				product.UnitID = Convert.ToInt32(form["ProductUnit"]);
+				product.GroupID = Convert.ToInt32(form["ProductGroup"]);
+				product.VAT = form["ProductVAT"] == "on";
+				product.Feature = form["ProductFeature"] == "on";
+				product.NewArrival = form["ProductNewArrival"] == "on";
+				product.Warranty = form["ProductWarranty"] == "on";
+				product.StatusID = form["ProductStatusID"];
+				product.EditUserID = userId;
+				product.EditDate = now;
+
+				return product.ID;
+			}
+		}
+
+		private List<int> GetSubCategories(IFormCollection form)
+		{
+			return form.Keys
+				.Where(k => k.StartsWith("SubCategories[") && k.EndsWith("].ID"))
+				.Select(k => Convert.ToInt32(form[k]))
+				.Distinct()
+				.ToList();
+		}
+
+		private async Task SaveSubCategories(int productId, List<int> subCatIds, int userId, DateTime now)
+		{
+			var existing = await _dbContext.ProductsSubCategories
+				.Where(x => x.ProductID == productId && x.DeletedDate == null)
+				.ToListAsync();
+
+			foreach (var sc in existing)
+			{
+				if (!subCatIds.Contains(sc.SubCategoryID))
+				{
+					sc.DeletedUserID = userId;
+					sc.DeletedDate = now;
+				}
+			}
+
+			foreach (var id in subCatIds)
+			{
+				if (!existing.Any(x => x.SubCategoryID == id))
+				{
+					_dbContext.ProductsSubCategories.Add(new ProductSubCategory
+					{
+						ProductID = productId,
+						SubCategoryID = id,
+						StatusID = "A",
+						CreatedUserID = userId,
+						CreationDate = now
+					});
+				}
+			}
+		}
+
+		private List<int> GetSpecs(IFormCollection form)
+		{
+			return form["ProductSpecs[]"]
+				.Select(int.Parse)
+				.Distinct()
+				.ToList();
+		}
+
+		private async Task SaveSpecs(int productId, List<int> specIds, int userId, DateTime now)
+		{
+			var existing = await _dbContext.ProductsSpecs
+				.Where(ps => ps.ProductID == productId && ps.DeletedDate == null)
+				.ToListAsync();
+
+			foreach (var ps in existing)
+			{
+				if (!specIds.Contains(ps.SpecID))
+				{
+					ps.DeletedUserID = userId;
+					ps.DeletedDate = now;
+				}
+			}
+
+			foreach (var id in specIds)
+			{
+				if (!existing.Any(ps => ps.SpecID == id))
+				{
+					_dbContext.ProductsSpecs.Add(new ProductSpec
+					{
+						ProductID = productId,
+						SpecID = id,
+						CreatedUserID = userId,
+						CreatedDate = now
+					});
+				}
+			}
+		}
+
+		private List<int> GetColors(IFormCollection form)
+		{
+			return form["ProductColors[]"]
+				.Select(int.Parse)
+				.Distinct()
+				.ToList();
+		}
+
+		private async Task SaveColors(int productId, List<int> colorIds, IFormCollection form, int userId, DateTime now)
+		{
+			var existing = await _dbContext.ProductsColors
+				.Where(x => x.ProductID == productId && x.DeletedDate == null)
+				.ToListAsync();
+
+			var map = existing.ToDictionary(x => x.ColorID);
+
+			int.TryParse(form["CoverColorID"], out int coverColorId);
+
+			foreach (var pc in existing)
+			{
+				if (!colorIds.Contains(pc.ColorID))
+				{
+					pc.DeletedDate = now;
+					pc.DeletedUserID = userId;
+				}
+			}
+
+			foreach (var colorId in colorIds)
+			{
+				bool isCover = colorId == coverColorId;
+
+				map.TryGetValue(colorId, out var pc);
+
+				if (pc == null)
+				{
+					_dbContext.ProductsColors.Add(new ProductColor
+					{
+						ProductID = productId,
+						ColorID = colorId,
+						IsCover = isCover,
+						StatusID = "A",
+						CreatedUserID = userId,
+						CreationDate = now
+					});
+				}
+				else
+				{
+					pc.IsCover = isCover;
+					pc.EditUserID = userId;
+					pc.EditDate = now;
+				}
+			}
+		}
+
+		private async Task SaveProductSizes(int productId, IFormCollection form, int userId, DateTime now)
+		{
+			var existingSizes = _dbContext.ProductsSizes
+				.Where(x => x.ProductID == productId)
+				.ToList();
+
+			var existingSizeMap = existingSizes.ToDictionary(
+				x => (x.ProductTypeID, x.ProductDetailID, x.SizeID)
+			);
+
+			var submittedKeys = new HashSet<string>();
+			var submittedTypeIds = new HashSet<int>();
+			var submittedDetailKeys = new HashSet<string>();
+
+			var regex = new Regex(@"ProductDetails\[(\d+)\]", RegexOptions.Compiled);
+
+			foreach (var key in form.Keys.Where(k => k.StartsWith("ProductDetails[")))
+			{
+				var match = regex.Match(key);
+				if (!match.Success) continue;
+
+				int productTypeId = int.Parse(match.Groups[1].Value);
+				submittedTypeIds.Add(productTypeId);
+
+				var detailIds = form[key].Select(int.Parse).ToList();
+
+				foreach (var detailId in detailIds)
+				{
+					submittedDetailKeys.Add($"{productId}-{productTypeId}-{detailId}");
+
+					string sizesFormKey = $"ProductSizes[{productTypeId}][{detailId}][]";
+					if (!form.ContainsKey(sizesFormKey)) continue;
+
+					var sizeIds = form[sizesFormKey].Select(int.Parse).ToList();
+
+					foreach (var sizeId in sizeIds)
+					{
+						submittedKeys.Add($"{productId}-{productTypeId}-{detailId}-{sizeId}");
+
+						existingSizeMap.TryGetValue((productTypeId, detailId, sizeId), out var existing);
+
+						if (existing == null)
+						{
+							var newSize = new ProductSize
+							{
+								ProductID = productId,
+								ProductTypeID = productTypeId,
+								ProductDetailID = detailId,
+								SizeID = sizeId,
+								Sale = 0,
+								Raise = 0,
+								StatusID = "A",
+								CreatedUserID = userId,
+								CreationDate = now
+							};
+
+							_dbContext.ProductsSizes.Add(newSize);
+							existingSizeMap[(productTypeId, detailId, sizeId)] = newSize;
+						}
+						else
+						{
+							if (existing.DeletedDate != null)
+							{
+								existing.DeletedDate = null;
+								existing.DeletedUserID = null;
+							}
+
+							existing.StatusID = "A";
+							existing.EditUserID = userId;
+							existing.EditDate = now;
+						}
+					}
+				}
+			}
+
+			bool hasSubmittedTypes = submittedTypeIds.Count > 0;
+			bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
+			bool hasSubmittedSizes = submittedKeys.Count > 0;
+
+			var removedSizeKeys = new List<(int TypeId, int DetailId, int SizeId)>();
+
+			foreach (var ps in existingSizes)
+			{
+				if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
+				{
+					if (ps.DeletedDate == null)
+					{
+						ps.DeletedUserID = userId;
+						ps.DeletedDate = now;
+					}
+					continue;
+				}
+
+				string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
+
+				if (hasSubmittedDetails && !submittedDetailKeys.Contains(detailKey))
+				{
+					if (ps.DeletedDate == null)
+					{
+						ps.DeletedUserID = userId;
+						ps.DeletedDate = now;
+					}
+					continue;
+				}
+
+				string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
+
+				if (hasSubmittedSizes && !submittedKeys.Contains(sizeKey))
+				{
+					if (ps.DeletedDate == null)
+					{
+						ps.DeletedUserID = userId;
+						ps.DeletedDate = now;
+
+						removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
+					}
+				}
+			}
+
+			if (removedSizeKeys.Any())
+			{
+				var typeIds = removedSizeKeys.Select(x => x.TypeId).ToHashSet();
+				var detailIds = removedSizeKeys.Select(x => x.DetailId).ToHashSet();
+				var sizeIds = removedSizeKeys.Select(x => x.SizeId).ToHashSet();
+
+				var stocksToDelete = _dbContext.Stocks
+					.Where(s =>
+						s.ProductID == productId &&
+						typeIds.Contains(s.ProductTypeID) &&
+						detailIds.Contains(s.ProductDetailID) &&
+						sizeIds.Contains(s.SizeID) &&
+						s.DeletedDate == null)
+					.ToList();
+
+				foreach (var stock in stocksToDelete)
+				{
+					stock.DeletedUserID = userId;
+					stock.DeletedDate = now;
+				}
+
+				var pricesToDelete = _dbContext.Prices
+					.Where(p =>
+						p.ProductID == productId &&
+						typeIds.Contains(p.ProductTypeID) &&
+						detailIds.Contains(p.ProductDetailID) &&
+						sizeIds.Contains(p.SizeID) &&
+						p.DeletedDate == null)
+					.ToList();
+
+				foreach (var price in pricesToDelete)
+				{
+					price.DeletedUserID = userId;
+					price.DeletedDate = now;
+				}
+			}
+		}
+		private async Task SaveImages(int productId, int userId, DateTime now)
+		{
+			var allImages = _dbContext.ProductsImages
+				.Where(x => x.ProductID == productId && x.DeletedDate == null)
+				.ToList();
+
+			List<int> deletedIds = new();
+
+			if (Request.Form.ContainsKey("DeletedImageIds[]"))
+			{
+				deletedIds = Request.Form["DeletedImageIds[]"]
+					.Where(x => !string.IsNullOrWhiteSpace(x))
+					.Select(int.Parse)
+					.ToList();
+			}
+
+			if (deletedIds.Any())
+			{
+				var imagesToDelete = allImages
+					.Where(x => deletedIds.Contains(x.ID))
+					.ToList();
+
+				foreach (var img in imagesToDelete)
+				{
+					img.DeletedUserID = userId;
+					img.DeletedDate = now;
+				}
+
+				allImages = allImages.Except(imagesToDelete).ToList();
+			}
+
+			var uploadedFiles = Request.Form.Files
+				.Where(f => f.Name.Contains("ProductColorImages["))
+				.ToList();
+
+			if (uploadedFiles.Any())
+			{
+				string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
+				string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
+
+				Directory.CreateDirectory(originalDir);
+				Directory.CreateDirectory(smallDir);
+
+				var groupedByColor = uploadedFiles.GroupBy(f =>
+				{
+					string key = f.Name;
+					int start = key.IndexOf('[') + 1;
+					int end = key.IndexOf(']');
+					return int.Parse(key.Substring(start, end - start));
+				});
+
+				foreach (var colorGroup in groupedByColor)
+				{
+					int colorId = colorGroup.Key;
+
+					foreach (var file in colorGroup)
+					{
+						if (file.Length == 0) continue;
+
+						string ext = Path.GetExtension(file.FileName);
+						string fileName = $"{Guid.NewGuid()}{ext}";
+
+						string originalPath = Path.Combine(originalDir, fileName);
+						string smallPath = Path.Combine(smallDir, fileName);
+
+						using (var stream = new FileStream(originalPath, FileMode.Create))
+							await file.CopyToAsync(stream);
+
+						using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
+						{
+							image.Mutate(x => x.Resize(new ResizeOptions
+							{
+								Mode = ResizeMode.Max,
+								Size = new SixLabors.ImageSharp.Size(600, 600)
+							}));
+
+							image.Save(smallPath);
+						}
+
+						var newImg = new ProductImage
+						{
+							ProductID = productId,
+							ColorID = colorId,
+							OriginalImage = fileName,
+							SmallImage = fileName,
+							IsInitial = false,
+							StatusID = "A",
+							CreatedUserID = userId,
+							CreationDate = now
+						};
+
+						_dbContext.ProductsImages.Add(newImg);
+						allImages.Add(newImg);
+					}
+				}
+			}
+
+			var groups = allImages
+				.Where(x => x.DeletedDate == null)
+				.GroupBy(x => x.ColorID)
+				.ToList();
+
+			foreach (var group in groups)
+			{
+				int colorId = group.Key;
+
+				var selectedKeys = Request.Form.Keys
+					.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
+					.ToList();
+
+				bool userSelected = false;
+
+				if (selectedKeys.Any())
+				{
+					foreach (var img in group)
+						img.IsInitial = false;
+
+					foreach (var key in selectedKeys)
+					{
+						if (Request.Form[key] != "true") continue;
+
+						var parts = key.Split('[', ']');
+
+						if (!int.TryParse(parts[3], out int imageId)) continue;
+
+						var selected = group.FirstOrDefault(x => x.ID == imageId);
+
+						if (selected != null)
+						{
+							selected.IsInitial = true;
+							userSelected = true;
+						}
+					}
+				}
+
+				if (!userSelected && !group.Any(x => x.IsInitial))
+				{
+					var first = group.FirstOrDefault();
+					if (first != null)
+						first.IsInitial = true;
+				}
+			}
+		}
 		[HttpGet]
 		public IActionResult GetProductEditExtras(int productId)
 		{

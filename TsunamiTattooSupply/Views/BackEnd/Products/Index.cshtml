@@ -148,6 +148,10 @@
 
     <script>
 
+    let colorImagesBuffer = {};
+    let deletedExistingImages = [];
+    let removedNewImages = {}; // { colorId: Set(filenames) }
+
     $(document).ready(function () {
          
             var table = $('#tableProducts').DataTable({
@@ -372,6 +376,7 @@
 
             });
 
+
               // =====================================
         // 🔹 NEW PRODUCT BUTTON (Open Create Modal)
         // =====================================
@@ -412,12 +417,14 @@
             // ================================
             modal.show();
 
-                showModalLoader();
+            showModalLoader();
+
+            resetImageBuffers();
 
             // ================================
             // AFTER MODAL IS VISIBLE ✅
             // ================================
-                    $('#saveProductModal').one('shown.bs.modal', function () {
+        $('#saveProductModal').one('shown.bs.modal', function () {
 
             Promise.all([
                 LoadGroups(0),
@@ -773,7 +780,7 @@
                     });
                 }
 
-                                  $(document).on('click', '.btnEditProduct', function () {
+        $(document).on('click', '.btnEditProduct', function () {
 
             const modalEl = document.getElementById("saveProductModal");
             const modal   = new bootstrap.Modal(modalEl);
@@ -820,6 +827,8 @@
             // 🔥 SHOW SPINNER IMMEDIATELY
             showModalLoader();
 
+            resetImageBuffers();
+
             // ================================
             // AFTER MODAL FULLY SHOWN
             // ================================
@@ -846,7 +855,15 @@
             });
 
         });
-         
+
+        function resetImageBuffers() {
+
+            colorImagesBuffer = {};
+            deletedExistingImages.length = 0;
+            removedNewImages = {};
+
+        }
+
             // ✅ Source of truth: all selected subcategory IDs for this product
             let selectedSubCatIds = new Set();
 

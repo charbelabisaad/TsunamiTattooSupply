@@ -757,10 +757,6 @@
 </div>
 
 <script>
-
-		const colorImagesBuffer = {};
-		const deletedExistingImages = []; 
-		const removedNewImages = {}; // { colorId: Set(filenames) }
  
 
 	document.addEventListener('DOMContentLoaded', function () {
@@ -1496,7 +1492,7 @@
 	$(document).on("click", "#btnSaveProductInitialInfo", function () {
 
 		// ==================================================
-		// 🔥 FORCE bootstrap-select → real <select> values
+		// FORCE bootstrap-select → real <select> values
 		// ==================================================
 		$('.product-sizes').each(function () {
 			const selected = $(this).selectpicker('val');
@@ -1529,7 +1525,7 @@
 		// ==================================================
 		$("#ProductCodeMessage").text("");
 		$("#ProductNameMessage").text("");
-		$("#ProductSubCategoryMessage").text("");  
+		$("#ProductSubCategoryMessage").text("");
 
 		let hasError = false;
 
@@ -1554,36 +1550,33 @@
 		}
 
 		let specs = $("#ProductSpecs").val();
-		
 		if (!specs || specs.length === 0) {
-			 
 			$("#ProductSpecsMessage").text("Please select at least one spec");
 			hasError = true;
 		}
 
- 
 		let colors = $("#ProductColors").val();
 		if (!colors || colors.length === 0) {
-			$("#ProductColors")
-				.closest(".col-12")
-				.append(`
-					<div id="ProductColorsMessage"
-						 class="text-danger fw-normal mt-1">
-						 Please select at least one color
-					</div>
-				`);
-			toastr.error("Please at lease one color")
+
+			if (!$("#ProductColorsMessage").length) {
+				$("#ProductColors")
+					.closest(".col-12")
+					.append(`
+						<div id="ProductColorsMessage"
+							 class="text-danger fw-normal mt-1">
+							 Please select at least one color
+						</div>
+					`);
+			}
+
+			toastr.error("Please select at least one color");
 			hasError = true;
 		}
-
-		
 
 		if (hasError){
 			toastr.error("Please fill or select the required field!");
 			return;
 		}
-
-		 
 
 		// ==================================================
 		// Submit
@@ -1591,63 +1584,58 @@
 		btn.prop("disabled", true);
 		spinner.removeClass("d-none");
 
+		// ==================================================
+		// FIX EMPTY NUMERIC VALUES (IMPORTANT)
+		// ==================================================
+		$('input[type="number"]').each(function () {
+
+			let v = $(this).val();
+
+			if (v === '' || v === null || isNaN(v)) {
+				$(this).val(0);
+			}
+
+		});
+
 		let formData = new FormData(form[0]);
 
 		// ==================================================
-		// 🔥 Append NEW color images
+		// Append NEW color images
 		// ==================================================
-			// ==================================================
-	// 🔥 Append NEW color images
-	// ==================================================
-	Object.keys(colorImagesBuffer).forEach(colorId => {
+		Object.keys(colorImagesBuffer).forEach(colorId => {
 
-		let files = colorImagesBuffer[colorId] || [];
-		let removedSet = removedNewImages[colorId] || new Set();
+			let files = colorImagesBuffer[colorId] || [];
+			let removedSet = removedNewImages[colorId] || new Set();
 
-		files.forEach(file => {
-			if (removedSet.has(file.name)) return;
+			files.forEach(file => {
 
-			formData.append(
-				`ProductColorImages[${colorId}][]`,
-				file
-			);
+				if (!file) return;
+				if (removedSet.has(file.name)) return;
+
+				formData.append(`ProductColorImages[${colorId}][]`, file);
+
+			});
 		});
-	});
-
-	// ==================================================
-	// 🔥 Append deleted existing images (soft delete)
-	// ==================================================
-	deletedExistingImages.forEach(id => {
-		formData.append("DeletedImageIds[]", id);
-	});
 
 		// ==================================================
-		// 🔥 Keep EXISTING images
+		// Append deleted images (SAFE)
 		// ==================================================
-		// $('.color-image-item[data-image-id]').each(function () {
-		// 	formData.append(
-		// 		'KeptImageIds[]',
-		// 		$(this).data('image-id')
-		// 	);
-		// });
-
-	// ==================================================
-	// 🔥 Append INITIAL flags per image
-	// ==================================================
-	// $('.initial-hidden').each(function () {
-
-	// 	let name = $(this).attr('name');   ColorImageInitial[5][]
-	// 	let val  = $(this).val();          true / false
-
-	// 	formData.append(name, val);
-	// });
+		deletedExistingImages
+			.filter(id => id !== null && id !== undefined && id !== '' && !isNaN(id))
+			.forEach(id => {
+				formData.append("DeletedImageIds[]", parseInt(id));
+			});
 
 		// ==================================================
-		// AJAX
+		// Ensure CoverColorID exists
 		// ==================================================
+		if (!$('input[name="CoverColorID"]:checked').length) {
+			formData.append("CoverColorID", 0);
+		}
 
-	 
-
+		// ==================================================
+		// AJAX SAVE
+		// ==================================================
 		$.ajax({
 			url: '@Url.Action("SaveProduct", "Products")',
 			type: 'POST',
@@ -1657,44 +1645,44 @@
 
 			success: function (res) {
 
-				if (res.success) {
+				if (res && res.success) {
 
-			 
-						
-					// clear image buffers
-					Object.keys(colorImagesBuffer).forEach(k => {
-						colorImagesBuffer[k] = [];
-					});
-
-				
+					// ==========================================
+					// RESET IMAGE BUFFERS
+					// ==========================================
+					colorImagesBuffer = {};
+					removedNewImages = {};
+					deletedExistingImages = [];
 
 					$('#ProductID').val(res.productID);
 
 					toastr.success("Product saved successfully");
 
-					//$("#saveProductModal").modal("hide");
-					//$("#tableProducts").DataTable().ajax.reload(null, false);
-
-					//window.location.reload();
-
 					$("#productDetails").removeClass("d-none");
 
 					listProductPrice(res.productID);
 					listProductStock(res.productID);
-					deletedExistingImages.length = 0;
 
-				} else {
-					toastr.error(res.message || "Failed to save product");
 				}
+				else {
+
+					toastr.error(res.message || "Failed to save product");
+
+				}
+
 			},
 
 			error: function () {
+
 				toastr.error("Unexpected server error");
+
 			},
 
 			complete: function () {
+
 				btn.prop("disabled", false);
 				spinner.addClass("d-none");
+
 			}
 		});
 	});
