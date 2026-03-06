@@ -1161,102 +1161,116 @@
 			});
 		});
 
-		$(document).on('click', '.btn-add-color-image', function () {
+	$(document).on('click', '.btn-add-color-image', function () {
 
-			let $card   = $(this).closest('.color-card');
-			let colorId = $card.data('color-id');
-			let $list   = $('#dProductColorImagesList' + colorId);
+		let $card   = $(this).closest('.color-card');
+		let colorId = $card.data('color-id');
+		let $list   = $('#dProductColorImagesList' + colorId);
 
-			let files = colorImagesBuffer[colorId] || [];
+		let input = $card.find('.color-image-input')[0];
 
-			if (!files.length) {
-				toastr.warning('Please browse images first');
-				return;
-			}
+		if (!input.files || !input.files.length) {
+			toastr.warning('Please browse images first');
+			return;
+		}
 
-			if (!removedNewImages[colorId]) {
-				removedNewImages[colorId] = new Set();
-			}
+		let file = input.files[0];
 
-			files.forEach(file => {
+		if (!removedNewImages[colorId]) {
+			removedNewImages[colorId] = new Set();
+		}
 
-				let removedSet = removedNewImages[colorId];
+		let removedSet = removedNewImages[colorId];
 
-				// 🔒 Prevent duplicates OR re-adding removed ones
-				let exists =
-					$list.find(`.color-image-item[data-filename="${file.name}"]`).length > 0 ||
-					removedSet.has(file.name);
+		let exists =
+			$list.find(`.color-image-item[data-filename="${file.name}"]`).length > 0 ||
+			removedSet.has(file.name);
 
-				if (exists) return;
+		if (exists) {
+			toastr.warning("Image already added");
+			return;
+		}
 
-				let reader = new FileReader();
+		// ======================================
+		// ✅ STORE IN BUFFER (only here!)
+		// ======================================
+		if (!colorImagesBuffer[colorId]) {
+			colorImagesBuffer[colorId] = [];
+		}
 
-				reader.onload = function (e) {
+		colorImagesBuffer[colorId].push(file);
 
-						let tempId = 'NEW_' + Math.random().toString(36).substring(2,9);
+		// ======================================
+		// PREVIEW IMAGE IN LIST
+		// ======================================
+		let reader = new FileReader();
 
-	let imageHtml = `
-	<div class="inline-block">
+		reader.onload = function (e) {
 
-		<div class="color-image-item position-relative"
-			 style="min-width:200px;height:200px;"
-			 data-filename="${file.name}"
-			 data-temp-id="${tempId}">
+			let tempId = 'NEW_' + Math.random().toString(36).substring(2,9);
 
-			<img src="${e.target.result}"
-				 class="img-fluid rounded"
-				 style="width:100%;height:100%;object-fit:contain;background:#fff;border:1px solid #ccc;">
+			let imageHtml = `
+			<div class="inline-block">
 
-			<div class="image-overlay d-flex justify-content-center align-items-center">
-				<button type="button" class="overlay-btn btn-view-image">
-					<i class="fas fa-eye"></i>
-				</button>
-				<button type="button" class="overlay-btn btn-clear-image">
-					<i class="fas fa-times"></i>
-				</button>
+				<div class="color-image-item position-relative"
+					 style="min-width:200px;height:200px;"
+					 data-filename="${file.name}"
+					 data-temp-id="${tempId}">
+
+					<img src="${e.target.result}"
+						 class="img-fluid rounded"
+						 style="width:100%;height:100%;object-fit:contain;background:#fff;border:1px solid #ccc;">
+
+					<div class="image-overlay d-flex justify-content-center align-items-center">
+						<button type="button" class="overlay-btn btn-view-image">
+							<i class="fas fa-eye"></i>
+						</button>
+						<button type="button" class="overlay-btn btn-clear-image">
+							<i class="fas fa-times"></i>
+						</button>
+					</div>
+				</div>
+
+				<div class="mt-1 text-center">
+					<label class="mb-0">
+						<input type="radio"
+							   class="radio-initial"
+							   name="ColorInitial_${colorId}">
+						Is Initial
+					</label>
+
+					<input type="hidden"
+						   name="ColorImageInitial[${colorId}][${tempId}]"
+						   value="false"
+						   class="initial-hidden">
+				</div>
+
 			</div>
-		</div>
+			`;
 
-		<div class="mt-1 text-center">
-			<label class="mb-0">
-				<input type="radio"
-					   class="radio-initial"
-					   name="ColorInitial_${colorId}">
-				Is Initial
-			</label>
+			$list.append(imageHtml);
+		};
 
-			<input type="hidden"
-				   name="ColorImageInitial[${colorId}][${tempId}]"
-				   value="false"
-				   class="initial-hidden">
-		</div>
+		reader.readAsDataURL(file);
 
-	</div>
-	`;
+		// ======================================
+		// RESET INPUT + PREVIEW
+		// ======================================
+		input.value = "";
 
+		let $box = $card.find('.image-box');
 
+		$box.find('.color-image-preview')
+			.attr('src', '')
+			.addClass('d-none');
 
+		$box.find('.placeholder-icon')
+			.removeClass('d-none');
 
-					$list.append(imageHtml);
-				};
-
-				reader.readAsDataURL(file);
-			});
-
-			// ✅ RESET IMAGE BOX PREVIEW
-			let $box = $card.find('.image-box');
-
-			$box.find('.color-image-preview')
-				.attr('src', '')
-				.addClass('d-none');
-
-			$box.find('.placeholder-icon').removeClass('d-none');
-		});
-
-		 // when selecting initial image per color
+	});
 
 
-	$(document).on('change', '.color-image-input', function () {
+		$(document).on('change', '.color-image-input', function () {
 
 		let input   = this;
 		let $card   = $(this).closest('.color-card');
@@ -1269,22 +1283,12 @@
 		const maxSizeKB = 100;
 		const maxSizeBytes = maxSizeKB * 1024;
 
-		// ============================================
-		// 🔴 SIZE VALIDATION FIRST (BEFORE BUFFER)
-		// ============================================
 		if (file.size > maxSizeBytes) {
 
 			toastr.error("Image size must not exceed 100 KB");
 
-			// 🔥 CLEAR BUFFER (IMPORTANT)
-			if (colorImagesBuffer[colorId]) {
-				colorImagesBuffer[colorId] = [];
-			}
-
-			// reset input
 			input.value = "";
 
-			// reset preview
 			let $box = $card.find('.image-box');
 			let $img = $box.find('.color-image-preview');
 			let $icon = $box.find('.placeholder-icon');
@@ -1295,18 +1299,6 @@
 			return;
 		}
 
-		// ============================================
-		// 🟢 BUFFER FILE ONLY IF VALID
-		// ============================================
-		if (!colorImagesBuffer[colorId]) {
-			colorImagesBuffer[colorId] = [];
-		}
-
-		colorImagesBuffer[colorId].push(file);
-
-		// ============================================
-		// 🟢 PREVIEW
-		// ============================================
 		let reader = new FileReader();
 
 		reader.onload = function (e) {
@@ -1321,10 +1313,8 @@
 
 		reader.readAsDataURL(file);
 
-		// reset input (allow reselect same file)
-		input.value = '';
-
 		toastr.success('Image selected. Click "Add Image".');
+
 	});
 
 		$(document).on('click', '.btn-view-image', function (e) {
@@ -1366,7 +1356,7 @@
 		$("#imagePreviewModal").modal("show");
 	}
 
-			$(document).on('click', '.btn-clear-image', function (e) {
+	$(document).on('click', '.btn-clear-image', function (e) {
 
 		e.preventDefault();
 		e.stopPropagation();
@@ -1406,41 +1396,27 @@
 		$imageItem.closest('.inline-block').remove();
 	});
 
-		$(document).on('click', '.btn-clear', function (e) {
+	$(document).on('click', '.btn-clear', function (e) {
 
-			e.preventDefault();
-			e.stopPropagation();
+		e.preventDefault();
+		e.stopPropagation();
 
-			const $card   = $(this).closest('.color-card');
-			const colorId = $card.data('color-id');
+		const $card = $(this).closest('.color-card');
 
-			// ============================================
-			// 🟥 REMOVE ALL FILES FROM BUFFER (MAIN FIX)
-			// ============================================
-			if (colorImagesBuffer[colorId]) {
-				colorImagesBuffer[colorId] = [];   // 🔥 EMPTY BUFFER
-			}
+		// clear browse input only
+		const $fileInput = $card.find('.color-image-input');
 
-			// ============================================
-			// 🟥 CLEAR FILE INPUT
-			// ============================================
-			const $fileInput = $card.find('.color-image-input');
+		if ($fileInput.length) {
 			$fileInput.val('');
-			$fileInput.get(0).value = '';
+			$fileInput[0].value = '';
+		}
 
-			// ============================================
-			// 🟥 REMOVE ALL THUMBNAILS
-			// ============================================
-			$card.find('.color-image-list').html('');
+		// reset preview
+		const $preview = $card.find('.color-image-preview');
+		const $icon    = $card.find('.placeholder-icon');
 
-			// ============================================
-			// 🟥 RESET PREVIEW
-			// ============================================
-			const $preview = $card.find('.color-image-preview');
-			const $icon    = $card.find('.placeholder-icon');
-
-			$preview.attr('src','').addClass('d-none');
-			$icon.removeClass('d-none');
+		$preview.attr('src','').addClass('d-none');
+		$icon.removeClass('d-none');
 
 	});
 
