@@ -1420,6 +1420,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 			}
 		}
+
 		private async Task SaveImages(int productId, int userId, DateTime now)
 		{
 			var allImages = _dbContext.ProductsImages
