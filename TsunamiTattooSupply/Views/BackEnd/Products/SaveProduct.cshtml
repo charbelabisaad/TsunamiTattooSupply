@@ -707,13 +707,13 @@
 
 						</div>
 
-						<div class="col-12 col-md-6">
+						<div class="col-12 col-md-6" style="overflow:visible">
 
-							<div id="productStock" class="card">
+							<div id="productStock" class="card" style="overflow:visible">
 
 								<div class="card-header font-weight-bold">Stock</div>
 
-								<div class="card-body">
+								<div class="card-body" style="overflow:visible">
 
 									 <div id="ProductStock" class="p-3" style="height: 500px; overflow-x:hidden; overflow-y:auto;"></div>
 
@@ -2331,22 +2331,19 @@
 		});
 	});
 
-	$(document).on("click", "#btnSaveProductStock", function () {
+$(document).on("click", "#btnSaveProductStock", function () {
 
 	let btn = $("#btnSaveProductStock");
 	let spinner = $("#btnSaveProductStockSpinner");
 
-	// =========================================
-	// 🛑 PREVENT DOUBLE CLICK
-	// =========================================
 	if (btn.data("loading")) return;
 	btn.data("loading", true);
 
 	// =========================================
-	// 🔵 CHECK DUPLICATE BARCODE INSIDE PAGE
+	// DUPLICATE BARCODE CHECK
 	// =========================================
 	let barcodeMap = {};
-	let hasDuplicate = false;
+	let duplicateError = false;
 
 	$(".barcode").each(function () {
 
@@ -2360,20 +2357,21 @@
 		if (barcodeMap[value]) {
 			input.addClass("border-danger");
 			barcodeMap[value].addClass("border-danger");
-			hasDuplicate = true;
+			duplicateError = true;
 		} else {
 			barcodeMap[value] = input;
 		}
+
 	});
 
-	if (hasDuplicate) {
+	if (duplicateError) {
 		toastr.error("Duplicate barcode exists in table");
 		btn.data("loading", false);
 		return;
 	}
 
 	// =========================================
-	// 🔵 PREPARE FORM DATA
+	// PREPARE DATA
 	// =========================================
 	btn.prop("disabled", true);
 	spinner.removeClass("d-none");
@@ -2383,18 +2381,71 @@
 
 	let index = 0;
 
+	let stockMap = {};
+
 	$("#ProductStock tbody tr").each(function () {
 
 		let row = $(this);
 
+		let stockId = row.find(".stock-id").val() || 0;
 		let sizeId = row.find(".size-id").val();
-		let colorId = row.find(".color-id").val();
-		let typeId = row.find(".type-id").val() || 0;
-		let detailId = row.find(".detail-id").val() || 0;
+		let colorId = row.find(".color-id").selectpicker('val');
+		let typeId = row.find(".type-id").selectpicker('val') || 0;
+		let detailId = row.find(".detail-id").selectpicker('val') || 0;
 		let qty = row.find(".qty").val() || 0;
 		let barcode = row.find(".barcode").val() || "";
-		let stockInUse = row.find('.useinstock').is(':checked') ? 1 : 0;
+		let stockInUse = row.find(".useinstock").is(':checked') ? 1 : 0;
 
+		// ===============================
+		// COLOR VALIDATION
+		// ===============================
+		if (!colorId) {
+
+			let input = row.find(".color-id");
+
+			input.addClass("border-danger");
+
+			toastr.error("Please select a color");
+
+			$('html,body').animate({
+				scrollTop: input.offset().top - 150
+			}, 400);
+
+			btn.prop("disabled", false);
+			spinner.addClass("d-none");
+			btn.data("loading", false);
+
+			duplicateError = true;
+			return false;
+		}
+
+		// ===============================
+		// DUPLICATE STOCK CHECK
+		// ===============================
+		let key = `${sizeId}_${colorId}_${typeId}_${detailId}`;
+
+		row.removeClass("table-danger");
+
+		if (stockMap[key]) {
+
+			row.addClass("table-danger");
+
+			toastr.error("Stock already exists for this combination");
+
+			btn.prop("disabled", false);
+			spinner.addClass("d-none");
+			btn.data("loading", false);
+
+			duplicateError = true;
+			return false;
+		}
+
+		stockMap[key] = true;
+
+		// ===============================
+		// APPEND FORM DATA
+		// ===============================
+		formData.append(`StockID[${index}]`, stockId);
 		formData.append(`StockSizeID[${index}]`, sizeId);
 		formData.append(`StockColorID[${index}]`, colorId);
 		formData.append(`StockTypeID[${index}]`, typeId);
@@ -2404,10 +2455,19 @@
 		formData.append(`StockInUse[${index}]`, stockInUse);
 
 		index++;
+
 	});
 
+	if (duplicateError) {
+		toastr.error("Please fix highlighted fields");
+		btn.prop("disabled", false);
+		spinner.addClass("d-none");
+		btn.data("loading", false);
+		return;
+	}
+
 	// =========================================
-	// 🔵 AJAX SAVE
+	// AJAX SAVE
 	// =========================================
 	$.ajax({
 		url: '@Url.Action("SaveStock", "Products")',
@@ -2423,26 +2483,37 @@
 			btn.data("loading", false);
 
 			if (res.success) {
+
 				toastr.success("Stock saved successfully");
-				listProductStock($("#ProductID").val());
-			}
-			else {
+
+				loadProductStock($("#ProductID").val());
+
+			} else {
+
 				toastr.error(res.message || "Error saving");
 
-				// 🔴 highlight barcode from backend message
 				if (res.message && res.message.includes("Barcode")) {
+
 					let barcode = res.message.split(":")[1]?.trim();
 
 					$(".barcode").each(function () {
+
 						if ($(this).val() === barcode) {
+
 							$(this).addClass("border-danger");
+
 							$('html,body').animate({
 								scrollTop: $(this).offset().top - 150
 							}, 400);
+
 						}
+
 					});
+
 				}
+
 			}
+
 		},
 
 		error: function () {
@@ -2452,135 +2523,185 @@
 			btn.data("loading", false);
 
 			toastr.error("Server error while saving");
+
 		}
 	});
 
-	});
+});
 
 
+		function listProductStock(productId){
 
-		function listProductStock(ProductID){
+		if (!productId) return;
 
-			if (!ProductID) return;
+		$.ajax({
+			url: '@Url.Action("GetProductStock", "Products")',
+			type: 'GET',
+			data: { productId: productId },
 
-			$.ajax({
-				url: '@Url.Action("GetProductStock", "Products")',
-				type: 'GET',
-				data: { productId: ProductID },
+			success: function (res) {
 
-				   success: function(res){
+				if (!res.success) {
+					toastr.error(res.message);
+					return;
+				}
 
-		if(!res.success){
-			toastr.error(res.message);
-			return;
-		}
+				window.STOCK_COLORS  = res.colors;
+				window.STOCK_DETAILS = res.sizeDetails;
 
-		let html = "";
+				let html = "";
 
-		// 🔵 LOOP SIZES
-		res.productSizes.forEach(size => {
+				// group stocks by size
+				let stockMap = {};
 
-			html += `
-			<div class="variation-card mb-3">
-
-				<div class="variation-header p-2 bg-light">
-					<span class="text-primary font-weight-bold">${size.sizeDescription}</span> -
-					<span class="text-muted font-italic">Rank: ${size.sizeRank}</span>
-				</div>
-
-				<div class="variation-body p-2">
-				<table class="table table-sm table-bordered">
-				<thead class="bg-light">
-					<tr>
-						<th style="width:200px">Color</th>
-						<th style="width:150px">Type</th>
-						<th style="width:150px">Detail</th>
-						<th style="width:100px">Qty</th>
-						<th style="width:160px">Barcode</th>
-						<th style="width:50px">Used</th>
-					</tr>
-				</thead>
-				<tbody>
-			`;
-
-			// 🔵 DETAILS FOR THIS SIZE
-			let details = res.sizeDetails.filter(d => d.sizeID == size.sizeID);
-
-			details.forEach(det => {
-
-				// 🔵 LOOP COLORS
-				res.colors.forEach(color => {
-
-					let stock = res.stocks.find(x =>
-						x.sizeID == size.sizeID &&
-						x.colorID == color.colorID &&
-						x.productTypeID == det.productTypeID &&
-						x.productDetailID == det.productDetailID
-					);
-
-					if(!stock){
-						stock = {
-							id:0,
-							quantity:0,
-							barcode:""
-						};
-					}
-
-					html += `
-					<tr>
-
-						<td class="align-middle">
-							<i class="fas fa-square"
-							   style="color:#${color.code}; font-size:18px"></i>
-							${color.name}
-
-							<input type="hidden" class="stock-id" value="${stock.id}">
-							<input type="hidden" class="size-id" value="${size.sizeID}">
-							<input type="hidden" class="color-id" value="${color.colorID}">
-							<input type="hidden" class="type-id" value="${det.productTypeID}">
-							<input type="hidden" class="detail-id" value="${det.productDetailID}">
-						</td>
-
-						<td class="align-middle">${det.productTypeDescription}</td>
-						<td class="align-middle">${det.productDetailDescription}</td>
-
-						<td class="align-middle">
-							   <input type="number"
-								   class="form-control form-control-sm qty" min="0"
-								   value="${stock.quantity}"
-								   ${!stock.useInStock ? 'readonly' : ''}>
-						</td>
-
-						<td class="align-middle">
-							<input type="text"
-								   class="form-control form-control-sm barcode"
-								   value="${stock.barcode ?? ''}"
-								   ${!stock.useInStock ? 'readonly' : ''}>
-						</td>
-						<td class="align-center text-center">
-							<div class="custom-control custom-switch d-inline-block">
-								<input type="checkbox"
-									   class="custom-control-input useinstock"
-									   id="stock_${stock.id}"
-									   ${stock.useInStock ? 'checked' : ''}
-									   ${stock.quantity > 0 ? 'disabled' : ''}>
-								<label class="custom-control-label" for="stock_${stock.id}"></label>
-							</div>
-						</td>
-					</tr>`;
+				res.stocks.forEach(s => {
+					if (!stockMap[s.sizeID]) stockMap[s.sizeID] = [];
+					stockMap[s.sizeID].push(s);
 				});
 
-			});
+				res.productSizes.forEach(size => {
 
-			html += `</tbody></table></div></div>`;
+					html += `
+					<div class="variation-card mb-3" style="overflow:visible">
+
+						<div class="variation-header p-2 bg-light">
+							<span class="text-primary font-weight-bold">
+								${size.sizeDescription}
+							</span>
+							<span class="text-muted">Rank: ${size.sizeRank}</span>
+						</div>
+
+						<div class="variation-body p-2" style="overflow:visible">
+
+							<div class="text-right mb-2">
+								<button type="button"
+										class="btn btn-black btnAddProductStock"
+										value="${size.sizeID}">
+									<i class="fas fa-plus"></i> Add
+								</button>
+							</div>
+
+							<table class="table table-sm table-bordered" style="overflow:visible">
+							<thead class="bg-light">
+								<tr>
+									<th style="width:200px">Color</th>
+									<th style="width:150px">Type</th>
+									<th style="width:150px">Detail</th>
+									<th style="width:100px">Qty</th>
+									<th style="width:160px">Barcode</th>
+									<th style="width:60px">Used</th>
+									<th style="width:60px"></th>
+								</tr>
+							</thead>
+							<tbody>
+					`;
+
+					let stocks = stockMap[size.sizeID] || [];
+
+					stocks.forEach(stock => {
+						html += AddStockRow(stock);
+					});
+
+					html += `
+							</tbody>
+							</table>
+						</div>
+					</div>`;
+				});
+
+				$("#ProductStock").html(html);
+
+				// initialize selectpicker after DOM render
+				$('#ProductStock .selectpicker').selectpicker('render');
+			}
 		});
-
-		$("#ProductStock").html(html);
-	}
-
-			});
 		}
 
+
+		function AddStockRow(stock = null, sizeID = null) {
+
+		let colorOptions = `<option value="">Select</option>`;
+
+		STOCK_COLORS.forEach(c => {
+			colorOptions += `
+			<option value="${c.colorID}" 
+				${stock?.colorID == c.colorID ? 'selected' : ''}>
+				${c.name}
+			</option>`;
+		});
+
+		let typeOptions = `<option value="">Select</option>`;
+		let detailOptions = `<option value="">Select</option>`;
+
+		STOCK_DETAILS.forEach(d => {
+
+			typeOptions += `
+			<option value="${d.productTypeID}"
+				${stock?.productTypeID == d.productTypeID ? 'selected' : ''}>
+				${d.productTypeDescription}
+			</option>`;
+
+			detailOptions += `
+			<option value="${d.productDetailID}"
+				${stock?.productDetailID == d.productDetailID ? 'selected' : ''}>
+				${d.productDetailDescription}
+			</option>`;
+		});
+
+		return `
+		<tr>
+
+			<td style="width:200px">
+
+				<input type="hidden" class="stock-id" value="${stock?.id ?? 0}">
+				<input type="hidden" class="size-id" value="${sizeID ?? stock?.sizeID ?? ''}">
+
+				<select class="form-control form-control-sm color-id selectpicker" data-live-search="true">
+					${colorOptions}
+				</select>
+
+			</td>
+
+			<td style="width:150px">
+				<select class="form-control form-control-sm type-id selectpicker" data-live-search="true">
+					${typeOptions}
+				</select>
+			</td>
+
+			<td style="width:150px">
+				<select class="form-control form-control-sm detail-id selectpicker" data-live-search="true">
+					${detailOptions}
+				</select>
+			</td>
+
+			<td style="width:100px">
+				<input type="number"
+					   class="form-control form-control-sm qty"
+					   min="0"
+					   value="${stock?.quantity ?? 0}">
+			</td>
+
+			<td style="width:160px">
+				<input type="text"
+					   class="form-control form-control-sm barcode"
+					   value="${stock?.barcode ?? ''}">
+			</td>
+
+			<td style="width:60px" class="align-middle text-center">
+				<input type="checkbox"
+					   class="useinstock"
+					   ${stock?.useInStock ? 'checked' : ''}>
+			</td>
+
+			<td style="width:60px" class="align-middle text-center">
+				<button type="button"
+						class="btn btn-sm btn-danger remove-row">
+					<i class="fas fa-trash"></i>
+				</button>
+			</td>
+
+		</tr>`;
+		}
 
 
 	});

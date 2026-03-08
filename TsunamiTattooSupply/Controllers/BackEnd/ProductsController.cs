@@ -1100,7 +1100,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					VAT = form["ProductVAT"] == "on",
 					Feature = form["ProductFeature"] == "on",
 					NewArrival = form["ProductNewArrival"] == "on",
+					NewArrivalDateExpiryDate = form["ProductNewArrival"] == "on"
+					? Convert.ToDateTime(form["ProductExpiryDate"])
+					: null,
 					Warranty = form["ProductWarranty"] == "on",
+					WarrantyMonths = Convert.ToInt32(form["ProductWarrantyMonths"]),
 					StatusID = form["ProductStatusID"],
 					CreatedUserID = userId,
 					CreationDate = now
@@ -1123,7 +1127,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				product.VAT = form["ProductVAT"] == "on";
 				product.Feature = form["ProductFeature"] == "on";
 				product.NewArrival = form["ProductNewArrival"] == "on";
+				product.NewArrivalDateExpiryDate = form["ProductNewArrival"] == "on"
+					? Convert.ToDateTime(form["ProductExpiryDate"])
+					: null;
 				product.Warranty = form["ProductWarranty"] == "on";
+				product.WarrantyMonths = Convert.ToInt32(form["ProductWarrantyMonths"]);
 				product.StatusID = form["ProductStatusID"];
 				product.EditUserID = userId;
 				product.EditDate = now;
@@ -2176,32 +2184,33 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
-
 		public IActionResult GetProductStock(int productId)
 		{
 			try
 			{
-				// =====================================================
-				// 🔵 COLORS
-				// =====================================================
+				// =========================================
+				// COLORS
+				// =========================================
 				var colors = _dbContext.ProductsColors
-				.Where(c => c.ProductID == productId && c.DeletedDate == null)
-				.OrderBy(c => c.Color.Name)   // 🔥 IMPORTANT
-				.Select(c => new
-				{
-					id = c.ID,
-					colorID = c.ColorID,
-					code = c.Color.Code,
-					name = c.Color.Name
-				})
-				.ToList();
+					.AsNoTracking()
+					.Where(c => c.ProductID == productId && c.DeletedDate == null)
+					.OrderBy(c => c.Color.Name)
+					.Select(c => new
+					{
+						colorID = c.ColorID,
+						code = c.Color.Code,
+						name = c.Color.Name
+					})
+					.ToList();
 
-
-				// =====================================================
-				// 🔵 SIZES (ONE BLOCK PER SIZE ONLY)
-				// =====================================================
+				// =========================================
+				// SIZES
+				// =========================================
 				var productSizes = _dbContext.ProductsSizes
-					.Where(x => x.ProductID == productId && x.DeletedDate == null && x.StatusID == "A")
+					.AsNoTracking()
+					.Where(x => x.ProductID == productId
+								&& x.DeletedDate == null
+								&& x.StatusID == "A")
 					.GroupBy(x => new
 					{
 						x.SizeID,
@@ -2210,100 +2219,84 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					})
 					.Select(g => new
 					{
-						SizeID = g.Key.SizeID,
-						SizeDescription = g.Key.SizeDescription,
-						SizeRank = g.Key.SizeRank
+						sizeID = g.Key.SizeID,
+						sizeDescription = g.Key.SizeDescription,
+						sizeRank = g.Key.SizeRank
 					})
-					.OrderBy(x => x.SizeRank)
+					.OrderBy(x => x.sizeRank)
 					.ToList();
 
-
-				// =====================================================
-				// 🔵 TYPE + DETAIL COMBINATIONS PER SIZE
-				// =====================================================
+				// =========================================
+				// TYPE + DETAIL FOR DROPDOWNS
+				// =========================================
 				var sizeDetails = _dbContext.ProductsSizes
-					.Where(x => x.ProductID == productId && x.DeletedDate == null && x.StatusID == "A")
-					.Select(x => new
+					.AsNoTracking()
+					.Where(x => x.ProductID == productId
+								&& x.DeletedDate == null
+								&& x.StatusID == "A")
+					.GroupBy(x => new
 					{
-						x.SizeID,
 						x.ProductTypeID,
 						ProductTypeDescription = x.ProductType.Description,
 						x.ProductDetailID,
 						ProductDetailDescription = x.ProductDetail.Description
 					})
-					.Distinct()
-					.OrderBy(x => x.ProductTypeDescription)
-					.ThenBy(x => x.ProductDetailDescription)
+					.Select(g => new
+					{
+						productTypeID = g.Key.ProductTypeID,
+						productTypeDescription = g.Key.ProductTypeDescription,
+						productDetailID = g.Key.ProductDetailID,
+						productDetailDescription = g.Key.ProductDetailDescription
+					})
+					.OrderBy(x => x.productTypeDescription)
+					.ThenBy(x => x.productDetailDescription)
 					.ToList();
 
+				// =========================================
+				// STOCKS
+				// =========================================
+				var stocks = _dbContext.Stocks
+					.AsNoTracking()
+					.Where(s => s.ProductID == productId && s.DeletedDate == null)
+					.Select(s => new
+					{
+						id = s.ID,
+						sizeID = s.SizeID,
+						sizeDescription = s.Size.Description,
+						sizeRank = s.Size.Rank,
+						colorID = s.ColorID,
+						colorName = s.Color.Name,
+						colorCode = s.Color.Code,
+						productTypeID = s.ProductTypeID,
+						productTypeDescription = s.ProductType.Description,
+						productDetailID = s.ProductDetailID,
+						productDetailDescription = s.ProductDetail.Description,
+						quantity = s.Quantity,
+						barcode = s.Barcode,
+						useInStock = s.UseInStock
+					})
+					.OrderBy(x => x.sizeRank)
+					.ThenBy(x => x.colorName)
+					.ToList();
 
-				// =====================================================
-				// 🔵 STOCK
-				// =====================================================
-				var stocks = (
-		from s in _dbContext.Stocks
-
-		join ps in _dbContext.ProductsSizes
-			on new
-			{
-				s.ProductID,
-				s.SizeID,
-				s.ProductTypeID,
-				s.ProductDetailID
-			}
-			equals new
-			{
-				ps.ProductID,
-				ps.SizeID,
-				ps.ProductTypeID,
-				ps.ProductDetailID
-			}
-
-		join size in _dbContext.Sizes
-			on s.SizeID equals size.ID
-
-		join color in _dbContext.Colors
-			on s.ColorID equals color.ID
-
-		where s.ProductID == productId
-			  && s.DeletedDate == null
-			  && ps.DeletedDate == null
-			  && ps.StatusID == "A"
-
-		orderby size.Rank, color.Name   // 🔥 ORDER HERE
-
-		select new
-		{
-			id = s.ID,
-			sizeID = s.SizeID,
-			colorID = s.ColorID,
-			productTypeID = s.ProductTypeID,
-			productDetailID = s.ProductDetailID,
-			productTypeDescription = s.ProductType.Description,
-			productDetailDescription = s.ProductDetail.Description,
-			quantity = s.Quantity,
-			barcode = s.Barcode,
-			useInStock = s.UseInStock
-		}
-
-	).ToList();
-
-				// =====================================================
 				return Json(new
 				{
 					success = true,
 					colors = colors,
-					productSizes = productSizes,   // only sizes
-					sizeDetails = sizeDetails,     // type+detail per size
+					productSizes = productSizes,
+					sizeDetails = sizeDetails,
 					stocks = stocks
 				});
 			}
 			catch (Exception ex)
 			{
-				return Json(new { success = false, message = ex.Message });
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
 			}
 		}
-
 		[HttpPost]
 		public async Task<IActionResult> SaveStock()
 		{
@@ -2313,11 +2306,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				DateTime now = DateTime.UtcNow;
 
 				var form = Request.Form;
-				int productId = Convert.ToInt32(form["ProductID"]);
 
-				// -----------------------------------------------
-				// 1️⃣ Load all existing stocks once
-				// -----------------------------------------------
+				if (!int.TryParse(form["ProductID"], out int productId))
+					return Json(new { success = false, message = "Invalid product" });
+
+				// =====================================
+				// Load existing stocks
+				// =====================================
 				var existingStocks = await _dbContext.Stocks
 					.Where(x => x.ProductID == productId && x.DeletedDate == null)
 					.ToListAsync();
@@ -2326,72 +2321,37 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					x => (x.ProductTypeID, x.ProductDetailID, x.SizeID, x.ColorID)
 				);
 
-				// -----------------------------------------------
-				// 2️⃣ Load ALL barcodes once
-				// -----------------------------------------------
-				var allBarcodes = await _dbContext.Stocks
-					.Where(x => x.DeletedDate == null && x.Barcode != null)
-					.Select(x => new
-					{
-						x.Barcode,
-						x.ProductID,
-						ProductName = x.Product.Name
-					})
-					.ToListAsync();
+				var processedKeys = new HashSet<(int, int, int, int)>();
 
-				var barcodeMap = allBarcodes
-					.GroupBy(x => x.Barcode)
-					.ToDictionary(g => g.Key, g => g.First());
+				// =====================================
+				// Get row indexes
+				// =====================================
+				var rows = form.Keys
+					.Where(k => k.StartsWith("StockSizeID["))
+					.Select(k => int.Parse(k.Replace("StockSizeID[", "").Replace("]", "")))
+					.OrderBy(x => x)
+					.ToList();
 
-				// -----------------------------------------------
-				// 3️⃣ Process rows
-				// -----------------------------------------------
-				foreach (var key in form.Keys.Where(k => k.StartsWith("StockSizeID[")))
+				foreach (var i in rows)
 				{
-					int rowIndex = Convert.ToInt32(key.Replace("StockSizeID[", "").Replace("]", ""));
+					int.TryParse(form[$"StockSizeID[{i}]"], out int sizeId);
+					int.TryParse(form[$"StockColorID[{i}]"], out int colorId);
+					int.TryParse(form[$"StockTypeID[{i}]"], out int typeId);
+					int.TryParse(form[$"StockDetailID[{i}]"], out int detailId);
 
-					int sizeId = Convert.ToInt32(form[$"StockSizeID[{rowIndex}]"]);
-					int colorId = Convert.ToInt32(form[$"StockColorID[{rowIndex}]"]);
+					decimal.TryParse(form[$"StockQty[{i}]"], out decimal qty);
 
-					int typeId = string.IsNullOrEmpty(form[$"StockTypeID[{rowIndex}]"])
-						? 0 : Convert.ToInt32(form[$"StockTypeID[{rowIndex}]"]);
+					string barcode = form[$"StockBarcode[{i}]"];
+					bool useInStock = form[$"StockInUse[{i}]"] == "1";
 
-					int detailId = string.IsNullOrEmpty(form[$"StockDetailID[{rowIndex}]"])
-						? 0 : Convert.ToInt32(form[$"StockDetailID[{rowIndex}]"]);
+					var key = (typeId, detailId, sizeId, colorId);
 
-					decimal qty = string.IsNullOrEmpty(form[$"StockQty[{rowIndex}]"])
-						? 0 : Convert.ToDecimal(form[$"StockQty[{rowIndex}]"]);
+					processedKeys.Add(key);
 
-					string barcode = form[$"StockBarcode[{rowIndex}]"];
-					bool useInStock = form[$"StockInUse[{rowIndex}]"] == "1";
-
-					// -----------------------------------------------
-					// 🔴 Barcode validation (no DB hit now)
-					// -----------------------------------------------
-					if (!string.IsNullOrWhiteSpace(barcode))
-					{
-						if (barcodeMap.TryGetValue(barcode, out var existingBarcode))
-						{
-							if (existingBarcode.ProductID != productId)
-							{
-								return Json(new
-								{
-									success = false,
-									message = $"Barcode '{barcode}' already exists in product: <b>{existingBarcode.ProductName}</b>"
-								});
-							}
-						}
-					}
-
-					// -----------------------------------------------
-					// 🔵 Fast lookup
-					// -----------------------------------------------
-					stockMap.TryGetValue(
-						(typeId, detailId, sizeId, colorId),
-						out var existing
-					);
-
-					if (existing != null)
+					// =====================================
+					// UPDATE
+					// =====================================
+					if (stockMap.TryGetValue(key, out var existing))
 					{
 						existing.Quantity = qty;
 						existing.Barcode = barcode;
@@ -2401,6 +2361,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 					else
 					{
+						// =====================================
+						// INSERT
+						// =====================================
 						var newStock = new Stock
 						{
 							ProductID = productId,
@@ -2416,21 +2379,34 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						};
 
 						await _dbContext.Stocks.AddAsync(newStock);
+					}
+				}
 
-						stockMap[(typeId, detailId, sizeId, colorId)] = newStock;
+				// =====================================
+				// SOFT DELETE removed rows
+				// =====================================
+				foreach (var stock in existingStocks)
+				{
+					var key = (stock.ProductTypeID, stock.ProductDetailID, stock.SizeID, stock.ColorID);
+
+					if (!processedKeys.Contains(key))
+					{
+						stock.DeletedDate = now;
+						stock.EditUserID = userId;
+						stock.EditDate = now;
 					}
 				}
 
 				await _dbContext.SaveChangesAsync();
 
-				return Json(new { success = true, message = "Stock saved successfully" });
+				return Json(new { success = true });
 			}
 			catch (Exception ex)
 			{
 				return Json(new
 				{
 					success = false,
-					message = ex.ToString()
+					message = ex.Message
 				});
 			}
 		}
