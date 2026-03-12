@@ -40,9 +40,18 @@ builder.Services.AddAuthentication(
 
 builder.Services.Configure<FormOptions>(options =>
 {
-	options.ValueCountLimit = 10000;     // increase max form keys
-	options.ValueLengthLimit = int.MaxValue;
-	options.MultipartBodyLengthLimit = 104857600; // optional (100MB)
+	options.ValueCountLimit = int.MaxValue;          // Max number of form keys
+	options.KeyLengthLimit = int.MaxValue;           // Max length of a key
+	options.ValueLengthLimit = int.MaxValue;         // Max length of a value
+	options.MultipartHeadersLengthLimit = int.MaxValue;
+	options.MultipartBodyLengthLimit = long.MaxValue; // Max file upload size
+	options.MemoryBufferThreshold = int.MaxValue;
+
+});
+
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+	serverOptions.Limits.MaxRequestBodySize = long.MaxValue;
 });
 
 // ✅ Add Session BEFORE builder.Build()
