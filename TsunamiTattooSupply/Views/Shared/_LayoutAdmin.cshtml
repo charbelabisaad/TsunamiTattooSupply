@@ -384,8 +384,8 @@
                             </li>
                         </ul>
                     </li>
-                        <li class="nav-item @((currentController == "BannersHome" || currentController == "BannersPages") ? "menu-open" : string.Empty)">
-                        <a href="#" class="nav-link @((currentController == "BannersHome" || currentController == "BannersPages") ? "active" : string.Empty)">
+                    <li class="nav-item @((currentController == "BannersHomeWeb" || currentController == "BannersHomeMobile" || currentController == "BannersPages") ? "menu-open" : string.Empty)">
+                        <a href="#" class="nav-link @((currentController == "BannersHomeWeb" || currentController == "BannersPages") ? "active" : string.Empty)">
                             <i class="nav-icon fas fa-images"></i>
                             <p class="font-weight-bold">
                                 Banners
@@ -394,9 +394,15 @@
                         </a>
                         <ul class="nav nav-treeview">
                             <li class="nav-item ml-3">
-                                <a asp-area="" asp-controller="BannersHome" asp-action="Index" class="nav-link @((currentController == "BannersHome" && currentAction == "Index") ? "active" : string.Empty)">
+                                    <a asp-area="" asp-controller="BannersHomeWeb" asp-action="Index" class="nav-link @((currentController == "BannersHomeWeb" && currentAction == "Index") ? "active" : string.Empty)">
                                     <i class="bi bi-house-door nav-icon"></i>
-                                    <p>Home</p>
+                                      <p>Home Web</p>
+                                </a>
+                            </li>
+                            <li class="nav-item ml-3">
+                                <a asp-area="" asp-controller="BannersHomeMobile" asp-action="Index" class="nav-link @((currentController == "BannersHomeMobile" && currentAction == "Index") ? "active" : string.Empty)">
+                                    <i class="bi bi-house-door nav-icon"></i>
+                                    <p>Home Mobile</p>
                                 </a>
                             </li>
                             <li class="nav-item ml-3">

@@ -1,0 +1,868 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Banners";
+}
+
+<style>
+    /* 🔹 Dark translucent backdrop for both modals */
+    #imageBannerViewModal,
+    #imageSubBannerViewModal {
+        background-color: rgba(0, 0, 0, 0.88);
+        backdrop-filter: blur(4px); /* subtle blur for elegance */
+        z-index: 5000;
+    }
+
+        /* 🔹 Center modal content beautifully */
+        #imageBannerViewModal .modal-dialog,
+        #imageSubBannerViewModal .modal-dialog {
+            max-width: 500px;
+            max-height: 500px;
+            margin: auto;
+        }
+
+        /* 🔹 Transparent modal box */
+        #imageBannerViewModal .modal-content,
+        #imageSubBannerViewModal .modal-content {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* 🔹 Smooth image transitions */
+        #imageBannerViewModal img,
+        #imageSubBannerViewModal img {
+            transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
+            opacity: 0.95;
+        }
+
+            /* 🔹 Slight zoom and fade on hover */
+            #imageBannerViewModal img:hover,
+            #imageSubBannerViewModal img:hover {
+                transform: scale(1.1);
+                opacity: 1;
+            }
+
+        /* 🔹 Optional close button hover effect */
+        #imageBannerViewModal .btn:hover,
+        #imageSubBannerViewModal .btn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: scale(1.1);
+            transition: all 0.2s ease-in-out;
+        }
+
+    /* 🔹 Orange bordered SubBanner button */
+    .btnViewSubBanners {
+        border: 1px solid #ff6600 !important;
+        color: #ff6600 !important;
+        width: 130px;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .btnViewSubBanners:hover {
+            background-color: #ff6600 !important;
+            color: #ffffff !important;
+        }
+
+        .btnViewSubBanners:focus {
+            box-shadow: none !important;
+        }
+
+    /* 🔹 Equal-height header style for SubBanner cards */
+    .subcardheader-equal {
+        min-height: 56px; /* ensures consistent header height */
+        padding: 0.75rem 1rem !important; /* consistent spacing inside */
+        align-groups: center; /* vertical center */
+        justify-content: space-between; /* title on left, button on right */
+    }
+     
+
+</style>
+
+<partial name="SaveBanner" />
+<partial name="DeleteBanner" />
+<partial name="Rank" />
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1 class="m-0">@ViewData["Title"]</h1>
+                </div><!-- /.col -->
+            </div><!-- /.row -->
+        </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content-header -->
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="row">
+                        <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Banners List</h3></div>
+                        <div class="col-6 d-flex align-groups-center justify-content-end">
+                            <button id="btnNewBanner" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Banner</button>
+                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="col-sm-12 mt-3">
+                         
+                        <table id="tableBanners" class="table table-striped w-100">
+                            <thead>
+                                <tr style="vertical-align:middle">
+                                    <th style="width:100px">Image</th>
+                                    <th style="width:20%">Description</th>
+                                    <th style="width:20%">Category</th>
+                                    <th style="width:20%">SubCategory</th> 
+                                    <th style="width:20%">Product</th>
+                                    <th style="width:50px">Status</th>
+                                    <th style="width:50px" class="no-export">Actions</th>
+                                </tr>
+                            </thead>
+                        </table>
+                            
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </section>
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            var table = $('#tableBanners').DataTable({
+                processing: true,
+                responsive: true,
+                ajax: {
+                    url: '@Url.Action("ListGetBanners","BannersHomeMobile")',
+                    type: 'GET',
+                    dataSrc: function (json) {
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load banners.");
+                            return [];
+                        }
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
+                        return json.data;
+                    }
+                },
+
+                dom:
+                    '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                    '<"row mt-2 mb-2 d-flex align-items-center"' +
+                    '<"col-md-6 d-flex align-items-center" l>' +
+                    '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                    '<"col-md-2 d-flex justify-content-end" p>' +
+                    '>',
+
+
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search banners..."
+                },
+
+                buttons: [
+                    {
+                        extend: 'copy',
+                        className: 'btn btn-secondary btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-copy"></i> Copy'
+                    },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-success btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-excel"></i> Excel'
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        customize: function (doc) {
+                            var tableBody = doc.content[1].table.body;
+                            var colCount = tableBody[0].length;
+
+                            var colWidths = [];
+                            for (var i = 0; i < colCount; i++) colWidths.push('*');
+
+                            doc.content[1].table.widths = colWidths;
+                            doc.styles.tableBodyEven.alignment = 'center';
+                            doc.styles.tableBodyOdd.alignment = 'center';
+                            doc.styles.tableHeader.alignment = 'center';
+                            doc.defaultStyle.fontSize = 8;
+                            doc.pageMargins = [10, 10, 10, 10];
+                        }
+                    },
+                    {
+                        extend: 'print',
+                        className: 'btn btn-dark btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-print"></i> Print'
+                    },
+                    {
+                        text: '<i class="fas fa-sync"></i> Refresh',
+                        className: 'btn btn-primary btn-sm',
+                        action: function () {
+                            table.ajax.reload();
+                        }
+                    }
+                ],
+
+                columns: [
+                    {
+                        data: "image",
+                        className: "align-middle",
+                        render: function (data, type, row) {
+                            if (!row.image) {
+                                return `<span class="text-muted">No Image</span>`;
+                            }
+
+                            return `<img src="${row.imagePath}${row.image}"
+                                         style="width:70px;height:70px;object-fit:contain;border-radius:4px;cursor:pointer"
+                                         class="bannerImagePreview"
+                                         data-img="${row.image}"
+                                         data-imagepath="${row.imagePath}">`;
+                        }
+                    },
+                    {
+                        data: "description",
+                        className: "align-middle"
+                    },
+                    {
+                        data: "categoryDescription",
+                        className: "align-middle",
+                        render: function (data) {
+                            return data ? data : '<span class="text-muted">-</span>';
+                        }
+                    },
+                    {
+                        data: "subCategoryDescription",
+                        className: "align-middle",
+                        render: function (data) {
+                            return data ? data : '<span class="text-muted">-</span>';
+                        }
+                    },
+                    {
+                        data: "productDescription",
+                        className: "align-middle",
+                        render: function (data) {
+                            return data ? data : '<span class="text-muted">-</span>';
+                        }
+                    },
+                       // 🔹 Group Status with Color Badge
+                    {
+                        data: "status",
+                        className: "align-middle text-center",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="badge text-white"
+                                        style="background-color:#${row.statusColor}; width:120px;">
+                                    ${data}
+                                </div>
+                            `;
+                        }
+                    },
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: "no-export text-center align-middle",
+                        render: function (data, type, row) {
+                            return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" type="button" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditBanner" style="cursor:pointer"
+                                       data-id="${row.id}"
+                                       data-description="${row.description ?? ''}"
+                                       data-imagepath="${row.imagePath ?? ''}"
+                                       data-image="${row.image ?? ''}"
+                                       data-categoryid="${row.categoryID ?? '0'}"
+                                       data-subcategoryid="${row.subCategoryID ?? '0'}"
+                                       data-productid="${row.productID ?? '0'}"
+                                       data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+
+                                    <a class="dropdown-item btnDeleteBanner" style="cursor:pointer"
+                                       data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>
+                            `;
+                        }
+                    }
+                ],
+                order: [[1, "asc"]]
+            });
+
+        $("#btnNewBanner").on("click", function () {
+
+            // Title
+            $("#modalBannerTitle").text("Create New Banner");
+
+            // Reset hidden fields
+            $("#BannerID").val(0);
+            $("#BannerTypeID").val("");
+
+            // Reset text fields
+            $("#BannerDescription").val("");
+
+            // Reset selects
+            $("#BannerCategory").val("0");
+            $("#BannerSubCategory").empty().append('<option value="">-- Select Sub Category --</option>');
+            $("#BannerProduct").empty().append('<option value="">-- Select Product --</option>');
+
+            $("#BannerCategory").selectpicker('destroy').selectpicker('render');
+            $("#BannerSubCategory").selectpicker('destroy').selectpicker('render');
+            $("#BannerProduct").selectpicker('destroy').selectpicker('render');
+
+            // Reset validation messages
+            $("#BannerDescriptionMessage").html("");
+            $("#BannerCategoryMessage").html("");
+            $("#BannerSubCategoryMessage").html("");
+            $("#BannerProductMessage").html("");
+
+            // Reset status
+            $("#BannerStatusToggle").prop("checked", true);
+            $("#BannerStatusID").val("A");
+            $("label[for='BannerStatusToggle']").text("Active");
+
+            // Reset image
+            $("#bannerImage").val("");
+            $("#bannerImagePreview").attr("src", "").addClass("d-none");
+            $(".placeholder-icon").removeClass("d-none");
+            $(".btn-clear").hide();
+            $(".btn-view").hide();
+            $("#ClearImage").val("false");
+
+            // Open modal
+            $("#saveBannerModal").modal("show");
+        });
+
+
+            $(document).on("click", ".btnEditBanner", function () {
+
+                let id = $(this).data("id");
+                let description = $(this).data("description");
+                let imagePath = $(this).data("imagepath");
+                let image = $(this).data("image");
+                let categoryId = $(this).data("categoryid");
+                let subCategoryId = $(this).data("subcategoryid");
+                let productId = $(this).data("productid");
+                let statusId = $(this).data("statusid");
+
+                $("#modalBannerTitle").text("Edit Banner");
+
+                $("#BannerID").val(id);
+                $("#BannerDescription").val(description);
+                $("#BannerStatusID").val(statusId);
+                $("#ClearImage").val("false");
+
+                $("#BannerDescriptionMessage").text("");
+                $("#BannerCategoryMessage").text("");
+                $("#BannerSubCategoryMessage").text("");
+                $("#BannerProductMessage").text("");
+
+                if (statusId === "A") {
+                    $("#BannerStatusToggle").prop("checked", true);
+                    $("#BannerStatusToggle").next("label").text("Active");
+                } else {
+                    $("#BannerStatusToggle").prop("checked", false);
+                    $("#BannerStatusToggle").next("label").text("Inactive");
+                }
+
+                const preview = $("#bannerImagePreview");
+                const placeholder = $(".placeholder-icon");
+                const clearBtn = $(".btn-clear");
+                const viewBtn = $(".btn-view");
+                const input = $("#bannerImage");
+
+                input.val("");
+
+                if (image && imagePath) {
+                    preview.attr("src", imagePath + image).removeClass("d-none");
+                    placeholder.addClass("d-none");
+                    clearBtn.show();
+                    viewBtn.show();
+                } else {
+                    preview.attr("src", "").addClass("d-none");
+                    placeholder.removeClass("d-none");
+                    clearBtn.hide();
+                    viewBtn.hide();
+                }
+
+                // Set category first
+                $("#BannerCategory").val(categoryId);
+                $("#BannerCategory").selectpicker('destroy').selectpicker('render');
+
+                // Load subcategories, then set subcategory, then load products, then set product
+                $.ajax({
+                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+                    type: 'GET',
+                    data: { categoryId: categoryId },
+                    success: function (subCategories) {
+
+                        let subSelect = $("#BannerSubCategory");
+                        subSelect.empty();
+                        subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+                        (subCategories || []).forEach(sc => {
+                            subSelect.append(`<option value="${sc.id}">${sc.name}</option>`);
+                        });
+
+                        subSelect.val(String(subCategoryId));
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                        $.ajax({
+                            url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+                            type: 'GET',
+                            data: {
+                                CategoryId: categoryId,
+                                SubCategoryId: subCategoryId
+                            },
+                            success: function (products) {
+
+                                let productSelect = $("#BannerProduct");
+                                productSelect.empty();
+                                productSelect.append('<option value="">-- Select Product --</option>');
+
+                                (products || []).forEach(p => {
+                                    let productValue = p.productID ?? p.ProductID;
+                                    let productText = (p.productName ?? p.ProductName) + ' - ' + (p.productGroupName ?? p.ProductGroupName);
+
+                                    productSelect.append(`<option value="${productValue}">${productText}</option>`);
+                                });
+
+                                productSelect.val(String(productId));
+                                productSelect.selectpicker('destroy').selectpicker('render');
+
+                                $("#saveBannerModal").modal("show");
+                            },
+                            error: function () {
+                                toastr.error("Failed to load products");
+                            }
+                        });
+                    },
+                    error: function () {
+                        toastr.error("Failed to load sub-categories");
+                    }
+                });
+            });
+
+ 
+             // ================================
+        // 🔹 SAVE BANNER BUTTON
+        // ================================
+
+         // ================================
+        // 🔹 SAVE BANNER BUTTON
+        // ================================
+        $("#btnSaveBanner").on("click", function (e) {
+            e.preventDefault();
+
+            $("#BannerDescriptionMessage").text("");
+            $("#BannerCategoryMessage").text("");
+            $("#BannerSubCategoryMessage").text("");
+            $("#BannerProductMessage").text("");
+
+            let isValid = true;
+
+            let id = $("#BannerID").val() || 0;
+            let description = $("#BannerDescription").val().trim();
+            let categoryId = $("#BannerCategory").val();
+            let subCategoryId = $("#BannerSubCategory").val();
+            let productId = $("#BannerProduct").val();
+            let imageFile = $("#bannerImage")[0].files[0];
+
+            if (description === "") {
+                $("#BannerDescriptionMessage").text("Description is required");
+                isValid = false;
+            }
+
+            if (!categoryId || categoryId === "0") {
+                $("#BannerCategoryMessage").text("Category is required");
+                isValid = false;
+            }
+
+            if (!subCategoryId || subCategoryId === "0") {
+                $("#BannerSubCategoryMessage").text("Sub Category is required");
+                isValid = false;
+            }
+
+            if (!productId || productId === "0") {
+                $("#BannerProductMessage").text("Product is required");
+                isValid = false;
+            }
+
+            // image required only when create
+            if (id == 0 && !imageFile) {
+                toastr.error("Image is required");
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            let btn = $("#btnSaveBanner");
+            let spinner = $("#btnSaveBannerSpinner");
+
+            btn.prop("disabled", true);
+            spinner.removeClass("d-none");
+
+            let formData = new FormData();
+            formData.append("ID", id);
+            formData.append("Description", description);
+            formData.append("CategoryID", categoryId);
+            formData.append("SubCategoryID", subCategoryId);
+            formData.append("ProductID", productId);
+            formData.append("StatusID", $("#BannerStatusID").val());
+            formData.append("ClearImage", $("#ClearImage").val());
+
+            if (imageFile) {
+                formData.append("Image", imageFile);
+            }
+
+            $.ajax({
+                url: '@Url.Action("SaveBanner", "BannersHomeMobile")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    btn.prop("disabled", false);
+                    spinner.addClass("d-none");
+
+                    if (response.success) {
+                        toastr.success(response.message);
+
+                        $("#saveBannerModal").modal("hide");
+
+                        $("#bannerForm")[0].reset();
+                        $("#BannerID").val(0);
+                        $("#BannerTypeID").val("");
+                        $("#BannerStatusID").val("A");
+                        $("#ClearImage").val("false");
+
+                        $("#BannerCategory").val("0");
+                        $("#BannerSubCategory").empty().append('<option value="">-- Select Sub Category --</option>');
+                        $("#BannerProduct").empty().append('<option value="">-- Select Product --</option>');
+
+                        $("#BannerCategory").selectpicker('refresh');
+                        $("#BannerSubCategory").selectpicker('refresh');
+                        $("#BannerProduct").selectpicker('refresh');
+
+                        $("#bannerImage").val("");
+                        $("#bannerImagePreview").attr("src", "").addClass("d-none");
+                        $(".placeholder-icon").removeClass("d-none");
+                        $(".btn-clear").hide();
+                        $(".btn-view").hide();
+
+                        if ($.fn.DataTable.isDataTable("#tableBanners")) {
+                            $("#tableBanners").DataTable().ajax.reload(null, false);
+                        }
+                    } else {
+                        toastr.error(response.message || "Failed to save mobile banner");
+                    }
+                },
+                error: function (xhr) {
+                    btn.prop("disabled", false);
+                    spinner.addClass("d-none");
+
+                    let message = "An error occurred while saving mobile banner";
+
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        message = xhr.responseJSON.message;
+                    }
+
+                    toastr.error(message);
+                }
+            });
+        });
+
+
+        // ============================================
+        // 🔹 IMAGE UPLOAD / PREVIEW / CLEAR / VIEW
+        // ============================================
+        const wrapper = document.querySelector(".image-box-wrapper");
+
+        if (wrapper) {
+            const input = wrapper.querySelector("#bannerImage");
+            const preview = wrapper.querySelector("#bannerImagePreview");
+            const placeholder = wrapper.querySelector(".placeholder-icon");
+            const clearBtn = wrapper.querySelector(".btn-clear");
+            const viewBtn = wrapper.querySelector(".btn-view");
+            const browseBtn = wrapper.querySelector(".btn-browse");
+
+            clearBtn.style.display = "none";
+            viewBtn.style.display = "none";
+
+            browseBtn.addEventListener("click", () => input.click());
+
+            input.addEventListener("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const maxSizeKB = 100;
+                const maxSizeBytes = maxSizeKB * 1024;
+
+                if (file.size > maxSizeBytes) {
+                    toastr.error("Image size must not exceed 100 KB");
+
+                    input.value = "";
+                    preview.src = "";
+                    preview.classList.add("d-none");
+                    placeholder.classList.remove("d-none");
+
+                    clearBtn.style.display = "none";
+                    viewBtn.style.display = "none";
+
+                    $("#ClearImage").val("false");
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = e => {
+                    preview.src = e.target.result;
+                    preview.classList.remove("d-none");
+                    placeholder.classList.add("d-none");
+
+                    clearBtn.style.display = "inline-block";
+                    viewBtn.style.display = "inline-block";
+
+                    $("#ClearImage").val("false");
+                };
+
+                reader.readAsDataURL(file);
+            });
+
+            clearBtn.addEventListener("click", () => {
+                preview.src = "";
+                preview.classList.add("d-none");
+                placeholder.classList.remove("d-none");
+                input.value = "";
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display = "none";
+
+                $("#ClearImage").val("true");
+            });
+
+            viewBtn.addEventListener("click", () => {
+                if (!preview.src) return;
+                $("#imageBannerViewModalImg").attr("src", preview.src);
+                new bootstrap.Modal(document.getElementById("imageBannerViewModal")).show();
+            });
+        }
+
+        // ================================
+        // 🔹 OPEN DELETE MODAL
+        // ================================
+        $(document).on("click", ".btnDeleteBanner", function () {
+            let id = $(this).data("id");
+
+            $("#deletedBannerId").val(id);
+            $("#deleteBannerMessage").text("Are you sure you want to delete this Banner?");
+            $("#deleteBannerModal").modal("show");
+
+        });
+
+              // ================================
+            // 🔹 CONFIRM DELETE BANNER
+            // ================================
+            $(document).on("click", "#btnConfirmDeleteBanner", function () {
+
+                let id = $("#deletedBannerId").val();
+
+                $("#btnDeleteSpinner").removeClass("d-none");
+                $("#btnConfirmDeleteBanner i").addClass("d-none");
+                $("#btnConfirmDeleteBanner").prop("disabled", true);
+
+                $.ajax({
+                    url: '@Url.Action("DeleteBanner","BannersHomeMobile")',
+
+                    type: "POST",
+                    data: { ID: id },
+                    success: function (response) {
+
+                        if (response.success) {
+                            toastr.success(response.message);
+
+                            $("#deleteBannerModal").modal("hide");
+
+                            if ($.fn.DataTable.isDataTable("#tableBanners")) {
+                                $("#tableBanners").DataTable().ajax.reload(null, false);
+                            }
+                        } else {
+                            toastr.error(response.message || "Failed to delete banner.");
+                        }
+
+                        resetDeleteButton();
+                    },
+                    error: function () {
+                        toastr.error("Server error while deleting banner.");
+                        resetDeleteButton();
+                    }
+                });
+
+                function resetDeleteButton() {
+                    $("#btnDeleteSpinner").addClass("d-none");
+                    $("#btnConfirmDeleteBanner i").removeClass("d-none");
+                    $("#btnConfirmDeleteBanner").prop("disabled", false);
+                }
+            });
+
+            $(document).on('change', '#BannerCategory', function () {
+
+                LoadSubCategories();
+
+                $('#BannerProduct').empty().append('<option value="">-- Select Product --</option>')
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            });
+
+            let currentCategoryOptionIds = [];
+            let subCatMetaById = {};
+
+            function LoadSubCategories() {
+
+                let categoryId = $('#BannerCategory').val();
+                let subSelect  = $('#BannerSubCategory');
+             
+                subSelect.empty();
+                currentCategoryOptionIds = [];
+
+                // Always add empty option
+                subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+                if (!categoryId) {
+                    subSelect.selectpicker('destroy').selectpicker('render'); 
+                    return;
+                }
+       
+                $.ajax({
+                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+                    type: 'GET',
+                    data: { categoryId },
+                    success: function (items) {
+
+                        (items || []).forEach(sc => {
+                            let id = String(sc.id);
+
+                            subSelect.append(
+                                `<option value="${id}">${sc.name}</option>`
+                            );
+
+                            currentCategoryOptionIds.push(id);
+
+
+
+                            if (!subCatMetaById[id]) {
+                                subCatMetaById[id] = {
+                                    id: sc.id,
+                                    name: sc.name,
+                                    categoryId: parseInt(categoryId)
+                                };
+                            }
+                        });
+
+                        // Refresh picker (NO destroy)
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                        // ===============================
+                        // RESTORE OR CLEAR SELECTION
+                        // ===============================
+                        if (restoreSelection) {
+                            let validSelected = currentCategoryOptionIds.filter(
+                                id => selectedSubCatIds.has(id)
+                            );
+
+                            subSelect.selectpicker('val', validSelected);
+                        } else {
+                            // 🔥 FORCE CLEAR
+                            subSelect.selectpicker('val', []);
+                        }
+
+                            subSelect.selectpicker('destroy').selectpicker('render');
+
+                        // Keep tags
+                        renderTags();
+                    },
+                    error: function () {
+                        toastr.error('Failed to load sub-categories');
+                    }
+                });
+            }
+
+        $(document).on('change', '#BannerSubCategory', function () {
+            LoadProducts();
+        });
+
+        function LoadProducts() {
+
+            let categoryId = $('#BannerCategory').val();
+            let subCategoryId = $('#BannerSubCategory').val();
+            let productSelect = $('#BannerProduct');
+
+            productSelect.empty();
+            productSelect.append('<option value="">-- Select Product --</option>');
+
+            if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
+                productSelect.selectpicker('destroy').selectpicker('render');
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+                type: 'GET',
+                data: {
+                    CategoryId: categoryId,
+                    SubCategoryId: subCategoryId
+                },
+                success: function (items) {
+
+                    productSelect.empty();
+                    productSelect.append('<option value="">-- Select Product --</option>');
+
+                    (items || []).forEach(p => {
+                        productSelect.append(
+                            `<option value="${p.productID}">${p.productName} - ${p.productGroupName}</option>`
+                        );
+                    });
+
+                    productSelect.selectpicker('destroy').selectpicker('render');
+
+                },
+                error: function () {
+                    toastr.error('Failed to load products');
+                }
+            });
+        }
+
+        });
+         
+    </script>
+
+}

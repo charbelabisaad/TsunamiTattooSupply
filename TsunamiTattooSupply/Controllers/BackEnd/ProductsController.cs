@@ -1065,7 +1065,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				await SaveProductSizes(productId, form, userId, now);
 
-				await SaveImages(productId, userId, now);
+				//await SaveImages(productId, userId, now);
 
 				await _dbContext.SaveChangesAsync();
 
@@ -1084,6 +1084,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+		
 		private async Task<int> SaveProductBasic(int productId, IFormCollection form, int userId, DateTime now)
 		{
 			Product product;
@@ -1429,62 +1430,205 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
-		private async Task SaveImages(int productId, int userId, DateTime now)
+		//private async Task SaveImages(int productId, int userId, DateTime now)
+		//{
+		//	var allImages = _dbContext.ProductsImages
+		//		.Where(x => x.ProductID == productId && x.DeletedDate == null)
+		//		.ToList();
+
+		//	List<int> deletedIds = new();
+
+		//	if (Request.Form.ContainsKey("DeletedImageIds[]"))
+		//	{
+		//		deletedIds = Request.Form["DeletedImageIds[]"]
+		//			.Where(x => !string.IsNullOrWhiteSpace(x))
+		//			.Select(int.Parse)
+		//			.ToList();
+		//	}
+
+		//	if (deletedIds.Any())
+		//	{
+		//		var imagesToDelete = allImages
+		//			.Where(x => deletedIds.Contains(x.ID))
+		//			.ToList();
+
+		//		foreach (var img in imagesToDelete)
+		//		{
+		//			img.DeletedUserID = userId;
+		//			img.DeletedDate = now;
+		//		}
+
+		//		allImages = allImages.Except(imagesToDelete).ToList();
+		//	}
+
+		//	var uploadedFiles = Request.Form.Files
+		//		.Where(f => f.Name.Contains("ProductColorImages["))
+		//		.ToList();
+
+		//	if (uploadedFiles.Any())
+		//	{
+		//		string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
+		//		string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
+
+		//		Directory.CreateDirectory(originalDir);
+		//		Directory.CreateDirectory(smallDir);
+
+		//		var groupedByColor = uploadedFiles.GroupBy(f =>
+		//		{
+		//			string key = f.Name;
+		//			int start = key.IndexOf('[') + 1;
+		//			int end = key.IndexOf(']');
+		//			return int.Parse(key.Substring(start, end - start));
+		//		});
+
+		//		foreach (var colorGroup in groupedByColor)
+		//		{
+		//			int colorId = colorGroup.Key;
+
+		//			foreach (var file in colorGroup)
+		//			{
+		//				if (file.Length == 0) continue;
+
+		//				string ext = Path.GetExtension(file.FileName);
+		//				string fileName = $"{Guid.NewGuid()}{ext}";
+
+		//				string originalPath = Path.Combine(originalDir, fileName);
+		//				string smallPath = Path.Combine(smallDir, fileName);
+
+		//				using (var stream = new FileStream(originalPath, FileMode.Create))
+		//					await file.CopyToAsync(stream);
+
+		//				using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
+		//				{
+		//					image.Mutate(x => x.Resize(new ResizeOptions
+		//					{
+		//						Mode = ResizeMode.Max,
+		//						Size = new SixLabors.ImageSharp.Size(600, 600)
+		//					}));
+
+		//					image.Save(smallPath);
+		//				}
+
+		//				var newImg = new ProductImage
+		//				{
+		//					ProductID = productId,
+		//					ColorID = colorId,
+		//					OriginalImage = fileName,
+		//					SmallImage = fileName,
+		//					IsInitial = false,
+		//					StatusID = "A",
+		//					CreatedUserID = userId,
+		//					CreationDate = now
+		//				};
+
+		//				_dbContext.ProductsImages.Add(newImg);
+		//				allImages.Add(newImg);
+		//			}
+		//		}
+		//	}
+
+		//	var groups = allImages
+		//		.Where(x => x.DeletedDate == null)
+		//		.GroupBy(x => x.ColorID)
+		//		.ToList();
+
+		//	foreach (var group in groups)
+		//	{
+		//		int colorId = group.Key;
+
+		//		var selectedKeys = Request.Form.Keys
+		//			.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
+		//			.ToList();
+
+		//		bool userSelected = false;
+
+		//		if (selectedKeys.Any())
+		//		{
+		//			foreach (var img in group)
+		//				img.IsInitial = false;
+
+		//			foreach (var key in selectedKeys)
+		//			{
+		//				if (Request.Form[key] != "true") continue;
+
+		//				var parts = key.Split('[', ']');
+
+		//				if (!int.TryParse(parts[3], out int imageId)) continue;
+
+		//				var selected = group.FirstOrDefault(x => x.ID == imageId);
+
+		//				if (selected != null)
+		//				{
+		//					selected.IsInitial = true;
+		//					userSelected = true;
+		//				}
+		//			}
+		//		}
+
+		//		if (!userSelected && !group.Any(x => x.IsInitial))
+		//		{
+		//			var first = group.FirstOrDefault();
+		//			if (first != null)
+		//				first.IsInitial = true;
+		//		}
+		//	}
+		//}
+
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> SaveProductColorImages()
 		{
-			var allImages = _dbContext.ProductsImages
-				.Where(x => x.ProductID == productId && x.DeletedDate == null)
-				.ToList();
-
-			List<int> deletedIds = new();
-
-			if (Request.Form.ContainsKey("DeletedImageIds[]"))
+			try
 			{
-				deletedIds = Request.Form["DeletedImageIds[]"]
-					.Where(x => !string.IsNullOrWhiteSpace(x))
-					.Select(int.Parse)
-					.ToList();
-			}
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+				DateTime now = DateTime.UtcNow;
 
-			if (deletedIds.Any())
-			{
-				var imagesToDelete = allImages
-					.Where(x => deletedIds.Contains(x.ID))
-					.ToList();
+				int productId = Convert.ToInt32(Request.Form["ProductID"]);
+				int colorId = Convert.ToInt32(Request.Form["ColorID"]);
 
-				foreach (var img in imagesToDelete)
+				var allImages = await _dbContext.ProductsImages
+					.Where(x => x.ProductID == productId && x.ColorID == colorId && x.DeletedDate == null)
+					.ToListAsync();
+
+				List<int> deletedIds = new();
+
+				if (Request.Form.ContainsKey("DeletedImageIds[]"))
 				{
-					img.DeletedUserID = userId;
-					img.DeletedDate = now;
+					deletedIds = Request.Form["DeletedImageIds[]"]
+						.Where(x => !string.IsNullOrWhiteSpace(x) && int.TryParse(x, out _))
+						.Select(int.Parse)
+						.ToList();
 				}
 
-				allImages = allImages.Except(imagesToDelete).ToList();
-			}
-
-			var uploadedFiles = Request.Form.Files
-				.Where(f => f.Name.Contains("ProductColorImages["))
-				.ToList();
-
-			if (uploadedFiles.Any())
-			{
-				string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
-				string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
-
-				Directory.CreateDirectory(originalDir);
-				Directory.CreateDirectory(smallDir);
-
-				var groupedByColor = uploadedFiles.GroupBy(f =>
+				if (deletedIds.Any())
 				{
-					string key = f.Name;
-					int start = key.IndexOf('[') + 1;
-					int end = key.IndexOf(']');
-					return int.Parse(key.Substring(start, end - start));
-				});
+					var imagesToDelete = allImages
+						.Where(x => deletedIds.Contains(x.ID))
+						.ToList();
 
-				foreach (var colorGroup in groupedByColor)
+					foreach (var img in imagesToDelete)
+					{
+						img.DeletedUserID = userId;
+						img.DeletedDate = now;
+						img.IsInitial = false;
+					}
+
+					allImages = allImages.Except(imagesToDelete).ToList();
+				}
+
+				var uploadedFiles = Request.Form.Files
+					.Where(f => f.Name == "Files")
+					.ToList();
+
+				if (uploadedFiles.Any())
 				{
-					int colorId = colorGroup.Key;
+					string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
+					string smallDir = Path.Combine(_imagesRoot, Global.ProductSmallImagePath.TrimStart('/'));
 
-					foreach (var file in colorGroup)
+					Directory.CreateDirectory(originalDir);
+					Directory.CreateDirectory(smallDir);
+
+					foreach (var file in uploadedFiles)
 					{
 						if (file.Length == 0) continue;
 
@@ -1494,10 +1638,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						string originalPath = Path.Combine(originalDir, fileName);
 						string smallPath = Path.Combine(smallDir, fileName);
 
-						using (var stream = new FileStream(originalPath, FileMode.Create))
+						await using (var stream = new FileStream(
+							originalPath,
+							FileMode.Create,
+							FileAccess.Write,
+							FileShare.None,
+							81920,
+							useAsync: true))
+						{
 							await file.CopyToAsync(stream);
+						}
 
-						using (var image = SixLabors.ImageSharp.Image.Load(file.OpenReadStream()))
+						await using (var readStream = new FileStream(
+							originalPath,
+							FileMode.Open,
+							FileAccess.Read,
+							FileShare.Read,
+							81920,
+							useAsync: true))
+						using (var image = await SixLabors.ImageSharp.Image.LoadAsync(readStream))
 						{
 							image.Mutate(x => x.Resize(new ResizeOptions
 							{
@@ -1505,7 +1664,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 								Size = new SixLabors.ImageSharp.Size(600, 600)
 							}));
 
-							image.Save(smallPath);
+							await image.SaveAsync(smallPath);
 						}
 
 						var newImg = new ProductImage
@@ -1524,54 +1683,63 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						allImages.Add(newImg);
 					}
 				}
-			}
 
-			var groups = allImages
-				.Where(x => x.DeletedDate == null)
-				.GroupBy(x => x.ColorID)
-				.ToList();
+				await _dbContext.SaveChangesAsync();
 
-			foreach (var group in groups)
-			{
-				int colorId = group.Key;
+				string selectedInitial = Request.Form["SelectedInitial"];
 
-				var selectedKeys = Request.Form.Keys
-					.Where(k => k.StartsWith($"ColorImageInitial[{colorId}]"))
-					.ToList();
+				var activeImages = allImages.Where(x => x.DeletedDate == null).ToList();
 
-				bool userSelected = false;
-
-				if (selectedKeys.Any())
+				if (activeImages.Any())
 				{
-					foreach (var img in group)
+					foreach (var img in activeImages)
 						img.IsInitial = false;
 
-					foreach (var key in selectedKeys)
+					bool userSelected = false;
+
+					if (!string.IsNullOrWhiteSpace(selectedInitial) && selectedInitial.StartsWith("existing_"))
 					{
-						if (Request.Form[key] != "true") continue;
+						string idPart = selectedInitial.Replace("existing_", "");
 
-						var parts = key.Split('[', ']');
-
-						if (!int.TryParse(parts[3], out int imageId)) continue;
-
-						var selected = group.FirstOrDefault(x => x.ID == imageId);
-
-						if (selected != null)
+						if (int.TryParse(idPart, out int existingId))
 						{
-							selected.IsInitial = true;
-							userSelected = true;
+							var selected = activeImages.FirstOrDefault(x => x.ID == existingId);
+							if (selected != null)
+							{
+								selected.IsInitial = true;
+								userSelected = true;
+							}
 						}
+					}
+
+					if (!userSelected)
+					{
+						var first = activeImages.FirstOrDefault();
+						if (first != null)
+							first.IsInitial = true;
 					}
 				}
 
-				if (!userSelected && !group.Any(x => x.IsInitial))
+				await _dbContext.SaveChangesAsync();
+
+				return Json(new
 				{
-					var first = group.FirstOrDefault();
-					if (first != null)
-						first.IsInitial = true;
-				}
+					success = true,
+					colorId = colorId
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
 			}
 		}
+
+
+
 		[HttpGet]
 		public IActionResult GetProductEditExtras(int productId)
 		{

@@ -1,0 +1,369 @@
+﻿<!-- ========================================= -->
+<!--  BRAND IMAGE VIEW MODAL (Single & Global) -->
+<!-- ========================================= -->
+
+<style>
+
+    #saveBannerModal .modal-content {
+    background: #f8f9fb;
+    }
+
+    #saveBannerModal .card {
+    background: #ffffff;
+    }
+
+    #saveBannerModal .card-header {
+    border-bottom: 1px solid #f1f3f5 !important;
+    }
+
+    #saveBannerModal .form-control {
+    border: 1px solid #dfe3e8;
+    }
+
+    #saveBannerModal .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: none;
+    }
+
+    .banner-status-box {
+    background: #f8f9fb;
+    border: 1px solid #e9ecef;
+    }
+
+    .image-box {
+    border: 2px dashed #d9dee7 !important;
+    transition: all 0.25s ease;
+    overflow: hidden;
+    }
+
+
+</style>
+
+<div class="modal fade" id="imageBannerViewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content bg-transparent border-0">
+
+            <div class="modal-body d-flex justify-content-center align-items-center p-0"
+            style="background: rgba(0,0,0,0.9); border-radius: 10px;">
+
+                <img id="imageBannerViewModalImg"
+                src=""
+                class="img-fluid rounded shadow-lg"
+                style="object-fit: contain; border-radius: 10px;" />
+
+                <!-- Close Button -->
+                <button type="button"
+                class="btn position-absolute top-0 end-0 m-3"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+                style="background: rgba(0,0,0,0.6); border-radius: 50%; width: 45px; height: 45px;">
+                    <i class="fas fa-times text-white fs-4"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade fullmodal-right" id="saveBannerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content border-0 shadow rounded-4 overflow-hidden">
+
+            <div class="modal-header bg-white border-bottom px-4 py-3">
+                <div>
+                    <h5 id="modalBannerTitle" class="modal-title fw-bold mb-0">Create New Banner</h5>
+                    <small class="text-muted">Manage banner image and details</small>
+                </div>
+
+                <button type="button" class="btn-close border-0" data-bs-dismiss="modal"></button>
+            </div>
+
+            <form id="bannerForm" method="post" class="d-flex flex-column flex-grow-1">
+
+                <div class="modal-body bg-light px-4 py-4">
+
+                    <input id="BannerID" type="hidden" value="0" />
+                    <input id="BannerTypeID" type="hidden" value="" />
+
+                    <div class="row g-4">
+
+                        <!-- IMAGE CARD -->
+                        <div class="col-lg-5 col-12">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                                    <h6 class="mb-1 fw-bold">Banner Image</h6>
+                                    <small class="text-muted">Upload and preview banner image</small>
+                                </div>
+
+                                <div class="card-body d-flex align-items-center justify-content-center px-4 pb-4">
+
+                                    <div id="dBannerImage" class="text-center w-100">
+
+                                        <div class="image-box-wrapper mx-auto position-relative"
+                                        style="width:250px; height:250px;">
+
+                                            <!-- Main Box -->
+                                            <div class="image-box border rounded d-flex align-items-center justify-content-center bg-light position-relative"
+                                            style="width:100%; height:100%; cursor:pointer;">
+
+                                                <input type="file"
+                                                id="bannerImage"
+                                                name="bannerImage"
+                                                accept="image/*"
+                                                style="display:none;" />
+
+                                                <span class="text-muted placeholder-icon" style="font-size:50px;">
+                                                    <i class="fas fa-image"></i>
+                                                </span>
+
+                                                <img id="bannerImagePreview"
+                                                class="img-fluid rounded d-none"
+                                                style="width:100%; height:100%; object-fit:contain;" />
+                                            </div>
+
+                                            <!-- Overlay Buttons -->
+                                            <div class="image-overlay d-flex flex-column justify-content-center align-items-center">
+                                                <div class="d-flex gap-4">
+                                                    <button type="button" class="overlay-btn btn-clear" title="Clear">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+
+                                                    <button type="button" class="overlay-btn btn-view" title="View">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+
+                                                    <button type="button" class="overlay-btn btn-browse" title="Browse">
+                                                        <i class="fas fa-paperclip"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="mt-3 text-muted small">
+                                            Max image size: 100 KB
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- DETAILS CARD -->
+                        <div class="col-lg-7 col-12">
+                            <div class="card border-0 shadow-sm rounded-4 h-100">
+                                <div class="card-header bg-white border-0 pt-4 pb-2 px-4">
+                                    <h6 class="mb-1 fw-bold">Banner Details</h6>
+                                    <small class="text-muted">Enter banner information</small>
+                                </div>
+
+                                <div class="card-body px-4 pb-4">
+
+                                    <div class="mb-4">
+                                        <label for="BannerDescription" class="form-label fw-semibold">Description</label>
+                                        <input type="text"
+                                        class="form-control form-control-lg rounded-3"
+                                        id="BannerDescription"
+                                        name="BannerDescription"
+                                        placeholder="Fill Description" />
+                                        <div id="BannerDescriptionMessage" class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="BannerCategory" class="form-label fw-semibold">Category</label>
+                                        <select class="form-control form-control-lg selectpicker rounded-3"
+                                        id="BannerCategory"
+                                        name="BannerCategory">
+
+                                            <option value="0">Select a category</option>
+
+                                            @foreach(var obj in Model.categories)
+                                            {
+                                                <option value="@obj.ID">@obj.Description</option>
+                                            }
+
+                                        </select>
+                                        <div id="BannerCategoryMessage" class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="BannerSubCategory" class="form-label fw-semibold">Sub Category</label>
+                                        <select class="form-control form-control-lg selectpicker rounded-3"
+                                                id="BannerSubCategory"
+                                                name="BannerSubCategory"
+                                                data-live-search="true"></select>
+                                        <div id="BannerSubCategoryMessage" class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+                                        <label for="BannerProduct" class="form-label fw-semibold">Product</label>
+                                        <select class="form-control form-control-lg selectpicker rounded-3"
+                                                id="BannerProduct"
+                                                name="BannerProduct"
+                                                data-live-search="true"></select>
+                                        <div id="BannerProductMessage" class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="banner-status-box d-flex align-items-center justify-content-between rounded-3 px-3 py-3">
+                                        <div>
+                                            <div class="fw-semibold">Status</div>
+                                            <small class="text-muted">Enable or disable this banner</small>
+                                        </div>
+
+                                        <div class="custom-control custom-switch mb-0">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="BannerStatusToggle"
+                                                   name="BannerStatusToggle"
+                                                   checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerStatusToggle">
+                                                Active
+                                            </label>
+                                            <input type="hidden" id="BannerStatusID" name="BannerStatusID" value="A">
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="modal-footer bg-white border-top px-4 py-3">
+                    <button type="button" class="btn btn-light border rounded-3 px-4" data-bs-dismiss="modal">
+                        <i class="fas fa-ban me-1"></i> Cancel
+                    </button>
+
+                    <button id="btnSaveBanner" type="button" class="btn btn-primary rounded-3 px-4">
+                        <span id="btnSaveBannerSpinner"
+                              class="spinner-border spinner-border-sm d-none me-2"
+                              role="status"></span>
+                        <i class="fas fa-save me-1"></i> Save
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="ClearImage" value="false" />
+
+<script>
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // ========================
+        // 🔹 Status Toggle
+        // ========================
+        $("#BannerStatusToggle").on("change", function () {
+            if (this.checked) {
+                $("#BannerStatusID").val("A");
+                $(this).next("label").text("Active");
+            } else {
+                $("#BannerStatusID").val("I");
+                $(this).next("label").text("Inactive");
+            }
+        });
+
+          // ============================================
+    // 🔹 IMAGE UPLOAD / PREVIEW / CLEAR / VIEW
+    // ============================================
+const wrapper = document.querySelector(".image-box-wrapper");
+
+    if (wrapper) {
+
+        const input = wrapper.querySelector("#bannerImage");
+        const preview = wrapper.querySelector("#bannerImagePreview");
+        const placeholder = wrapper.querySelector(".placeholder-icon");
+        const clearBtn = wrapper.querySelector(".btn-clear");
+        const viewBtn = wrapper.querySelector(".btn-view");
+        const browseBtn = wrapper.querySelector(".btn-browse");
+
+        let isOpeningFileDialog = false;
+
+        clearBtn.style.display = "none";
+        viewBtn.style.display = "none";
+
+        // Browse Button
+        browseBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isOpeningFileDialog) return;
+
+            isOpeningFileDialog = true;
+            input.click();
+
+            setTimeout(function () {
+                isOpeningFileDialog = false;
+            }, 500);
+        });
+
+        // On File Select
+        input.addEventListener("change", function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            const maxSizeKB = 100;
+            const maxSizeBytes = maxSizeKB * 1024;
+
+            if (file.size > maxSizeBytes) {
+                toastr.error("Image size must not exceed 100 KB");
+
+                input.value = "";
+                preview.src = "";
+                preview.classList.add("d-none");
+                placeholder.classList.remove("d-none");
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display = "none";
+
+                $("#ClearImage").val("false");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.classList.remove("d-none");
+                placeholder.classList.add("d-none");
+
+                clearBtn.style.display = "inline-block";
+                viewBtn.style.display = "inline-block";
+
+                $("#ClearImage").val("false");
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        // Clear Image
+        clearBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            preview.src = "";
+            preview.classList.add("d-none");
+            placeholder.classList.remove("d-none");
+            input.value = "";
+
+            clearBtn.style.display = "none";
+            viewBtn.style.display = "none";
+
+            $("#ClearImage").val("true");
+        });
+
+        // View Image Modal
+        viewBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!preview.src) return;
+
+            $("#imageBannerViewModalImg").attr("src", preview.src);
+            new bootstrap.Modal(document.getElementById("imageBannerViewModal")).show();
+        });
+    } 
+</script>

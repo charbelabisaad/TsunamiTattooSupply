@@ -9,6 +9,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	{
 		public IActionResult Index()
 		{
+
+
+
 			return View("~/Views/BackEnd/BannersPages/Index.cshtml");
 		}
 	}

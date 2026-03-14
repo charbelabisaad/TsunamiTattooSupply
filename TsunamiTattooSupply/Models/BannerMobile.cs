@@ -20,6 +20,10 @@ namespace TsunamiTattooSupply.Models
 		public string Image { get; set; }
 
 		[Required]
+		[StringLength(50)]
+		public string Description { get; set; } = string.Empty;
+
+		[Required]
 		public int CategoryID { get; set; }
 
 		[Required]

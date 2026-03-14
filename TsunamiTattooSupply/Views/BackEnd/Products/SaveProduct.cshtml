@@ -1465,7 +1465,7 @@
 		$('#imageProductViewModal').modal('show');
 	});
 
-	$(document).on("click", "#btnSaveProductInitialInfo", function () {
+	$(document).on("click", "#btnSaveProductInitialInfo", async function () {
 
 		// ==================================================
 		// FORCE bootstrap-select → real <select> values
@@ -1492,9 +1492,9 @@
 		// ==================================================
 		// Elements
 		// ==================================================
-		let btn     = $(this);
+		let btn = $(this);
 		let spinner = $("#btnSaveProductInitialInfoSpinner");
-		let form    = $("#productForm");
+		let form = $("#productForm");
 
 		// ==================================================
 		// Reset validation
@@ -1502,6 +1502,8 @@
 		$("#ProductCodeMessage").text("");
 		$("#ProductNameMessage").text("");
 		$("#ProductSubCategoryMessage").text("");
+		$("#ProductSpecsMessage").text("");
+		$("#ProductColorsMessage").remove();
 
 		let hasError = false;
 
@@ -1520,8 +1522,7 @@
 
 		let subCategories = $("#ProductSubCategory").val();
 		if (!subCategories || subCategories.length === 0) {
-			$("#ProductSubCategoryMessage")
-				.text("Please select at least one sub category");
+			$("#ProductSubCategoryMessage").text("Please select at least one sub category");
 			hasError = true;
 		}
 
@@ -1533,136 +1534,190 @@
 
 		let colors = $("#ProductColors").val();
 		if (!colors || colors.length === 0) {
-
 			if (!$("#ProductColorsMessage").length) {
-				$("#ProductColors")
-					.closest(".col-12")
-					.append(`
-						<div id="ProductColorsMessage"
-							 class="text-danger fw-normal mt-1">
-							 Please select at least one color
-						</div>
-					`);
+				$("#ProductColors").closest(".col-12").append(`
+					<div id="ProductColorsMessage" class="text-danger fw-normal mt-1">
+						Please select at least one color
+					</div>
+				`);
 			}
-
 			toastr.error("Please select at least one color");
 			hasError = true;
 		}
 
-		if (hasError){
+		if (hasError) {
 			toastr.error("Please fill or select the required field!");
 			return;
 		}
 
 		// ==================================================
-		// Submit
+		// Submit start
 		// ==================================================
 		btn.prop("disabled", true);
 		spinner.removeClass("d-none");
 
-		// ==================================================
-		// FIX EMPTY NUMERIC VALUES (IMPORTANT)
-		// ==================================================
-		$('input[type="number"]').each(function () {
+		try {
 
-			let v = $(this).val();
+			// ==================================================
+			// FIX EMPTY NUMERIC VALUES
+			// ==================================================
+			$('input[type="number"]').each(function () {
+				let v = $(this).val();
+				if (v === '' || v === null || isNaN(v)) {
+					$(this).val(0);
+				}
+			});
 
-			if (v === '' || v === null || isNaN(v)) {
-				$(this).val(0);
+			// ==================================================
+			// MAIN FORM DATA WITHOUT IMAGE FILES
+			// ==================================================
+			let formData = new FormData(form[0]);
+
+			// do not append ProductColorImages here anymore
+			// images will be uploaded per color in separate AJAX calls
+
+			// ==================================================
+			// Append deleted images only if you still want global delete handling
+			// better move delete per color later
+			// ==================================================
+			deletedExistingImages
+				.filter(id => id !== null && id !== undefined && id !== '' && !isNaN(id))
+				.forEach(id => {
+					formData.append("DeletedImageIds[]", parseInt(id));
+				});
+
+			// ==================================================
+			// Ensure CoverColorID exists
+			// ==================================================
+			if (!$('input[name="CoverColorID"]:checked').length) {
+				formData.append("CoverColorID", 0);
 			}
 
-		});
-
-		let formData = new FormData(form[0]);
-
-		// ==================================================
-		// Append NEW color images
-		// ==================================================
-		Object.keys(colorImagesBuffer).forEach(colorId => {
-
-			let files = colorImagesBuffer[colorId] || [];
-			let removedSet = removedNewImages[colorId] || new Set();
-
-			files.forEach(file => {
-
-				if (!file) return;
-				if (removedSet.has(file.name)) return;
-
-				formData.append(`ProductColorImages[${colorId}][]`, file);
-
-			});
-		});
-
-		// ==================================================
-		// Append deleted images (SAFE)
-		// ==================================================
-		deletedExistingImages
-			.filter(id => id !== null && id !== undefined && id !== '' && !isNaN(id))
-			.forEach(id => {
-				formData.append("DeletedImageIds[]", parseInt(id));
+			// ==================================================
+			// SAVE PRODUCT FIRST
+			// ==================================================
+			let res = await $.ajax({
+				url: '@Url.Action("SaveProduct", "Products")',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false
 			});
 
-		// ==================================================
-		// Ensure CoverColorID exists
-		// ==================================================
-		if (!$('input[name="CoverColorID"]:checked').length) {
-			formData.append("CoverColorID", 0);
+			if (!res || !res.success) {
+				toastr.error((res && res.message) || "Failed to save product");
+				return;
+			}
+
+			let productId = res.productID || res.ProductID;
+			$('#ProductID').val(productId);
+
+			// ==================================================
+			// UPLOAD COLOR IMAGES ONE BY ONE
+			// ==================================================
+			let colorIds = $("#ProductColors").val() || [];
+
+			for (let i = 0; i < colorIds.length; i++) {
+				let colorId = colorIds[i];
+
+				let uploadRes = await uploadSingleColorImages(productId, colorId);
+
+				if (!uploadRes.success) {
+					toastr.error(uploadRes.message || ("Failed to save images for color " + colorId));
+					return;
+				}
+			}
+
+			// ==================================================
+			// RESET IMAGE BUFFERS
+			// ==================================================
+			colorImagesBuffer = {};
+			removedNewImages = {};
+			deletedExistingImages = [];
+
+			toastr.success("Product saved successfully");
+
+			$("#productDetails").removeClass("d-none");
+
+			listProductPrice(productId);
+			listProductStock(productId);
 		}
-
-		// ==================================================
-		// AJAX SAVE
-		// ==================================================
-		$.ajax({
-			url: '@Url.Action("SaveProduct", "Products")',
-			type: 'POST',
-			data: formData,
-			processData: false,
-			contentType: false,
-
-			success: function (res) {
-
-				if (res && res.success) {
-
-					// ==========================================
-					// RESET IMAGE BUFFERS
-					// ==========================================
-					colorImagesBuffer = {};
-					removedNewImages = {};
-					deletedExistingImages = [];
-
-					$('#ProductID').val(res.productID);
-
-					toastr.success("Product saved successfully");
-
-					$("#productDetails").removeClass("d-none");
-
-					listProductPrice(res.productID);
-					listProductStock(res.productID);
-
-				}
-				else {
-
-					toastr.error(res.message || "Failed to save product");
-
-				}
-
-			},
-
-			error: function () {
-
-				toastr.error("Unexpected server error");
-
-			},
-
-			complete: function () {
-
-				btn.prop("disabled", false);
-				spinner.addClass("d-none");
-
-			}
-		});
+		catch (ex) {
+			console.error(ex);
+			toastr.error("Unexpected server error");
+		}
+		finally {
+			btn.prop("disabled", false);
+			spinner.addClass("d-none");
+		}
 	});
 
+	async function uploadSingleColorImages(productId, colorId) {
+
+		let fd = new FormData();
+
+		fd.append("__RequestVerificationToken", $('input[name="__RequestVerificationToken"]').val());
+		fd.append("ProductID", productId);
+		fd.append("ColorID", colorId);
+
+		// ==========================================
+		// Append files of this color only
+		// ==========================================
+		let files = colorImagesBuffer[colorId] || [];
+		let removedSet = removedNewImages[colorId] || new Set();
+
+		files.forEach(file => {
+			if (!file) return;
+			if (removedSet.has(file.name)) return;
+
+			fd.append("Files", file);
+		});
+
+		// ==========================================
+		// Append deleted existing images for this color only
+		// You should mark each deleted image with colorId
+		// ==========================================
+		let deletedForColor = [];
+
+		$(`.existing-color-image-item[data-color-id="${colorId}"].deleted`).each(function () {
+			let imageId = $(this).data("image-id");
+			if (imageId) {
+				deletedForColor.push(imageId);
+			}
+		});
+
+		deletedForColor.forEach(id => {
+			fd.append("DeletedImageIds[]", id);
+		});
+
+		// ==========================================
+		// Selected initial image for this color
+		// radio value should be like: existing_12
+		// ==========================================
+		let selectedInitial = $(`input[name="ColorImageInitial[${colorId}]"]:checked`).val();
+		if (selectedInitial) {
+			fd.append("SelectedInitial", selectedInitial);
+		}
+
+		try {
+			let res = await $.ajax({
+				url: '@Url.Action("SaveProductColorImages", "Products")',
+				type: 'POST',
+				data: fd,
+				processData: false,
+				contentType: false
+			});
+
+			return res;
+		}
+		catch (ex) {
+			console.error("Upload color images failed:", colorId, ex);
+			return {
+				success: false,
+				message: "Unexpected error while uploading color images"
+			};
+		}
+	}
 
 
 		function listProductPrice(ProductID){
