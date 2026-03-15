@@ -5,8 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 	[Table("BannersPages")]
-	//[Index(nameof(Code), IsUnique = true)]
-	//[Index(nameof(Name), IsUnique = true)]
+	[Index(nameof(PageLocationID))]
 	[Index(nameof(StatusID))]
 	public class BannerPage
 	{
@@ -21,7 +20,13 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(50)]
 		public string Name { get; set; }
+		 
+		[StringLength(3)]
+		public string AppType { get; set; }
 
+		[Required]
+		public int PageLocationID { get; set; }
+		 
 		[Required]
 		[Column(TypeName = "text")]
 		public string  Image { get; set; }
@@ -29,6 +34,20 @@ namespace TsunamiTattooSupply.Models
 		[Column (TypeName = "text")]
 		public string Link { get; set; }
 
+		public int? CategoryID { get; set; } 
+
+		public int? SubCategoryID { get; set; }
+
+		public int? ProductID { get; set; }
+
+		[Required]
+		public bool HasPeriod { get; set; } = false;
+
+		public DateTime? StartDate { get; set; } 
+		public DateTime? EndDate { get; set; }
+
+		public bool Present { get; set; } = false;
+		 
 		[Required]
 		public string StatusID { get; set; }
 
@@ -45,6 +64,9 @@ namespace TsunamiTattooSupply.Models
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
+
+		[ForeignKey("PageLocationID")]
+		public virtual PageLocation PageLocation { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

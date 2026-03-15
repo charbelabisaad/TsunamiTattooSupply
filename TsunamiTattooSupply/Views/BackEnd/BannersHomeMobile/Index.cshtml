@@ -107,7 +107,7 @@
                         <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Banners List</h3></div>
                         <div class="col-6 d-flex align-groups-center justify-content-end">
                             <button id="btnNewBanner" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Banner</button>
-                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3 d-none"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -145,6 +145,109 @@
     <script>
 
         $(document).ready(function () {
+
+           const wrapper = document.querySelector(".image-box-wrapper");
+
+        if (wrapper) {
+            const input = wrapper.querySelector("#bannerImage");
+            const preview = wrapper.querySelector("#bannerImagePreview");
+            const placeholder = wrapper.querySelector(".placeholder-icon");
+            const clearBtn = wrapper.querySelector(".btn-clear");
+            const viewBtn = wrapper.querySelector(".btn-view");
+            const browseBtn = wrapper.querySelector(".btn-browse");
+
+            clearBtn.style.display = "none";
+            viewBtn.style.display = "none";
+
+            function resetBannerImage(clearImageValue = "false") {
+                input.value = "";
+                preview.src = "";
+                preview.classList.add("d-none");
+                placeholder.classList.remove("d-none");
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display = "none";
+
+                $("#ClearImage").val(clearImageValue);
+            }
+
+            // remove old handlers first
+            $(browseBtn).off("click");
+            $(input).off("change");
+            $(clearBtn).off("click");
+            $(viewBtn).off("click");
+
+            $(browseBtn).on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                input.click();
+            });
+
+            $(input).on("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const maxSizeKB = 100;
+                const maxSizeBytes = maxSizeKB * 1024;
+
+                if (file.size > maxSizeBytes) {
+                    toastr.error("Image size must not exceed 100 KB");
+                    resetBannerImage("false");
+                    return;
+                }
+
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const img = new Image();
+
+                    img.onload = function () {
+                        const requiredWidth = 361;
+                        const requiredHeight = 190;
+
+                        if (img.width !== requiredWidth || img.height !== requiredHeight) {
+                            toastr.error("Image dimensions must be exactly 361 x 190 pixels");
+                            resetBannerImage("false");
+                            return;
+                        }
+
+                        preview.src = e.target.result;
+                        preview.classList.remove("d-none");
+                        placeholder.classList.add("d-none");
+
+                        clearBtn.style.display = "inline-block";
+                        viewBtn.style.display = "inline-block";
+
+                        $("#ClearImage").val("false");
+                    };
+
+                    img.src = e.target.result;
+                };
+
+                reader.readAsDataURL(file);
+            });
+
+            $(clearBtn).on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                resetBannerImage("true");
+            });
+
+            $(viewBtn).on("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                if (!preview.src) return;
+
+                $("#imageBannerViewModalImg").attr("src", preview.src);
+                new bootstrap.Modal(document.getElementById("imageBannerViewModal")).show();
+            });
+        }
 
             var table = $('#tableBanners').DataTable({
                 processing: true,
@@ -602,79 +705,25 @@
         });
 
 
-        // ============================================
-        // 🔹 IMAGE UPLOAD / PREVIEW / CLEAR / VIEW
-        // ============================================
-        const wrapper = document.querySelector(".image-box-wrapper");
 
-        if (wrapper) {
-            const input = wrapper.querySelector("#bannerImage");
-            const preview = wrapper.querySelector("#bannerImagePreview");
-            const placeholder = wrapper.querySelector(".placeholder-icon");
-            const clearBtn = wrapper.querySelector(".btn-clear");
-            const viewBtn = wrapper.querySelector(".btn-view");
-            const browseBtn = wrapper.querySelector(".btn-browse");
-
-            clearBtn.style.display = "none";
-            viewBtn.style.display = "none";
-
-            browseBtn.addEventListener("click", () => input.click());
-
-            input.addEventListener("change", function () {
-                const file = this.files[0];
-                if (!file) return;
-
-                const maxSizeKB = 100;
-                const maxSizeBytes = maxSizeKB * 1024;
-
-                if (file.size > maxSizeBytes) {
-                    toastr.error("Image size must not exceed 100 KB");
-
-                    input.value = "";
-                    preview.src = "";
-                    preview.classList.add("d-none");
-                    placeholder.classList.remove("d-none");
-
-                    clearBtn.style.display = "none";
-                    viewBtn.style.display = "none";
-
-                    $("#ClearImage").val("false");
-                    return;
+            // ========================
+            // Status Toggle
+            // ========================
+            $("#BannerStatusToggle").on("change", function () {
+                if (this.checked) {
+                    $("#BannerStatusID").val("A");
+                    $(this).next("label").text("Active");
+                } else {
+                    $("#BannerStatusID").val("I");
+                    $(this).next("label").text("Inactive");
                 }
-
-                const reader = new FileReader();
-                reader.onload = e => {
-                    preview.src = e.target.result;
-                    preview.classList.remove("d-none");
-                    placeholder.classList.add("d-none");
-
-                    clearBtn.style.display = "inline-block";
-                    viewBtn.style.display = "inline-block";
-
-                    $("#ClearImage").val("false");
-                };
-
-                reader.readAsDataURL(file);
             });
 
-            clearBtn.addEventListener("click", () => {
-                preview.src = "";
-                preview.classList.add("d-none");
-                placeholder.classList.remove("d-none");
-                input.value = "";
+            // ============================================
+            // IMAGE UPLOAD / PREVIEW / CLEAR / VIEW
+            // ============================================
 
-                clearBtn.style.display = "none";
-                viewBtn.style.display = "none";
-
-                $("#ClearImage").val("true");
-            });
-
-            viewBtn.addEventListener("click", () => {
-                if (!preview.src) return;
-                $("#imageBannerViewModalImg").attr("src", preview.src);
-                new bootstrap.Modal(document.getElementById("imageBannerViewModal")).show();
-            });
-        }
+      
 
         // ================================
         // 🔹 OPEN DELETE MODAL

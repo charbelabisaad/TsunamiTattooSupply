@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315153915_AddNewPageLocationToBannerPages")]
+    partial class AddNewPageLocationToBannerPages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1344,13 +1347,7 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("StatusID")
-                        .IsRequired()
-                        .HasColumnType("character varying(1)");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("StatusID");
 
                     b.ToTable("PageLocations");
                 });
@@ -3357,17 +3354,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Size");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.PageLocation", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Price", b =>

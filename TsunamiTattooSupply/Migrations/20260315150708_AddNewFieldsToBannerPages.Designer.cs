@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260315150708_AddNewFieldsToBannerPages")]
+    partial class AddNewFieldsToBannerPages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -155,11 +158,6 @@ namespace TsunamiTattooSupply.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
-                    b.Property<string>("AppType")
-                        .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("character varying(3)");
-
                     b.Property<int?>("CategoryID")
                         .HasColumnType("integer");
 
@@ -205,9 +203,6 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("PageLocationID")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("Present")
                         .HasColumnType("boolean");
 
@@ -224,6 +219,11 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<int?>("SubCategoryID")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)");
+
                     b.HasKey("ID");
 
                     b.HasIndex("CreatedUserID");
@@ -231,8 +231,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("DeletedUserID");
 
                     b.HasIndex("EditUserID");
-
-                    b.HasIndex("PageLocationID");
 
                     b.HasIndex("StatusID");
 
@@ -1325,34 +1323,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("POSStocks");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.PageLocation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("StatusID")
-                        .IsRequired()
-                        .HasColumnType("character varying(1)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("StatusID");
-
-                    b.ToTable("PageLocations");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Permission", b =>
@@ -2871,12 +2841,6 @@ namespace TsunamiTattooSupply.Migrations
                         .WithMany()
                         .HasForeignKey("EditUserID");
 
-                    b.HasOne("TsunamiTattooSupply.Models.PageLocation", "PageLocation")
-                        .WithMany()
-                        .HasForeignKey("PageLocationID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusID")
@@ -2888,8 +2852,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("DeletedUser");
 
                     b.Navigation("EditUser");
-
-                    b.Navigation("PageLocation");
 
                     b.Navigation("Status");
                 });
@@ -3357,17 +3319,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Size");
-                });
-
-            modelBuilder.Entity("TsunamiTattooSupply.Models.PageLocation", b =>
-                {
-                    b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Price", b =>
