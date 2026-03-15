@@ -37,7 +37,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			var vm = new PageViewModel
 			{
-				categories = GetGategories()
+				categories = GetCategories()
 			};
 
 			return View("~/Views/BackEnd/BannersHomeMobile/Index.cshtml", vm);
@@ -106,7 +106,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
-		public List<CategoryDto> GetGategories()
+		public List<CategoryDto> GetCategories()
 		{
 			return _dbContext.Categories
 				.Where(c => c.DeletedDate == null)

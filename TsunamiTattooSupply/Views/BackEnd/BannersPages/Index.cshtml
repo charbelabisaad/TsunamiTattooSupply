@@ -1,4 +1,6 @@
-﻿@*
+﻿@model TsunamiTattooSupply.ViewModels.PageViewModel
+
+@*
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
@@ -6,22 +8,226 @@
     ViewData["Title"] = "Banners Pages";
 }
 
+<style>
+
+    .custom-tabs {
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+
+    .custom-tabs .nav-link {
+        border: none !important;
+        border-radius: 0;
+        color: #6c757d;
+        font-weight: 600;
+        background-color: transparent !important;
+        padding: 12px 20px;
+        position: relative;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .custom-tabs .nav-link:hover,
+    .custom-tabs .nav-link:focus,
+    .custom-tabs .nav-link:active {
+        color: #0d6efd;
+        outline: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .custom-tabs .nav-link.active {
+        color: #0d6efd !important;
+        background-color: transparent !important;
+        outline: none !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .custom-tabs .nav-link.active::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        bottom: -1px;
+        width: 100%;
+        height: 3px;
+        background-color: #0d6efd;
+        border-radius: 2px 2px 0 0;
+    }
+
+    .page-location-wrapper {
+        margin-bottom: 20px;
+    }
+
+    .page-location-button {
+        min-width: 140px;
+        margin-right: 8px;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .page-location-button:focus,
+    .page-location-button:active {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+        .page-location-button.btn-outline-dark:hover {
+            background-color: whitesmoke;
+            color: #000000;
+        }
+
+        .page-location-button.btn-dark:hover {
+            background-color: #343a40;
+            color: #ffffff;
+            border-color: #343a40;
+            cursor:default;
+        }
+
+    a:focus,
+    button:focus {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+</style>
+
+<partial name="DeleteBannerWeb" />
+<partial name="SaveBannerWeb" />
+
+<partial name="DeleteBannerMobile" />
+<partial name="SaveBannerMobile" />
+
 <div class="content-wrapper">
-    <!-- Content Header (Page header) -->
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
                     <h1 class="m-0">@ViewData["Title"]</h1>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- /.content-header -->
-    <!-- Main content -->
+
     <section class="content">
         <div class="container-fluid">
-        </div> 
-    </section>
+            <div class="card">
+                <div class="card-header">
 
+                    <div class="row">
+                        <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Banners Pages List</h3></div>
+                        <div class="col-6 d-flex align-groups-center justify-content-end">
+                            <button id="btnNewBanner" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Banner</button>
+                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3 d-none"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                        </div>
+                    </div>
+                     
+                </div>
+
+                <div class="card-body">
+
+                    <ul class="nav nav-tabs custom-tabs" id="bannersTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active"
+                               id="web-tab"
+                               data-toggle="tab"
+                               href="#web-pane"
+                               role="tab"
+                               aria-controls="web-pane"
+                               aria-selected="true">
+                                Web
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link"
+                               id="mobile-tab"
+                               data-toggle="tab"
+                               href="#mobile-pane"
+                               role="tab"
+                               aria-controls="mobile-pane"
+                               aria-selected="false">
+                                Mobile
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="page-location-wrapper">
+                        @{
+                            int count = 0;
+                            string selected = "";
+                        }
+
+                        @foreach (var obj in Model.locations)
+                        {
+                            selected = count == 0 ? "btn-dark" : "btn-outline-dark";
+
+                            <button id="PageLocation-@obj.ID"
+                                    type="button"
+                                    name="PageLocation"
+                                    class="btn @selected page-location-button">
+                                @obj.Description
+                            </button>
+
+                            count++;
+                        }
+                    </div>
+
+                    <input id="BannerAppType" type="hidden" name="BannerAppType" value="WEB" />
+
+                    <input id="BannerLocationPage" type="hidden" name="BannerLocationPage" />
+
+                    <div class="tab-content pt-2" id="bannersTabsContent">
+
+                        <div class="tab-pane fade show active" id="web-pane" role="tabpanel" aria-labelledby="web-tab">
+                            <table id="tableBannersAdWeb" class="table table-striped w-100">
+                                <thead>
+                                    <tr style="vertical-align:middle">
+                                        <th style="width:100px">Image</th>
+                                        <th style="width:200px">Name</th>
+                                        <th>Link</th>
+                                        <th style="width:50px">Status</th>
+                                        <th style="width:50px" class="no-export">Actions</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                        <div class="tab-pane fade" id="mobile-pane" role="tabpanel" aria-labelledby="mobile-tab">
+                            <table id="tableBannersMobile" class="table table-striped w-100">
+                                <thead>
+                                    <tr style="vertical-align:middle">
+                                        <th style="width:100px">Image</th>
+                                        <th style="width:20%">Name</th>
+                                        <th style="width:20%">Category</th>
+                                        <th style="width:20%">SubCategory</th>
+                                        <th style="width:20%">Product</th>
+                                        <th style="width:50px">Status</th>
+                                        <th style="width:50px" class="no-export">Actions</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).on('click', '.page-location-button', function () {
+            $('.page-location-button')
+                .removeClass('btn-dark')
+                .addClass('btn-outline-dark');
+
+            $(this)
+                .removeClass('btn-outline-dark')
+                .addClass('btn-dark');
+        });
+    </script>
+}

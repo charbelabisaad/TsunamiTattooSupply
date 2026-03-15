@@ -8,13 +8,16 @@ namespace TsunamiTattooSupply.Models
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-		public int Id { get; set; }
+		public int ID { get; set; }
 
 		[StringLength (50)]	
 		public string Code { get; set; }
 
 		[Required]
 		public string Description { get; set; }
+
+		[Required]
+		public int Rank { get; set; }
 
 		[Required]
 		public string StatusID { get; set; }
