@@ -1130,12 +1130,10 @@
                 .find('.filter-option-inner-inner')
                 .text(displayText);
         }
-
-        function renderEditImages(images) {
+                function renderEditImages(images) {
 
             if (!images || !images.length) return;
 
-            // 🔹 Group images by color first (safer)
             const imagesByColor = {};
 
             images.forEach(img => {
@@ -1145,55 +1143,49 @@
                 imagesByColor[img.colorId].push(img);
             });
 
-            // 🔹 Render per color
             Object.keys(imagesByColor).forEach(colorId => {
 
                 let $list = $('#dProductColorImagesList' + colorId);
 
                 if (!$list.length) return;
 
-                // 🔥 Clear ONLY this color list
                 $list.empty();
 
                 imagesByColor[colorId].forEach(img => {
 
                     let html = `
-                    <div class="inline-block">
+                        <div class="inline-block">
 
-                        <div class="color-image-item position-relative"
-                             data-image-id="${img.id}">
+                            <div class="color-image-item position-relative"
+                                 data-image-id="${img.id}"
+                                 data-color-id="${colorId}">
 
-                            <img src="${img.smallImage}"
-                                 class="img-fluid rounded"
-                                 style="width:200px;height:200px;object-fit:contain;background:#fff;border:1px solid #ccc;">
+                                <img src="${img.smallImage}"
+                                     class="img-fluid rounded"
+                                     style="width:200px;height:200px;object-fit:contain;background:#fff;border:1px solid #ccc;">
 
-                            <div class="image-overlay d-flex justify-content-center align-items-center">
-                                <button type="button" class="overlay-btn btn-view-image">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button type="button" class="overlay-btn btn-clear-image btn-remove-existing">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                                <div class="image-overlay d-flex justify-content-center align-items-center">
+                                    <button type="button" class="overlay-btn btn-view-image">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" class="overlay-btn btn-clear-image btn-remove-existing">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
                             </div>
+
+                            <div class="mt-1 text-center">
+                                <label class="mb-0">
+                                    <input type="radio"
+                                           class="radio-initial"
+                                           name="ColorInitial_${colorId}"
+                                           value="existing_${img.id}"
+                                           ${img.isInitial == 1 ? "checked" : ""}>
+                                    Is Initial
+                                </label>
+                            </div>
+
                         </div>
-
-                        <div class="mt-1 text-center">
-                            <label class="mb-0">
-                                <input type="radio"
-                                       class="radio-initial"
-                                       name="ColorInitial_${colorId}"
-                                       ${img.isInitial == 1 ? "checked" : ""}
-                                       value="1">
-                                Is Initial
-                            </label>
-
-                            <input type="hidden"
-                                   name="ColorImageInitial[${colorId}][${img.id}]"
-                                   value="${img.isInitial == 1 ? 'true' : 'false'}"
-                                   class="initial-hidden">
-                        </div>
-
-                    </div>
                     `;
 
                     $list.append(html);
@@ -1201,7 +1193,6 @@
 
             });
         }
-         
         $(document).on("change", ".radio-initial", function () {
              
             let wrapper = $(this).closest('.inline-block');

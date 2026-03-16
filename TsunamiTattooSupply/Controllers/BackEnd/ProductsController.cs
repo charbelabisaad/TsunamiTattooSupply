@@ -1226,53 +1226,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				.Distinct()
 				.ToList();
 		}
-
 		private async Task SaveColors(int productId, List<int> colorIds, IFormCollection form, int userId, DateTime now)
 		{
-			var existing = await _dbContext.ProductsColors
-				.Where(x => x.ProductID == productId && x.DeletedDate == null)
-				.ToListAsync();
+			colorIds ??= new List<int>();
 
-			var map = existing.ToDictionary(x => x.ColorID);
+			var existing = await _dbContext.ProductsColors
+				.Where(x => x.ProductID == productId)
+				.ToListAsync();
 
 			int.TryParse(form["CoverColorID"], out int coverColorId);
 
-			foreach (var pc in existing)
+			foreach (var item in existing.Where(x => !colorIds.Contains(x.ColorID) && x.DeletedDate == null))
 			{
-				if (!colorIds.Contains(pc.ColorID))
-				{
-					pc.DeletedDate = now;
-					pc.DeletedUserID = userId;
-				}
+				item.DeletedDate = now;
+				item.DeletedUserID = userId;
+				item.EditDate = now;
+				item.EditUserID = userId;
+				item.IsCover = false;
+				item.ShowFront = false;
+				item.StatusID = "I";
 			}
 
 			foreach (var colorId in colorIds)
 			{
 				bool isCover = colorId == coverColorId;
 
-				map.TryGetValue(colorId, out var pc);
+				string showFrontKey = $"ProductColorsMeta[{colorId}].ShowFront";
+				string isActiveKey = $"ProductColorsMeta[{colorId}].IsActive";
 
-				if (pc == null)
+				bool showFront = form.ContainsKey(showFrontKey);
+				bool isActive = form.ContainsKey(isActiveKey);
+
+				string statusId = isActive ? "A" : "I";
+
+				var existingColor = existing.FirstOrDefault(x => x.ColorID == colorId);
+
+				if (existingColor == null)
 				{
 					_dbContext.ProductsColors.Add(new ProductColor
 					{
 						ProductID = productId,
 						ColorID = colorId,
 						IsCover = isCover,
-						StatusID = "A",
+						ShowFront = showFront,
+						StatusID = statusId,
 						CreatedUserID = userId,
 						CreationDate = now
 					});
 				}
 				else
 				{
-					pc.IsCover = isCover;
-					pc.EditUserID = userId;
-					pc.EditDate = now;
+					existingColor.DeletedDate = null;
+					existingColor.DeletedUserID = null;
+					existingColor.IsCover = isCover;
+					existingColor.ShowFront = showFront;
+					existingColor.StatusID = statusId;
+					existingColor.EditUserID = userId;
+					existingColor.EditDate = now;
 				}
 			}
 		}
-
 		private async Task SaveProductSizes(int productId, IFormCollection form, int userId, DateTime now)
 		{
 			var existingSizes = _dbContext.ProductsSizes
@@ -1620,6 +1633,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Where(f => f.Name == "Files")
 					.ToList();
 
+				var fileKeys = Request.Form["FileKeys"].ToList();
+
+				var newImagesMap = new Dictionary<string, ProductImage>();
+
 				if (uploadedFiles.Any())
 				{
 					string originalDir = Path.Combine(_imagesRoot, Global.ProductOriginalImagePath.TrimStart('/'));
@@ -1628,8 +1645,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Directory.CreateDirectory(originalDir);
 					Directory.CreateDirectory(smallDir);
 
-					foreach (var file in uploadedFiles)
+					for (int i = 0; i < uploadedFiles.Count; i++)
 					{
+						var file = uploadedFiles[i];
 						if (file.Length == 0) continue;
 
 						string ext = Path.GetExtension(file.FileName);
@@ -1681,6 +1699,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 						_dbContext.ProductsImages.Add(newImg);
 						allImages.Add(newImg);
+
+						if (i < fileKeys.Count && !string.IsNullOrWhiteSpace(fileKeys[i]))
+						{
+							newImagesMap[fileKeys[i]] = newImg;
+						}
 					}
 				}
 
@@ -1693,22 +1716,34 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				if (activeImages.Any())
 				{
 					foreach (var img in activeImages)
+					{
 						img.IsInitial = false;
+					}
 
 					bool userSelected = false;
 
-					if (!string.IsNullOrWhiteSpace(selectedInitial) && selectedInitial.StartsWith("existing_"))
+					if (!string.IsNullOrWhiteSpace(selectedInitial))
 					{
-						string idPart = selectedInitial.Replace("existing_", "");
-
-						if (int.TryParse(idPart, out int existingId))
+						// existing image
+						if (selectedInitial.StartsWith("existing_"))
 						{
-							var selected = activeImages.FirstOrDefault(x => x.ID == existingId);
-							if (selected != null)
+							string idPart = selectedInitial.Replace("existing_", "");
+
+							if (int.TryParse(idPart, out int existingId))
 							{
-								selected.IsInitial = true;
-								userSelected = true;
+								var selected = activeImages.FirstOrDefault(x => x.ID == existingId);
+								if (selected != null)
+								{
+									selected.IsInitial = true;
+									userSelected = true;
+								}
 							}
+						}
+						// new uploaded image
+						else if (newImagesMap.ContainsKey(selectedInitial))
+						{
+							newImagesMap[selectedInitial].IsInitial = true;
+							userSelected = true;
 						}
 					}
 
@@ -1737,7 +1772,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-
 
 
 		[HttpGet]
