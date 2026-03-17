@@ -95,8 +95,7 @@
 </style>
 
 <partial name="DeleteBannerWeb" />
-<partial name="SaveBannerWeb" />
-
+<partial name="SaveBannerWeb" /> 
 <partial name="DeleteBannerMobile" />
 <partial name="SaveBannerMobile" />
 
@@ -220,14 +219,540 @@
 
 @section Scripts {
     <script>
-        $(document).on('click', '.page-location-button', function () {
-            $('.page-location-button')
-                .removeClass('btn-dark')
-                .addClass('btn-outline-dark');
 
-            $(this)
-                .removeClass('btn-outline-dark')
-                .addClass('btn-dark');
+        $(document).ready(function(){
+
+            $('#web-tab').on('click', function () {
+                $('#BannerAppType').val('WEB');
+            });
+
+            $('#mobile-tab').on('click', function () {
+                $('#BannerAppType').val('MOBILE');
+            });
+
+            $(document).on('click','#btnNewBanner ', function(){
+                   
+                if ($('#BannerAppType').val() === 'WEB') {
+                         
+                    ShowBannerWebModal();
+
+                } else if ($('#BannerAppType').val() === 'MOBILE') {
+                         
+                    ShowBannerMobileModal();
+
+                }
+                     
+            });
+
+            function ShowBannerWebModal(){
+
+                resetBannerWebForm();
+                $("#saveBannerWebModal").modal("show");
+
+            }
+
+            function ShowBannerMobileModal(){
+
+                resetBannerMobileForm();
+                $("#saveBannerMobileModal").modal("show");
+
+            }
+     
+            $(document).on('click', '.page-location-button', function () {
+                $('.page-location-button')
+                    .removeClass('btn-dark')
+                    .addClass('btn-outline-dark');
+
+                $(this)
+                    .removeClass('btn-outline-dark')
+                    .addClass('btn-dark');
+            });
+
+            ///////////////////////////////////////////////////// BANNER WEB /////////////////////////////////////////////////////
+
+            const wrapperWeb = document.querySelector("#saveBannerWebModal .image-box-wrapper");
+
+            if (wrapperWeb) {
+
+                const input       = wrapperWeb.querySelector("#bannerWebImage");
+                const preview     = wrapperWeb.querySelector("#bannerWebImagePreview");
+                const placeholder = wrapperWeb.querySelector(".placeholder-icon");
+                const clearBtn    = wrapperWeb.querySelector(".btn-clear-Web");
+                const viewBtn     = wrapperWeb.querySelector(".btn-view-Web");
+                const browseBtn   = wrapperWeb.querySelector(".btn-browse-web");
+
+                let dialogOpen = false;
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display  = "none";
+
+                function resetBannerWebImage(clearImageValue = "false") {
+                    input.value = "";
+                    preview.src = "";
+                    preview.classList.add("d-none");
+                    placeholder.classList.remove("d-none");
+
+                    clearBtn.style.display = "none";
+                    viewBtn.style.display  = "none";
+
+                    $("#ClearWebImage").val(clearImageValue);
+                }
+
+                // =========================
+                // Browse Button
+                // =========================
+                browseBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (dialogOpen) return;
+
+                    dialogOpen = true;
+
+                    setTimeout(() => input.click(), 0);
+                });
+
+                // =========================
+                // On File Select
+                // =========================
+                input.addEventListener("change", function () {
+                    dialogOpen = false;
+
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const maxSizeKB = 150;
+                    const maxSizeBytes = maxSizeKB * 1024;
+
+                    if (file.size > maxSizeBytes) {
+                        toastr.error("Image size must not exceed 150 KB");
+                        resetBannerWebImage("false");
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+
+                        img.onload = function () {
+
+                            const requiredWidth  = 1920;
+                            const requiredHeight = 1000;
+
+                            if (img.width !== requiredWidth || img.height !== requiredHeight) {
+                                toastr.error("Image dimensions must be exactly 1920 x 1000 pixels");
+                                resetBannerWebImage("false");
+                                return;
+                            }
+
+                            preview.src = e.target.result;
+                            preview.classList.remove("d-none");
+                            placeholder.classList.add("d-none");
+
+                            clearBtn.style.display = "inline-block";
+                            viewBtn.style.display  = "inline-block";
+
+                            $("#ClearWebImage").val("false");
+                        };
+
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
+                // =========================
+                // Dialog safety
+                // =========================
+                input.addEventListener("click", function () {
+                    setTimeout(() => dialogOpen = false, 1000);
+                });
+
+                // =========================
+                // Clear Image
+                // =========================
+                clearBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    resetBannerWebImage("true");
+                });
+
+                // =========================
+                // View Image Modal
+                // =========================
+                viewBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (!preview.src) return;
+
+                    $("#imageBannerWebViewModalImg").attr("src", preview.src);
+                    new bootstrap.Modal(document.getElementById("imageBannerWebViewModal")).show();
+                });
+            }
+
+            function resetBannerWebForm() {
+
+                // =========================
+                // IDs
+                // =========================
+                $('#BannerWebID').val(0);
+                $('#BannerWebTypeID').val('');
+
+                // =========================
+                // Inputs
+                // =========================
+                $('#BannerWebDescription').val('');
+                $('#BannerWebSentence').val('');
+                $('#BannerWebLink').val('');
+
+                // =========================
+                // Status
+                // =========================
+                $('#BannerWebStatusToggle').prop('checked', true);
+                $('#BannerWebStatusID').val('A');
+
+                // =========================
+                // Image Reset
+                // =========================
+                $('#bannerWebImage').val('');
+
+                $('#bannerWebImagePreview')
+                    .attr('src', '')
+                    .addClass('d-none');
+
+                // show placeholder again
+                $('#saveBannerWebModal .placeholder-icon').removeClass('d-none');
+
+                // reset clear flag
+                $('#ClearWebImage').val('false');
+
+                // =========================
+                // Validation Messages
+                // =========================
+                $('#BannerWebDescriptionMessage').html('');
+                $('#BannerWebSentenceMessage').html('');
+                $('#BannerWebLinkMessage').html('');
+
+                // =========================
+                // Modal Title
+                // =========================
+                $('#modalBannerWebTitle').text('Create New BannerWeb');
+
+            }
+
+            ///////////////////////////////////////////////////// BANNER MOBILE /////////////////////////////////////////////////////
+
+            const wrapperMobile = document.querySelector("#saveBannerMobileModal .image-box-wrapper");
+
+            if (wrapperMobile) {
+
+                const input       = wrapperMobile.querySelector("#bannerMobileImage");
+                const preview     = wrapperMobile.querySelector("#bannerMobileImagePreview");
+                const placeholder = wrapperMobile.querySelector(".placeholder-icon");
+                const clearBtn    = wrapperMobile.querySelector(".btn-clear-mobile");
+                const viewBtn     = wrapperMobile.querySelector(".btn-view-mobile");
+                const browseBtn   = wrapperMobile.querySelector(".btn-browse-mobile");
+
+                let dialogOpen = false;
+
+                clearBtn.style.display = "none";
+                viewBtn.style.display  = "none";
+
+                function resetBannerMobileImage(clearImageValue = "false") {
+                    input.value = "";
+                    preview.src = "";
+                    preview.classList.add("d-none");
+                    placeholder.classList.remove("d-none");
+
+                    clearBtn.style.display = "none";
+                    viewBtn.style.display  = "none";
+
+                    $("#ClearImageMobile").val(clearImageValue);
+                }
+
+                // =========================
+                // Browse Button
+                // =========================
+                browseBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (dialogOpen) return;
+
+                    dialogOpen = true;
+
+                    setTimeout(() => input.click(), 0);
+                });
+
+                // =========================
+                // On File Select
+                // =========================
+                input.addEventListener("change", function () {
+                    dialogOpen = false;
+
+                    const file = this.files[0];
+                    if (!file) return;
+
+                    const maxSizeKB = 150;
+                    const maxSizeBytes = maxSizeKB * 1024;
+
+                    if (file.size > maxSizeBytes) {
+                        toastr.error("Image size must not exceed 150 KB");
+                        resetBannerMobileImage("false");
+                        return;
+                    }
+
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+
+                        img.onload = function () {
+
+                            // 🔥 You can change mobile dimensions if needed
+                            const requiredWidth  = 800;
+                            const requiredHeight = 600;
+
+                            if (img.width !== requiredWidth || img.height !== requiredHeight) {
+                                toastr.error("Image dimensions must be exactly 800 x 600 pixels");
+                                resetBannerMobileImage("false");
+                                return;
+                            }
+
+                            preview.src = e.target.result;
+                            preview.classList.remove("d-none");
+                            placeholder.classList.add("d-none");
+
+                            clearBtn.style.display = "inline-block";
+                            viewBtn.style.display  = "inline-block";
+
+                            $("#ClearImageMobile").val("false");
+                        };
+
+                        img.src = e.target.result;
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+
+                // =========================
+                // Dialog safety
+                // =========================
+                input.addEventListener("click", function () {
+                    setTimeout(() => dialogOpen = false, 1000);
+                });
+
+                // =========================
+                // Clear Image
+                // =========================
+                clearBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    resetBannerMobileImage("true");
+                });
+
+                // =========================
+                // View Image Modal
+                // =========================
+                viewBtn.addEventListener("click", function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (!preview.src) return;
+
+                    $("#imageBannerMobileViewModalImg").attr("src", preview.src);
+                    new bootstrap.Modal(document.getElementById("imageBannerMobileViewModal")).show();
+                });
+            }
+
+            function resetBannerMobileForm() {
+
+                // =========================
+                // IDs
+                // =========================
+                $('#BannerMobileID').val(0);
+                $('#BannerMobileTypeID').val('');
+
+                // =========================
+                // Inputs
+                // =========================
+                $('#BannerMobileDescription').val('');
+
+                // =========================
+                // Dropdowns (selectpicker)
+                // =========================
+                $('#BannerMobileCategory')
+                    .val(0)
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+                $('#BannerMobileSubCategory')
+                    .html('')
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+                $('#BannerMobileProduct')
+                    .html('')
+                    .selectpicker('refresh')
+                    .selectpicker('render');
+
+                // =========================
+                // Status
+                // =========================
+                $('#BannerMobileStatusToggle').prop('checked', true);
+                $('#BannerMobileStatusID').val('A');
+
+                // =========================
+                // Image Reset
+                // =========================
+                $('#bannerMobileImage').val('');
+
+                $('#bannerMobileImagePreview')
+                    .attr('src', '')
+                    .addClass('d-none');
+
+                // show placeholder again
+                $('#saveBannerMobileModal .placeholder-icon').removeClass('d-none');
+
+                // reset clear flag
+                $('#ClearImageMobile').val('false');
+
+                // =========================
+                // Validation Messages
+                // =========================
+                $('#BannerMobileDescriptionMessage').html('');
+                $('#BannerMobileCategoryMessage').html('');
+                $('#BannerMobileSubCategoryMessage').html('');
+                $('#BannerMobileProductMessage').html('');
+
+                // =========================
+                // Modal Title
+                // =========================
+                $('#modalBannerMobileTitle').text('Create New BannerMobile');
+
+            }
+
+            let currentCategoryOptionIds = [];
+            let subCatMetaById = {};
+
+            $(document).on('change', '#BannerMobileCategory', function () {
+                LoadSubCategories();
+            });
+
+            function LoadSubCategories(restoreSelection = false, selectedSubCatIds = new Set()) {
+
+                let categoryId = $('#BannerMobileCategory').val();
+                let subSelect  = $('#BannerMobileSubCategory');
+
+                subSelect.empty();
+                currentCategoryOptionIds = [];
+
+                // Default option
+                subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+                if (!categoryId || categoryId === "0") {
+                    subSelect.selectpicker('destroy').selectpicker('render');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+                    type: 'GET',
+                    data: { categoryId },
+                    success: function (items) {
+
+                        (items || []).forEach(sc => {
+                            let id = String(sc.id);
+
+                            subSelect.append(`<option value="${id}">${sc.name}</option>`);
+
+                            currentCategoryOptionIds.push(id);
+
+                            if (!subCatMetaById[id]) {
+                                subCatMetaById[id] = {
+                                    id: sc.id,
+                                    name: sc.name,
+                                    categoryId: parseInt(categoryId)
+                                };
+                            }
+                        });
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                        // Restore or clear selection
+                        if (restoreSelection) {
+                            let validSelected = currentCategoryOptionIds.filter(
+                                id => selectedSubCatIds.has(id)
+                            );
+                            subSelect.selectpicker('val', validSelected);
+                        } else {
+                            subSelect.selectpicker('val', []);
+                        }
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                        // Optional (if you use tags)
+                        if (typeof renderTags === "function") {
+                            renderTags();
+                        }
+                    },
+                    error: function () {
+                        toastr.error('Failed to load sub-categories');
+                    }
+                });
+            }
+
+            $(document).on('change', '#BannerMobileSubCategory', function () {
+                LoadProducts();
+            });
+
+            function LoadProducts() {
+
+                let categoryId     = $('#BannerMobileCategory').val();
+                let subCategoryId  = $('#BannerMobileSubCategory').val();
+                let productSelect  = $('#BannerMobileProduct');
+
+                productSelect.empty();
+                productSelect.append('<option value="">-- Select Product --</option>');
+
+                if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
+                    productSelect.selectpicker('destroy').selectpicker('render');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+                    type: 'GET',
+                    data: {
+                        CategoryId: categoryId,
+                        SubCategoryId: subCategoryId
+                    },
+                    success: function (items) {
+
+                        productSelect.empty();
+                        productSelect.append('<option value="">-- Select Product --</option>');
+
+                        (items || []).forEach(p => {
+                            productSelect.append(
+                                `<option value="${p.productID}">
+                                    ${p.productName} - ${p.productGroupName}
+                                </option>`
+                            );
+                        });
+
+                        productSelect.selectpicker('destroy').selectpicker('render');
+                    },
+                    error: function () {
+                        toastr.error('Failed to load products');
+                    }
+                });
+            }
+
         });
+ 
     </script>
 }
