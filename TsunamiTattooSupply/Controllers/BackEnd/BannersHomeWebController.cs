@@ -73,8 +73,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Description = b.Description,
 					Sentence = b.Sentence,
 					Link = b.Link, 
-					Image = b.Image,
 					ImagePath = Global.BannerWebImagePath, 
+					Image = b.Image,
 					StatusID = b.Status.ID,
 					Status = b.Status.Description,
 					StatusColor = b.Status.Color

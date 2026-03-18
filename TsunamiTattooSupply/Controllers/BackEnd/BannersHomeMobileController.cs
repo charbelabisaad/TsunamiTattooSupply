@@ -79,8 +79,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					ID = b.ID,
 					Description = b.Description,
-					Image = b.Image,
 					ImagePath = Global.BannerMobileImagePath,
+					Image = b.Image,
 					CategoryID = b.Category.ID,
 					CategoryDescription = b.Category.Description,
 					SubCategoryID = b.SubCategory.ID,

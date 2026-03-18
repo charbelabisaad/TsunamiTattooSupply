@@ -39,7 +39,10 @@ namespace TsunamiTattooSupply.Functions
 
 		public static string BannerWebImagePath = string.Empty;
 		public static string BannerMobileImagePath = string.Empty;
-		public static string BannerHomeImagePath = string.Empty;
+
+		public static string BannerPageWebImagePath = string.Empty;
+
+		public static string BannerPageMobileImagePath = string.Empty;
 
 		public static string CountriesFlagsImagePath = string.Empty;
 

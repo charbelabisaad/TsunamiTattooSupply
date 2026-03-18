@@ -6,6 +6,9 @@ namespace TsunamiTattooSupply.Models
 {
 	[Table("BannersPages")]
 	[Index(nameof(PageLocationID))]
+	[Index(nameof(CategoryID))]
+	[Index(nameof(SubCategoryID))]
+	[Index(nameof(ProductID))]
 	[Index(nameof(StatusID))]
 	public class BannerPage
 	{
@@ -67,6 +70,15 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("PageLocationID")]
 		public virtual PageLocation PageLocation { get; set; }
+
+		[ForeignKey("CategoryID")]
+		public virtual Category Category { get; set; }
+
+		[ForeignKey("SubCategoryID")]
+		public virtual SubCategory SubCategory { get; set; }
+
+		[ForeignKey("ProductID")]
+		public virtual Product Product { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }
