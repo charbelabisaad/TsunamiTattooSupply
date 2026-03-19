@@ -28,8 +28,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public IActionResult Index()
 		{
 			FilePathService fp = new FilePathService(_dbContext);
-			Global.BannerPageWebImagePath = fp.GetFilePath("BNNRPGEWEBIMG").Description;
-			Global.BannerPageMobileImagePath = fp.GetFilePath("BNNRPGEWEBIMG").Description;
+			Global.BannerPageWebImagePath = fp.GetFilePath("BNNRPGEWBIMG").Description;
+			Global.BannerPageMobileImagePath = fp.GetFilePath("BNNRPGEMBLIMG").Description;
 
 			PageViewModel vm = new PageViewModel
 			{
@@ -105,7 +105,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				return Json(new
 				{
-					data = new List<BannerDto>(),
+					data = new List<BannerPageDto>(),
 					success = false,
 					message = "An unexpected error occurred while loading banners pages web"
 				});
@@ -132,7 +132,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Code = b.Code,
 					Name = b.Name,	
 					Link = b.Link, 
-					ImagePath = Global.BannerWebImagePath,
+					ImagePath = Global.BannerPageWebImagePath,
 					Image = b.Image,
 					StatusID = b.Status.ID,
 					Status = b.Status.Description,
@@ -153,123 +153,214 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
-				[HttpPost]
-				public IActionResult SaveBannerWeb(
-			int ID,
-			string Description,
-			string? Sentence,
-			string? Link,
-			string StatusID,
-			int PageLocationID,
-			IFormFile? Image)
+		[HttpPost]
+		public IActionResult SaveBannerWeb(
+int ID,
+string Description,
+string? Sentence,
+string? Link,
+string StatusID,
+int PageLocationID,
+IFormFile? Image)
+		{
+			try
 			{
-				try
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+				string bannerImagePath = Global.BannerPageWebImagePath;
+
+				string PhysicalPath(string urlPath)
 				{
-					int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+					if (string.IsNullOrEmpty(_envirment.WebRootPath))
+						throw new Exception("WebRootPath is not configured.");
 
-					string bannerImagePath = Global.BannerWebImagePath;
+					var relative = urlPath.Trim().TrimStart('/', '\\');
+					return Path.Combine(_envirment.WebRootPath, relative);
+				}
 
-					string PhysicalPath(string urlPath)
-					{
-						var relative = urlPath.Trim().TrimStart('/', '\\');
-						return Path.Combine(_envirment.WebRootPath, relative);
-					}
+				string SaveFile(IFormFile file, string folder, string prefix, int id)
+				{
+					long maxSize = 150 * 1024;
 
-					string? SaveFile(IFormFile file, string folder, string prefix, int id)
-					{
-						long maxSize = 150 * 1024;
-						if (file.Length > maxSize)
-							throw new Exception("Image size must not exceed 150 KB.");
+					if (file.Length > maxSize)
+						throw new Exception("Image size must not exceed 150 KB.");
 
-						var ext = Path.GetExtension(file.FileName).ToLower();
-						var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+					var ext = Path.GetExtension(file.FileName).ToLower();
+					var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
 
-						if (!allowed.Contains(ext))
-							throw new Exception("Invalid image type.");
+					if (!allowed.Contains(ext))
+						throw new Exception("Invalid image type.");
 
-						var physical = PhysicalPath(folder);
+					var physical = PhysicalPath(folder);
+
+					if (!Directory.Exists(physical))
 						Directory.CreateDirectory(physical);
 
-						var name = $"{prefix}_{id}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
-						var full = Path.Combine(physical, name);
+					var name = $"{prefix}_{id}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
+					var full = Path.Combine(physical, name);
 
-						using var stream = new FileStream(full, FileMode.Create);
+					using (var stream = new FileStream(full, FileMode.Create))
+					{
 						file.CopyTo(stream);
-
-						return name;
 					}
 
-					bool IsTrue(string key)
-						=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
+					return name;
+				}
 
-					BannerPage banner;
-					bool isNew = ID == 0;
+				bool IsTrue(string key)
+					=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
 
-					if (isNew)
+				BannerPage banner;
+				bool isNew = ID == 0;
+
+				// =========================
+				// CREATE
+				// =========================
+				if (isNew)
+				{
+					if (Image == null || Image.Length == 0)
 					{
-						if (Image == null)
-							return Json(new { success = false, message = "Image is required." });
-
-						banner = new BannerPage
+						return Json(new
 						{
-							Name = Description,
-							Code = "TMP",
-							AppType = "HME",
-							PageLocationID = PageLocationID,
-							StatusID = StatusID,
-							Image = "",
-							Link = Link,
-							CreatedUserID = userId,
-							CreationDate = DateTime.UtcNow
-						};
-
-						_dbContext.BannersPages.Add(banner);
-						_dbContext.SaveChanges();
-
-						banner.Code = $"BNR-{banner.ID}";
-					}
-					else
-					{
-						banner = _dbContext.BannersPages.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
-
-						if (banner == null)
-							return Json(new { success = false, message = "Not found" });
-
-						banner.Name = Description;
-						banner.Link = Link;
-						banner.StatusID = StatusID;
-						banner.EditUserID = userId;
-						banner.EditDate = DateTime.UtcNow;
+							success = false,
+							message = "Image is required."
+						});
 					}
 
-					// Clear image
-					if (IsTrue("ClearWebImage") && !string.IsNullOrEmpty(banner.Image))
-					{
-						var old = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-						if (System.IO.File.Exists(old)) System.IO.File.Delete(old);
-						banner.Image = "";
-					}
+					// 🔥 UNIQUE CHECK
+					bool exists = _dbContext.BannersPages.Any(b =>
+						b.PageLocationID == PageLocationID &&
+						b.AppType == "WEB" &&
+						b.DeletedDate == null
+					);
 
-					// New image
-					if (Image != null)
+					if (exists)
 					{
-						if (!string.IsNullOrEmpty(banner.Image))
+						return Json(new
 						{
-							var old = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-							if (System.IO.File.Exists(old)) System.IO.File.Delete(old);
-						}
-
-						banner.Image = SaveFile(Image, bannerImagePath, "BNRWEB", banner.ID);
+							success = false,
+							message = "A banner already exists for this page location (WEB)."
+						});
 					}
 
+					banner = new BannerPage
+					{
+						Name = Description,
+						Code = "TMP",
+						AppType = "WEB",
+						PageLocationID = PageLocationID,
+						StatusID = StatusID,
+						Image = "",
+						Link = Link,
+						CreatedUserID = userId,
+						CreationDate = DateTime.UtcNow
+					};
+
+					_dbContext.BannersPages.Add(banner);
 					_dbContext.SaveChanges();
 
-					return Json(new { success = true, message = "Saved successfully" });
+					// generate code after ID
+					banner.Code = $"BNR-{banner.ID}";
+					_dbContext.SaveChanges();
 				}
-				catch (Exception ex)
+
+				// =========================
+				// UPDATE
+				// =========================
+				else
 				{
-					return Json(new { success = false, message = ex.Message });
+					banner = _dbContext.BannersPages
+						.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
+
+					if (banner == null)
+					{
+						return Json(new
+						{
+							success = false,
+							message = "Banner not found."
+						});
+					}
+
+					// 🔥 UNIQUE CHECK (EXCLUDE CURRENT)
+					bool exists = _dbContext.BannersPages.Any(b =>
+						b.PageLocationID == PageLocationID &&
+						b.AppType == "WEB" &&
+						b.DeletedDate == null &&
+						b.ID != ID
+					);
+
+					if (exists)
+					{
+						return Json(new
+						{
+							success = false,
+							message = "A banner already exists for this page location (WEB)."
+						});
+					}
+
+					banner.Name = Description;
+					banner.Link = Link;
+					banner.StatusID = StatusID;
+					banner.EditUserID = userId;
+					banner.EditDate = DateTime.UtcNow;
 				}
+
+				// =========================
+				// CLEAR IMAGE
+				// =========================
+				if (IsTrue("ClearWebImage") && !string.IsNullOrEmpty(banner.Image))
+				{
+					var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+					if (System.IO.File.Exists(oldPath))
+						System.IO.File.Delete(oldPath);
+
+					banner.Image = "";
+				}
+
+				// =========================
+				// SAVE NEW IMAGE
+				// =========================
+				if (Image != null && Image.Length > 0)
+				{
+					if (!string.IsNullOrEmpty(banner.Image))
+					{
+						var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+						if (System.IO.File.Exists(oldPath))
+							System.IO.File.Delete(oldPath);
+					}
+
+					var fileName = SaveFile(Image, bannerImagePath, "BNRWEB", banner.ID);
+
+					if (string.IsNullOrEmpty(fileName))
+					{
+						return Json(new
+						{
+							success = false,
+							message = "Failed to save image."
+						});
+					}
+
+					banner.Image = fileName;
+				}
+
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					message = isNew ? "Banner created successfully." : "Banner updated successfully."
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
+			}
 		}
 
 		[HttpPost]
@@ -287,17 +378,21 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
-				string bannerImagePath = Global.BannerMobileImagePath;
+				string bannerImagePath = Global.BannerPageMobileImagePath;
 
 				string PhysicalPath(string urlPath)
 				{
+					if (string.IsNullOrEmpty(_envirment.WebRootPath))
+						throw new Exception("WebRootPath is not configured.");
+
 					var relative = urlPath.Trim().TrimStart('/', '\\');
 					return Path.Combine(_envirment.WebRootPath, relative);
 				}
 
-				string? SaveFile(IFormFile file, string folder, string prefix, int id)
+				string SaveFile(IFormFile file, string folder, string prefix, int id)
 				{
 					long maxSize = 150 * 1024;
+
 					if (file.Length > maxSize)
 						throw new Exception("Image size must not exceed 150 KB.");
 
@@ -308,13 +403,17 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						throw new Exception("Invalid image type.");
 
 					var physical = PhysicalPath(folder);
-					Directory.CreateDirectory(physical);
+
+					if (!Directory.Exists(physical))
+						Directory.CreateDirectory(physical);
 
 					var name = $"{prefix}_{id}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
 					var full = Path.Combine(physical, name);
 
-					using var stream = new FileStream(full, FileMode.Create);
-					file.CopyTo(stream);
+					using (var stream = new FileStream(full, FileMode.Create))
+					{
+						file.CopyTo(stream);
+					}
 
 					return name;
 				}
@@ -325,10 +424,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				BannerPage banner;
 				bool isNew = ID == 0;
 
+				// =========================
+				// CREATE
+				// =========================
 				if (isNew)
 				{
-					if (Image == null)
-						return Json(new { success = false, message = "Image is required." });
+					if (Image == null || Image.Length == 0)
+					{
+						return Json(new
+						{
+							success = false,
+							message = "Image is required."
+						});
+					}
 
 					banner = new BannerPage
 					{
@@ -348,14 +456,27 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					_dbContext.BannersPages.Add(banner);
 					_dbContext.SaveChanges();
 
+					// generate code after ID
 					banner.Code = $"BNR-{banner.ID}";
+					_dbContext.SaveChanges();
 				}
+
+				// =========================
+				// UPDATE
+				// =========================
 				else
 				{
-					banner = _dbContext.BannersPages.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
+					banner = _dbContext.BannersPages
+						.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
 
 					if (banner == null)
-						return Json(new { success = false, message = "Not found" });
+					{
+						return Json(new
+						{
+							success = false,
+							message = "Banner not found."
+						});
+					}
 
 					banner.Name = Description;
 					banner.CategoryID = CategoryID;
@@ -366,33 +487,61 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					banner.EditDate = DateTime.UtcNow;
 				}
 
-				// Clear image
+				// =========================
+				// CLEAR IMAGE
+				// =========================
 				if (IsTrue("ClearImageMobile") && !string.IsNullOrEmpty(banner.Image))
 				{
-					var old = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-					if (System.IO.File.Exists(old)) System.IO.File.Delete(old);
+					var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+					if (System.IO.File.Exists(oldPath))
+						System.IO.File.Delete(oldPath);
+
 					banner.Image = "";
 				}
 
-				// New image
-				if (Image != null)
+				// =========================
+				// SAVE NEW IMAGE
+				// =========================
+				if (Image != null && Image.Length > 0)
 				{
 					if (!string.IsNullOrEmpty(banner.Image))
 					{
-						var old = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-						if (System.IO.File.Exists(old)) System.IO.File.Delete(old);
+						var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+						if (System.IO.File.Exists(oldPath))
+							System.IO.File.Delete(oldPath);
 					}
 
-					banner.Image = SaveFile(Image, bannerImagePath, "BNRMBL", banner.ID);
+					var fileName = SaveFile(Image, bannerImagePath, "BNRMBL", banner.ID);
+
+					if (string.IsNullOrEmpty(fileName))
+					{
+						return Json(new
+						{
+							success = false,
+							message = "Failed to save image."
+						});
+					}
+
+					banner.Image = fileName;
 				}
 
 				_dbContext.SaveChanges();
 
-				return Json(new { success = true, message = "Saved successfully" });
+				return Json(new
+				{
+					success = true,
+					message = isNew ? "Banner created successfully." : "Banner updated successfully."
+				});
 			}
 			catch (Exception ex)
 			{
-				return Json(new { success = false, message = ex.Message });
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
 			}
 		}
 
@@ -436,7 +585,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					ID = b.ID,
 					Name = b.Name,
-					ImagePath = Global.BannerMobileImagePath,
+					ImagePath = Global.BannerPageMobileImagePath,
 					Image = b.Image,
 					CategoryID = b.Category.ID,
 					CategoryDescription = b.Category.Description,

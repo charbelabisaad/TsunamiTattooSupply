@@ -180,7 +180,7 @@
                     <div class="tab-content pt-2" id="bannersTabsContent">
 
                         <div class="tab-pane fade show active" id="web-pane" role="tabpanel" aria-labelledby="web-tab">
-                            <table id="tableBannersAdWeb" class="table table-striped w-100">
+                            <table id="tableBannersWeb" class="table table-striped w-100">
                                 <thead>
                                     <tr style="vertical-align:middle">
                                         <th style="width:100px">Image</th>
@@ -257,17 +257,10 @@
                 $("#saveBannerMobileModal").modal("show");
 
             }
-     
-            $(document).on('click', '.page-location-button', function () {
-                $('.page-location-button')
-                    .removeClass('btn-dark')
-                    .addClass('btn-outline-dark');
 
-                $(this)
-                    .removeClass('btn-outline-dark')
-                    .addClass('btn-dark');
-            });
+             $(document).ready(function () {
 
+            // ✅ 1. DEFINE CLICK HANDLER FIRST
             $(document).on('click', '.page-location-button', function () {
 
                 $('.page-location-button')
@@ -277,12 +270,21 @@
                 $(this)
                     .removeClass('btn-outline-dark')
                     .addClass('btn-dark');
-
-                // 🔥 SET VALUE
+ 
                 let id = $(this).attr("id").split("-")[1];
                 $("#BannerLocationPage").val(id);
 
+                tableBannersWeb.ajax.reload();
             });
+
+            // ✅ 2. THEN TRIGGER CLICK
+            let firstLocation = $('.page-location-button').first();
+
+            if (firstLocation.length) {
+                firstLocation.click(); // 🔥 NOW WORKS
+            }
+
+        });
 
             ///////////////////////////////////////////////////// BANNER WEB /////////////////////////////////////////////////////
 
@@ -411,7 +413,7 @@
             }
 
 
-                    var tableBannersWeb = $('#tableBannersAdWeb').DataTable({
+            var tableBannersWeb = $('#tableBannersWeb').DataTable({
             processing: true,
             responsive: true,
 
@@ -420,6 +422,7 @@
                 type: 'GET',
                 data: function (d) {
                     d.PageLocationID = $('#BannerLocationPage').val();
+                   
                 },
                 dataSrc: function (json) {
 
@@ -715,7 +718,7 @@
                             $("#saveBannerWebModal").modal("hide");
 
                             // 🔥 reload table
-                            $("#tableBannersAdWeb").DataTable().ajax.reload(null, false);
+                            $("#tableBannersWeb").DataTable().ajax.reload(null, false);
 
                         } else {
 
@@ -806,8 +809,8 @@
                         img.onload = function () {
 
                             // 🔥 You can change mobile dimensions if needed
-                            const requiredWidth  = 800;
-                            const requiredHeight = 600;
+                            const requiredWidth  = 1920;
+                            const requiredHeight = 1000;
 
                             if (img.width !== requiredWidth || img.height !== requiredHeight) {
                                 toastr.error("Image dimensions must be exactly 800 x 600 pixels");
@@ -1230,133 +1233,136 @@
                 });
             }
 
-            $(document).on("click", "#btnSaveBannerMobile", function (e) {
+                $(document).on("click", "#btnSaveBannerMobile", function (e) {
 
-                e.preventDefault();
+            e.preventDefault();
 
-                let btn     = $(this);
-                let spinner = $("#btnSaveBannerMobileSpinner");
+            let btn     = $(this);
+            let spinner = $("#btnSaveBannerMobileSpinner");
 
-                let id            = $("#BannerMobileID").val();
-                let description   = $("#BannerMobileDescription").val().trim();
-                let statusId      = $("#BannerMobileStatusID").val();
+            let id            = $("#BannerMobileID").val();
+            let description   = $("#BannerMobileDescription").val().trim();
+            let statusId      = $("#BannerMobileStatusID").val();
 
-                let categoryId    = $("#BannerMobileCategory").val();
-                let subCategoryId = $("#BannerMobileSubCategory").val();
-                let productId     = $("#BannerMobileProduct").val();
+            let categoryId    = $("#BannerMobileCategory").val();
+            let subCategoryId = $("#BannerMobileSubCategory").val();
+            let productId     = $("#BannerMobileProduct").val();
 
-                let imageFile     = $("#bannerMobileImage")[0].files[0];
-                let clearImage    = $("#ClearImageMobile").val();
-                let pageLocationId = $("#BannerLocationPage").val();
+            let imageFile     = $("#bannerMobileImage")[0].files[0];
+            let clearImage    = $("#ClearImageMobile").val();
+            let pageLocationId = $("#BannerLocationPage").val();
 
-                let isValid = true;
+            let isValid = true;
 
-                // =========================
-                // Reset messages
-                // =========================
-                $("#BannerMobileDescriptionMessage").html("");
-                $("#BannerMobileCategoryMessage").html("");
-                $("#BannerMobileSubCategoryMessage").html("");
-                $("#BannerMobileProductMessage").html("");
+            // =========================
+            // Reset messages
+            // =========================
+            $(".text-danger").html("");
 
-                // =========================
-                // Validation
-                // =========================
-                if (description === "") {
-                    $("#BannerMobileDescriptionMessage").html("Description is required");
-                    isValid = false;
-                }
+            // =========================
+            // Validation
+            // =========================
+            if (description === "") {
+                $("#BannerMobileDescriptionMessage").html("Description is required");
+                isValid = false;
+            }
 
-                if (!categoryId || categoryId === "0") {
-                    $("#BannerMobileCategoryMessage").html("Category is required");
-                    isValid = false;
-                }
+            if (!categoryId || categoryId === "0") {
+                $("#BannerMobileCategoryMessage").html("Category is required");
+                isValid = false;
+            }
 
-                if (!subCategoryId || subCategoryId === "0") {
-                    $("#BannerMobileSubCategoryMessage").html("Sub Category is required");
-                    isValid = false;
-                }
+            if (!subCategoryId || subCategoryId === "0") {
+                $("#BannerMobileSubCategoryMessage").html("Sub Category is required");
+                isValid = false;
+            }
 
-                if (!productId || productId === "0") {
-                    $("#BannerMobileProductMessage").html("Product is required");
-                    isValid = false;
-                }
+            if (!productId || productId === "0") {
+                $("#BannerMobileProductMessage").html("Product is required");
+                isValid = false;
+            }
 
-                if (id === "0" && !imageFile) {
-                    toastr.error("Image is required");
-                    isValid = false;
-                }
+            if (id === "0" && !imageFile) {
+                toastr.error("Image is required");
+                isValid = false;
+            }
 
-                if (!isValid) return;
+            if (!isValid) return;
 
-                // =========================
-                // UI Loading
-                // =========================
-                spinner.removeClass("d-none");
-                btn.prop("disabled", true);
+            // =========================
+            // UI Loading
+            // =========================
+            spinner.removeClass("d-none");
+            btn.prop("disabled", true);
 
-                // =========================
-                // FormData
-                // =========================
-                let formData = new FormData();
+            // =========================
+            // FIX NULL VALUES 🔥
+            // =========================
+            categoryId    = categoryId === "0" ? null : categoryId;
+            subCategoryId = subCategoryId === "0" ? null : subCategoryId;
+            productId     = productId === "0" ? null : productId;
 
-                formData.append("ID", id);
-                formData.append("Description", description);
-                formData.append("StatusID", statusId);
-                formData.append("PageLocationID", pageLocationId);
+            // =========================
+            // FormData
+            // =========================
+            let formData = new FormData();
 
-                formData.append("CategoryID", categoryId);
-                formData.append("SubCategoryID", subCategoryId);
-                formData.append("ProductID", productId);
+            formData.append("ID", id);
+            formData.append("Description", description);
+            formData.append("StatusID", statusId);
+            formData.append("PageLocationID", pageLocationId);
 
-                formData.append("ClearImageMobile", clearImage);
+            if (categoryId !== null)    formData.append("CategoryID", categoryId);
+            if (subCategoryId !== null) formData.append("SubCategoryID", subCategoryId);
+            if (productId !== null)     formData.append("ProductID", productId);
 
-                if (imageFile) {
-                    formData.append("Image", imageFile);
-                }
+            formData.append("ClearImageMobile", clearImage ?? "false");
 
-                // =========================
-                // AJAX
-                // =========================
-                $.ajax({
-                    url: '@Url.Action("SaveBannerMobile", "BannersPages")',
-                    type: "POST",
-                    data: formData,
-                    processData: false,
-                    contentType: false,
+            if (imageFile) {
+                formData.append("Image", imageFile);
+            }
 
-                    success: function (response) {
+            // =========================
+            // AJAX
+            // =========================
+            $.ajax({
+                url: '@Url.Action("SaveBannerMobile", "BannersPages")',
+                type: "POST",
+                data: formData,
+                processData: false,
+                contentType: false,
 
-                        spinner.addClass("d-none");
-                        btn.prop("disabled", false);
+                success: function (response) {
 
-                        if (response.success) {
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
 
-                            toastr.success(response.message);
+                    if (response.success) {
 
-                            $("#saveBannerMobileModal").modal("hide");
+                        toastr.success(response.message);
 
-                            // 🔥 reload mobile table
-                            $("#tableBannersMobile").DataTable().ajax.reload(null, false);
+                        $("#saveBannerMobileModal").modal("hide");
 
-                        } else {
+                        $("#tableBannersMobile").DataTable().ajax.reload(null, false);
 
-                            toastr.error(response.message);
+                    } else {
 
-                        }
-                    },
-
-                    error: function () {
-
-                        spinner.addClass("d-none");
-                        btn.prop("disabled", false);
-
-                        toastr.error("Something went wrong");
+                        toastr.error(response.message);
 
                     }
-                });
+                },
 
+                error: function () {
+
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
+
+                    toastr.error("Something went wrong");
+
+                }
             });
+
+        });
 
         });
   
