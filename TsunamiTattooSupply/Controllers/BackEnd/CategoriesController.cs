@@ -650,7 +650,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					sub.Description = normalizedDescription;
 					sub.SpecsLabel = SpecsLabel.Trim();
-					sub.TypesLabel = ProductDetailsLabel.Trim();
+					sub.TypesLabel = ProductTypesLabel.Trim();
 					sub.DetailsLabel = ProductDetailsLabel.Trim();
 					sub.StatusID = StatusID;
 					sub.EditUserID = userId;

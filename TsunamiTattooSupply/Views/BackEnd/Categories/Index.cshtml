@@ -747,6 +747,20 @@
                         }   
                     },
                     {
+                        data: "typesLabel",
+                        className: "align-middle",
+                        render: function (data) {
+                            return `<span class="fw-bold">${data}</span>`;
+                        }   
+                    },
+                    {
+                        data: "detailsLabel",
+                        className: "align-middle",
+                        render: function (data) {
+                            return `<span class="fw-bold">${data}</span>`;
+                        }   
+                    },
+                    {
                         data: "rank",
                         className: "align-middle d-none"
                     },
@@ -1091,9 +1105,7 @@
                 $('#subCategoryStatusLa// ').text('Inactive');
             }
         });
-         
-        
-
+          
         $(document).on('click', '#btnSetRankCategory', function () {
 
             const $rankSelect = $('#rankSelect');
