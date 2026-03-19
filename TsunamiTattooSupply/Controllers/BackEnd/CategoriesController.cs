@@ -479,6 +479,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ID = sc.ID,
 						Description = sc.Description,
 						SpecsLabel = sc.SpecsLabel,
+						TypesLabel = sc.TypesLabel,
+						DetailsLabel = sc.DetailsLabel,
 						WebImagePath = Global.SubCategoryWebImagePath,
 						WebImage = sc.WebImage,
 						MobileImagePath = Global.SubCategoryMobileImagePath,
@@ -514,6 +516,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	int CategoryID,
 	string Description,
 	string SpecsLabel,
+	string ProductTypesLabel,
+	string ProductDetailsLabel,
 	IFormFile? BannerImage,
 	IFormFile? WebImage,
 	IFormFile? MobileImage,
@@ -621,6 +625,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						CategoryID = CategoryID,
 						Description = normalizedDescription,
 						SpecsLabel = SpecsLabel.Trim(),
+						TypesLabel = ProductTypesLabel.Trim(),
+						DetailsLabel = ProductDetailsLabel.Trim(),
 						StatusID = StatusID,
 						CreatedUserID = userId,
 						CreationDate = DateTime.UtcNow
@@ -644,6 +650,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					sub.Description = normalizedDescription;
 					sub.SpecsLabel = SpecsLabel.Trim();
+					sub.TypesLabel = ProductDetailsLabel.Trim();
+					sub.DetailsLabel = ProductDetailsLabel.Trim();
 					sub.StatusID = StatusID;
 					sub.EditUserID = userId;
 					sub.EditDate = DateTime.UtcNow;

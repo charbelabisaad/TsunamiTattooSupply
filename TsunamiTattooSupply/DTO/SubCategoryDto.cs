@@ -1,4 +1,6 @@
-﻿namespace TsunamiTattooSupply.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TsunamiTattooSupply.DTO
 {
 	public class SubCategoryDto
 	{
@@ -7,6 +9,10 @@
 		public string Description { get; set; }
 
 		public string SpecsLabel { get; set; }
+		 
+		public string? TypesLabel { get; set; }
+		 
+		public string? DetailsLabel { get; set; }
 
 		public string? BannerImagePath { get; set; }
 		public string? BannerImage { get; set; }

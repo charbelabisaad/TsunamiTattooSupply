@@ -16,13 +16,16 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 	{
 		private readonly TsunamiDbContext _dbContext;
 		public readonly ILogger<BannersPagesController> _logger;
-		public readonly IWebHostEnvironment _envirment;
+		//public readonly IWebHostEnvironment _envirment;
+		private readonly string _imagesRoot;
 
-		public BannersPagesController(TsunamiDbContext dbContext, ILogger<BannersPagesController> logger, IWebHostEnvironment envirment)
+
+		public BannersPagesController(TsunamiDbContext dbContext, ILogger<BannersPagesController> logger, IWebHostEnvironment envirment ,IConfiguration config)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
-			_envirment = envirment;
+			//_envirment = envirment;
+			_imagesRoot = config["StaticFiles:ImagesRoot"];
 		}
 
 		public IActionResult Index()
@@ -134,6 +137,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Link = b.Link, 
 					ImagePath = Global.BannerPageWebImagePath,
 					Image = b.Image,
+					StartDate = Convert.ToDateTime(b.StartDate),
+					EndDate = Convert.ToDateTime(b.EndDate),
+					Present = b.Present,
 					StatusID = b.Status.ID,
 					Status = b.Status.Description,
 					StatusColor = b.Status.Color
@@ -155,213 +161,223 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		[HttpPost]
 		public IActionResult SaveBannerWeb(
-int ID,
-string Description,
-string? Sentence,
-string? Link,
-string StatusID,
-int PageLocationID,
-IFormFile? Image)
-		{
-			try
-			{
-				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
-
-				string bannerImagePath = Global.BannerPageWebImagePath;
-
-				string PhysicalPath(string urlPath)
+		int ID,
+		string Description,
+		string? Sentence,
+		string? Link,
+		DateTime StartDate,
+		DateTime? EndDate,
+		bool Present,
+		string StatusID,
+		int PageLocationID,
+		IFormFile? Image)
 				{
-					if (string.IsNullOrEmpty(_envirment.WebRootPath))
-						throw new Exception("WebRootPath is not configured.");
-
-					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_envirment.WebRootPath, relative);
-				}
-
-				string SaveFile(IFormFile file, string folder, string prefix, int id)
-				{
-					long maxSize = 150 * 1024;
-
-					if (file.Length > maxSize)
-						throw new Exception("Image size must not exceed 150 KB.");
-
-					var ext = Path.GetExtension(file.FileName).ToLower();
-					var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
-
-					if (!allowed.Contains(ext))
-						throw new Exception("Invalid image type.");
-
-					var physical = PhysicalPath(folder);
-
-					if (!Directory.Exists(physical))
-						Directory.CreateDirectory(physical);
-
-					var name = $"{prefix}_{id}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
-					var full = Path.Combine(physical, name);
-
-					using (var stream = new FileStream(full, FileMode.Create))
+					try
 					{
-						file.CopyTo(stream);
+						int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+						string bannerImagePath = Global.BannerPageWebImagePath;
+
+						string PhysicalPath(string urlPath)
+						{
+							if (string.IsNullOrEmpty(_imagesRoot))
+								throw new Exception("WebRootPath is not configured.");
+
+							var relative = urlPath.Trim().TrimStart('/', '\\');
+							return Path.Combine(_imagesRoot, relative);
+						}
+
+						string SaveFile(IFormFile file, string folder, string prefix, int id)
+						{
+							long maxSize = 150 * 1024;
+
+							if (file.Length > maxSize)
+								throw new Exception("Image size must not exceed 150 KB.");
+
+							var ext = Path.GetExtension(file.FileName).ToLower();
+							var allowed = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+
+							if (!allowed.Contains(ext))
+								throw new Exception("Invalid image type.");
+
+							var physical = PhysicalPath(folder);
+
+							if (!Directory.Exists(physical))
+								Directory.CreateDirectory(physical);
+
+							var name = $"{prefix}_{id}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
+							var full = Path.Combine(physical, name);
+
+							using (var stream = new FileStream(full, FileMode.Create))
+							{
+								file.CopyTo(stream);
+							}
+
+							return name;
+						}
+
+						bool IsTrue(string key)
+							=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
+
+						BannerPage banner;
+						bool isNew = ID == 0;
+
+						// =========================
+						// CREATE
+						// =========================
+						if (isNew)
+						{
+							if (Image == null || Image.Length == 0)
+							{
+								return Json(new
+								{
+									success = false,
+									message = "Image is required."
+								});
+							}
+
+							// 🔥 UNIQUE CHECK
+							bool exists = _dbContext.BannersPages.Any(b =>
+								b.PageLocationID == PageLocationID &&
+								b.AppType == "WEB" &&
+								b.DeletedDate == null
+							);
+
+							if (exists)
+							{
+								return Json(new
+								{
+									success = false,
+									message = "A banner already exists for this page location (WEB)."
+								});
+							}
+
+							banner = new BannerPage
+							{
+								Name = Description,
+								Code = "TMP",
+								AppType = "WEB",
+								PageLocationID = PageLocationID,
+								StatusID = StatusID,
+								Image = "",
+								Link = Link,
+								StartDate = StartDate,
+								EndDate = Present == true ? null : EndDate,
+								Present = Present,
+								CreatedUserID = userId,
+								CreationDate = DateTime.UtcNow
+							};
+
+							_dbContext.BannersPages.Add(banner);
+							_dbContext.SaveChanges();
+
+							// generate code after ID
+							banner.Code = $"BNR-{banner.ID}";
+							_dbContext.SaveChanges();
+						}
+
+						// =========================
+						// UPDATE
+						// =========================
+						else
+						{
+							banner = _dbContext.BannersPages
+								.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
+
+							if (banner == null)
+							{
+								return Json(new
+								{
+									success = false,
+									message = "Banner not found."
+								});
+							}
+
+							// 🔥 UNIQUE CHECK (EXCLUDE CURRENT)
+							bool exists = _dbContext.BannersPages.Any(b =>
+								b.PageLocationID == PageLocationID &&
+								b.AppType == "WEB" &&
+								b.DeletedDate == null &&
+								b.ID != ID
+							);
+
+							if (exists)
+							{
+								return Json(new
+								{
+									success = false,
+									message = "A banner already exists for this page location (WEB)."
+								});
+							}
+
+							banner.Name = Description;
+							banner.Link = Link;
+							banner.StartDate = StartDate;
+							banner.EndDate = Present == true ? null : EndDate;
+							banner.Present = Present;
+							banner.StatusID = StatusID;
+							banner.EditUserID = userId;
+							banner.EditDate = DateTime.UtcNow;
+
+						}
+
+						// =========================
+						// CLEAR IMAGE
+						// =========================
+						if (IsTrue("ClearWebImage") && !string.IsNullOrEmpty(banner.Image))
+						{
+							var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+							if (System.IO.File.Exists(oldPath))
+								System.IO.File.Delete(oldPath);
+
+							banner.Image = "";
+						}
+
+						// =========================
+						// SAVE NEW IMAGE
+						// =========================
+						if (Image != null && Image.Length > 0)
+						{
+							if (!string.IsNullOrEmpty(banner.Image))
+							{
+								var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+								if (System.IO.File.Exists(oldPath))
+									System.IO.File.Delete(oldPath);
+							}
+
+							var fileName = SaveFile(Image, bannerImagePath, "BNRWEB", banner.ID);
+
+							if (string.IsNullOrEmpty(fileName))
+							{
+								return Json(new
+								{
+									success = false,
+									message = "Failed to save image."
+								});
+							}
+
+							banner.Image = fileName;
+						}
+
+						_dbContext.SaveChanges();
+
+						return Json(new
+						{
+							success = true,
+							message = isNew ? "Banner created successfully." : "Banner updated successfully."
+						});
 					}
-
-					return name;
-				}
-
-				bool IsTrue(string key)
-					=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
-
-				BannerPage banner;
-				bool isNew = ID == 0;
-
-				// =========================
-				// CREATE
-				// =========================
-				if (isNew)
-				{
-					if (Image == null || Image.Length == 0)
+					catch (Exception ex)
 					{
 						return Json(new
 						{
 							success = false,
-							message = "Image is required."
+							message = ex.Message
 						});
 					}
-
-					// 🔥 UNIQUE CHECK
-					bool exists = _dbContext.BannersPages.Any(b =>
-						b.PageLocationID == PageLocationID &&
-						b.AppType == "WEB" &&
-						b.DeletedDate == null
-					);
-
-					if (exists)
-					{
-						return Json(new
-						{
-							success = false,
-							message = "A banner already exists for this page location (WEB)."
-						});
-					}
-
-					banner = new BannerPage
-					{
-						Name = Description,
-						Code = "TMP",
-						AppType = "WEB",
-						PageLocationID = PageLocationID,
-						StatusID = StatusID,
-						Image = "",
-						Link = Link,
-						CreatedUserID = userId,
-						CreationDate = DateTime.UtcNow
-					};
-
-					_dbContext.BannersPages.Add(banner);
-					_dbContext.SaveChanges();
-
-					// generate code after ID
-					banner.Code = $"BNR-{banner.ID}";
-					_dbContext.SaveChanges();
 				}
-
-				// =========================
-				// UPDATE
-				// =========================
-				else
-				{
-					banner = _dbContext.BannersPages
-						.FirstOrDefault(x => x.ID == ID && x.DeletedDate == null);
-
-					if (banner == null)
-					{
-						return Json(new
-						{
-							success = false,
-							message = "Banner not found."
-						});
-					}
-
-					// 🔥 UNIQUE CHECK (EXCLUDE CURRENT)
-					bool exists = _dbContext.BannersPages.Any(b =>
-						b.PageLocationID == PageLocationID &&
-						b.AppType == "WEB" &&
-						b.DeletedDate == null &&
-						b.ID != ID
-					);
-
-					if (exists)
-					{
-						return Json(new
-						{
-							success = false,
-							message = "A banner already exists for this page location (WEB)."
-						});
-					}
-
-					banner.Name = Description;
-					banner.Link = Link;
-					banner.StatusID = StatusID;
-					banner.EditUserID = userId;
-					banner.EditDate = DateTime.UtcNow;
-				}
-
-				// =========================
-				// CLEAR IMAGE
-				// =========================
-				if (IsTrue("ClearWebImage") && !string.IsNullOrEmpty(banner.Image))
-				{
-					var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-
-					if (System.IO.File.Exists(oldPath))
-						System.IO.File.Delete(oldPath);
-
-					banner.Image = "";
-				}
-
-				// =========================
-				// SAVE NEW IMAGE
-				// =========================
-				if (Image != null && Image.Length > 0)
-				{
-					if (!string.IsNullOrEmpty(banner.Image))
-					{
-						var oldPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
-
-						if (System.IO.File.Exists(oldPath))
-							System.IO.File.Delete(oldPath);
-					}
-
-					var fileName = SaveFile(Image, bannerImagePath, "BNRWEB", banner.ID);
-
-					if (string.IsNullOrEmpty(fileName))
-					{
-						return Json(new
-						{
-							success = false,
-							message = "Failed to save image."
-						});
-					}
-
-					banner.Image = fileName;
-				}
-
-				_dbContext.SaveChanges();
-
-				return Json(new
-				{
-					success = true,
-					message = isNew ? "Banner created successfully." : "Banner updated successfully."
-				});
-			}
-			catch (Exception ex)
-			{
-				return Json(new
-				{
-					success = false,
-					message = ex.Message
-				});
-			}
-		}
 
 		[HttpPost]
 		public IActionResult SaveBannerMobile(
@@ -372,6 +388,9 @@ IFormFile? Image)
 		int? CategoryID,
 		int? SubCategoryID,
 		int? ProductID,
+		DateTime StartDate,
+		DateTime? EndDate,
+		bool Present,
 		IFormFile? Image)
 		{
 			try
@@ -382,11 +401,11 @@ IFormFile? Image)
 
 				string PhysicalPath(string urlPath)
 				{
-					if (string.IsNullOrEmpty(_envirment.WebRootPath))
+					if (string.IsNullOrEmpty(_imagesRoot))
 						throw new Exception("WebRootPath is not configured.");
 
 					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_envirment.WebRootPath, relative);
+					return Path.Combine(_imagesRoot, relative);
 				}
 
 				string SaveFile(IFormFile file, string folder, string prefix, int id)
@@ -447,6 +466,9 @@ IFormFile? Image)
 						CategoryID = CategoryID,
 						SubCategoryID = SubCategoryID,
 						ProductID = ProductID,
+						StartDate =  StartDate,
+						EndDate = Present == true ? null :  EndDate,
+						Present = Present,
 						StatusID = StatusID,
 						Image = "",
 						CreatedUserID = userId,
@@ -482,6 +504,9 @@ IFormFile? Image)
 					banner.CategoryID = CategoryID;
 					banner.SubCategoryID = SubCategoryID;
 					banner.ProductID = ProductID;
+					banner.StartDate = StartDate;
+					banner.EndDate = Present == true ? null : EndDate;
+					banner.Present = Present;
 					banner.StatusID = StatusID;
 					banner.EditUserID = userId;
 					banner.EditDate = DateTime.UtcNow;
@@ -545,6 +570,70 @@ IFormFile? Image)
 			}
 		}
 
+		[HttpPost]
+		public IActionResult DeleteBannerWeb(int id)
+		{
+			try
+			{
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+				var banner = _dbContext.BannersPages
+					.FirstOrDefault(x => x.ID == id && x.DeletedDate == null);
+
+				if (banner == null)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "Banner not found."
+					});
+				}
+
+				string bannerImagePath = Global.BannerPageWebImagePath;
+
+				string PhysicalPath(string urlPath)
+				{
+					var relative = urlPath.Trim().TrimStart('/', '\\');
+					return Path.Combine(_imagesRoot, relative);
+				}
+
+				// =========================
+				// DELETE IMAGE FROM SERVER 🔥
+				// =========================
+				if (!string.IsNullOrEmpty(banner.Image))
+				{
+					var fullPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+					if (System.IO.File.Exists(fullPath))
+					{
+						System.IO.File.Delete(fullPath);
+					}
+				}
+
+				// =========================
+				// SOFT DELETE
+				// =========================
+				banner.DeletedDate = DateTime.UtcNow;
+				banner.DeletedUserID = userId;
+
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					message = "Banner deleted successfully."
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.InnerException?.Message ?? ex.Message
+				});
+			}
+		}
+
 		////////////////////////////////////////// BANNER MOBILE //////////////////////////////////////////
 
 		[HttpGet]
@@ -593,6 +682,9 @@ IFormFile? Image)
 					SubCategoryDescription = b.SubCategory.Description,
 					ProductID = b.Product.ID,
 					ProductDescription = b.Product.Name + " - " + b.Product.Group.Name,
+					StartDate = Convert.ToDateTime(b.StartDate),
+					EndDate = Convert.ToDateTime(b.EndDate),
+					Present = b.Present,
 					StatusID = b.Status.ID,
 					Status = b.Status.Description,
 					StatusColor = b.Status.Color
@@ -610,6 +702,64 @@ IFormFile? Image)
 
 			return banners;
 
+		}
+
+		[HttpPost]
+		public IActionResult DeleteBannerMobile(int id)
+		{
+			try
+			{
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+				var banner = _dbContext.BannersPages
+					.FirstOrDefault(x => x.ID == id && x.DeletedDate == null);
+
+				if (banner == null)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "Banner not found."
+					});
+				}
+
+				string bannerImagePath = Global.BannerPageMobileImagePath;
+
+				string PhysicalPath(string urlPath)
+				{
+					var relative = urlPath.Trim().TrimStart('/', '\\');
+					return Path.Combine(_imagesRoot, relative);
+				}
+
+				// 🔥 DELETE IMAGE
+				if (!string.IsNullOrEmpty(banner.Image))
+				{
+					var fullPath = Path.Combine(PhysicalPath(bannerImagePath), banner.Image);
+
+					if (System.IO.File.Exists(fullPath))
+						System.IO.File.Delete(fullPath);
+				}
+
+				// 🔥 SOFT DELETE
+				banner.DeletedDate = DateTime.UtcNow;
+				banner.DeletedUserID = userId;
+
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					message = "Banner deleted successfully."
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.InnerException?.Message ?? ex.Message
+				});
+			}
 		}
 
 	}

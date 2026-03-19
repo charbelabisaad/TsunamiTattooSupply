@@ -258,6 +258,8 @@
 
             }
 
+      
+
              $(document).ready(function () {
 
             // ✅ 1. DEFINE CLICK HANDLER FIRST
@@ -275,6 +277,8 @@
                 $("#BannerLocationPage").val(id);
 
                 tableBannersWeb.ajax.reload();
+                tableBannersMobile.ajax.reload();
+
             });
 
             // ✅ 2. THEN TRIGGER CLICK
@@ -285,9 +289,166 @@
             }
 
         });
+         
+        function formatDate(date) {
 
-            ///////////////////////////////////////////////////// BANNER WEB /////////////////////////////////////////////////////
+            if (!date) return "";
 
+            // handle string like 2026-03-19T00:00:00
+            if (typeof date === "string") {
+                return date.split("T")[0];
+            }
+
+            // fallback for Date object
+            let d = new Date(date);
+            return d.toISOString().split("T")[0];
+        }
+         
+        ///////////////////////////////////////////////////// BANNER WEB /////////////////////////////////////////////////////
+
+
+        $('#BannerWebStartDate').daterangepicker({  singleDatePicker: true,
+            autoApply: true,
+            showDropdowns: true,
+            timePicker: false,
+            locale: { format: 'YYYY-MM-DD' }
+        });
+
+
+        $('#BannerWebEndDate').daterangepicker({  singleDatePicker: true,
+            autoApply: true,
+            showDropdowns: true,
+            timePicker: false,
+            locale: { format: 'YYYY-MM-DD' }
+        });
+
+          $(document).on("change", "#BannerWebPresentToggle", function () {
+
+                if ($(this).is(":checked")) {
+
+                    // ✔ Present = TRUE → disable End Date
+                    $("#BannerWebEndDate").prop("disabled", true).val("");
+
+                } else {
+
+                    // ✔ Present = FALSE → enable End Date
+                    $("#BannerWebEndDate").prop("disabled", false);
+
+                }
+
+            });
+
+        $(document).on("click", ".btnEditBannerWeb", function () {
+
+            let btn = $(this);
+
+            // =========================
+            // GET DATA
+            // =========================
+            let id        = btn.data("id");
+            let name      = btn.data("name");
+            let link      = btn.data("link");
+            let image     = btn.data("image");
+            let imagePath = btn.data("imagepath");
+            let startDate = btn.data("startdate");
+            let endDate   = btn.data("enddate");
+            let present   = btn.data("present");
+            let statusId  = btn.data("statusid");
+
+            // =========================
+            // SET VALUES
+            // =========================
+            $("#BannerWebID").val(id);
+            $("#BannerWebDescription").val(name);
+            $("#BannerWebLink").val(link);
+
+
+            // =========================
+            // PRESENT + DATES 🔥
+            // =========================
+            $("#BannerWebPresentToggle").prop("checked", present === true || present === "true");
+             
+            $("#BannerWebStartDate").val(formatDate(startDate));
+            $("#BannerWebEndDate").val(formatDate(endDate));
+
+            // toggle EndDate enable/disable
+            if (present === true || present === "true") {
+
+                $("#BannerWebEndDate").prop("disabled", true);
+
+            } else {
+
+                $("#BannerWebEndDate").prop("disabled", false);
+
+            }
+
+            $("#BannerWebStatusID").val(statusId);
+            $("#BannerWebStatusToggle").prop("checked", statusId === "A");
+
+            // =========================
+            // IMAGE HANDLING 🔥
+            // =========================
+            let preview     = $("#bannerWebImagePreview");
+            let placeholder = $("#saveBannerWebModal .placeholder-icon");
+
+            if (image) {
+
+                preview
+                    .attr("src", imagePath + image)
+                    .removeClass("d-none");
+
+                placeholder.addClass("d-none");
+
+                $(".btn-clear-Web").show();
+                $(".btn-view-Web").show();
+
+                $("#ClearWebImage").val("false");
+
+            } else {
+
+                preview
+                    .attr("src", "")
+                    .addClass("d-none");
+
+                placeholder.removeClass("d-none");
+
+                $(".btn-clear-Web").hide();
+                $(".btn-view-Web").hide();
+
+                $("#ClearWebImage").val("false");
+            }
+
+            // =========================
+            // TITLE
+            // =========================
+            $("#modalBannerWebTitle").text("Edit Banner");
+
+            // =========================
+            // SHOW MODAL
+            // =========================
+            $("#saveBannerWebModal").modal("show");
+
+        });
+
+        let deleteBannerWebId = 0;
+
+        $(document).on("click", ".btnDeleteBannerWeb", function () {
+
+            let id = $(this).data("id");
+
+            // set hidden input
+            $("#deletedBannerWebId").val(id);
+
+            // optional message
+            $("#deleteBannerWebMessage").text("Are you sure you want to delete this Banner?");
+
+            // reset error message
+            $("#deleteModalBannerWebMessage").hide().html("");
+
+            // show modal
+            $("#deleteBannerWebModal").modal("show");
+
+        });
 
             const wrapperWeb = document.querySelector("#saveBannerWebModal .image-box-wrapper");
 
@@ -564,6 +725,9 @@
                                    data-link="${row.link ?? ''}"
                                    data-image="${row.image ?? ''}"
                                    data-imagepath="${row.imagePath ?? ''}"
+                                    data-startdate="${row.startDate ?? ''}"
+                                    data-enddate="${row.endDate ?? ''}"
+                                    data-present="${row.present ?? false}"
                                    data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
                                 </a>
@@ -583,6 +747,66 @@
             order: [[1, "asc"]]
         });
 
+                      $(document).on("click", "#btnConfirmDeleteBannerWeb", function () {
+
+            let btn     = $(this);
+            let spinner = $("#btnDeleteConfirmBannerWebSpinner");
+
+            let id = $("#deletedBannerWebId").val();
+
+            if (!id || id === "0") return;
+
+            // =========================
+            // UI LOADING
+            // =========================
+            spinner.removeClass("d-none");
+            btn.prop("disabled", true);
+
+            // =========================
+            // AJAX
+            // =========================
+            $.ajax({
+                url: '@Url.Action("DeleteBannerWeb", "BannersPages")',
+                type: "POST",
+                data: { id: id },
+
+                success: function (response) {
+
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
+
+                    if (response.success) {
+
+                        toastr.success(response.message);
+
+                        $("#deleteBannerWebModal").modal("hide");
+
+                        // 🔥 reload table
+                        $("#tableBannersWeb").DataTable().ajax.reload(null, false);
+
+                        $("#deletedBannerWebId").val(0);
+
+                    } else {
+
+                        $("#deleteModalBannerWebMessage")
+                            .html(response.message)
+                            .show();
+                    }
+                },
+
+                error: function () {
+
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
+
+                    $("#deleteModalBannerWebMessage")
+                        .html("Something went wrong")
+                        .show();
+                }
+            });
+
+        });
+
             function resetBannerWebForm() {
 
                 // =========================
@@ -594,9 +818,22 @@
                 // =========================
                 // Inputs
                 // =========================
-                $('#BannerWebDescription').val('');
-                $('#BannerWebSentence').val('');
+                $('#BannerWebDescription').val(''); 
                 $('#BannerWebLink').val('');
+
+                // =========================
+                // 🔥 DATE TODAY
+                // =========================
+                let today = new Date().toISOString().split('T')[0];
+
+                $("#BannerWebStartDate").val(today);
+                $("#BannerWebEndDate").val("");
+
+                // =========================
+                // PRESENT
+                // =========================
+                $("#BannerWebPresentToggle").prop("checked", true);
+                $("#BannerWebEndDate").prop("disabled", true);
 
                 // =========================
                 // Status
@@ -622,8 +859,7 @@
                 // =========================
                 // Validation Messages
                 // =========================
-                $('#BannerWebDescriptionMessage').html('');
-                $('#BannerWebSentenceMessage').html('');
+                $('#BannerWebDescriptionMessage').html(''); 
                 $('#BannerWebLinkMessage').html('');
 
                 // =========================
@@ -641,11 +877,15 @@
                 let spinner = $("#btnSaveBannerWebSpinner");
 
                 let id          = $("#BannerWebID").val();
-                let description = $("#BannerWebDescription").val().trim();
-                let sentence    = $("#BannerWebSentence").val().trim();
+                let description = $("#BannerWebDescription").val().trim(); 
                 let link        = $("#BannerWebLink").val().trim();
                 let statusId    = $("#BannerWebStatusID").val();
                 let imageFile   = $("#bannerWebImage")[0].files[0];
+
+                let present   = $("#BannerWebPresentToggle").is(":checked");
+                let startDate = $("#BannerWebStartDate").val();
+                let endDate   = $("#BannerWebEndDate").val();
+
                 let clearImage  = $("#ClearWebImage").val();
                 let pageLocationId = $("#BannerLocationPage").val();
 
@@ -654,8 +894,7 @@
                 // =========================
                 // Reset messages
                 // =========================
-                $("#BannerWebDescriptionMessage").html("");
-                $("#BannerWebSentenceMessage").html("");
+                $("#BannerWebDescriptionMessage").html(""); 
                 $("#BannerWebLinkMessage").html("");
 
                 // =========================
@@ -670,7 +909,25 @@
                     toastr.error("Image is required");
                     isValid = false;
                 }
+                 
+                if (!present) {
 
+                    if (!startDate) {
+                        toastr.error("Start Date is required");
+                        isValid = false;
+                    }
+
+                    if (!endDate) {
+                        toastr.error("End Date is required");
+                        isValid = false;
+                    }
+
+                    if (startDate && endDate && startDate > endDate) {
+                        toastr.error("Start Date must be before End Date");
+                        isValid = false;
+                    }
+                }
+                 
                 if (!isValid) return;
 
                 // =========================
@@ -685,11 +942,23 @@
                 let formData = new FormData();
 
                 formData.append("ID", id);
-                formData.append("Description", description);
-                formData.append("Sentence", sentence);
+                formData.append("Description", description); 
                 formData.append("Link", link);
                 formData.append("StatusID", statusId);
                 formData.append("PageLocationID", pageLocationId);
+
+
+                formData.append("Present", present);
+
+                 formData.append("StartDate", startDate || "");
+
+                if (!present) {
+                    formData.append("EndDate", endDate || "");
+                } else {
+                    formData.append("EndDate", "");
+                }
+
+
                 formData.append("ClearWebImage", clearImage);
 
                 if (imageFile) {
@@ -741,6 +1010,37 @@
 
             ///////////////////////////////////////////////////// BANNER MOBILE /////////////////////////////////////////////////////
              
+                $('#BannerMobileStartDate').daterangepicker({  singleDatePicker: true,
+                    autoApply: true,
+                    showDropdowns: true,
+                    timePicker: false,
+                    locale: { format: 'YYYY-MM-DD' }
+                });
+
+
+                $('#BannerMobileEndDate').daterangepicker({  singleDatePicker: true,
+                    autoApply: true,
+                    showDropdowns: true,
+                    timePicker: false,
+                    locale: { format: 'YYYY-MM-DD' }
+                });
+
+            $(document).on("change", "#BannerMobilePresentToggle", function () {
+
+                if ($(this).is(":checked")) {
+
+                    // ✔ Present = TRUE → disable End Date
+                    $("#BannerMobileEndDate").prop("disabled", true).val("");
+
+                } else {
+
+                    // ✔ Present = FALSE → enable End Date
+                    $("#BannerMobileEndDate").prop("disabled", false);
+
+                }
+
+            });
+
             const wrapperMobile = document.querySelector("#saveBannerMobileModal .image-box-wrapper");
 
             if (wrapperMobile) {
@@ -758,6 +1058,7 @@
                 viewBtn.style.display  = "none";
 
                 function resetBannerMobileImage(clearImageValue = "false") {
+
                     input.value = "";
                     preview.src = "";
                     preview.classList.add("d-none");
@@ -1023,17 +1324,20 @@
 
                             <div class="dropdown-menu">
 
-                                <a class="dropdown-item btnEditBannerMobile"
-                                   data-id="${row.id}"
-                                   data-name="${row.name ?? ''}"
-                                   data-image="${row.image ?? ''}"
-                                   data-imagepath="${row.imagePath ?? ''}"
-                                   data-categoryid="${row.categoryID ?? '0'}"
-                                   data-subcategoryid="${row.subCategoryID ?? '0'}"
-                                   data-productid="${row.productID ?? '0'}"
-                                   data-statusid="${row.statusID}">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
+                                     <a class="dropdown-item btnEditBannerMobile"
+                                       data-id="${row.id}"
+                                       data-name="${row.name ?? ''}"
+                                       data-image="${row.image ?? ''}"
+                                       data-imagepath="${row.imagePath ?? ''}"
+                                       data-categoryid="${row.categoryID ?? '0'}"
+                                       data-subcategoryid="${row.subCategoryID ?? '0'}"
+                                       data-productid="${row.productID ?? '0'}"
+                                       data-startdate="${row.startDate ?? ''}"
+                                       data-enddate="${row.endDate ?? ''}"
+                                       data-present="${row.present ?? false}"
+                                       data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
 
                                 <a class="dropdown-item btnDeleteBannerMobile"
                                    data-id="${row.id}">
@@ -1050,72 +1354,214 @@
             order: [[1, "asc"]]
         });
 
-            function resetBannerMobileForm() {
+          $(document).on("click", ".btnEditBannerMobile", function () {
 
-                // =========================
-                // IDs
-                // =========================
-                $('#BannerMobileID').val(0);
-                $('#BannerMobileTypeID').val('');
+            let btn = $(this);
 
-                // =========================
-                // Inputs
-                // =========================
-                $('#BannerMobileDescription').val('');
+            // =========================
+            // GET DATA
+            // =========================
+            let id              = btn.data("id");
+            let name            = btn.data("name");
+            let image           = btn.data("image");
+            let imagePath       = btn.data("imagepath");
+            let categoryId      = btn.data("categoryid");
+            let subCategoryId   = btn.data("subcategoryid");
+            let productId       = btn.data("productid");
+            let startDate = btn.data("startdate");
+            let endDate   = btn.data("enddate");
+            let present   = btn.data("present");
+            let statusId        = btn.data("statusid");
 
-                // =========================
-                // Dropdowns (selectpicker)
-                // =========================
-                $('#BannerMobileCategory')
-                    .val(0)
-                    .selectpicker('destroy')
-                    .selectpicker('render');
+            // =========================
+            // SET BASIC VALUES
+            // =========================
+            $("#BannerMobileID").val(id);
+            $("#BannerMobileDescription").val(name);
 
-                $('#BannerMobileSubCategory')
-                    .html('')
-                    .selectpicker('destroy')
-                    .selectpicker('render');
+            $("#BannerMobileStatusID").val(statusId);
+            $("#BannerMobileStatusToggle").prop("checked", statusId === "A");
 
-                $('#BannerMobileProduct')
-                    .html('')
-                    .selectpicker('refresh')
-                    .selectpicker('render');
+        // =========================
+        // PRESENT + DATES 🔥
+        // =========================
+        $("#BannerMobilePresentToggle").prop("checked", present === true || present === "true");
 
-                // =========================
-                // Status
-                // =========================
-                $('#BannerMobileStatusToggle').prop('checked', true);
-                $('#BannerMobileStatusID').val('A');
+        $("#BannerMobileStartDate").val(formatDate(startDate));
+        $("#BannerMobileEndDate").val(formatDate(endDate));
 
-                // =========================
-                // Image Reset
-                // =========================
-                $('#bannerMobileImage').val('');
+        // toggle EndDate enable/disable
+        if (present === true || present === "true") {
 
-                $('#bannerMobileImagePreview')
-                    .attr('src', '')
-                    .addClass('d-none');
+            $("#BannerMobileEndDate").prop("disabled", true);
 
-                // show placeholder again
-                $('#saveBannerMobileModal .placeholder-icon').removeClass('d-none');
+        } else {
 
-                // reset clear flag
-                $('#ClearImageMobile').val('false');
+            $("#BannerMobileEndDate").prop("disabled", false);
 
-                // =========================
-                // Validation Messages
-                // =========================
-                $('#BannerMobileDescriptionMessage').html('');
-                $('#BannerMobileCategoryMessage').html('');
-                $('#BannerMobileSubCategoryMessage').html('');
-                $('#BannerMobileProductMessage').html('');
+        }
 
-                // =========================
-                // Modal Title
-                // =========================
-                $('#modalBannerMobileTitle').text('Create New BannerMobile');
+            // =========================
+            // CATEGORY (SELECTPICKER)
+            // =========================
+            $("#BannerMobileCategory")
+                .val(categoryId || 0)
+                .selectpicker('destroy')
+                .selectpicker('render');
 
+            // =========================
+            // LOAD SUBCATEGORY + PRODUCT 🔥
+            // =========================
+            let selectedSub = new Set();
+            if (subCategoryId && subCategoryId !== "0") {
+                selectedSub.add(String(subCategoryId));
             }
+
+            // Load subcategories then restore selection
+            LoadSubCategories(true, selectedSub);
+
+            // Delay loading products until subcategory is ready
+            setTimeout(function () {
+
+                $("#BannerMobileSubCategory")
+                    .val(subCategoryId || 0)
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+                LoadProducts();
+
+                setTimeout(function () {
+                    $("#BannerMobileProduct")
+                        .val(productId || 0)
+                        .selectpicker('destroy')
+                        .selectpicker('render');
+                }, 300);
+
+            }, 300);
+
+            // =========================
+            // IMAGE HANDLING 🔥
+            // =========================
+            let preview     = $("#bannerMobileImagePreview");
+            let placeholder = $("#saveBannerMobileModal .placeholder-icon");
+
+            if (image) {
+
+                preview
+                    .attr("src", imagePath + image)
+                    .removeClass("d-none");
+
+                placeholder.addClass("d-none");
+
+                $(".btn-clear-mobile").show();
+                $(".btn-view-mobile").show();
+
+                $("#ClearImageMobile").val("false");
+
+            } else {
+
+                preview
+                    .attr("src", "")
+                    .addClass("d-none");
+
+                placeholder.removeClass("d-none");
+
+                $(".btn-clear-mobile").hide();
+                $(".btn-view-mobile").hide();
+
+                $("#ClearImageMobile").val("false");
+            }
+
+            // =========================
+            // TITLE
+            // =========================
+            $("#modalBannerMobileTitle").text("Edit Banner");
+
+            // =========================
+            // SHOW MODAL
+            // =========================
+            $("#saveBannerMobileModal").modal("show");
+
+        });
+
+        function resetBannerMobileForm() {
+
+            // =========================
+            // IDs
+            // =========================
+            $('#BannerMobileID').val(0);
+            $('#BannerMobileTypeID').val('');
+
+            // =========================
+            // Inputs
+            // =========================
+            $('#BannerMobileDescription').val('');
+
+            // =========================
+            // Dropdowns
+            // =========================
+            $('#BannerMobileCategory')
+                .val(0)
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            $('#BannerMobileSubCategory')
+                .html('')
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            $('#BannerMobileProduct')
+                .html('')
+                .selectpicker('refresh')
+                .selectpicker('render');
+
+            // =========================
+            // 🔥 DATE TODAY
+            // =========================
+            let today = new Date().toISOString().split('T')[0];
+
+            $("#BannerMobileStartDate").val(today);
+            $("#BannerMobileEndDate").val("");
+
+            // =========================
+            // PRESENT
+            // =========================
+            $("#BannerMobilePresentToggle").prop("checked", true);
+            $("#BannerMobileEndDate").prop("disabled", true);
+
+            // =========================
+            // Status
+            // =========================
+            $('#BannerMobileStatusToggle').prop('checked', true);
+            $('#BannerMobileStatusID').val('A');
+
+            // =========================
+            // Image Reset
+            // =========================
+            $('#bannerMobileImage').val('');
+
+            $('#bannerMobileImagePreview')
+                .attr('src', '')
+                .addClass('d-none');
+
+            $('#saveBannerMobileModal .placeholder-icon').removeClass('d-none');
+
+            $('#ClearImageMobile').val('false');
+
+            // =========================
+            // Validation Messages
+            // =========================
+            $('#BannerMobileDescriptionMessage').html('');
+            $('#BannerMobileCategoryMessage').html('');
+            $('#BannerMobileSubCategoryMessage').html('');
+            $('#BannerMobileProductMessage').html('');
+
+            // =========================
+            // Modal Title
+            // =========================
+            $('#modalBannerMobileTitle').text('Create New BannerMobile');
+
+        }
 
             let currentCategoryOptionIds = [];
             let subCatMetaById = {};
@@ -1233,7 +1679,7 @@
                 });
             }
 
-                $(document).on("click", "#btnSaveBannerMobile", function (e) {
+        $(document).on("click", "#btnSaveBannerMobile", function (e) {
 
             e.preventDefault();
 
@@ -1247,6 +1693,10 @@
             let categoryId    = $("#BannerMobileCategory").val();
             let subCategoryId = $("#BannerMobileSubCategory").val();
             let productId     = $("#BannerMobileProduct").val();
+
+            let present   = $("#BannerMobilePresentToggle").is(":checked");
+            let startDate = $("#BannerMobileStartDate").val();
+            let endDate   = $("#BannerMobileEndDate").val();
 
             let imageFile     = $("#bannerMobileImage")[0].files[0];
             let clearImage    = $("#ClearImageMobile").val();
@@ -1287,6 +1737,24 @@
                 isValid = false;
             }
 
+            if (!present) {
+
+                if (!startDate) {
+                    toastr.error("Start Date is required");
+                    isValid = false;
+                }
+
+                if (!endDate) {
+                    toastr.error("End Date is required");
+                    isValid = false;
+                }
+
+                if (startDate && endDate && startDate > endDate) {
+                    toastr.error("Start Date must be before End Date");
+                    isValid = false;
+                }
+            }
+
             if (!isValid) return;
 
             // =========================
@@ -1315,6 +1783,16 @@
             if (categoryId !== null)    formData.append("CategoryID", categoryId);
             if (subCategoryId !== null) formData.append("SubCategoryID", subCategoryId);
             if (productId !== null)     formData.append("ProductID", productId);
+
+            formData.append("Present", present);
+
+             formData.append("StartDate", startDate || "");
+
+            if (!present) { 
+                formData.append("EndDate", endDate || "");
+            } else { 
+                formData.append("EndDate", "");
+            }
 
             formData.append("ClearImageMobile", clearImage ?? "false");
 
@@ -1363,6 +1841,85 @@
             });
 
         });
+
+        $(document).on("click", ".btnDeleteBannerMobile", function () {
+
+            let id = $(this).data("id");
+
+            // set hidden input
+            $("#deletedBannerMobileId").val(id);
+
+            // reset message
+            $("#deleteModalBannerMobileMessage").hide().html("");
+
+            // optional text
+            $("#deleteBannerMobileMessage").text("Are you sure you want to delete this Banner?");
+
+            // show modal
+            $("#deleteBannerMobileModal").modal("show");
+
+        });
+
+                $(document).on("click", "#btnConfirmDeleteBannerMobile", function () {
+
+            let btn     = $(this);
+            let spinner = $("#btnDeleteBannerMobileSpinner");
+
+            let id = $("#deletedBannerMobileId").val();
+
+            if (!id || id === "0") return;
+
+            // =========================
+            // UI LOADING
+            // =========================
+            spinner.removeClass("d-none");
+            btn.prop("disabled", true);
+
+            // =========================
+            // AJAX
+            // =========================
+            $.ajax({
+                url: '@Url.Action("DeleteBannerMobile", "BannersPages")',
+                type: "POST",
+                data: { id: id },
+
+                success: function (response) {
+
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
+
+                    if (response.success) {
+
+                        toastr.success(response.message);
+
+                        $("#deleteBannerMobileModal").modal("hide");
+
+                        // 🔥 reload table
+                        $("#tableBannersMobile").DataTable().ajax.reload(null, false);
+
+                        $("#deletedBannerMobileId").val(0);
+
+                    } else {
+
+                        $("#deleteModalBannerMobileMessage")
+                            .html(response.message)
+                            .show();
+                    }
+                },
+
+                error: function () {
+
+                    spinner.addClass("d-none");
+                    btn.prop("disabled", false);
+
+                    $("#deleteModalBannerMobileMessage")
+                        .html("Something went wrong")
+                        .show();
+                }
+            });
+
+        });
+
 
         });
   

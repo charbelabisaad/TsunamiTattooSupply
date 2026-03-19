@@ -168,16 +168,7 @@
                                                placeholder="Fill Description" />
                                         <div id="BannerWebDescriptionMessage" class="text-danger small mt-1"></div>
                                     </div>
-
-                                    <div class="mb-4">
-                                        <label for="BannerWebSentence" class="form-label fw-semibold">Sentence</label>
-                                        <input type="text"
-                                               class="form-control form-control-lg rounded-3"
-                                               id="BannerWebSentence"
-                                               name="BannerWebSentence"
-                                               placeholder="Fill Sentence" />
-                                        <div id="BannerWebSentenceMessage" class="text-danger small mt-1"></div>
-                                    </div>
+                                     
 
                                     <div class="mb-4">
                                         <label for="BannerWebLink" class="form-label fw-semibold">Link</label>
@@ -188,6 +179,50 @@
                                                placeholder="Fill Sentence" />
                                         <div id="BannerWebLinkMessage" class="text-danger small mt-1"></div>
                                     </div>
+
+                                         <div class="mt-4">
+
+
+
+                                        <!-- DATE RANGE -->
+                                        <div id="BannerWebDateRange" class="row g-3">
+
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Start Date</label>
+                                                <input type="date"
+                                                       id="BannerWebStartDate"
+                                                       class="form-control form-control-lg rounded-3" />
+                                            </div>
+
+                                            <div class="col-md-6">
+
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <label class="form-label fw-semibold">End Date</label>
+                                                    </div>
+                                                    <div class="col-6 text-right">
+                                                        <div class="custom-control custom-switch mb-0">
+                                                            <input type="checkbox"
+                                                                   class="custom-control-input"
+                                                                   id="BannerWebPresentToggle">
+                                                            <label class="custom-control-label fw-semibold" for="BannerWebPresentToggle">
+                                                                Present
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+
+                                                <input type="date"
+                                                       id="BannerWebEndDate"
+                                                       class="form-control form-control-lg rounded-3" />
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div class="mt-4">
 
                                     <div class="bannerWeb-status-box d-flex align-items-center justify-content-between rounded-3 px-3 py-3">
                                         <div>
@@ -206,6 +241,8 @@
                                             </label>
                                             <input type="hidden" id="BannerWebStatusID" name="BannerWebStatusID" value="A">
                                         </div>
+                                    </div>
+
                                     </div>
 
                                 </div>

@@ -204,25 +204,70 @@
                                         <div id="BannerMobileProductMessage" class="text-danger small mt-1"></div>
                                     </div>
 
-                                    <div class="bannerMobile-status-box d-flex align-items-center justify-content-between rounded-3 px-3 py-3">
-                                        <div>
-                                            <div class="fw-semibold">Status</div>
-                                            <small class="text-muted">Enable or disable this bannerMobile</small>
+                                    <div class="mt-4">
+
+                                       
+
+                                        <!-- DATE RANGE -->
+                                        <div id="BannerMobileDateRange" class="row g-3">
+
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Start Date</label>
+                                                <input type="date"
+                                                       id="BannerMobileStartDate"
+                                                       class="form-control form-control-lg rounded-3" />
+                                            </div>
+
+                                            <div class="col-md-6">
+
+                                                <div class="row">
+                                                    <div class="col-6">
+                                                        <label class="form-label fw-semibold">End Date</label>
+                                                    </div>
+                                                    <div class="col-6 text-right">
+                                                        <div class="custom-control custom-switch mb-0">
+                                                            <input type="checkbox"
+                                                                   class="custom-control-input"
+                                                                   id="BannerMobilePresentToggle">
+                                                            <label class="custom-control-label fw-semibold" for="BannerMobilePresentToggle">
+                                                                Present
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                
+                                                <input type="date"
+                                                       id="BannerMobileEndDate"
+                                                       class="form-control form-control-lg rounded-3" />
+                                            </div>
+
                                         </div>
 
-                                        <div class="custom-control custom-switch mb-0">
-                                            <input type="checkbox"
-                                                   class="custom-control-input"
-                                                   id="BannerMobileStatusToggle"
-                                                   name="BannerMobileStatusToggle"
-                                                   checked>
-                                            <label class="custom-control-label fw-semibold" for="BannerMobileStatusToggle">
-                                                Active
-                                            </label>
-                                            <input type="hidden" id="BannerMobileStatusID" name="BannerMobileStatusID" value="A">
-                                        </div>
                                     </div>
 
+                                    <div class="mt-4">
+
+                                        <div class="bannerMobile-status-box d-flex align-items-center justify-content-between rounded-3 px-3 py-3">
+                                            <div>
+                                                <div class="fw-semibold">Status</div>
+                                                <small class="text-muted">Enable or disable this bannerMobile</small>
+                                            </div>
+
+                                            <div class="custom-control custom-switch mb-0">
+                                                <input type="checkbox"
+                                                       class="custom-control-input"
+                                                       id="BannerMobileStatusToggle"
+                                                       name="BannerMobileStatusToggle"
+                                                       checked>
+                                                <label class="custom-control-label fw-semibold" for="BannerMobileStatusToggle">
+                                                    Active
+                                                </label>
+                                                <input type="hidden" id="BannerMobileStatusID" name="BannerMobileStatusID" value="A">
+                                            </div>
+                                        </div>
+
+                                    </div>
                                 </div>
                             </div>
                         </div>

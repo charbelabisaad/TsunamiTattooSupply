@@ -35,7 +35,7 @@ namespace TsunamiTattooSupply.Models
 		public string  Image { get; set; }
 
 		[Column (TypeName = "text")]
-		public string Link { get; set; }
+		public string? Link { get; set; }
 
 		public int? CategoryID { get; set; } 
 
@@ -46,7 +46,10 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		public bool HasPeriod { get; set; } = false;
 
-		public DateTime? StartDate { get; set; } 
+		[Column(TypeName = "date")]
+		public DateTime? StartDate { get; set; }
+
+		[Column(TypeName = "date")]
 		public DateTime? EndDate { get; set; }
 
 		public bool Present { get; set; } = false;

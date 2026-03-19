@@ -640,6 +640,8 @@
             $("#SubCategoryID").val("0");
             $("#SubCategoryDescription").val("");
             $("#SubCategorySpecsLabel").val("");
+            $("#SubCategoryProductTypesLabel").val("");
+            $("#SubCategoryProductDetailsLabel").val("");
             $("#SubCategoryDescriptionMessage").text("");
 
             $("#subcategoryStatusToggle").prop("checked", true);
@@ -777,6 +779,8 @@
                                        data-id="${row.id}"
                                        data-description="${row.description}"
                                        data-specslabel="${row.specsLabel}"
+                                       data-producttypeslabel="${row.typesLabel}"
+                                       data-productdetailslabel="${row.detailsLabel}"
                                        data-webimagepath="${row.webImagePath}"
                                        data-webimage="${row.webImage}"
                                        data-mobileimagepath="${row.mobileImagePath}"
@@ -814,7 +818,14 @@
             $("#SubCategorySpecsLabel").removeClass('border-danger');
             $("#SubCategorySpecsLabelMessage").text('');
 
+            $("#SubCategoryProductTypesLabel").removeClass('border-danger');
+            $("#SubCategoryProductTypesLabelMessage").text('');
+
+            $("#SubCategoryProductDetailsLabel").removeClass('border-danger');
+            $("#SubCategoryProductDetailsLabelMessage").text('');
+             
             let description = $('#SubCategoryDescription').val().trim();
+
             if (!description) {
                 $('#SubCategoryDescriptionMessage').text("Description is required!");
                 $('#SubCategoryDescription').addClass('border-danger');
@@ -831,12 +842,32 @@
                 return;
             }
 
+            let prodcuttypeslabel = $('#SubCategoryProductTypesLabel').val().trim();
+
+            if(!specslabel){
+                $('#SubCategoryProductTypesLabelMessage').text("Product Types Label is required!");
+                $('#SubCategoryProductTypesLabel').addClass('border-danger');
+                resetSubButton();
+                return;
+            }
+
+            let prodcutdetailslabel = $('#SubCategoryProductDetailsLabel').val().trim();
+
+            if(!specslabel){
+                $('#SubCategoryProductDetailsLabelMessage').text("Product Details Label is required!");
+                $('#SubCategoryProductDetailsLabel').addClass('border-danger');
+                resetSubButton();
+                return;
+            }
+
             let formData = new FormData();
 
             formData.append("ID", $('#SubCategoryID').val());
             formData.append("CategoryID", $('#ParentCategoryID').val());
             formData.append("Description", description);
-            formData.append("SpecsLabel", specslabel)
+            formData.append("SpecsLabel", specslabel); 
+            formData.append("ProductTypesLabel", prodcuttypeslabel);
+            formData.append("ProductDetailsLabel", prodcutdetailslabel)
             formData.append("StatusID", $('#subCategoryStatusID').val());
              
             const attach = (id, key) => {
@@ -906,6 +937,8 @@
             let id = $(this).data("id");
             let description = $(this).data("description");
             let specsLabel = $(this).data("specslabel");
+            let productTypesLabel = $(this).data("producttypeslabel");
+            let productDetailsLabel = $(this).data("productdetailslabel");
             let webPath = $(this).data("webimagepath");
             let webImg = $(this).data("webimage");
             let mobilePath = $(this).data("mobileimagepath");
@@ -918,10 +951,10 @@
              
             $("#SubCategoryID").val(id);
             $("#SubCategoryDescription").val(description);
-
-              
-
+             
             $("#SubCategorySpecsLabel").val(specsLabel);
+            $("#SubCategoryProductTypesLabel").val(productTypesLabel);
+            $("#SubCategoryProductDetailsLabel").val(productDetailsLabel);
              
             if (statusId === "A") {
                 $("#subcategoryStatusToggle").prop("checked", true);
