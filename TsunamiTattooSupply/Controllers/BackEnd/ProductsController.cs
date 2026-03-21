@@ -2083,6 +2083,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+
 		public IActionResult GetProductSizesPrice(int ProductID)
 		{
 			try
@@ -2103,7 +2104,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}).ToList();
 
 				// =====================================================
-				// 🔵 COLORS (LIKE STOCK)
+				// 🔵 COLORS
 				// =====================================================
 				var colors = _dbContext.ProductsColors
 					.Where(c => c.ProductID == ProductID && c.DeletedDate == null && c.StatusID == "A")
@@ -2113,35 +2114,74 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ColorName = c.Color.Name,
 						ColorCode = c.Color.Code
 					}).ToList();
+				
+				// =====================================================
+				// 🔵 PRICES (GROUPED → NO DUPLICATES ISSUE)
+				// =====================================================
+				var pricesDict = (
+					from p in _dbContext.Prices
 
-				// =====================================================
-				// 🔵 EXISTING PRICES
-				// =====================================================
-				var prices = _dbContext.Prices
-					.Where(pr => pr.ProductID == ProductID && pr.DeletedDate == null)
-					.Select(pr => new PriceDto
+						// 🔵 JOIN WITH VALID SIZES
+					join ps in _dbContext.ProductsSizes
+						on new { p.ProductID, p.ProductTypeID, p.ProductDetailID, p.SizeID }
+						equals new { ps.ProductID, ps.ProductTypeID, ps.ProductDetailID, ps.SizeID }
+
+						// 🔵 JOIN WITH VALID COLORS
+					join pc in _dbContext.ProductsColors
+						on new { p.ProductID, p.ColorID }
+						equals new { pc.ProductID, pc.ColorID }
+
+					where p.ProductID == ProductID
+						&& p.DeletedDate == null
+
+						// 🔥 VALID SIZE
+						&& ps.DeletedDate == null
+						&& ps.StatusID == "A"
+
+						// 🔥 VALID COLOR
+						&& pc.DeletedDate == null
+						&& pc.StatusID == "A"
+
+					select new PriceDto
 					{
-						ProductID = pr.ProductID,
-						ProductTypeID = pr.ProductTypeID,
-						ProductDetailID = pr.ProductDetailID,
-						SizeID = pr.SizeID,
-						ColorID = pr.ColorID,
-						ColorName = pr.Color.Name,
-						ColorCode = pr.Color.Code,
-						CountryID = pr.CountryID,
-						CurrencyID = pr.CurrencyID,
-						CurrencyCode = pr.Currency.Code,
-						CurrencyDescription = pr.Currency.Description,
-						CurrencySymbol = pr.Currency.Symbol,
-						Sale = pr.Sale,
-						Raise = pr.Raise,
-						Amount = pr.Amount,
-						AmountNet = pr.AmountNet,
-						UseInPrice = pr.UseInPrice,
-					}).ToList();
+						ProductID = p.ProductID,
+						ProductTypeID = p.ProductTypeID,
+						ProductDetailID = p.ProductDetailID,
+						SizeID = p.SizeID,
+						ColorID = p.ColorID,
+
+						ColorName = p.Color.Name,
+						ColorCode = p.Color.Code,
+
+						CountryID = p.CountryID,
+						CurrencyID = p.CurrencyID,
+						CurrencyCode = p.Currency.Code,
+						CurrencyDescription = p.Currency.Description,
+						CurrencySymbol = p.Currency.Symbol,
+
+						Sale = p.Sale,
+						Raise = p.Raise,
+						Amount = p.Amount,
+						AmountNet = p.AmountNet,
+						UseInPrice = p.UseInPrice
+					}
+				)
+				.ToList()
+				.GroupBy(p => (
+					p.ProductTypeID,
+					p.ProductDetailID,
+					p.SizeID,
+					p.ColorID,
+					p.CurrencyID,
+					p.CountryID   // 🔥 ADD THIS
+				))
+				.ToDictionary(
+					g => g.Key,
+					g => g.OrderByDescending(x => x.Amount).First()
+				);
 
 				// =====================================================
-				// 🔵 SIZES + TYPE + DETAIL
+				// 🔵 SIZES
 				// =====================================================
 				var sizes = _dbContext.ProductsSizes
 					.Where(ps => ps.ProductID == ProductID
@@ -2167,14 +2207,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ProductTypeDescription = g.Key.ProductTypeDescription,
 						ProductDetailID = g.Key.ProductDetailID,
 						ProductDetailDescription = g.Key.ProductDetailDescription,
-						SizeRank = g.Key.SizeRank, 
+						SizeRank = g.Key.SizeRank,
 						ProductSizePrice = new List<PriceDto>()
 					})
 					.OrderBy(x => x.SizeRank)
 					.ToList();
 
 				// =====================================================
-				// 🔥 BUILD FULL MATRIX LIKE STOCK
+				// 🔥 BUILD MATRIX (FAST)
 				// =====================================================
 				foreach (var size in sizes)
 				{
@@ -2184,13 +2224,16 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					{
 						foreach (var cur in currencies)
 						{
-							var existing = prices.FirstOrDefault(p =>
-								p.ProductTypeID == size.ProductTypeID &&
-								p.ProductDetailID == size.ProductDetailID &&
-								p.SizeID == size.SizeID &&
-								p.ColorID == color.ColorID &&
-								p.CurrencyID == cur.ID
+							var key = (
+								size.ProductTypeID,
+								size.ProductDetailID,
+								size.SizeID,
+								color.ColorID,
+								cur.ID,
+								cur.CountryID ?? 0   // 🔥 ADD THIS
 							);
+
+							pricesDict.TryGetValue(key, out var existing);
 
 							if (existing != null)
 							{
@@ -2198,7 +2241,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							}
 							else
 							{
-								// 🔵 zero price if not exists
 								list.Add(new PriceDto
 								{
 									ProductID = ProductID,
@@ -2262,7 +2304,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.Where(p => p.ProductID == productId && p.DeletedDate == null)
 					.ToListAsync();
 
-				// Composite key including currency & country
 				var priceMap = existingPrices
 					.GroupBy(p => (
 						p.ProductID,
@@ -2275,7 +2316,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.ToDictionary(g => g.Key, g => g.First());
 
 				//-------------------------------------------------
-				// 2️⃣ Preload currency-country mapping (OPTIMIZED)
+				// 2️⃣ Preload currency-country mapping
 				//-------------------------------------------------
 				var currencyIds = form.Keys
 					.Where(k => k.StartsWith("Price["))
@@ -2332,6 +2373,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					);
 
 					//-------------------------------------------------
+					// 🔥 SKIP INSERT if not used
+					//-------------------------------------------------
+					if (!useInPrice && !priceMap.ContainsKey(key))
+					{
+						continue;
+					}
+
+					//-------------------------------------------------
 					// 🔥 UPSERT
 					//-------------------------------------------------
 					if (priceMap.TryGetValue(key, out var existing))
@@ -2346,7 +2395,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					}
 					else
 					{
-						// INSERT
+						// INSERT (only if useInPrice = true)
 						var newPrice = new Price
 						{
 							ProductID = productId,
@@ -2455,12 +2504,29 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.ToList();
 
 				// =========================================
-				// STOCKS
+				// STOCKS (FIXED - NO DATA LOSS)
 				// =========================================
-				var stocks = _dbContext.Stocks
-					.AsNoTracking()
-					.Where(s => s.ProductID == productId && s.DeletedDate == null)
-					.Select(s => new
+				var stocks = (
+					from s in _dbContext.Stocks.AsNoTracking()
+
+						// LEFT JOIN SIZE
+					join ps in _dbContext.ProductsSizes
+						on new { s.ProductID, s.ProductTypeID, s.ProductDetailID, s.SizeID }
+						equals new { ps.ProductID, ps.ProductTypeID, ps.ProductDetailID, ps.SizeID }
+						into psGroup
+					from ps in psGroup.DefaultIfEmpty()
+
+						// LEFT JOIN COLOR
+					join pc in _dbContext.ProductsColors
+						on new { s.ProductID, s.ColorID }
+						equals new { pc.ProductID, pc.ColorID }
+						into pcGroup
+					from pc in pcGroup.DefaultIfEmpty()
+
+					where s.ProductID == productId
+						&& s.DeletedDate == null
+
+					select new
 					{
 						id = s.ID,
 						sizeID = s.SizeID,
@@ -2476,10 +2542,11 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						quantity = s.Quantity,
 						barcode = s.Barcode,
 						useInStock = s.UseInStock
-					})
-					.OrderBy(x => x.sizeRank)
-					.ThenBy(x => x.colorName)
-					.ToList();
+					}
+				)
+				.OrderBy(x => x.sizeRank)
+				.ThenBy(x => x.colorName)
+				.ToList();
 
 				return Json(new
 				{
@@ -2499,6 +2566,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
+
+
 		[HttpPost]
 		public async Task<IActionResult> SaveStock()
 		{

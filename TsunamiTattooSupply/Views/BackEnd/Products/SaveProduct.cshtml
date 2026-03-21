@@ -1758,7 +1758,14 @@
 
 							let color = colorGroups[colorID];
 
-							color.prices.forEach(price => {
+								let uniquePrices = {};
+
+									color.prices.forEach(p => {
+										let key = `${p.productTypeID}_${p.productDetailID}_${p.sizeID}_${p.colorID}_${p.currencyID}_${p.countryID}`;
+										uniquePrices[key] = p;
+									});
+
+									Object.values(uniquePrices).forEach(price => {
 
 								let key = `${price.productTypeID}_${price.productDetailID}_${price.sizeID}_${price.colorID}_${price.currencyID}`;
 
