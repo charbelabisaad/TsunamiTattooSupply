@@ -1110,11 +1110,11 @@
                         img.onload = function () {
 
                             // 🔥 You can change mobile dimensions if needed
-                            const requiredWidth  = 1920;
-                            const requiredHeight = 1000;
+                            const requiredWidth  = 1080;
+                            const requiredHeight = 563;
 
                             if (img.width !== requiredWidth || img.height !== requiredHeight) {
-                                toastr.error("Image dimensions must be exactly 800 x 600 pixels");
+                                toastr.error("Image dimensions must be exactly 1080 x 563 pixels");
                                 resetBannerMobileImage("false");
                                 return;
                             }
@@ -1324,20 +1324,20 @@
 
                             <div class="dropdown-menu">
 
-                                     <a class="dropdown-item btnEditBannerMobile"
-                                       data-id="${row.id}"
-                                       data-name="${row.name ?? ''}"
-                                       data-image="${row.image ?? ''}"
-                                       data-imagepath="${row.imagePath ?? ''}"
-                                       data-categoryid="${row.categoryID ?? '0'}"
-                                       data-subcategoryid="${row.subCategoryID ?? '0'}"
-                                       data-productid="${row.productID ?? '0'}"
-                                       data-startdate="${row.startDate ?? ''}"
-                                       data-enddate="${row.endDate ?? ''}"
-                                       data-present="${row.present ?? false}"
-                                       data-statusid="${row.statusID}">
-                                        <i class="fas fa-edit"></i> Edit
-                                    </a>
+                                <a class="dropdown-item btnEditBannerMobile"
+                                    data-id="${row.id}"
+                                    data-name="${row.name ?? ''}"
+                                    data-image="${row.image ?? ''}"
+                                    data-imagepath="${row.imagePath ?? ''}"
+                                    data-categoryid="${row.categoryID ?? '0'}"
+                                    data-subcategoryid="${row.subCategoryID ?? '0'}"
+                                    data-productid="${row.productID ?? '0'}"
+                                    data-startdate="${row.startDate ?? ''}"
+                                    data-enddate="${row.endDate ?? ''}"
+                                    data-present="${row.present ?? false}"
+                                    data-statusid="${row.statusID}">
+                                    <i class="fas fa-edit"></i> Edit
+                                </a>
 
                                 <a class="dropdown-item btnDeleteBannerMobile"
                                    data-id="${row.id}">
@@ -1401,6 +1401,17 @@
 
         }
 
+
+        if (categoryId) {
+                $("#BannerMobileCategoryRadio").prop("checked", true).trigger("change");
+            }
+        else if (subCategoryId) {
+            $("#BannerMobileSubCategoryRadio").prop("checked", true).trigger("change");
+        }
+        else if (productId) {
+            $("#BannerMobileProductRadio").prop("checked", true).trigger("change");
+        }
+
             // =========================
             // CATEGORY (SELECTPICKER)
             // =========================
@@ -1409,35 +1420,17 @@
                 .selectpicker('destroy')
                 .selectpicker('render');
 
-            // =========================
-            // LOAD SUBCATEGORY + PRODUCT 🔥
-            // =========================
-            let selectedSub = new Set();
-            if (subCategoryId && subCategoryId !== "0") {
-                selectedSub.add(String(subCategoryId));
-            }
-
-            // Load subcategories then restore selection
-            LoadSubCategories(true, selectedSub);
-
-            // Delay loading products until subcategory is ready
-            setTimeout(function () {
-
-                $("#BannerMobileSubCategory")
-                    .val(subCategoryId || 0)
+            $("#BannerMobileSubCategory")
+                    .val(subCategoryId)
                     .selectpicker('destroy')
                     .selectpicker('render');
-
-                LoadProducts();
-
-                setTimeout(function () {
+                     
                     $("#BannerMobileProduct")
-                        .val(productId || 0)
+                        .val(productId)
                         .selectpicker('destroy')
                         .selectpicker('render');
-                }, 300);
-
-            }, 300);
+          
+             
 
             // =========================
             // IMAGE HANDLING 🔥
@@ -1484,6 +1477,37 @@
 
         });
 
+        $(document).on('change', 'input[name="BannerMobileLink"]', function () {
+            toggleBannerMobileLink(this.id);
+        });
+
+        $(document).ready(function () {
+            toggleBannerMobileLink($('input[name="BannerMobileLink"]:checked').attr('id'));
+        });
+
+        function toggleBannerMobileLink(radioId) {
+
+            const map = {
+                BannerMobileCategoryRadio: '#BannerMobileCategory',
+                BannerMobileSubCategoryRadio: '#BannerMobileSubCategory',
+                BannerMobileProductRadio: '#BannerMobileProduct'
+            };
+
+            // disable all
+            $('#BannerMobileCategory, #BannerMobileSubCategory, #BannerMobileProduct')
+                .prop('disabled', true);
+
+            // enable selected
+            if (map[radioId]) {
+                $(map[radioId]).prop('disabled', false);
+            }
+
+            // 🔥 refresh AFTER all changes
+            $('#BannerMobileCategory').selectpicker('destroy').selectpicker('render');
+            $('#BannerMobileSubCategory').selectpicker('destroy').selectpicker('render');
+            $('#BannerMobileProduct').selectpicker('destroy').selectpicker('render');
+        }
+
         function resetBannerMobileForm() {
 
             // =========================
@@ -1496,6 +1520,8 @@
             // Inputs
             // =========================
             $('#BannerMobileDescription').val('');
+
+             $("#BannerMobileCategoryRadio").prop("checked", true).trigger('change');
 
             // =========================
             // Dropdowns
@@ -1512,7 +1538,7 @@
 
             $('#BannerMobileProduct')
                 .html('')
-                .selectpicker('refresh')
+                .selectpicker('destroy')
                 .selectpicker('render');
 
             // =========================
@@ -1566,118 +1592,118 @@
             let currentCategoryOptionIds = [];
             let subCatMetaById = {};
 
-            $(document).on('change', '#BannerMobileCategory', function () {
-                LoadSubCategories();
-            });
+            // $(document).on('change', '#BannerMobileCategory', function () {
+            //     LoadSubCategories();
+            // });
 
-            function LoadSubCategories(restoreSelection = false, selectedSubCatIds = new Set()) {
+            // function LoadSubCategories(restoreSelection = false, selectedSubCatIds = new Set()) {
 
-                let categoryId = $('#BannerMobileCategory').val();
-                let subSelect  = $('#BannerMobileSubCategory');
+            //     let categoryId = $('#BannerMobileCategory').val();
+            //     let subSelect  = $('#BannerMobileSubCategory');
 
-                subSelect.empty();
-                currentCategoryOptionIds = [];
+            //     subSelect.empty();
+            //     currentCategoryOptionIds = [];
 
-                // Default option
-                subSelect.append('<option value="">-- Select Sub Category --</option>');
+            //     // Default option
+            //     subSelect.append('<option value="">-- Select Sub Category --</option>');
 
-                if (!categoryId || categoryId === "0") {
-                    subSelect.selectpicker('destroy').selectpicker('render');
-                    return;
-                }
+            //     if (!categoryId || categoryId === "0") {
+            //         subSelect.selectpicker('destroy').selectpicker('render');
+            //         return;
+            //     }
 
-                $.ajax({
-                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
-                    type: 'GET',
-                    data: { categoryId },
-                    success: function (items) {
+            //     $.ajax({
+            //         url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+            //         type: 'GET',
+            //         data: { categoryId },
+            //         success: function (items) {
 
-                        (items || []).forEach(sc => {
-                            let id = String(sc.id);
+            //             (items || []).forEach(sc => {
+            //                 let id = String(sc.id);
 
-                            subSelect.append(`<option value="${id}">${sc.name}</option>`);
+            //                 subSelect.append(`<option value="${id}">${sc.name}</option>`);
 
-                            currentCategoryOptionIds.push(id);
+            //                 currentCategoryOptionIds.push(id);
 
-                            if (!subCatMetaById[id]) {
-                                subCatMetaById[id] = {
-                                    id: sc.id,
-                                    name: sc.name,
-                                    categoryId: parseInt(categoryId)
-                                };
-                            }
-                        });
+            //                 if (!subCatMetaById[id]) {
+            //                     subCatMetaById[id] = {
+            //                         id: sc.id,
+            //                         name: sc.name,
+            //                         categoryId: parseInt(categoryId)
+            //                     };
+            //                 }
+            //             });
 
-                        subSelect.selectpicker('destroy').selectpicker('render');
+            //             subSelect.selectpicker('destroy').selectpicker('render');
 
-                        // Restore or clear selection
-                        if (restoreSelection) {
-                            let validSelected = currentCategoryOptionIds.filter(
-                                id => selectedSubCatIds.has(id)
-                            );
-                            subSelect.selectpicker('val', validSelected);
-                        } else {
-                            subSelect.selectpicker('val', []);
-                        }
+            //             // Restore or clear selection
+            //             if (restoreSelection) {
+            //                 let validSelected = currentCategoryOptionIds.filter(
+            //                     id => selectedSubCatIds.has(id)
+            //                 );
+            //                 subSelect.selectpicker('val', validSelected);
+            //             } else {
+            //                 subSelect.selectpicker('val', []);
+            //             }
 
-                        subSelect.selectpicker('destroy').selectpicker('render');
+            //             subSelect.selectpicker('destroy').selectpicker('render');
 
-                        // Optional (if you use tags)
-                        if (typeof renderTags === "function") {
-                            renderTags();
-                        }
-                    },
-                    error: function () {
-                        toastr.error('Failed to load sub-categories');
-                    }
-                });
-            }
+            //             // Optional (if you use tags)
+            //             if (typeof renderTags === "function") {
+            //                 renderTags();
+            //             }
+            //         },
+            //         error: function () {
+            //             toastr.error('Failed to load sub-categories');
+            //         }
+            //     });
+            // }
 
-            $(document).on('change', '#BannerMobileSubCategory', function () {
-                LoadProducts();
-            });
+            // $(document).on('change', '#BannerMobileSubCategory', function () {
+            //     LoadProducts();
+            // });
 
-            function LoadProducts() {
+            // function LoadProducts() {
 
-                let categoryId     = $('#BannerMobileCategory').val();
-                let subCategoryId  = $('#BannerMobileSubCategory').val();
-                let productSelect  = $('#BannerMobileProduct');
+            //     let categoryId     = $('#BannerMobileCategory').val();
+            //     let subCategoryId  = $('#BannerMobileSubCategory').val();
+            //     let productSelect  = $('#BannerMobileProduct');
 
-                productSelect.empty();
-                productSelect.append('<option value="">-- Select Product --</option>');
+            //     productSelect.empty();
+            //     productSelect.append('<option value="">-- Select Product --</option>');
 
-                if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
-                    productSelect.selectpicker('destroy').selectpicker('render');
-                    return;
-                }
+            //     if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
+            //         productSelect.selectpicker('destroy').selectpicker('render');
+            //         return;
+            //     }
 
-                $.ajax({
-                    url: '@Url.Action("GetProducts", "BannersHomeMobile")',
-                    type: 'GET',
-                    data: {
-                        CategoryId: categoryId,
-                        SubCategoryId: subCategoryId
-                    },
-                    success: function (items) {
+            //     $.ajax({
+            //         url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+            //         type: 'GET',
+            //         data: {
+            //             CategoryId: categoryId,
+            //             SubCategoryId: subCategoryId
+            //         },
+            //         success: function (items) {
 
-                        productSelect.empty();
-                        productSelect.append('<option value="">-- Select Product --</option>');
+            //             productSelect.empty();
+            //             productSelect.append('<option value="">-- Select Product --</option>');
 
-                        (items || []).forEach(p => {
-                            productSelect.append(
-                                `<option value="${p.productID}">
-                                    ${p.productName} - ${p.productGroupName}
-                                </option>`
-                            );
-                        });
+            //             (items || []).forEach(p => {
+            //                 productSelect.append(
+            //                     `<option value="${p.productID}">
+            //                         ${p.productName} - ${p.productGroupName}
+            //                     </option>`
+            //                 );
+            //             });
 
-                        productSelect.selectpicker('destroy').selectpicker('render');
-                    },
-                    error: function () {
-                        toastr.error('Failed to load products');
-                    }
-                });
-            }
+            //             productSelect.selectpicker('destroy').selectpicker('render');
+            //         },
+            //         error: function () {
+            //             toastr.error('Failed to load products');
+            //         }
+            //     });
+            // }
 
         $(document).on("click", "#btnSaveBannerMobile", function (e) {
 
@@ -1700,7 +1726,8 @@
 
             let imageFile     = $("#bannerMobileImage")[0].files[0];
             let clearImage    = $("#ClearImageMobile").val();
-            let pageLocationId = $("#BannerLocationPage").val();
+            let pageLocationId = $("#BannerLocationPage").val(); 
+            let bannerLink = $('input[name="BannerMobileLink"]:checked').attr('id');
 
             let isValid = true;
 
@@ -1717,19 +1744,23 @@
                 isValid = false;
             }
 
-            if (!categoryId || categoryId === "0") {
-                $("#BannerMobileCategoryMessage").html("Category is required");
-                isValid = false;
+            if (bannerLink === 'BannerCategoryRadio') {
+                if (!categoryId || categoryId === "0") {
+                    $("#BannerCategoryMessage").text("Category is required");
+                    isValid = false;
+                }
             }
-
-            if (!subCategoryId || subCategoryId === "0") {
-                $("#BannerMobileSubCategoryMessage").html("Sub Category is required");
-                isValid = false;
+            else if (bannerLink === 'BannerSubCategoryRadio') {
+                if (!subCategoryId || subCategoryId === "0") {
+                    $("#BannerSubCategoryMessage").text("Sub Category is required");
+                    isValid = false;
+                }
             }
-
-            if (!productId || productId === "0") {
-                $("#BannerMobileProductMessage").html("Product is required");
-                isValid = false;
+            else if (bannerLink === 'BannerProductRadio') {
+                if (!productId || productId === "0") {
+                    $("#BannerProductMessage").text("Product is required");
+                    isValid = false;
+                }
             }
 
             if (id === "0" && !imageFile) {
@@ -1796,6 +1827,8 @@
 
             formData.append("ClearImageMobile", clearImage ?? "false");
 
+            formData.append("BannerLink", bannerLink);
+             
             if (imageFile) {
                 formData.append("Image", imageFile);
             }

@@ -75,13 +75,13 @@ namespace TsunamiTattooSupply.Models
 		public virtual PageLocation PageLocation { get; set; }
 
 		[ForeignKey("CategoryID")]
-		public virtual Category Category { get; set; }
+		public virtual Category? Category { get; set; }
 
 		[ForeignKey("SubCategoryID")]
-		public virtual SubCategory SubCategory { get; set; }
+		public virtual SubCategory? SubCategory { get; set; }
 
 		[ForeignKey("ProductID")]
-		public virtual Product Product { get; set; }
+		public virtual Product? Product { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

@@ -7,6 +7,7 @@ namespace TsunamiTattooSupply.Models
 	[Table("BannersMobiles")]
 	[Index(nameof(CategoryID))]
 	[Index(nameof(SubCategoryID))]
+	[Index(nameof(GroupID))]
 	[Index(nameof(ProductID))]
 	[Index(nameof(StatusID))]
 	public class BannerMobile
@@ -22,15 +23,16 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(50)]
 		public string Description { get; set; } = string.Empty;
+ 
+		public int? CategoryID { get; set; }
+		 
+		public int? SubCategoryID { get; set; }
+ 
+		public int? GroupID { get; set; }
 
-		[Required]
-		public int CategoryID { get; set; }
+		public int? ProductID { get; set; }
 
-		[Required]
-		public int SubCategoryID { get; set; }
-
-		[Required]
-		public int ProductID { get; set; }
+		public bool ShopNow { get; set; } = false;
 
 		[Required]
 		public string StatusID { get; set; }
@@ -50,13 +52,16 @@ namespace TsunamiTattooSupply.Models
 		public DateTime? DeletedDate { get; set; }
 
 		[ForeignKey("CategoryID")]
-		public virtual Category Category { get; set; }
+		public virtual Category? Category { get; set; }
 
 		[ForeignKey("SubCategoryID")]
-		public virtual SubCategory SubCategory { get; set; }
+		public virtual SubCategory? SubCategory { get; set; }
+
+		[ForeignKey("GroupID")]
+		public virtual Group? Group { get; set; }
 
 		[ForeignKey("ProductID")]
-		public virtual Product Product { get; set; }
+		public virtual Product? Product { get; set; }
 
 		[ForeignKey("StatusID")]
 		public virtual Status Status { get; set; }

@@ -37,7 +37,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			PageViewModel vm = new PageViewModel
 			{
 				locations = GetPageLocations(),
-				categories = GetCategories()
+				categories = GetCategories(),
+				subcategories = GetSubCategories(),
+				products = GetProducts(),
 
 			};
 
@@ -75,22 +77,39 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpGet]
-		public IActionResult GetSubCategories(int categoryId)
+		public List<SubCategoryDto> GetSubCategories()
 		{
-			var subCategories = _dbContext.SubCategories
+			return _dbContext.SubCategories
 				.Where(sc =>
 					sc.DeletedDate == null &&
-					sc.StatusID == "A" &&
-					sc.CategoryID == categoryId)
+					sc.StatusID == "A" )
 				.OrderBy(sc => sc.Rank)
-				.Select(sc => new
+				.Select(sc => new SubCategoryDto
 				{
-					id = sc.ID,
-					name = sc.Description
+					ID = sc.ID,
+					Description = sc.Description
 				})
 				.ToList();
 
-			return Json(subCategories);
+			 
+		}
+
+		[HttpGet]
+		public List<ProductDto> GetProducts()
+		{
+			return _dbContext.ProductsSubCategories
+				.AsNoTracking()
+				.Where(ps =>
+					ps.DeletedDate == null &&
+					ps.Product.DeletedDate == null)
+				.OrderBy(ps => ps.Product.Name)
+				.Select(ps => new ProductDto
+				{
+					ID = ps.Product.ID,
+					Name = ps.Product.Name,
+					GroupDescription = ps.Product.Group.Name
+				})
+				.ToList();
 		}
 
 		////////////////////////////////////////// BANNER WEB //////////////////////////////////////////
@@ -388,6 +407,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		int? CategoryID,
 		int? SubCategoryID,
 		int? ProductID,
+		string BannerLink, // 👈 add this
 		DateTime StartDate,
 		DateTime? EndDate,
 		bool Present,
@@ -395,6 +415,33 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
+
+				if (BannerLink == "BannerMobileCategoryRadio")
+				{
+					if (CategoryID <= 0)
+						return Json(new { success = false, message = "Category is required." });
+
+					SubCategoryID = null;
+					ProductID = null;
+				}
+				else if (BannerLink == "BannerMobileSubCategoryRadio")
+				{
+					if (SubCategoryID <= 0)
+						return Json(new { success = false, message = "Sub Category is required." });
+
+					CategoryID = null;
+					ProductID = null;
+				}
+				else if (BannerLink == "BannerMobileProductRadio")
+				{
+					if (ProductID <= 0)
+						return Json(new { success = false, message = "Product is required." });
+
+					CategoryID = null;
+					SubCategoryID = null;
+				}
+
+
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
 				string bannerImagePath = Global.BannerPageMobileImagePath;
@@ -676,12 +723,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Name = b.Name,
 					ImagePath = Global.BannerPageMobileImagePath,
 					Image = b.Image,
-					CategoryID = b.Category.ID,
-					CategoryDescription = b.Category.Description,
-					SubCategoryID = b.SubCategory.ID,
-					SubCategoryDescription = b.SubCategory.Description,
-					ProductID = b.Product.ID,
-					ProductDescription = b.Product.Name + " - " + b.Product.Group.Name,
+					CategoryID = b.CategoryID != null ? b.CategoryID : null,
+					CategoryDescription = b.CategoryID != null ? b.Category.Description : null,
+					SubCategoryID = b.SubCategoryID != null ? b.SubCategoryID : null,
+					SubCategoryDescription = b.SubCategoryID != null ?  b.SubCategory.Description : null,
+					ProductID = b.ProductID != null ? b.ProductID : null,
+					ProductDescription = b.ProductID != null ? b.Product.Name : null,
 					StartDate = Convert.ToDateTime(b.StartDate),
 					EndDate = Convert.ToDateTime(b.EndDate),
 					Present = b.Present,

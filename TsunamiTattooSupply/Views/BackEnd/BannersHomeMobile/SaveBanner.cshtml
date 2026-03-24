@@ -168,39 +168,121 @@
                                         placeholder="Fill Description" />
                                         <div id="BannerDescriptionMessage" class="text-danger small mt-1"></div>
                                     </div>
-
+                                    
                                     <div class="mb-4">
-                                        <label for="BannerCategory" class="form-label fw-semibold">Category</label>
-                                        <select class="form-control form-control-lg selectpicker rounded-3"
-                                        id="BannerCategory"
-                                        name="BannerCategory">
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerCategoryRadio" name="BannerLink" class="custom-control-input" checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerCategoryRadio">
+                                                Category
+                                            </label>
+                                        </div>
+
+                                        <select class="form-control form-control-lg selectpicker rounded-3 mt-2"
+                                                id="BannerCategory"
+                                                name="BannerCategory">
 
                                             <option value="0">Select a category</option>
 
-                                            @foreach(var obj in Model.categories)
+                                            @foreach (var obj in Model.categories)
                                             {
                                                 <option value="@obj.ID">@obj.Description</option>
                                             }
 
                                         </select>
+
                                         <div id="BannerCategoryMessage" class="text-danger small mt-1"></div>
                                     </div>
 
+
                                     <div class="mb-4">
-                                        <label for="BannerSubCategory" class="form-label fw-semibold">Sub Category</label>
-                                        <select class="form-control form-control-lg selectpicker rounded-3"
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerSubCategoryRadio" name="BannerLink" class="custom-control-input">
+                                            <label class="custom-control-label fw-semibold" for="BannerSubCategoryRadio">
+                                                Sub Category
+                                            </label>
+                                        </div>
+
+                                        <select class="form-control form-control-lg selectpicker rounded-3 mt-2"
                                                 id="BannerSubCategory"
                                                 name="BannerSubCategory"
-                                                data-live-search="true"></select>
+                                                data-live-search="true" disabled>
+
+                                            <option value="0">Select a sub category</option>
+
+                                            @foreach (var obj in Model.subcategories)
+                                            {
+                                                <option value="@obj.ID">@obj.Description</option>
+                                            }
+                                            
+                                            </select>
+
                                         <div id="BannerSubCategoryMessage" class="text-danger small mt-1"></div>
+
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="BannerProduct" class="form-label fw-semibold">Product</label>
-                                        <select class="form-control form-control-lg selectpicker rounded-3"
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerGroupRadio" name="BannerLink" class="custom-control-input">
+                                            <label class="custom-control-label fw-semibold" for="BannerGroupRadio">
+                                                Group
+                                            </label>
+                                        </div>
+
+                                        <select class="form-control form-control-lg selectpicker rounded-3 mt-2"
+                                                id="BannerGroup"
+                                                name="BannerGroup"
+                                                data-live-search="true" disabled>
+
+                                            <option value="0">Select a group</option>
+
+                                            @foreach (var obj in Model.groups)
+                                            {
+                                                <option value="@obj.ID">@obj.Name</option>
+                                            }
+
+                                        </select>
+
+                                        <div id="BannerGroupsMessage" class="text-danger small mt-1"></div>
+
+                                    </div>
+
+                                    <div class="mb-4">
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerShopNowRadio" name="BannerLink" class="custom-control-input">
+                                            <label class="custom-control-label fw-semibold" for="BannerShopNowRadio">
+                                                Shop Now
+                                            </label>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="mb-4">
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerProductRadio" name="BannerLink" class="custom-control-input">
+                                            <label class="custom-control-label fw-semibold" for="BannerProductRadio">
+                                                Product
+                                            </label>
+                                        </div>
+
+                                        <select class="form-control form-control-lg selectpicker rounded-3 mt-2"
                                                 id="BannerProduct"
                                                 name="BannerProduct"
-                                                data-live-search="true"></select>
+                                                data-live-search="true" disabled>
+
+                                            <option value="0">Select a product</option>
+
+                                            @foreach (var obj in Model.products)
+                                            {
+                                                <option value="@obj.ID">@obj.Name</option>
+                                            }
+                                            
+                                            </select>
+
                                         <div id="BannerProductMessage" class="text-danger small mt-1"></div>
                                     </div>
 

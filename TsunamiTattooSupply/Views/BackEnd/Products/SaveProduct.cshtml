@@ -2565,89 +2565,107 @@ $(document).on("click", "#btnSaveProductStock", function () {
 
 		function listProductStock(productId){
 
-		if (!productId) return;
+				if (!productId) return;
 
-		$.ajax({
-			url: '@Url.Action("GetProductStock", "Products")',
-			type: 'GET',
-			data: { productId: productId },
+				$.ajax({
+					url: '@Url.Action("GetProductStock", "Products")',
+					type: 'GET',
+					data: { productId: productId },
 
-			success: function (res) {
+					success: function (res) {
 
-				if (!res.success) {
-					toastr.error(res.message);
-					return;
-				}
+						if (!res.success) {
+							toastr.error(res.message);
+							return;
+						}
 
-				window.STOCK_COLORS  = res.colors;
-				window.STOCK_DETAILS = res.sizeDetails;
+						window.STOCK_COLORS  = res.colors;
+						window.STOCK_DETAILS = res.sizeDetails;
 
-				let html = "";
+						let html = "";
 
-				// group stocks by size
-				let stockMap = {};
+						// =========================================
+						// 🔥 GROUP STOCKS BY SIZE
+						// =========================================
+						let stockMap = {};
 
-				res.stocks.forEach(s => {
-					if (!stockMap[s.sizeID]) stockMap[s.sizeID] = [];
-					stockMap[s.sizeID].push(s);
+						res.stocks.forEach(s => {
+							if (!stockMap[s.sizeID]) stockMap[s.sizeID] = [];
+							stockMap[s.sizeID].push(s);
+						});
+
+						// =========================================
+						// 🔥 LOOP SIZES
+						// =========================================
+						res.productSizes.forEach(size => {
+
+							html += `
+								<div class="variation-card mb-3">
+
+									<div class="variation-header p-2 bg-light">
+										<span class="text-primary font-weight-bold">
+											${size.sizeDescription}
+										</span>
+										<span class="text-muted">Rank: ${size.sizeRank}</span>
+									</div>
+
+									<div class="variation-body p-2">
+
+										<div class="text-right mb-2">
+											<button type="button"
+													class="btn btn-black btnAddProductStock"
+													value="${size.sizeID}">
+												<i class="fas fa-plus"></i> Add
+											</button>
+										</div>
+
+										<table class="table table-sm table-bordered">
+											<thead class="bg-light">
+												<tr>
+													<th style="width:200px">Color</th>
+													<th style="width:150px">Type</th>
+													<th style="width:150px">Detail</th>
+													<th style="width:100px">Qty</th>
+													<th style="width:160px">Barcode</th>
+													<th style="width:60px">Used</th>
+													<th style="width:60px"></th>
+												</tr>
+											</thead>
+											<tbody>
+							`;
+
+							let stocks = stockMap[size.sizeID] || [];
+
+							// =========================================
+							// 🔥 SORT (OPTIONAL BUT CLEAN)
+							// =========================================
+							stocks.sort((a, b) => {
+								return a.colorName.localeCompare(b.colorName);
+							});
+
+							// =========================================
+							// 🔥 RENDER STOCK ROWS
+							// =========================================
+							stocks.forEach(stock => {
+								html += buildStockRow(stock);
+							});
+
+							html += `
+											</tbody>
+										</table>
+									</div>
+								</div>
+							`;
+						});
+
+						$("#ProductStock").html(html);
+
+						// =========================================
+						// 🔥 RE-INIT SELECTPICKER
+						// =========================================
+						$('#ProductStock .selectpicker').selectpicker('render');
+					}
 				});
-
-				res.productSizes.forEach(size => {
-
-					html += `
-					<div class="variation-card mb-3" style="overflow:visible">
-
-						<div class="variation-header p-2 bg-light">
-							<span class="text-primary font-weight-bold">
-								${size.sizeDescription}
-							</span>
-							<span class="text-muted">Rank: ${size.sizeRank}</span>
-						</div>
-
-						<div class="variation-body p-2" style="overflow:visible">
-
-							<div class="text-right mb-2">
-								<button type="button"
-										class="btn btn-black btnAddProductStock"
-										value="${size.sizeID}">
-									<i class="fas fa-plus"></i> Add
-								</button>
-							</div>
-
-							<table class="table table-sm table-bordered" style="overflow:visible">
-							<thead class="bg-light">
-								<tr>
-									<th style="width:200px">Color</th>
-									<th style="width:150px">Type</th>
-									<th style="width:150px">Detail</th>
-									<th style="width:100px">Qty</th>
-									<th style="width:160px">Barcode</th>
-									<th style="width:60px">Used</th>
-									<th style="width:60px"></th>
-								</tr>
-							</thead>
-							<tbody>
-					`;
-
-					let stocks = stockMap[size.sizeID] || [];
-
-					stocks.forEach(stock => {
-						html += AddStockRow(stock);
-					});
-
-					html += `
-							</tbody>
-							</table>
-						</div>
-					</div>`;
-				});
-
-				$("#ProductStock").html(html);
-
-				// initialize selectpicker after DOM render
-				$('#ProductStock .selectpicker').selectpicker('render');
-			}
-		});
 		}
 
 

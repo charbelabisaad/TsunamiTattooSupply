@@ -37,7 +37,10 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			var vm = new PageViewModel
 			{
-				categories = GetCategories()
+				categories = GetCategories(),
+				subcategories = GetSubCategories(),
+				products = GetProducts(),
+				groups = GetGroups()
 			};
 
 			return View("~/Views/BackEnd/BannersHomeMobile/Index.cshtml", vm);
@@ -66,44 +69,44 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		public List<BannerMobileDto> GetBanners()
 		{
-			List<BannerMobileDto> banners = new List<BannerMobileDto>();
-
 			try
 			{
+				return _dbContext.BannersMobiles
+					.Where(b => b.DeletedDate == null)
+					.OrderBy(b => b.Description)
+					.Select(b => new BannerMobileDto
+					{
+						ID = b.ID,
+						Description = b.Description,
+						ImagePath = Global.BannerMobileImagePath,
+						Image = b.Image,
 
-				banners = _dbContext.BannersMobiles
-				.Where(b => b.DeletedDate == null)
-				.Include(b => b.Status)
-				.OrderBy(b => b.Description)
-				.Select(b => new BannerMobileDto
-				{
-					ID = b.ID,
-					Description = b.Description,
-					ImagePath = Global.BannerMobileImagePath,
-					Image = b.Image,
-					CategoryID = b.Category.ID,
-					CategoryDescription = b.Category.Description,
-					SubCategoryID = b.SubCategory.ID,
-					SubCategoryDescription = b.SubCategory.Description,
-					ProductID = b.Product.ID,
-					ProductDescription = b.Product.Name + " - " + b.Product.Group.Name, 
-					StatusID = b.Status.ID,
-					Status = b.Status.Description,
-					StatusColor = b.Status.Color
+						// ✅ Use FK directly (clean + safe)
+						CategoryID = b.CategoryID,
+						CategoryDescription = b.Category != null ? b.Category.Description : null,
 
-				}
-				).ToList();
+						SubCategoryID = b.SubCategoryID,
+						SubCategoryDescription = b.SubCategoryID != null ? b.SubCategory.Description : null,
+
+						GroupID = b.GroupID,
+						GroupName = b.GroupID != null ? b.Group.Name : null,
+
+						ProductID = b.ProductID, 
+						ProductName = b.ProductID != null ? b.Product.Name : null,
+
+						ShopNow = Convert.ToBoolean(b.ShopNow),
+
+						StatusID = b.Status.ID,
+						Status = b.Status.Description,
+						StatusColor = b.Status.Color
+					})
+					.ToList();
 			}
 			catch (Exception ex)
 			{
-
-				banners = new List<BannerMobileDto>();
 				_logger.LogError(ex, "Fetch Banners [ERROR]");
-
+				return new List<BannerMobileDto>();
 			}
-
-			return banners;
-
 		}
 
 		public List<CategoryDto> GetCategories()
@@ -120,53 +123,65 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpGet]
-		public IActionResult GetSubCategories(int categoryId)
+		public List<SubCategoryDto> GetSubCategories()
 		{
-			var subCategories = _dbContext.SubCategories
+			return _dbContext.SubCategories
 				.Where(sc =>
 					sc.DeletedDate == null &&
-					sc.StatusID == "A" &&
-					sc.CategoryID == categoryId)
+					sc.StatusID == "A")
 				.OrderBy(sc => sc.Rank)
-				.Select(sc => new
+				.Select(sc => new SubCategoryDto
 				{
-					id = sc.ID,
-					name = sc.Description
+					ID = sc.ID,
+					Description = sc.Description
 				})
 				.ToList();
-
-			return Json(subCategories);
 		}
 
 		[HttpGet]
-		public IActionResult GetProducts(int CategoryId, int SubCategoryId)
+		public List<GroupDto> GetGroups()
 		{
-			var products = _dbContext.ProductsSubCategories
-				.Where(
-					ps => ps.ProductID == ps.Product.ID &&
-					ps.SubCategory.CategoryID == CategoryId &&
-					ps.SubCategoryID == SubCategoryId &&
+			return _dbContext.Groups
+				.AsNoTracking()
+				.Where(g =>
+					g.DeletedDate == null)
+				.OrderBy(g => g.Name)
+				.Select(g => new GroupDto
+				{
+					ID = g.ID,
+					Name = g.Name 
+				})
+				.ToList();
+		}
+
+		[HttpGet]
+		public List<ProductDto> GetProducts()
+		{
+			return _dbContext.ProductsSubCategories
+				.AsNoTracking()
+				.Where(ps =>
 					ps.DeletedDate == null &&
 					ps.Product.DeletedDate == null)
 				.OrderBy(ps => ps.Product.Name)
-				.Select(ps => new
+				.Select(ps => new ProductDto
 				{
-					ProductID = ps.Product.ID,
-					ProductName = ps.Product.Name,
-					ProductGroupName = ps.Product.Group.Name
-				}).ToList();
-
-			return Json(products);
-					
+					ID = ps.Product.ID,
+					Name = ps.Product.Name,
+					GroupDescription = ps.Product.Group.Name
+				})
+				.ToList();
 		}
 
 		[HttpPost]
 		public IActionResult SaveBanner(
 			int ID,
 			string Description,
-			int CategoryID,
-			int SubCategoryID,
-			int ProductID,
+			int? CategoryID,
+			int? SubCategoryID,
+			int? GroupID,
+			int? ProductID,
+			bool ShopNow,
+			string BannerLink, // 👈 add this
 			string StatusID,
 			IFormFile? Image)
 		{
@@ -183,31 +198,51 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					});
 				}
 
-				if (CategoryID <= 0)
+				if (BannerLink == "BannerCategoryRadio")
 				{
-					return Json(new
-					{
-						success = false,
-						message = "Category is required."
-					});
-				}
+					if (CategoryID <= 0)
+						return Json(new { success = false, message = "Category is required." });
 
-				if (SubCategoryID <= 0)
-				{
-					return Json(new
-					{
-						success = false,
-						message = "Sub Category is required."
-					});
-				}
+					SubCategoryID = null;
+					GroupID = null;
+					ProductID = null;
 
-				if (ProductID <= 0)
+				}
+				else if (BannerLink == "BannerSubCategoryRadio")
 				{
-					return Json(new
-					{
-						success = false,
-						message = "Product is required."
-					});
+					if (SubCategoryID <= 0)
+						return Json(new { success = false, message = "Sub Category is required." });
+
+					CategoryID = null;
+					GroupID= null;
+					ProductID = null;
+				}
+				else if (BannerLink == "BannerGroupRadio")
+				{
+					if (GroupID <= 0)
+						return Json(new { success = false, message = "Group is required." });
+
+					CategoryID = null;
+					SubCategoryID = null;
+					ProductID = null;
+				}
+				else if (BannerLink == "BannerProductRadio")
+				{
+					if (ProductID <= 0)
+						return Json(new { success = false, message = "Product is required." });
+
+					CategoryID = null;
+					SubCategoryID = null;
+					GroupID = null;
+				}
+				else if (BannerLink == "BannerShopNowRadio")
+				{
+				 
+					CategoryID = null;
+					SubCategoryID = null;
+					GroupID = null;
+					ProductID = null;
+
 				}
 
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -284,7 +319,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Description = normalizedDescription,
 						CategoryID = CategoryID,
 						SubCategoryID = SubCategoryID,
+						GroupID = GroupID,
 						ProductID = ProductID,
+						ShopNow = ShopNow,
 						StatusID = StatusID,
 						Image = "",
 						CreatedUserID = userId,
@@ -296,8 +333,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 				else
 				{
-					banner = _dbContext.BannersMobiles
-						.FirstOrDefault(b => b.ID == ID && b.DeletedDate == null);
+					banner = _dbContext.BannersMobiles.FirstOrDefault(b => b.ID == ID && b.DeletedDate == null);
 
 					if (banner == null)
 					{
@@ -311,7 +347,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					banner.Description = normalizedDescription;
 					banner.CategoryID = CategoryID;
 					banner.SubCategoryID = SubCategoryID;
+					banner.GroupID = GroupID;
 					banner.ProductID = ProductID;
+					banner.ShopNow = ShopNow;	
 					banner.StatusID = StatusID;
 					banner.EditUserID = userId;
 					banner.EditDate = DateTime.UtcNow;
@@ -352,7 +390,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						banner.Description,
 						banner.CategoryID,
 						banner.SubCategoryID,
+						banner.GroupID,
 						banner.ProductID,
+						banner.ShopNow,
 						banner.StatusID,
 						banner.Image
 					}

@@ -2435,6 +2435,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new { success = false, message = ex.Message });
 			}
 		}
+
 		public IActionResult GetProductStock(int productId)
 		{
 			try
@@ -2504,19 +2505,17 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.ToList();
 
 				// =========================================
-				// STOCKS (FIXED - NO DATA LOSS)
+				// STOCKS (FIXED - REMOVE DUPLICATES)
 				// =========================================
 				var stocks = (
 					from s in _dbContext.Stocks.AsNoTracking()
 
-						// LEFT JOIN SIZE
 					join ps in _dbContext.ProductsSizes
 						on new { s.ProductID, s.ProductTypeID, s.ProductDetailID, s.SizeID }
 						equals new { ps.ProductID, ps.ProductTypeID, ps.ProductDetailID, ps.SizeID }
 						into psGroup
 					from ps in psGroup.DefaultIfEmpty()
 
-						// LEFT JOIN COLOR
 					join pc in _dbContext.ProductsColors
 						on new { s.ProductID, s.ColorID }
 						equals new { pc.ProductID, pc.ColorID }
@@ -2524,7 +2523,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					from pc in pcGroup.DefaultIfEmpty()
 
 					where s.ProductID == productId
-						&& s.DeletedDate == null
+						  && s.DeletedDate == null
 
 					select new
 					{
@@ -2544,6 +2543,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						useInStock = s.UseInStock
 					}
 				)
+				.ToList()
+
+				// 🔥 REMOVE DUPLICATES HERE
+				.GroupBy(x => new
+				{
+					x.productTypeID,
+					x.productDetailID,
+					x.sizeID,
+					x.colorID
+				})
+				.Select(g => g.OrderByDescending(x => x.id).First())
+
 				.OrderBy(x => x.sizeRank)
 				.ThenBy(x => x.colorName)
 				.ToList();
@@ -2566,7 +2577,6 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				});
 			}
 		}
-
 
 		[HttpPost]
 		public async Task<IActionResult> SaveStock()

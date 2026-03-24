@@ -170,7 +170,14 @@
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="BannerMobileCategory" class="form-label fw-semibold">Category</label>
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerMobileCategoryRadio" name="BannerMobileLink" class="custom-control-input" checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerMobileCategoryRadio">
+                                                Category
+                                            </label>
+                                        </div>
+
                                         <select class="form-control form-control-lg selectpicker rounded-3"
                                         id="BannerMobileCategory"
                                         name="BannerMobileCategory">
@@ -187,20 +194,56 @@
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="BannerMobileSubCategory" class="form-label fw-semibold">Sub Category</label>
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerMobileSubCategoryRadio" name="BannerMobileLink" class="custom-control-input" checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerMobileSubCategoryRadio">
+                                               Sub Category
+                                            </label>
+                                        </div>
+
                                         <select class="form-control form-control-lg selectpicker rounded-3"
                                                 id="BannerMobileSubCategory"
                                                 name="BannerMobileSubCategory"
-                                                data-live-search="true"></select>
-                                        <div id="BannerMobileSubCategoryMessage" class="text-danger small mt-1"></div>
+                                                data-live-search="true">
+                                                 
+                                                    <option value="0">Select a sub sub category</option>
+
+                                                    @foreach (var obj in Model.subcategories)
+                                                    {
+                                                        <option value="@obj.ID">@obj.Description</option>
+                                                    }
+                                             
+                                            </select>
+
+                                        <div id="BannerMobileSubCategoryMessage" class="text-danger small mt-1">
+
+
+                                        </div>
                                     </div>
 
                                     <div class="mb-4">
-                                        <label for="BannerMobileProduct" class="form-label fw-semibold">Product</label>
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerMobileProductRadio" name="BannerMobileLink" class="custom-control-input" checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerMobileProductRadio">
+                                                Product
+                                            </label>
+                                        </div>
+
                                         <select class="form-control form-control-lg selectpicker rounded-3"
                                                 id="BannerMobileProduct"
                                                 name="BannerMobileProduct"
-                                                data-live-search="true"></select>
+                                                data-live-search="true">
+                                                 
+                                                    <option value="0">Select a product</option>
+
+                                                    @foreach (var obj in Model.products)
+                                                    {
+                                                        <option value="@obj.ID">@obj.Name</option>
+                                                    }
+                                                     
+                                            </select>
                                         <div id="BannerMobileProductMessage" class="text-danger small mt-1"></div>
                                     </div>
 

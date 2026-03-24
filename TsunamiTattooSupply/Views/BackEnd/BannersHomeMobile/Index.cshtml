@@ -122,8 +122,10 @@
                                     <th style="width:100px">Image</th>
                                     <th style="width:20%">Description</th>
                                     <th style="width:20%">Category</th>
-                                    <th style="width:20%">SubCategory</th> 
-                                    <th style="width:20%">Product</th>
+                                    <th style="width:20%">SubCategory</th>
+                                    <th style="width:20%">Group</th>
+                                    <th style="width:20%">Product</th> 
+                                    <th style="width:10%">Shop Now</th>
                                     <th style="width:50px">Status</th>
                                     <th style="width:50px" class="no-export">Actions</th>
                                 </tr>
@@ -365,13 +367,29 @@
                         }
                     },
                     {
-                        data: "productDescription",
+                        data: "groupName",
                         className: "align-middle",
                         render: function (data) {
                             return data ? data : '<span class="text-muted">-</span>';
                         }
                     },
-                       // 🔹 Group Status with Color Badge
+                    {
+                        data: "productName",
+                        className: "align-middle",
+                        render: function (data) {
+                            return data ? data : '<span class="text-muted">-</span>';
+                        }
+                            },{
+            data: "shopNow",
+            className: "align-middle text-center",
+            render: function (data) {
+                const isTrue = data === true || data === "true" || data === 1;
+
+                return isTrue
+                    ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>'
+                    : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>';
+            }
+        },
                     {
                         data: "status",
                         className: "align-middle text-center",
@@ -379,7 +397,7 @@
                             return `
                                 <div class="badge text-white"
                                         style="background-color:#${row.statusColor}; width:120px;">
-                                    ${data}
+                                    ${data} ${row.shopNow}
                                 </div>
                             `;
                         }
@@ -403,7 +421,9 @@
                                        data-image="${row.image ?? ''}"
                                        data-categoryid="${row.categoryID ?? '0'}"
                                        data-subcategoryid="${row.subCategoryID ?? '0'}"
+                                       data-groupid="${row.groupID ?? '0'}"
                                        data-productid="${row.productID ?? '0'}"
+                                       data-shopnow="${row.shopNow}"
                                        data-statusid="${row.statusID}">
                                         <i class="fas fa-edit"></i> Edit
                                     </a>
@@ -432,14 +452,13 @@
 
             // Reset text fields
             $("#BannerDescription").val("");
-
+             
             // Reset selects
             $("#BannerCategory").val("0");
-            $("#BannerSubCategory").empty().append('<option value="">-- Select Sub Category --</option>');
-            $("#BannerProduct").empty().append('<option value="">-- Select Product --</option>');
-
+        
             $("#BannerCategory").selectpicker('destroy').selectpicker('render');
             $("#BannerSubCategory").selectpicker('destroy').selectpicker('render');
+            $("#BannerGroup").selectpicker('destroy').selectpicker('render');
             $("#BannerProduct").selectpicker('destroy').selectpicker('render');
 
             // Reset validation messages
@@ -448,6 +467,8 @@
             $("#BannerSubCategoryMessage").html("");
             $("#BannerProductMessage").html("");
 
+            $("#BannerCategoryRadio").prop("checked", true).trigger('change');
+             
             // Reset status
             $("#BannerStatusToggle").prop("checked", true);
             $("#BannerStatusID").val("A");
@@ -474,7 +495,9 @@
                 let image = $(this).data("image");
                 let categoryId = $(this).data("categoryid");
                 let subCategoryId = $(this).data("subcategoryid");
+                let groupId = $(this).data("groupid");
                 let productId = $(this).data("productid");
+                let shopNow = $(this).data("shopnow");
                 let statusId = $(this).data("statusid");
 
                 $("#modalBannerTitle").text("Edit Banner");
@@ -487,8 +510,22 @@
                 $("#BannerDescriptionMessage").text("");
                 $("#BannerCategoryMessage").text("");
                 $("#BannerSubCategoryMessage").text("");
+                $("#BannerGroupMessage").text("");
                 $("#BannerProductMessage").text("");
 
+                if (categoryId) {
+                    $("#BannerCategoryRadio").prop("checked", true).trigger("change");
+                }
+                else if (subCategoryId) {
+                    $("#BannerSubCategoryRadio").prop("checked", true).trigger("change");
+                }
+                else if (groupId) {
+                    $("#BannerGroupRadio").prop("checked", true).trigger("change");
+                }
+                else if (productId) {
+                    $("#BannerProductRadio").prop("checked", true).trigger("change");
+                }
+                 
                 if (statusId === "A") {
                     $("#BannerStatusToggle").prop("checked", true);
                     $("#BannerStatusToggle").next("label").text("Active");
@@ -521,66 +558,116 @@
                 $("#BannerCategory").val(categoryId);
                 $("#BannerCategory").selectpicker('destroy').selectpicker('render');
 
-                // Load subcategories, then set subcategory, then load products, then set product
-                $.ajax({
-                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
-                    type: 'GET',
-                    data: { categoryId: categoryId },
-                    success: function (subCategories) {
+                $("#BannerSubCategory").val(subCategoryId);
+                $("#BannerSubCategory").selectpicker('destroy').selectpicker('render');
 
-                        let subSelect = $("#BannerSubCategory");
-                        subSelect.empty();
-                        subSelect.append('<option value="">-- Select Sub Category --</option>');
+                $("#BannerGroup").val(groupId);
+                $("#BannerGroup").selectpicker('destroy').selectpicker('render');
 
-                        (subCategories || []).forEach(sc => {
-                            subSelect.append(`<option value="${sc.id}">${sc.name}</option>`);
-                        });
+                $("#BannerProduct").val(productId);
+                $("#BannerProduct").selectpicker('destroy').selectpicker('render');
 
-                        subSelect.val(String(subCategoryId));
-                        subSelect.selectpicker('destroy').selectpicker('render');
+                $("#BannerShopNow").prop('checked', shopNow);
 
-                        $.ajax({
-                            url: '@Url.Action("GetProducts", "BannersHomeMobile")',
-                            type: 'GET',
-                            data: {
-                                CategoryId: categoryId,
-                                SubCategoryId: subCategoryId
-                            },
-                            success: function (products) {
+                $("#saveBannerModal").modal("show");
 
-                                let productSelect = $("#BannerProduct");
-                                productSelect.empty();
-                                productSelect.append('<option value="">-- Select Product --</option>');
+                // // Load subcategories, then set subcategory, then load products, then set product
+                // $.ajax({
+                //     url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+                //     type: 'GET',
+                //     data: { categoryId: categoryId },
+                //     success: function (subCategories) {
 
-                                (products || []).forEach(p => {
-                                    let productValue = p.productID ?? p.ProductID;
-                                    let productText = (p.productName ?? p.ProductName) + ' - ' + (p.productGroupName ?? p.ProductGroupName);
+                //         let subSelect = $("#BannerSubCategory");
+                //         subSelect.empty();
+                //         subSelect.append('<option value="">-- Select Sub Category --</option>');
 
-                                    productSelect.append(`<option value="${productValue}">${productText}</option>`);
-                                });
+                //         (subCategories || []).forEach(sc => {
+                //             subSelect.append(`<option value="${sc.id}">${sc.name}</option>`);
+                //         });
 
-                                productSelect.val(String(productId));
-                                productSelect.selectpicker('destroy').selectpicker('render');
+                //         subSelect.val(String(subCategoryId));
+                //         subSelect.selectpicker('destroy').selectpicker('render');
 
-                                $("#saveBannerModal").modal("show");
-                            },
-                            error: function () {
-                                toastr.error("Failed to load products");
-                            }
-                        });
-                    },
-                    error: function () {
-                        toastr.error("Failed to load sub-categories");
-                    }
-                });
+                //         $.ajax({
+                //             url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+                //             type: 'GET',
+                //             data: {
+                //                 CategoryId: categoryId,
+                //                 SubCategoryId: subCategoryId
+                //             },
+                //             success: function (products) {
+
+                //                 let productSelect = $("#BannerProduct");
+                //                 productSelect.empty();
+                //                 productSelect.append('<option value="">-- Select Product --</option>');
+
+                //                 (products || []).forEach(p => {
+                //                     let productValue = p.productID ?? p.ProductID;
+                //                     let productText = (p.productName ?? p.ProductName) + ' - ' + (p.productGroupName ?? p.ProductGroupName);
+
+                //                     productSelect.append(`<option value="${productValue}">${productText}</option>`);
+                //                 });
+
+                //                 productSelect.val(String(productId));
+                //                 productSelect.selectpicker('destroy').selectpicker('render');
+
+                            
+
+                //                 $("#saveBannerModal").modal("show");
+                //             },
+                //             error: function () {
+                //                 toastr.error("Failed to load products");
+                //             }
+                //         });
+                //     },
+                //     error: function () {
+                //         toastr.error("Failed to load sub-categories");
+                //     }
+                //});
             });
 
- 
-             // ================================
-        // 🔹 SAVE BANNER BUTTON
-        // ================================
+        $(document).on('change', 'input[name="BannerLink"]', function () {
+            toggleBannerLink(this.id);
+        });
 
-         // ================================
+        $(document).ready(function () {
+            toggleBannerLink($('input[name="BannerLink"]:checked').attr('id'));
+        });
+
+        function toggleBannerLink(radioId) {
+
+            const map = {
+                BannerCategoryRadio: '#BannerCategory',
+                BannerSubCategoryRadio: '#BannerSubCategory',
+                BannerGroupRadio: '#BannerGroup', 
+                BannerProductRadio: '#BannerProduct'
+            };
+
+           
+
+            // disable all
+            $('#BannerCategory, #BannerSubCategory, #BannerGroup, #BannerProduct')
+                .prop('disabled', true);
+
+            if(!$('#BannerShopNow').is(':checked')){ 
+
+                // enable selected
+                if (map[radioId]) {
+                    $(map[radioId]).prop('disabled', false);
+                }
+             
+                // 🔥 refresh AFTER all changes
+                $('#BannerCategory').selectpicker('destroy').selectpicker('render');
+                $('#BannerSubCategory').selectpicker('destroy').selectpicker('render');
+                $('#BannerGroup').selectpicker('destroy').selectpicker('render');
+                $('#BannerProduct').selectpicker('destroy').selectpicker('render');
+
+            }
+
+        }
+
+        // ================================
         // 🔹 SAVE BANNER BUTTON
         // ================================
         $("#btnSaveBanner").on("click", function (e) {
@@ -597,27 +684,40 @@
             let description = $("#BannerDescription").val().trim();
             let categoryId = $("#BannerCategory").val();
             let subCategoryId = $("#BannerSubCategory").val();
+            let groupId = $("#BannerGroup").val();
             let productId = $("#BannerProduct").val();
+            let shopNow = $("#BannerShopNow").checked;
             let imageFile = $("#bannerImage")[0].files[0];
-
+            let bannerLink = $('input[name="BannerLink"]:checked').attr('id');
+             
             if (description === "") {
                 $("#BannerDescriptionMessage").text("Description is required");
                 isValid = false;
             }
 
-            if (!categoryId || categoryId === "0") {
-                $("#BannerCategoryMessage").text("Category is required");
-                isValid = false;
+            if (bannerLink === 'BannerCategoryRadio') {
+                if (!categoryId || categoryId === "0") {
+                    $("#BannerCategoryMessage").text("Category is required");
+                    isValid = false;
+                }
             }
-
-            if (!subCategoryId || subCategoryId === "0") {
-                $("#BannerSubCategoryMessage").text("Sub Category is required");
-                isValid = false;
+            else if (bannerLink === 'BannerSubCategoryRadio') {
+                if (!subCategoryId || subCategoryId === "0") {
+                    $("#BannerSubCategoryMessage").text("Sub Category is required");
+                    isValid = false;
+                }
             }
-
-            if (!productId || productId === "0") {
-                $("#BannerProductMessage").text("Product is required");
-                isValid = false;
+            else if (bannerLink === 'BannerGroupRadio') {
+                if (!groupId || groupId === "0") {
+                    $("#BannerGroupMessage").text("Group is required");
+                    isValid = false;
+                }
+            }
+            else if (bannerLink === 'BannerProductRadio') {
+                if (!productId || productId === "0") {
+                    $("#BannerProductMessage").text("Product is required");
+                    isValid = false;
+                }
             }
 
             // image required only when create
@@ -638,14 +738,19 @@
             formData.append("ID", id);
             formData.append("Description", description);
             formData.append("CategoryID", categoryId);
+            formData.append("GroupID", groupId);
             formData.append("SubCategoryID", subCategoryId);
             formData.append("ProductID", productId);
+            formData.append("ShopNow",shopNow);
             formData.append("StatusID", $("#BannerStatusID").val());
             formData.append("ClearImage", $("#ClearImage").val());
+
+            formData.append("BannerLink", bannerLink);
 
             if (imageFile) {
                 formData.append("Image", imageFile);
             }
+
 
             $.ajax({
                 url: '@Url.Action("SaveBanner", "BannersHomeMobile")',
@@ -662,25 +767,19 @@
 
                         $("#saveBannerModal").modal("hide");
 
-                        $("#bannerForm")[0].reset();
-                        $("#BannerID").val(0);
-                        $("#BannerTypeID").val("");
-                        $("#BannerStatusID").val("A");
-                        $("#ClearImage").val("false");
+                        // $("#bannerForm")[0].reset();
+                        // $("#BannerID").val(0);
+                        // $("#BannerTypeID").val("");
+                        // $("#BannerStatusID").val("A");
+                        // $("#ClearImage").val("false");
 
-                        $("#BannerCategory").val("0");
-                        $("#BannerSubCategory").empty().append('<option value="">-- Select Sub Category --</option>');
-                        $("#BannerProduct").empty().append('<option value="">-- Select Product --</option>');
-
-                        $("#BannerCategory").selectpicker('refresh');
-                        $("#BannerSubCategory").selectpicker('refresh');
-                        $("#BannerProduct").selectpicker('refresh');
-
-                        $("#bannerImage").val("");
-                        $("#bannerImagePreview").attr("src", "").addClass("d-none");
-                        $(".placeholder-icon").removeClass("d-none");
-                        $(".btn-clear").hide();
-                        $(".btn-view").hide();
+                        // $("#BannerCategory").val("0"); 
+ 
+                        // $("#bannerImage").val("");
+                        // $("#bannerImagePreview").attr("src", "").addClass("d-none");
+                        // $(".placeholder-icon").removeClass("d-none");
+                        // $(".btn-clear").hide();
+                        // $(".btn-view").hide();
 
                         if ($.fn.DataTable.isDataTable("#tableBanners")) {
                             $("#tableBanners").DataTable().ajax.reload(null, false);
@@ -782,133 +881,135 @@
                 }
             });
 
-            $(document).on('change', '#BannerCategory', function () {
+            // $(document).on('change', '#BannerCategory', function () {
 
-                LoadSubCategories();
+            //     LoadSubCategories();
 
-                $('#BannerProduct').empty().append('<option value="">-- Select Product --</option>')
-                .selectpicker('destroy')
-                .selectpicker('render');
+            //     $('#BannerProduct').empty().append('<option value="">-- Select Product --</option>')
+            //     .selectpicker('destroy')
+            //     .selectpicker('render');
 
-            });
+            // });
 
             let currentCategoryOptionIds = [];
             let subCatMetaById = {};
 
-            function LoadSubCategories() {
+            // function LoadSubCategories() {
 
-                let categoryId = $('#BannerCategory').val();
-                let subSelect  = $('#BannerSubCategory');
+            //     let categoryId = $('#BannerCategory').val();
+            //     let subSelect  = $('#BannerSubCategory');
              
-                subSelect.empty();
-                currentCategoryOptionIds = [];
+            //     subSelect.empty();
+            //     currentCategoryOptionIds = [];
 
-                // Always add empty option
-                subSelect.append('<option value="">-- Select Sub Category --</option>');
+            //     // Always add empty option
+            //     subSelect.append('<option value="">-- Select Sub Category --</option>');
 
-                if (!categoryId) {
-                    subSelect.selectpicker('destroy').selectpicker('render'); 
-                    return;
-                }
+            //     if (!categoryId) {
+            //         subSelect.selectpicker('destroy').selectpicker('render'); 
+            //         return;
+            //     }
        
-                $.ajax({
-                    url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
-                    type: 'GET',
-                    data: { categoryId },
-                    success: function (items) {
+            //     $.ajax({
+            //         url: '@Url.Action("GetSubCategories", "BannersHomeMobile")',
+            //         type: 'GET',
+            //         data: { categoryId },
+            //         success: function (items) {
 
-                        (items || []).forEach(sc => {
-                            let id = String(sc.id);
+            //             (items || []).forEach(sc => {
+            //                 let id = String(sc.id);
 
-                            subSelect.append(
-                                `<option value="${id}">${sc.name}</option>`
-                            );
+            //                 subSelect.append(
+            //                     `<option value="${id}">${sc.name}</option>`
+            //                 );
 
-                            currentCategoryOptionIds.push(id);
+            //                 currentCategoryOptionIds.push(id);
 
 
 
-                            if (!subCatMetaById[id]) {
-                                subCatMetaById[id] = {
-                                    id: sc.id,
-                                    name: sc.name,
-                                    categoryId: parseInt(categoryId)
-                                };
-                            }
-                        });
+            //                 if (!subCatMetaById[id]) {
+            //                     subCatMetaById[id] = {
+            //                         id: sc.id,
+            //                         name: sc.name,
+            //                         categoryId: parseInt(categoryId)
+            //                     };
+            //                 }
+            //             });
 
-                        // Refresh picker (NO destroy)
-                        subSelect.selectpicker('destroy').selectpicker('render');
+            //             // Refresh picker (NO destroy)
+            //             subSelect.selectpicker('destroy').selectpicker('render');
 
-                        // ===============================
-                        // RESTORE OR CLEAR SELECTION
-                        // ===============================
-                        if (restoreSelection) {
-                            let validSelected = currentCategoryOptionIds.filter(
-                                id => selectedSubCatIds.has(id)
-                            );
+            //             // ===============================
+            //             // RESTORE OR CLEAR SELECTION
+            //             // ===============================
+            //             if (restoreSelection) {
+            //                 let validSelected = currentCategoryOptionIds.filter(
+            //                     id => selectedSubCatIds.has(id)
+            //                 );
 
-                            subSelect.selectpicker('val', validSelected);
-                        } else {
-                            // 🔥 FORCE CLEAR
-                            subSelect.selectpicker('val', []);
-                        }
+            //                 subSelect.selectpicker('val', validSelected);
+            //             } else {
+            //                 // 🔥 FORCE CLEAR
+            //                 subSelect.selectpicker('val', []);
+            //             }
 
-                            subSelect.selectpicker('destroy').selectpicker('render');
+            //                 subSelect.selectpicker('destroy').selectpicker('render');
 
-                        // Keep tags
-                        renderTags();
-                    },
-                    error: function () {
-                        toastr.error('Failed to load sub-categories');
-                    }
-                });
-            }
+            //             // Keep tags
+            //             renderTags();
+            //         },
+            //         error: function () {
+            //             toastr.error('Failed to load sub-categories');
+            //         }
+            //     });
+            // }
 
-        $(document).on('change', '#BannerSubCategory', function () {
-            LoadProducts();
-        });
+        // $(document).on('change', '#BannerSubCategory', function () {
+        //     LoadProducts();
+        // });
 
-        function LoadProducts() {
+        // function LoadProducts() {
 
-            let categoryId = $('#BannerCategory').val();
-            let subCategoryId = $('#BannerSubCategory').val();
-            let productSelect = $('#BannerProduct');
+        //     let categoryId = $('#BannerCategory').val();
+        //     let subCategoryId = $('#BannerSubCategory').val();
+        //     let productSelect = $('#BannerProduct');
 
-            productSelect.empty();
-            productSelect.append('<option value="">-- Select Product --</option>');
+        //     productSelect.empty();
+        //     productSelect.append('<option value="">-- Select Product --</option>');
 
-            if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
-                productSelect.selectpicker('destroy').selectpicker('render');
-                return;
-            }
+        //     if (!categoryId || categoryId === "0" || !subCategoryId || subCategoryId === "0") {
+        //         productSelect.selectpicker('destroy').selectpicker('render');
+        //         return;
+        //     }
 
-            $.ajax({
-                url: '@Url.Action("GetProducts", "BannersHomeMobile")',
-                type: 'GET',
-                data: {
-                    CategoryId: categoryId,
-                    SubCategoryId: subCategoryId
-                },
-                success: function (items) {
+        //     $.ajax({
+        //         url: '@Url.Action("GetProducts", "BannersHomeMobile")',
+        //         type: 'GET',
+        //         data: {
+        //             CategoryId: categoryId,
+        //             SubCategoryId: subCategoryId
+        //         },
+        //         success: function (items) {
 
-                    productSelect.empty();
-                    productSelect.append('<option value="">-- Select Product --</option>');
+        //             productSelect.empty();
+        //             productSelect.append('<option value="">-- Select Product --</option>');
 
-                    (items || []).forEach(p => {
-                        productSelect.append(
-                            `<option value="${p.productID}">${p.productName} - ${p.productGroupName}</option>`
-                        );
-                    });
+        //             (items || []).forEach(p => {
+        //                 productSelect.append(
+        //                     `<option value="${p.productID}">${p.productName} - ${p.productGroupName}</option>`
+        //                 );
+        //             });
 
-                    productSelect.selectpicker('destroy').selectpicker('render');
+        //             productSelect.selectpicker('destroy').selectpicker('render');
 
-                },
-                error: function () {
-                    toastr.error('Failed to load products');
-                }
-            });
-        }
+        //         },
+        //         error: function () {
+        //             toastr.error('Failed to load products');
+        //         }
+        //     });
+        // }
+
+
 
         });
          
