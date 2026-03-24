@@ -207,7 +207,7 @@
                                                 name="BannerMobileSubCategory"
                                                 data-live-search="true">
                                                  
-                                                    <option value="0">Select a sub sub category</option>
+                                                    <option value="0">Select a sub category</option>
 
                                                     @foreach (var obj in Model.subcategories)
                                                     {
@@ -216,10 +216,33 @@
                                              
                                             </select>
 
-                                        <div id="BannerMobileSubCategoryMessage" class="text-danger small mt-1">
+                                        <div id="BannerMobileSubCategoryMessage" class="text-danger small mt-1"></div>
+                                    </div>
 
+                                    <div class="mb-4">
 
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerMobileGroupRadio" name="BannerMobileLink" class="custom-control-input" checked>
+                                            <label class="custom-control-label fw-semibold" for="BannerMobileGroupRadio">
+                                                Group
+                                            </label>
                                         </div>
+
+                                        <select class="form-control form-control-lg selectpicker rounded-3"
+                                                id="BannerMobileGroup"
+                                                name="BannerMobileGroup"
+                                                data-live-search="true">
+
+                                            <option value="0">Select a group</option>
+
+                                            @foreach (var obj in Model.groups)
+                                            {
+                                                <option value="@obj.ID">@obj.Name</option>
+                                            }
+
+                                        </select>
+
+                                        <div id="BannerMobileGroupMessage" class="text-danger small mt-1"></div>
                                     </div>
 
                                     <div class="mb-4">
@@ -245,6 +268,17 @@
                                                      
                                             </select>
                                         <div id="BannerMobileProductMessage" class="text-danger small mt-1"></div>
+                                    </div>
+
+                                    <div class="mb-4">
+
+                                        <div class="custom-control custom-radio">
+                                            <input type="radio" id="BannerMobileShopNowRadio" name="BannerMobileLink" class="custom-control-input">
+                                            <label class="custom-control-label fw-semibold" for="BannerMobileShopNowRadio">
+                                                Shop Now
+                                            </label>
+                                        </div>
+
                                     </div>
 
                                     <div class="mt-4">

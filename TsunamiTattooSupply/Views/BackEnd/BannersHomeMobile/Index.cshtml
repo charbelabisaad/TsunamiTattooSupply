@@ -115,19 +115,19 @@
 
                 <div class="card-body p-0">
                     <div class="col-sm-12 mt-3">
-                         
+
                         <table id="tableBanners" class="table table-striped w-100">
                             <thead>
                                 <tr style="vertical-align:middle">
-                                    <th style="width:100px">Image</th>
-                                    <th style="width:20%">Description</th>
-                                    <th style="width:20%">Category</th>
-                                    <th style="width:20%">SubCategory</th>
-                                    <th style="width:20%">Group</th>
-                                    <th style="width:20%">Product</th> 
-                                    <th style="width:10%">Shop Now</th>
-                                    <th style="width:50px">Status</th>
-                                    <th style="width:50px" class="no-export">Actions</th>
+                                    <th style="width:80px">Image</th>
+                                    <th style="width:18%">Description</th>
+                                    <th style="width:12%">Category</th>
+                                    <th style="width:12%">SubCategory</th>
+                                    <th style="width:12%">Group</th>
+                                    <th style="width:12%">Product</th>
+                                    <th style="width:8%">Shop Now</th>
+                                    <th style="width:8%">Status</th>
+                                    <th style="width:6%" class="no-export">Actions</th>
                                 </tr>
                             </thead>
                         </table>
@@ -379,17 +379,15 @@
                         render: function (data) {
                             return data ? data : '<span class="text-muted">-</span>';
                         }
-                            },{
-            data: "shopNow",
-            className: "align-middle text-center",
-            render: function (data) {
-                const isTrue = data === true || data === "true" || data === 1;
+                    },
+                    {
+                        data: "shopNow",
+                        className: "align-middle text-center",
+                        render: data => data ?
+                        '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                        '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
 
-                return isTrue
-                    ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>'
-                    : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>';
-            }
-        },
+                    },
                     {
                         data: "status",
                         className: "align-middle text-center",
@@ -686,7 +684,7 @@
             let subCategoryId = $("#BannerSubCategory").val();
             let groupId = $("#BannerGroup").val();
             let productId = $("#BannerProduct").val();
-            let shopNow = $("#BannerShopNow").checked;
+            let shopNow = $("#BannerShopNowRadio").prop("checked");
             let imageFile = $("#bannerImage")[0].files[0];
             let bannerLink = $('input[name="BannerLink"]:checked').attr('id');
              

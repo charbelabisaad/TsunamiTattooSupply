@@ -8,6 +8,7 @@ namespace TsunamiTattooSupply.Models
 	[Index(nameof(PageLocationID))]
 	[Index(nameof(CategoryID))]
 	[Index(nameof(SubCategoryID))]
+	[Index(nameof(GroupID))]
 	[Index(nameof(ProductID))]
 	[Index(nameof(StatusID))]
 	public class BannerPage
@@ -41,7 +42,11 @@ namespace TsunamiTattooSupply.Models
 
 		public int? SubCategoryID { get; set; }
 
+		public int? GroupID { get; set; }
+
 		public int? ProductID { get; set; }
+
+		public bool ShopNow { get; set; } = false;
 
 		[Required]
 		public bool HasPeriod { get; set; } = false;
@@ -79,7 +84,10 @@ namespace TsunamiTattooSupply.Models
 
 		[ForeignKey("SubCategoryID")]
 		public virtual SubCategory? SubCategory { get; set; }
-
+		 
+		[ForeignKey("GroupID")]
+		public virtual Group? Group { get; set; }
+		 
 		[ForeignKey("ProductID")]
 		public virtual Product? Product { get; set; }
 

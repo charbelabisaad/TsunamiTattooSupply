@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260324211403_AddShopNowToBannerPages")]
+    partial class AddShopNowToBannerPages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -197,9 +200,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("date");
 
-                    b.Property<int?>("GroupID")
-                        .HasColumnType("integer");
-
                     b.Property<bool>("HasPeriod")
                         .HasColumnType("boolean");
 
@@ -246,8 +246,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasIndex("DeletedUserID");
 
                     b.HasIndex("EditUserID");
-
-                    b.HasIndex("GroupID");
 
                     b.HasIndex("PageLocationID");
 
@@ -2909,10 +2907,6 @@ namespace TsunamiTattooSupply.Migrations
                         .WithMany()
                         .HasForeignKey("EditUserID");
 
-                    b.HasOne("TsunamiTattooSupply.Models.Group", "Group")
-                        .WithMany()
-                        .HasForeignKey("GroupID");
-
                     b.HasOne("TsunamiTattooSupply.Models.PageLocation", "PageLocation")
                         .WithMany()
                         .HasForeignKey("PageLocationID")
@@ -2940,8 +2934,6 @@ namespace TsunamiTattooSupply.Migrations
                     b.Navigation("DeletedUser");
 
                     b.Navigation("EditUser");
-
-                    b.Navigation("Group");
 
                     b.Navigation("PageLocation");
 

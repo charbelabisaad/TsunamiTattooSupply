@@ -200,8 +200,10 @@
                                         <th style="width:100px">Image</th>
                                         <th style="width:20%">Name</th>
                                         <th style="width:20%">Category</th>
-                                        <th style="width:20%">SubCategory</th>
+                                        <th style="width:20%">Sub Category</th>
+                                        <th style="width:20%">Group</th>
                                         <th style="width:20%">Product</th>
+                                        <th style="width:20%">Shop Now</th>
                                         <th style="width:50px">Status</th>
                                         <th style="width:50px" class="no-export">Actions</th>
                                     </tr>
@@ -1285,15 +1287,32 @@
                     }
                 },
 
-                // 🔹 Product
+                // 🔹 Group
                 {
-                    data: "productDescription",
+                    data: "groupName",
                     className: "align-middle",
                     render: function (data) {
                         return data ? data : '<span class="text-muted">-</span>';
                     }
                 },
 
+                // 🔹 Product
+                {
+                    data: "productName",
+                    className: "align-middle",
+                    render: function (data) {
+                        return data ? data : '<span class="text-muted">-</span>';
+                    }
+                },
+
+                {
+                    data: "shopNow",
+                    className: "align-middle text-center",
+                    render: data => data ?
+                    '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></i></span>' :
+                    '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-times"></i></span>'
+
+                },
                 // 🔹 Status
                 {
                     data: "status",
@@ -1331,6 +1350,8 @@
                                     data-imagepath="${row.imagePath ?? ''}"
                                     data-categoryid="${row.categoryID ?? '0'}"
                                     data-subcategoryid="${row.subCategoryID ?? '0'}"
+                                    data-groupid="${row.groupId ?? '0'}"
+                                    data-shopnow="${row.shopNow ?? false}"
                                     data-productid="${row.productID ?? '0'}"
                                     data-startdate="${row.startDate ?? ''}"
                                     data-enddate="${row.endDate ?? ''}"
@@ -1367,10 +1388,12 @@
             let imagePath       = btn.data("imagepath");
             let categoryId      = btn.data("categoryid");
             let subCategoryId   = btn.data("subcategoryid");
+            let groupId         = btn.data("bannerid");
             let productId       = btn.data("productid");
-            let startDate = btn.data("startdate");
-            let endDate   = btn.data("enddate");
-            let present   = btn.data("present");
+            let shopNow         = btn.data("shopnow");
+            let startDate       = btn.data("startdate");
+            let endDate         = btn.data("enddate");
+            let present         = btn.data("present");
             let statusId        = btn.data("statusid");
 
             // =========================
@@ -1382,35 +1405,39 @@
             $("#BannerMobileStatusID").val(statusId);
             $("#BannerMobileStatusToggle").prop("checked", statusId === "A");
 
-        // =========================
-        // PRESENT + DATES 🔥
-        // =========================
-        $("#BannerMobilePresentToggle").prop("checked", present === true || present === "true");
+            // =========================
+            // PRESENT + DATES 🔥
+            // =========================
+            $("#BannerMobilePresentToggle").prop("checked", present === true || present === "true");
 
-        $("#BannerMobileStartDate").val(formatDate(startDate));
-        $("#BannerMobileEndDate").val(formatDate(endDate));
+            $("#BannerMobileStartDate").val(formatDate(startDate));
+            $("#BannerMobileEndDate").val(formatDate(endDate));
 
-        // toggle EndDate enable/disable
-        if (present === true || present === "true") {
+            // toggle EndDate enable/disable
+            if (present === true || present === "true") {
 
-            $("#BannerMobileEndDate").prop("disabled", true);
+                $("#BannerMobileEndDate").prop("disabled", true);
 
-        } else {
+            } else {
 
-            $("#BannerMobileEndDate").prop("disabled", false);
+                $("#BannerMobileEndDate").prop("disabled", false);
 
-        }
-
-
-        if (categoryId) {
+            }
+ 
+            if (categoryId) {
                 $("#BannerMobileCategoryRadio").prop("checked", true).trigger("change");
             }
-        else if (subCategoryId) {
-            $("#BannerMobileSubCategoryRadio").prop("checked", true).trigger("change");
-        }
-        else if (productId) {
-            $("#BannerMobileProductRadio").prop("checked", true).trigger("change");
-        }
+            else if (subCategoryId) {
+                $("#BannerMobileSubCategoryRadio").prop("checked", true).trigger("change");
+            }
+            else if (groupId) {
+                $("#BannerMobileGroupRadio").prop("checked", true).trigger("change");
+            }
+            else if (productId) {
+                $("#BannerMobileProductRadio").prop("checked", true).trigger("change");
+            }
+
+            $("#BannerMobileShopNow").prop("checked", shopNow);
 
             // =========================
             // CATEGORY (SELECTPICKER)
@@ -1424,11 +1451,16 @@
                     .val(subCategoryId)
                     .selectpicker('destroy')
                     .selectpicker('render');
-                     
-                    $("#BannerMobileProduct")
-                        .val(productId)
-                        .selectpicker('destroy')
-                        .selectpicker('render');
+
+            $("#BannerMobileGroup")
+                    .val(subCategoryId)
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+            $("#BannerMobileProduct")
+                .val(productId)
+                .selectpicker('destroy')
+                .selectpicker('render');
           
              
 
@@ -1490,6 +1522,7 @@
             const map = {
                 BannerMobileCategoryRadio: '#BannerMobileCategory',
                 BannerMobileSubCategoryRadio: '#BannerMobileSubCategory',
+                BannerMobileGroupRadio: '#BannerMobileGroup',
                 BannerMobileProductRadio: '#BannerMobileProduct'
             };
 
@@ -1497,15 +1530,19 @@
             $('#BannerMobileCategory, #BannerMobileSubCategory, #BannerMobileProduct')
                 .prop('disabled', true);
 
-            // enable selected
-            if (map[radioId]) {
-                $(map[radioId]).prop('disabled', false);
+            if (!$("#BannerMobileShopNow").is(":checked")){
+                 
+                if (map[radioId]) {
+                    $(map[radioId]).prop('disabled', false);
+                }
+                 
+                $('#BannerMobileCategory').selectpicker('destroy').selectpicker('render');
+                $('#BannerMobileSubCategory').selectpicker('destroy').selectpicker('render');
+                $('#BannerMobileGroup').selectpicker('destroy').selectpicker('render');
+                $('#BannerMobileProduct').selectpicker('destroy').selectpicker('render');
+
             }
 
-            // 🔥 refresh AFTER all changes
-            $('#BannerMobileCategory').selectpicker('destroy').selectpicker('render');
-            $('#BannerMobileSubCategory').selectpicker('destroy').selectpicker('render');
-            $('#BannerMobileProduct').selectpicker('destroy').selectpicker('render');
         }
 
         function resetBannerMobileForm() {
@@ -1532,6 +1569,11 @@
                 .selectpicker('render');
 
             $('#BannerMobileSubCategory')
+                .html('')
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            $('#BannerMobileGroup')
                 .html('')
                 .selectpicker('destroy')
                 .selectpicker('render');
@@ -1580,6 +1622,7 @@
             $('#BannerMobileDescriptionMessage').html('');
             $('#BannerMobileCategoryMessage').html('');
             $('#BannerMobileSubCategoryMessage').html('');
+            $('#BannerMobileGroupMessage').html('');
             $('#BannerMobileProductMessage').html('');
 
             // =========================
@@ -1718,7 +1761,10 @@
 
             let categoryId    = $("#BannerMobileCategory").val();
             let subCategoryId = $("#BannerMobileSubCategory").val();
-            let productId     = $("#BannerMobileProduct").val();
+            let groupId = $("#BannerMobileGroup").val();
+            let productId = $("#BannerMobileProduct").val();
+
+            let shopNow = $("#BannerMobileShopNowRadio").prop("checked");
 
             let present   = $("#BannerMobilePresentToggle").is(":checked");
             let startDate = $("#BannerMobileStartDate").val();
@@ -1730,6 +1776,7 @@
             let bannerLink = $('input[name="BannerMobileLink"]:checked').attr('id');
 
             let isValid = true;
+
 
             // =========================
             // Reset messages
@@ -1813,7 +1860,10 @@
 
             if (categoryId !== null)    formData.append("CategoryID", categoryId);
             if (subCategoryId !== null) formData.append("SubCategoryID", subCategoryId);
+            if (groupId !== null) formData.append("GroupID", groupId);
             if (productId !== null)     formData.append("ProductID", productId);
+
+            formData.append("ShopNow", shopNow);
 
             formData.append("Present", present);
 

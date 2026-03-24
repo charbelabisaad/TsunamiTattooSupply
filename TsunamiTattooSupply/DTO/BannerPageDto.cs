@@ -29,10 +29,16 @@ namespace TsunamiTattooSupply.DTO
 
 		public string? SubCategoryDescription { get; set; }
 
+		public int? GroupID { get; set; }
+
+		public string? GroupName { get; set; }
+
 		public int? ProductID { get; set; }
 
-		public string? ProductDescription { get; set; }
+		public string? ProductName { get; set; }
  
+		public bool ShopNow { get; set; }
+
 		public bool HasPeriod { get; set; }
 
 		public DateTime StartDate { get; set; }
