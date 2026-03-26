@@ -27,6 +27,9 @@ namespace TsunamiTattooSupply.Models
 		public string? Link { get; set; }
 
 		[Required]
+		public int Rank { get; set; } = 0;
+
+		[Required]
 		public string StatusID { get; set; }
 
 		[Required]

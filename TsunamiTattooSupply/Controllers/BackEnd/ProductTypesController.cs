@@ -48,11 +48,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				producttypes = _dbContext.ProductTypes
 					.Where( pt => pt.DeletedDate == null)
+					.OrderBy(pt => pt.Rank)
 					.Select( pt =>  new ProductTypeDto
 					{
 						ID = pt.ID,
 						Description = pt.Description,
 						ShowFront = pt.ShowFront,
+						Rank = pt.Rank,
 						StatusID = pt.Status.ID,
 						StatusDescription = pt.Status.Description,
 						StatusColor = pt.Status.Color
@@ -194,6 +196,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					error = true,
 					message = "An unexpected error occurred while deleting the product type."
+				});
+			}
+		}
+
+		[HttpPost]
+		public IActionResult SaveRankProductTypes([FromBody] List<ProductTypeDto> producttypes)
+		{
+			try
+			{
+				if (producttypes == null || producttypes.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<ProductTypeDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = producttypes.Select(c => c.ID).ToList();
+
+				// Load affected Sizes once
+				var dbProductTypes = _dbContext.ProductTypes
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbProductTypes.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in producttypes)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var size))
+					{
+						size.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Product Types rank saved successfully",
+					data = GetProductTypes()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveRankProductTypes [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the product types rank.",
+					data = new List<ProductTypeDto>()
 				});
 			}
 		}

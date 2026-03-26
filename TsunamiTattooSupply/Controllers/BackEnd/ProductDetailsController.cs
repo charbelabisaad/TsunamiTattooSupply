@@ -49,15 +49,16 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			try
 			{
 				ProductDetails = _dbContext.ProductDetails
-					.Where(pt => pt.DeletedDate == null)
-					.Select(pt => new ProductDetailDto
+					.Where(pd => pd.DeletedDate == null)
+					.Select(pd => new ProductDetailDto
 					{
-						ID = pt.ID,
-						Description = pt.Description,
-						ShowFront = pt.ShowFront,
-						StatusID = pt.Status.ID,
-						StatusDescription = pt.Status.Description,
-						StatusColor = pt.Status.Color
+						ID = pd.ID,
+						Description = pd.Description,
+						Rank = pd.Rank,
+						ShowFront = pd.ShowFront,
+						StatusID = pd.Status.ID,
+						StatusDescription = pd.Status.Description,
+						StatusColor = pd.Status.Color
 					}).ToList();
 
 			}
@@ -197,6 +198,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					error = true,
 					message = "An unexpected error occurred while deleting the Product Detail."
+				});
+			}
+		}
+
+		[HttpPost]
+		public IActionResult SaveRankProductDetails([FromBody] List<ProductDetailDto> productdetails)
+		{
+			try
+			{
+				if (productdetails == null || productdetails.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<ProductDetailDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = productdetails.Select(c => c.ID).ToList();
+
+				// Load affected Sizes once
+				var dbProductDetails = _dbContext.ProductDetails
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbProductDetails.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in productdetails)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var size))
+					{
+						size.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Product Details rank saved successfully",
+					data = GetProductDetails()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "SaveRankProductDetails [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the product details rank.",
+					data = new List<ProductDetailDto>()
 				});
 			}
 		}

@@ -102,6 +102,8 @@
         const CategoryID = $("#ParentCategoryID").val();
 
         switch (mode) {
+
+
             case "CTGRY":
                 SaveRankCategory();
                 break;
@@ -111,21 +113,50 @@
                 SaveRankSubCategory(CategoryID);
                 break;
 
+            case "PRDCTDTL":
+
+                SaveRankProductDetail();
+                break;
+
+            case "PRDCTTP":
+
+                SaveRankProductType();
+                break;
+
             case "SZ":
 
                 SaveRankSize();
                 break;
-                 
+                
+            case "CLR":
+
+                SaveRankColor();
+                break;
+
+
             case "BRD":
+
                 SaveRankGroup(mode);
                 break;
 
             case "CLC": 
+
                 SaveRankGroup(mode)
                 break;
 
             case "PRDCT":
+
                 SaveRankProduct();
+                break;
+
+            case "BNRHMWB": 
+
+                SaveRankBannerHomeWeb();
+                break;
+
+            case "BNRHMMBL":
+
+                SaveRankBannerHomeMobile();
                 break;
 
             default:
@@ -193,152 +224,390 @@
         });
 
     }
+     
+    function SaveRankProductType() {
 
+        const ranks = [];
 
-        function SaveRankSize() {
-
-            const ranks = [];
-
-            $('#rankSelect option').each(function (index) {
-                ranks.push({
-                    ID: $(this).val(),
-                    Rank: index + 1
-                });
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
             });
+        });
 
-            ShowSaveSpinner();
+        ShowSaveSpinner();
 
-            $.ajax({
-                url: '@Url.Action("SaveRankSizes", "Sizes")',
-                type: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(ranks),
-                success: function (res) {
+        $.ajax({
+            url: '@Url.Action("SaveRankProductTypes", "ProductTypes")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
 
-                    const table = $.fn.DataTable.isDataTable("#tableSizes")
-                        ? $("#tableSizes").DataTable()
-                        : null;
+                const table = $.fn.DataTable.isDataTable("#tableProductTypes")
+                    ? $("#tableProductTypes").DataTable()
+                    : null;
 
-                    if (!res.success) {
-                        toastr.error(res.message || 'Failed to save size rank');
-                        HideSaveSpinner();
-                        return;
-                    }
-
-                    toastr.success(res.message || 'Size ranking saved');
-
-                    // Close modal
-                    const modalEl = document.getElementById('rankModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
-                    if (table) table.ajax.reload(null, false);
-
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save product type rank');
                     HideSaveSpinner();
-                },
-                error: function () {
-                    toastr.error('Server error while saving size rank');
-                    HideSaveSpinner();
+                    return;
                 }
+
+                toastr.success(res.message || 'Product Type ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving product type rank');
+                HideSaveSpinner();
+            }
+        });
+    }
+
+    function SaveRankProductDetail() {
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
             });
-        }
+        });
 
-        function SaveRankGroup(TypeID) {
+        ShowSaveSpinner();
 
-            const ranks = [];
+        $.ajax({
+            url: '@Url.Action("SaveRankProductDetails", "ProductDetails")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
 
-            $('#rankSelect option').each(function (index) {
-                ranks.push({
-                    ID: $(this).val(),
-                    Rank: index + 1
-                });
+                const table = $.fn.DataTable.isDataTable("#tableProductDetails")
+                    ? $("#tableProductDetails").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save product detail rank');
+                    HideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Product Detail ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving product detail rank');
+                HideSaveSpinner();
+            }
+        });
+    }
+
+    function SaveRankSize() {
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
             });
+        });
 
-            ShowSaveSpinner();
+        ShowSaveSpinner();
 
-            $.ajax({
-                url: '@Url.Action("SaveRankGroups", "Groups")?Type=' + TypeID,
-                type: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(ranks),
-                success: function (res) {
+        $.ajax({
+            url: '@Url.Action("SaveRankSizes", "Sizes")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
 
-                    const table = $.fn.DataTable.isDataTable("#tableGroups")
-                        ? $("#tableGroups").DataTable()
-                        : null;
+                const table = $.fn.DataTable.isDataTable("#tableSizes")
+                    ? $("#tableSizes").DataTable()
+                    : null;
 
-                    if (!res.success) {
-                        toastr.error(res.message || 'Failed to save group rank');
-                        HideSaveSpinner();
-                        return;
-                    }
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save size rank');
+                    HideSaveSpinner();
+                    return;
+                }
 
-                    toastr.success(res.message || 'Group ranking saved');
+                toastr.success(res.message || 'Size ranking saved');
 
-                    // Close modal
-                    const modalEl = document.getElementById('rankModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
-                    if (table) table.ajax.reload(null, false);
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving size rank');
+                HideSaveSpinner();
+            }
+        });
+    }
+
+    function SaveRankColor() {
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
+            });
+        });
+
+        ShowSaveSpinner();
+
+        $.ajax({
+            url: '@Url.Action("SaveRankColors", "Colors")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
+
+                const table = $.fn.DataTable.isDataTable("#tableColors")
+                    ? $("#tableColors").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save color rank');
+                    HideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Color ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving color rank');
+                HideSaveSpinner();
+            }
+        });
+    }
+
+    function SaveRankGroup(TypeID) {
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
+            });
+        });
+
+        ShowSaveSpinner();
+
+        $.ajax({
+            url: '@Url.Action("SaveRankGroups", "Groups")?Type=' + TypeID,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
+
+                const table = $.fn.DataTable.isDataTable("#tableGroups")
+                    ? $("#tableGroups").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save group rank');
+                    HideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Group ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
                  
-                    HideSaveSpinner();
-                },
-                error: function () {
-                    toastr.error('Server error while saving group rank');
-                    HideSaveSpinner();
-                }
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving group rank');
+                HideSaveSpinner();
+            }
+        });
+    }
+
+    function SaveRankSubCategory(CategoryID){
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
             });
-        }
+        });
 
-        function SaveRankSubCategory(CategoryID){
-
-            const ranks = [];
-
-            $('#rankSelect option').each(function (index) {
-                ranks.push({
-                    ID: $(this).val(),
-                    Rank: index + 1
-                });
-            });
-
-            ShowSaveSpinner();
+        ShowSaveSpinner();
              
-            $.ajax({
-                url: '@Url.Action("SaveRankSubCategories", "Categories")?CategoryID=' + CategoryID,
-                type: 'POST',
-                contentType: 'application/json; charset=utf-8',
-                data: JSON.stringify(ranks),
-                success: function (res) {
+        $.ajax({
+            url: '@Url.Action("SaveRankSubCategories", "Categories")?CategoryID=' + CategoryID,
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
 
-                    const table = $.fn.DataTable.isDataTable("#tableSubCategories")
-                        ? $("#tableSubCategories").DataTable()
-                        : null;
+                const table = $.fn.DataTable.isDataTable("#tableSubCategories")
+                    ? $("#tableSubCategories").DataTable()
+                    : null;
 
-                    if (!res.success) {
-                        toastr.error(res.message || 'Failed to save sub category rank');
-                        HideSaveSpinner();
-                        return;
-                    }
-
-                    toastr.success(res.message || 'Sub Category ranking saved');
-
-                    // Close modal
-                    const modalEl = document.getElementById('rankModal');
-                    const modal = bootstrap.Modal.getInstance(modalEl);
-                    modal.hide();
-                    if (table) table.ajax.reload(null, false);
-
-
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save sub category rank');
                     HideSaveSpinner();
-                },
-                error: function () {
-                    toastr.error('Server error while saving sub category rank');
-                    HideSaveSpinner();
+                    return;
                 }
-            });
 
-        }
+                toastr.success(res.message || 'Sub Category ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving sub category rank');
+                HideSaveSpinner();
+            }
+        });
+
+    }
  
-        function SaveRankProduct(){
+    function SaveRankProduct(){
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
+            });
+        });
+
+        ShowSaveSpinner();
+
+        $.ajax({
+            url: '@Url.Action("SaveRankProducts", "Products")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
+
+                const table = $.fn.DataTable.isDataTable("#tableProducts")
+                    ? $("#tableProducts").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save product rank');
+                    HideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Product ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving product rank');
+                HideSaveSpinner();
+            }
+        });
+
+    }
+
+    function SaveRankBannerHomeWeb(){
+
+        const ranks = [];
+
+        $('#rankSelect option').each(function (index) {
+            ranks.push({
+                ID: $(this).val(),
+                Rank: index + 1
+            });
+        });
+
+        ShowSaveSpinner();
+
+        $.ajax({
+            url: '@Url.Action("SaveRankBanners", "BannersHomeWeb")',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify(ranks),
+            success: function (res) {
+
+                const table = $.fn.DataTable.isDataTable("#tableBanners")
+                    ? $("#tableBanners").DataTable()
+                    : null;
+
+                if (!res.success) {
+                    toastr.error(res.message || 'Failed to save banner rank');
+                    HideSaveSpinner();
+                    return;
+                }
+
+                toastr.success(res.message || 'Banner ranking saved');
+
+                // Close modal
+                const modalEl = document.getElementById('rankModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                modal.hide();
+                if (table) table.ajax.reload(null, false);
+
+
+                HideSaveSpinner();
+            },
+            error: function () {
+                toastr.error('Server error while saving banner rank');
+                HideSaveSpinner();
+            }
+        });
+
+    }
+
+    function SaveRankBannerHomeMobile(){
 
             const ranks = [];
 
@@ -352,23 +621,23 @@
             ShowSaveSpinner();
 
             $.ajax({
-                url: '@Url.Action("SaveRankProducts", "Products")',
+                url: '@Url.Action("SaveRankBanners", "BannersHomeMobile")',
                 type: 'POST',
                 contentType: 'application/json; charset=utf-8',
                 data: JSON.stringify(ranks),
                 success: function (res) {
 
-                    const table = $.fn.DataTable.isDataTable("#tableProducts")
-                        ? $("#tableProducts").DataTable()
+                    const table = $.fn.DataTable.isDataTable("#tableBanners")
+                        ? $("#tableBanners").DataTable()
                         : null;
 
                     if (!res.success) {
-                        toastr.error(res.message || 'Failed to save product rank');
+                        toastr.error(res.message || 'Failed to save banner rank');
                         HideSaveSpinner();
                         return;
                     }
 
-                    toastr.success(res.message || 'Product ranking saved');
+                    toastr.success(res.message || 'Banner ranking saved');
 
                     // Close modal
                     const modalEl = document.getElementById('rankModal');
@@ -380,7 +649,7 @@
                     HideSaveSpinner();
                 },
                 error: function () {
-                    toastr.error('Server error while saving product rank');
+                    toastr.error('Server error while saving banner rank');
                     HideSaveSpinner();
                 }
             });

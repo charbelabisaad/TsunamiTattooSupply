@@ -73,7 +73,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				return _dbContext.BannersMobiles
 					.Where(b => b.DeletedDate == null)
-					.OrderBy(b => b.Description)
+					.OrderBy(b => b.Rank)
 					.Select(b => new BannerMobileDto
 					{
 						ID = b.ID,
@@ -493,6 +493,65 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		[HttpPost]
+		public IActionResult SaveRankBanners([FromBody] List<BannerMobileDto> banners)
+		{
+			try
+			{
+				if (banners == null || banners.Count == 0)
+				{
+					return Json(new
+					{
+						success = false,
+						message = "No ranking data received",
+						data = new List<BannerMobileDto>()
+					});
+				}
+
+				// Collect IDs
+				var ids = banners.Select(c => c.ID).ToList();
+
+				// Load affected categories once
+				var dbBanners = _dbContext.BannersMobiles
+											 .Where(c => ids.Contains(c.ID))
+											 .ToList();
+
+				// Fast lookup
+				var dbDict = dbBanners.ToDictionary(c => c.ID);
+
+				// Update only Rank
+				foreach (var dto in banners)
+				{
+					if (dbDict.TryGetValue(dto.ID, out var banner))
+					{
+						banner.Rank = dto.Rank;
+					}
+				}
+
+				_dbContext.SaveChanges();
+
+				// 🔁 Return refreshed list (ordered by Rank)
+
+
+				return Json(new
+				{
+					success = true,
+					message = "Banners rank saved successfully",
+					data = GetBanners()
+				});
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "saveRankBanners [ERROR]");
+
+				return Json(new
+				{
+					success = false,
+					message = "An unexpected error occurred while saving the banners rank.",
+					data = new List<BannerMobileDto>()
+				});
+			}
+		}
 
 	}
 }

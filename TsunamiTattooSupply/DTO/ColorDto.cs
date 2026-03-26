@@ -14,6 +14,8 @@ namespace TsunamiTattooSupply.DTO
 		 
 		public int TypeID { get; set; }
 
+		public int Rank { get; set; }
+
 		public bool ShowFront {  get; set; }
 
 		public string TypeCode { get; set; }

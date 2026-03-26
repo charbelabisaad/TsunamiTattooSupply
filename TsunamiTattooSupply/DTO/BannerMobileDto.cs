@@ -31,6 +31,8 @@ namespace TsunamiTattooSupply.DTO
 
 		public string? ProductName { get; set; }
 		  
+		public int Rank { get; set; }
+
 		public string StatusID { get; set; }
 
 		public string Status { get; set; }

@@ -107,7 +107,7 @@
                         <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Banners List</h3></div>
                         <div class="col-6 d-flex align-groups-center justify-content-end">
                             <button id="btnNewBanner" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Banner</button>
-                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3 d-none"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -126,6 +126,7 @@
                                     <th style="width:12%">Group</th>
                                     <th style="width:12%">Product</th>
                                     <th style="width:8%">Shop Now</th>
+                                    <th class="d-none">Rank</th>
                                     <th style="width:8%">Status</th>
                                     <th style="width:6%" class="no-export">Actions</th>
                                 </tr>
@@ -389,6 +390,11 @@
 
                     },
                     {
+                        data: "rank",
+                        className: "align-middle",
+                        visible: false
+                    },
+                    {
                         data: "status",
                         className: "align-middle text-center",
                         render: function (data, type, row) {
@@ -436,7 +442,7 @@
                         }
                     }
                 ],
-                order: [[1, "asc"]]
+                order: [[7, "asc"]]
             });
 
         $("#btnNewBanner").on("click", function () {
@@ -879,6 +885,45 @@
                 }
             });
 
+
+            $(document).on('click', '#btnSetRankBanner', function () {
+
+                const $rankSelect = $('#rankSelect');
+
+                $rankSelect.empty();
+
+                $("#rankMode").val("BNRHMMBL")
+
+                $.ajax({
+                    url: '@Url.Action("ListGetBanners", "BannersHomeMobile")',
+                    type: 'GET',
+                    success: function (res) {
+
+                        if (!res.success) {
+                            toastr.error(res.message || 'Failed to load banners');
+                            return;
+                        }
+
+                        // sort by Rank (safe)
+                        res.data.sort((a, b) => a.rank - b.rank);
+
+                        $.each(res.data, function (index, item) {
+                            $rankSelect.append(
+                                `<option value="${item.id}">
+                                    ${index + 1}. ${item.description}
+                                </option>`
+                            );
+                        });
+
+                        $('#rankModal').modal('show');
+                    },
+                    error: function () {
+                        toastr.error('Server error while loading banner');
+                    }
+                });
+
+            });
+
             // $(document).on('change', '#BannerCategory', function () {
 
             //     LoadSubCategories();
@@ -889,8 +934,8 @@
 
             // });
 
-            let currentCategoryOptionIds = [];
-            let subCatMetaById = {};
+            // let currentCategoryOptionIds = [];
+            // let subCatMetaById = {};
 
             // function LoadSubCategories() {
 

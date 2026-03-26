@@ -8,6 +8,7 @@
 
 <partial name="SaveProductType" />
 <partial name="DeleteProductType" />
+<partial name="Rank" />
 
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
@@ -31,6 +32,7 @@
                         <div class="col-6 d-flex align-items-center"><h3 class="card-title">ProductTypes List</h3></div>
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewProductType" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product Type</button>
+                            <button id="btnSetRankProductType" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div>
 
@@ -44,6 +46,7 @@
                                 <tr> 
                                     <th>Description</th>
                                     <th style="width:100px">Show Front</th>
+                                    <th class="d-none">Rank</th>
                                     <th style="width:50px">Status</th>
                                     <th class="no-export" style="width:50px">Actions</th>
                                 </tr>
@@ -128,7 +131,13 @@
                     className: 'align-middle'
 
                 },
+                // Rank
+                {
+                    data: 'rank',
+                    className: 'align-middle',
+                    visible: false
 
+                },
                 // IsCustom
                 {
                     data: 'showFront',
@@ -137,9 +146,9 @@
                         return data
                             ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
                             : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
-                    }
+                }
                 },
-
+                
                 // Status (derived frontend-only)
                 { data: 'statusDescription',
                     className: "align-middle text-center",
@@ -176,7 +185,8 @@
                         </div>`;
                     }
                 }
-            ]
+            ],
+            order: [[1,"asc"]]
         });
 
         // filter position
@@ -273,6 +283,47 @@
                 );
 
                 $("#deleteProductTypeModal").modal("show");
+
+            });
+
+            $(document).on('click', '#btnSetRankProductType', function () {
+
+                const $rankSelect = $('#rankSelect');
+
+                $rankSelect.empty();
+
+                var type = "PRDCTTP";
+
+                $("#rankMode").val(type)
+
+                $.ajax({
+                    url: '@Url.Action("ListGetProductTypes", "ProductTypes")',
+                    type: 'GET',
+                    data: { "TypeID": type },
+                    success: function (res) {
+
+                        if (!res.success) {
+                            toastr.error(res.message || 'Failed to load product types');
+                            return;
+                        }
+
+                        // sort by Rank (safe)
+                        res.data.sort((a, b) => a.rank - b.rank);
+
+                        $.each(res.data, function (index, item) {
+                            $rankSelect.append(
+                                `<option value="${item.id}">
+                                    ${index + 1}. ${item.description}
+                                </option>`
+                            );
+                        });
+
+                        $('#rankModal').modal('show');
+                    },
+                    error: function () {
+                        toastr.error('Server error while loading product types');
+                    }
+                });
 
             });
 

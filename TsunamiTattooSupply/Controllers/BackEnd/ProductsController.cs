@@ -1286,6 +1286,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 			}
 		}
+
 		private async Task SaveProductSizes(int productId, IFormCollection form, int userId, DateTime now)
 		{
 			var existingSizes = _dbContext.ProductsSizes
@@ -1299,6 +1300,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			var submittedKeys = new HashSet<string>();
 			var submittedTypeIds = new HashSet<int>();
 			var submittedDetailKeys = new HashSet<string>();
+			var typesWithSizes = new HashSet<int>();
+			var restoredKeys = new HashSet<string>();
 
 			var regex = new Regex(@"ProductDetails\[(\d+)\]", RegexOptions.Compiled);
 
@@ -1314,16 +1317,20 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				foreach (var detailId in detailIds)
 				{
-					submittedDetailKeys.Add($"{productId}-{productTypeId}-{detailId}");
+					string detailKey = $"{productId}-{productTypeId}-{detailId}";
+					submittedDetailKeys.Add(detailKey);
 
 					string sizesFormKey = $"ProductSizes[{productTypeId}][{detailId}][]";
 					if (!form.ContainsKey(sizesFormKey)) continue;
+
+					typesWithSizes.Add(productTypeId);
 
 					var sizeIds = form[sizesFormKey].Select(int.Parse).ToList();
 
 					foreach (var sizeId in sizeIds)
 					{
-						submittedKeys.Add($"{productId}-{productTypeId}-{detailId}-{sizeId}");
+						string currentKey = $"{productId}-{productTypeId}-{detailId}-{sizeId}";
+						submittedKeys.Add(currentKey);
 
 						existingSizeMap.TryGetValue((productTypeId, detailId, sizeId), out var existing);
 
@@ -1351,6 +1358,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							{
 								existing.DeletedDate = null;
 								existing.DeletedUserID = null;
+
+								// 🔥 protect from re-delete
+								restoredKeys.Add(currentKey);
 							}
 
 							existing.StatusID = "A";
@@ -1362,38 +1372,52 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 
 			bool hasSubmittedTypes = submittedTypeIds.Count > 0;
-			bool hasSubmittedDetails = submittedDetailKeys.Count > 0;
-			bool hasSubmittedSizes = submittedKeys.Count > 0;
 
 			var removedSizeKeys = new List<(int TypeId, int DetailId, int SizeId)>();
 
 			foreach (var ps in existingSizes)
 			{
+				// ===============================
+				// TYPE DELETE
+				// ===============================
 				if (hasSubmittedTypes && !submittedTypeIds.Contains(ps.ProductTypeID))
 				{
 					if (ps.DeletedDate == null)
 					{
 						ps.DeletedUserID = userId;
 						ps.DeletedDate = now;
+
+						removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
 					}
 					continue;
 				}
 
 				string detailKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}";
 
-				if (hasSubmittedDetails && !submittedDetailKeys.Contains(detailKey))
+				// ===============================
+				// DETAIL DELETE (ONLY IF TYPE HAS SIZES)
+				// ===============================
+				if (typesWithSizes.Contains(ps.ProductTypeID) &&
+					!submittedDetailKeys.Contains(detailKey))
 				{
 					if (ps.DeletedDate == null)
 					{
 						ps.DeletedUserID = userId;
 						ps.DeletedDate = now;
+
+						removedSizeKeys.Add((ps.ProductTypeID, ps.ProductDetailID, ps.SizeID));
 					}
 					continue;
 				}
 
 				string sizeKey = $"{ps.ProductID}-{ps.ProductTypeID}-{ps.ProductDetailID}-{ps.SizeID}";
 
-				if (hasSubmittedSizes && !submittedKeys.Contains(sizeKey))
+				// ===============================
+				// SIZE DELETE (FINAL FIX)
+				// ===============================
+				if (typesWithSizes.Contains(ps.ProductTypeID) &&
+					!submittedKeys.Contains(sizeKey) &&
+					!restoredKeys.Contains(sizeKey))
 				{
 					if (ps.DeletedDate == null)
 					{
@@ -1405,19 +1429,21 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 			}
 
+			// ===============================
+			// DELETE STOCKS & PRICES (FIXED EF)
+			// ===============================
 			if (removedSizeKeys.Any())
 			{
-				var typeIds = removedSizeKeys.Select(x => x.TypeId).ToHashSet();
-				var detailIds = removedSizeKeys.Select(x => x.DetailId).ToHashSet();
-				var sizeIds = removedSizeKeys.Select(x => x.SizeId).ToHashSet();
-
 				var stocksToDelete = _dbContext.Stocks
 					.Where(s =>
 						s.ProductID == productId &&
-						typeIds.Contains(s.ProductTypeID) &&
-						detailIds.Contains(s.ProductDetailID) &&
-						sizeIds.Contains(s.SizeID) &&
 						s.DeletedDate == null)
+					.AsEnumerable() // 🔥 FIX EF ERROR
+					.Where(s =>
+						removedSizeKeys.Any(x =>
+							x.TypeId == s.ProductTypeID &&
+							x.DetailId == s.ProductDetailID &&
+							x.SizeId == s.SizeID))
 					.ToList();
 
 				foreach (var stock in stocksToDelete)
@@ -1429,10 +1455,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var pricesToDelete = _dbContext.Prices
 					.Where(p =>
 						p.ProductID == productId &&
-						typeIds.Contains(p.ProductTypeID) &&
-						detailIds.Contains(p.ProductDetailID) &&
-						sizeIds.Contains(p.SizeID) &&
 						p.DeletedDate == null)
+					.AsEnumerable() // 🔥 FIX EF ERROR
+					.Where(p =>
+						removedSizeKeys.Any(x =>
+							x.TypeId == p.ProductTypeID &&
+							x.DetailId == p.ProductDetailID &&
+							x.SizeId == p.SizeID))
 					.ToList();
 
 				foreach (var price in pricesToDelete)
@@ -2067,18 +2096,18 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				return Json(new
 				{
 					success = true,
-					message = "Categories rank saved successfully",
+					message = "Products rank saved successfully",
 					data = GetProducts()
 				});
 			}
 			catch (Exception ex)
 			{
-				_logger.LogError(ex, "saveRankCategories [ERROR]");
+				_logger.LogError(ex, "saveRankProducts [ERROR]");
 
 				return Json(new
 				{
 					success = false,
-					message = "An unexpected error occurred while saving the categories rank.",
+					message = "An unexpected error occurred while saving the products rank.",
 					data = new List<ProductDto>()
 				});
 			}

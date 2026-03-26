@@ -1693,72 +1693,72 @@
 
 		function listProductPrice(ProductID){
 
-			if (!ProductID) return;
+				if (!ProductID) return;
 
-			$.ajax({
-				url: '@Url.Action("GetProductSizesPrice", "Products")',
-				type: 'GET',
-				data: { ProductID: ProductID },
+				$.ajax({
+					url: '@Url.Action("GetProductSizesPrice", "Products")',
+					type: 'GET',
+					data: { ProductID: ProductID },
 
-				success: function (res){
+					success: function (res){
 
-					if (!res || !res.success){
-						toastr.error(res.message || "Failed loading prices");
-						return;
-					}
+						if (!res || !res.success){
+							toastr.error(res.message || "Failed loading prices");
+							return;
+						}
 
-					let html = "";
+						let html = "";
 
-					res.data.forEach(size => {
+						res.data.forEach(size => {
 
-						let baseKey = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
+							let baseKey = `${size.productTypeID}_${size.productDetailID}_${size.sizeID}`;
 
-						html += `
-						<div class="variation-card mb-2">
+							html += `
+							<div class="variation-card mb-2">
 
-							<div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
-								<div>
-									<span class="badge bg-primary me-1">${size.productTypeDescription}</span>
-									<i class="fas fa-arrow-right text-muted mx-1"></i>
-									<span class="badge bg-info me-1">${size.productDetailDescription}</span>
-									<i class="fas fa-arrow-right text-muted mx-1"></i>
-									<span class="badge bg-success">${size.sizeDescription}</span>
+								<div class="variation-header p-2 bg-light d-flex justify-content-between align-items-center">
+									<div>
+										<span class="badge bg-primary me-1">${size.productTypeDescription}</span>
+										<i class="fas fa-arrow-right text-muted mx-1"></i>
+										<span class="badge bg-info me-1">${size.productDetailDescription}</span>
+										<i class="fas fa-arrow-right text-muted mx-1"></i>
+										<span class="badge bg-success">${size.sizeDescription}</span>
+									</div>
+
+									<div>
+										<span class="text-muted small">Rank: ${size.sizeRank}</span>
+									</div>
 								</div>
 
-								<div>
-									<span class="text-muted small">Rank: ${size.sizeRank}</span>
-								</div>
-							</div>
+								<div class="variation-body p-2">
+							`;
 
-							<div class="variation-body p-2">
-						`;
+							// ======================
+							// GROUP BY COLOR
+							// ======================
+							let colorGroups = {};
 
-						// ======================
-						// GROUP BY COLOR
-						// ======================
-						let colorGroups = {};
+							(size.productSizePrice || []).forEach(p => {
 
-						(size.productSizePrice || []).forEach(p => {
+								if (!colorGroups[p.colorID]){
+									colorGroups[p.colorID] = {
+										colorName: p.colorName,
+										colorCode: p.colorCode,
+										prices: []
+									};
+								}
 
-							if (!colorGroups[p.colorID]){
-								colorGroups[p.colorID] = {
-									colorName: p.colorName,
-									colorCode: p.colorCode,
-									prices: []
-								};
-							}
+								colorGroups[p.colorID].prices.push(p);
+							});
 
-							colorGroups[p.colorID].prices.push(p);
-						});
+							// ======================
+							// COLOR ROWS
+							// ======================
+							Object.keys(colorGroups).forEach(colorID => {
 
-						// ======================
-						// COLOR ROWS
-						// ======================
-						Object.keys(colorGroups).forEach(colorID => {
+								let color = colorGroups[colorID];
 
-							let color = colorGroups[colorID];
-
-								let uniquePrices = {};
+									let uniquePrices = {};
 
 									color.prices.forEach(p => {
 										let key = `${p.productTypeID}_${p.productDetailID}_${p.sizeID}_${p.colorID}_${p.currencyID}_${p.countryID}`;
@@ -1767,99 +1767,99 @@
 
 									Object.values(uniquePrices).forEach(price => {
 
-								let key = `${price.productTypeID}_${price.productDetailID}_${price.sizeID}_${price.colorID}_${price.currencyID}`;
+									let key = `${price.productTypeID}_${price.productDetailID}_${price.sizeID}_${price.colorID}_${price.currencyID}`;
 
-								html += `<div class="row align-items-end mb-2 border-top pt-2">`;
+									html += `<div class="row align-items-end mb-2 border-top pt-2">`;
 
-								// COLOR
-								html += `
-									<div class="col-md-3">
-										<label>Color</label>
-										<div>
-											<i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
-											${color.colorName}
-										</div>
-									</div>
-								`;
-
-								// SALE (PER PRICE)
-								html += `
-									<div class="col-md-2">
-										<label>Sale %</label>
-										<input type="number" step="0.01"
-											class="form-control form-control-sm sale-input"
-											name="Sale[${key}]"
-											data-key="${key}"
-											value="${price.sale ?? 0}" ${price.useInPrice === false ? 'readonly' : ''}>
-									</div>
-								`;
-
-								// AMOUNT
-								html += `
-									<div class="col-md-3">
-										<label>Amount (${price.currencyCode})</label>
-										<input type="number" step="0.01"
-											class="form-control form-control-sm price-input"
-											name="Price[${key}]"
-											data-key="${key}"
-											data-currency="${price.currencyID}"
-											value="${price.amount}" ${price.useInPrice === false ? 'readonly' : ''}>
-									</div>
-								`;
-
-								// NET
-								html += `
-									<div class="col-md-3">
-										<label>Net (${price.currencyCode})</label>
-										<input type="number" step="0.01"
-											class="form-control form-control-sm price-net-input"
-												name="PriceNet[${key}]"
-											data-key="${key}"
-											data-currency="${price.currencyID}"
-											value="${price.amountNet}" ${price.useInPrice === false ? 'readonly' : ''}>
-									</div>`;
-
-									  html += `
-											<div class="col-md-1">
-
-												<label class="font-weight-bold d-block">Used</label>
-
-												<input type="hidden"
-													   name="PriceInUse[${key}]"
-													   value="${price.useInPrice === true ? '1' : '0'}"
-													   class="useinprice-hidden"
-													   data-key="${key}">
-
-												<div class="custom-control custom-switch">
-														<input type="checkbox" ${price.useInPrice === true ? 'checked' : ''}
-														   class="custom-control-input useinprice"
-														   id="use_${key}"
-														   data-key="${key}">
-													<label class="custom-control-label" for="use_${key}"></label>
-												</div>
-
+									// COLOR
+									html += `
+										<div class="col-md-3">
+											<label>Color</label>
+											<div>
+												<i class="fas fa-square me-1" style="color:#${color.colorCode}"></i>
+												${color.colorName}
 											</div>
-										`;
+										</div>
+									`;
 
-								html += `<input type="hidden"
-								name="CountryID[${key}]"
-								value="${price.countryID}" />`
+									// SALE (PER PRICE)
+									html += `
+										<div class="col-md-2">
+											<label>Sale %</label>
+											<input type="number" step="0.01"
+												class="form-control form-control-sm sale-input"
+												name="Sale[${key}]"
+												data-key="${key}"
+												value="${price.sale ?? 0}" ${price.useInPrice === false ? 'readonly' : ''}>
+										</div>
+									`;
 
-								html += `</div>`;
+									// AMOUNT
+									html += `
+										<div class="col-md-3">
+											<label>Amount (${price.currencyCode})</label>
+											<input type="number" step="0.01"
+												class="form-control form-control-sm price-input"
+												name="Price[${key}]"
+												data-key="${key}"
+												data-currency="${price.currencyID}"
+												value="${price.amount}" ${price.useInPrice === false ? 'readonly' : ''}>
+										</div>
+									`;
+
+									// NET
+									html += `
+										<div class="col-md-3">
+											<label>Net (${price.currencyCode})</label>
+											<input type="number" step="0.01"
+												class="form-control form-control-sm price-net-input"
+													name="PriceNet[${key}]"
+												data-key="${key}"
+												data-currency="${price.currencyID}"
+												value="${price.amountNet}" ${price.useInPrice === false ? 'readonly' : ''}>
+										</div>`;
+
+										 html += `
+												<div class="col-md-1">
+
+													<label class="font-weight-bold d-block">Used</label>
+
+													<input type="hidden"
+														   name="PriceInUse[${key}]"
+														   value="${price.useInPrice === true ? '1' : '0'}"
+														   class="useinprice-hidden"
+														   data-key="${key}">
+
+													<div class="custom-control custom-switch">
+															<input type="checkbox" ${price.useInPrice === true ? 'checked' : ''}
+															   class="custom-control-input useinprice"
+															   id="use_${key}"
+															   data-key="${key}">
+														<label class="custom-control-label" for="use_${key}"></label>
+													</div>
+
+												</div>
+											`;
+
+									html += `<input type="hidden"
+									name="CountryID[${key}]"
+									value="${price.countryID}" />`
+
+									html += `</div>`;
+								});
+
 							});
 
+							html += `</div></div>`;
 						});
 
-						html += `</div></div>`;
-					});
+						$("#ProductSizesPrices").html(html);
+					},
 
-					$("#ProductSizesPrices").html(html);
-				},
-
-				error:function(){
-					toastr.error("Server error loading prices");
-				}
-			});
+					error:function(){
+						toastr.error("Server error loading prices");
+					}
+				});
 
 		}
 		 
@@ -2519,7 +2519,7 @@ $(document).on("click", "#btnSaveProductStock", function () {
 
 				toastr.success("Stock saved successfully");
 
-				loadProductStock($("#ProductID").val());
+				listProductStock($("#ProductID").val());
 
 			} else {
 

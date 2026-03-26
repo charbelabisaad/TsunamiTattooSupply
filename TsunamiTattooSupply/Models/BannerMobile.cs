@@ -35,6 +35,9 @@ namespace TsunamiTattooSupply.Models
 		public bool ShopNow { get; set; } = false;
 
 		[Required]
+		public int Rank { get; set; } = 0;
+
+		[Required]
 		public string StatusID { get; set; }
 
 		[Required]

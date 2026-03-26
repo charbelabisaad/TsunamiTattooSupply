@@ -106,7 +106,7 @@
                         <div class="col-6 d-flex align-groups-center"><h3 class="card-title">Banners List</h3></div>
                         <div class="col-6 d-flex align-groups-center justify-content-end">
                             <button id="btnNewBanner" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Banner</button>
-                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3 d-none"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
+                            <button id="btnSetRankBanner" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button>
                         </div>
                     </div> 
                 </div>
@@ -121,6 +121,7 @@
                                     <th style="width:200px">Description</th>
                                     <th>Sentence</th>
                                     <th>Link</th>
+                                    <th class="d-none"></th>
                                     <th style="width:50px">Status</th>
                                     <th style="width:50px" class="no-export">Actions</th>
                                 </tr>
@@ -378,6 +379,12 @@
                             return `<a href="${data}" target="_blank">${data}</a>`;
                         }
                     },
+
+                    {
+                        data: "rank",
+                        className: "align-middle",
+                        visible: false
+                    },
                        // 🔹 Group Status with Color Badge
                     {
                         data: "status",
@@ -424,7 +431,7 @@
                         }
                     }
                 ],
-                order: [[1, "asc"]]
+                order: [[4, "asc"]]
             });
 
             $("#btnNewBanner").on("click", function () {
@@ -693,6 +700,44 @@
                     $("#btnConfirmDeleteBanner i").removeClass("d-none");
                     $("#btnConfirmDeleteBanner").prop("disabled", false);
                 }
+            });
+
+            $(document).on('click', '#btnSetRankBanner', function () {
+
+                const $rankSelect = $('#rankSelect');
+
+                $rankSelect.empty();
+
+                $("#rankMode").val("BNRHMWB")
+
+                $.ajax({
+                    url: '@Url.Action("ListGetBanners", "BannersHomeWeb")',
+                    type: 'GET',
+                    success: function (res) {
+
+                        if (!res.success) {
+                            toastr.error(res.message || 'Failed to load banners');
+                            return;
+                        }
+
+                        // sort by Rank (safe)
+                        res.data.sort((a, b) => a.rank - b.rank);
+
+                        $.each(res.data, function (index, item) {
+                            $rankSelect.append(
+                                `<option value="${item.id}">
+                                    ${index + 1}. ${item.description}
+                                </option>`
+                            );
+                        });
+
+                        $('#rankModal').modal('show');
+                    },
+                    error: function () {
+                        toastr.error('Server error while loading banner');
+                    }
+                });
+
             });
 
         });

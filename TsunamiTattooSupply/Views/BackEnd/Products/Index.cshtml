@@ -996,7 +996,12 @@
                         bootstrap.Tab.getOrCreateInstance(firstTab).show();
 
                         // 🔥 LOAD DETAILS MANUALLY
-                        loadTypeDetails(typeId);
+                        const tabs = document.querySelectorAll('#productTypeTabs button.nav-link');
+
+                        tabs.forEach(tab => {
+                            const typeId = tab.dataset.bsTarget.replace('#type-', '');
+                            loadTypeDetails(typeId);
+                        });
                     });
 
                     /* ==================================================
@@ -1552,7 +1557,8 @@
                 }
             });
         }
-       $(document).on("click", ".btnAddProductStock", function () {
+       
+        $(document).on("click", ".btnAddProductStock", function () {
 
         let sizeID = $(this).val();
 
@@ -1975,6 +1981,7 @@
         function hideModalLoader() {
             $("#modalLoader").addClass("d-none");
         }
+        
     });
      
     </script>
