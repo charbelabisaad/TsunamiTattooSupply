@@ -640,8 +640,8 @@
             $("#SubCategoryID").val("0");
             $("#SubCategoryDescription").val("");
             $("#SubCategorySpecsLabel").val("");
-            $("#SubCategoryProductTypesLabel").val("");
-            $("#SubCategoryProductDetailsLabel").val("");
+            // $("#SubCategoryProductTypesLabel").val("");
+            // $("#SubCategoryProductDetailsLabel").val("");
             $("#SubCategoryDescriptionMessage").text("");
 
             $("#subcategoryStatusToggle").prop("checked", true);
@@ -746,20 +746,20 @@
                             return `<span class="fw-bold">${data}</span>`;
                         }   
                     },
-                    {
-                        data: "typesLabel",
-                        className: "align-middle",
-                        render: function (data) {
-                            return `<span class="fw-bold">${data}</span>`;
-                        }   
-                    },
-                    {
-                        data: "detailsLabel",
-                        className: "align-middle",
-                        render: function (data) {
-                            return `<span class="fw-bold">${data}</span>`;
-                        }   
-                    },
+                    // {
+                    //     data: "typesLabel",
+                    //     className: "align-middle",
+                    //     render: function (data) {
+                    //         return `<span class="fw-bold">${data}</span>`;
+                    //     }   
+                    // },
+                    // {
+                    //     data: "detailsLabel",
+                    //     className: "align-middle",
+                    //     render: function (data) {
+                    //         return `<span class="fw-bold">${data}</span>`;
+                    //     }   
+                    // },
                     {
                         data: "rank",
                         className: "align-middle d-none"
@@ -792,9 +792,7 @@
                                        style="cursor:pointer"
                                        data-id="${row.id}"
                                        data-description="${row.description}"
-                                       data-specslabel="${row.specsLabel}"
-                                       data-producttypeslabel="${row.typesLabel}"
-                                       data-productdetailslabel="${row.detailsLabel}"
+                                       data-specslabel="${row.specsLabel}" 
                                        data-webimagepath="${row.webImagePath}"
                                        data-webimage="${row.webImage}"
                                        data-mobileimagepath="${row.mobileImagePath}"
@@ -814,8 +812,12 @@
                         }
                     }
                 ],
-                order: [[3, "asc"]],
+                order: [[4, "asc"]],
             });
+
+            // data-producttypeslabel="${row.typesLabel}"
+            // data-productdetailslabel="${row.detailsLabel}"
+
         }
          
         // 🔹 SAVE SUBCATEGORY
@@ -832,11 +834,11 @@
             $("#SubCategorySpecsLabel").removeClass('border-danger');
             $("#SubCategorySpecsLabelMessage").text('');
 
-            $("#SubCategoryProductTypesLabel").removeClass('border-danger');
-            $("#SubCategoryProductTypesLabelMessage").text('');
+            // $("#SubCategoryProductTypesLabel").removeClass('border-danger');
+            // $("#SubCategoryProductTypesLabelMessage").text('');
 
-            $("#SubCategoryProductDetailsLabel").removeClass('border-danger');
-            $("#SubCategoryProductDetailsLabelMessage").text('');
+            // $("#SubCategoryProductDetailsLabel").removeClass('border-danger');
+            // $("#SubCategoryProductDetailsLabelMessage").text('');
              
             let description = $('#SubCategoryDescription').val().trim();
 
@@ -856,23 +858,23 @@
                 return;
             }
 
-            let prodcuttypeslabel = $('#SubCategoryProductTypesLabel').val().trim();
+            // let prodcuttypeslabel = $('#SubCategoryProductTypesLabel').val().trim();
 
-            if(!prodcuttypeslabel){
-                $('#SubCategoryProductTypesLabelMessage').text("Product Types Label is required!");
-                $('#SubCategoryProductTypesLabel').addClass('border-danger');
-                resetSubButton();
-                return;
-            }
+            // if(!prodcuttypeslabel){
+            //     $('#SubCategoryProductTypesLabelMessage').text("Product Types Label is required!");
+            //     $('#SubCategoryProductTypesLabel').addClass('border-danger');
+            //     resetSubButton();
+            //     return;
+            // }
 
-            let prodcutdetailslabel = $('#SubCategoryProductDetailsLabel').val().trim();
+            // let prodcutdetailslabel = $('#SubCategoryProductDetailsLabel').val().trim();
 
-            if(!prodcutdetailslabel){
-                $('#SubCategoryProductDetailsLabelMessage').text("Product Details Label is required!");
-                $('#SubCategoryProductDetailsLabel').addClass('border-danger');
-                resetSubButton();
-                return;
-            }
+            // if(!prodcutdetailslabel){
+            //     $('#SubCategoryProductDetailsLabelMessage').text("Product Details Label is required!");
+            //     $('#SubCategoryProductDetailsLabel').addClass('border-danger');
+            //     resetSubButton();
+            //     return;
+            // }
 
             let formData = new FormData();
 
@@ -880,8 +882,8 @@
             formData.append("CategoryID", $('#ParentCategoryID').val());
             formData.append("Description", description);
             formData.append("SpecsLabel", specslabel); 
-            formData.append("ProductTypesLabel", prodcuttypeslabel);
-            formData.append("ProductDetailsLabel", prodcutdetailslabel)
+            // formData.append("ProductTypesLabel", prodcuttypeslabel);
+            // formData.append("ProductDetailsLabel", prodcutdetailslabel)
             formData.append("StatusID", $('#subCategoryStatusID').val());
              
             const attach = (id, key) => {
@@ -951,8 +953,8 @@
             let id = $(this).data("id");
             let description = $(this).data("description");
             let specsLabel = $(this).data("specslabel");
-            let productTypesLabel = $(this).data("producttypeslabel");
-            let productDetailsLabel = $(this).data("productdetailslabel");
+            // let productTypesLabel = $(this).data("producttypeslabel");
+            // let productDetailsLabel = $(this).data("productdetailslabel");
             let webPath = $(this).data("webimagepath");
             let webImg = $(this).data("webimage");
             let mobilePath = $(this).data("mobileimagepath");
@@ -967,8 +969,8 @@
             $("#SubCategoryDescription").val(description);
              
             $("#SubCategorySpecsLabel").val(specsLabel);
-            $("#SubCategoryProductTypesLabel").val(productTypesLabel);
-            $("#SubCategoryProductDetailsLabel").val(productDetailsLabel);
+            // $("#SubCategoryProductTypesLabel").val(productTypesLabel);
+            // $("#SubCategoryProductDetailsLabel").val(productDetailsLabel);
              
             if (statusId === "A") {
                 $("#subcategoryStatusToggle").prop("checked", true);

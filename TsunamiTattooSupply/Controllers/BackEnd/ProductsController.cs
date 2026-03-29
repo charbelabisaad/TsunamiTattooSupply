@@ -2493,54 +2493,66 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				// =========================================
 				// SIZES
 				// =========================================
-				var productSizes = _dbContext.ProductsSizes
-					.AsNoTracking()
-					.Where(x => x.ProductID == productId
-								&& x.DeletedDate == null
-								&& x.StatusID == "A")
-					.GroupBy(x => new
-					{
-						x.SizeID,
-						SizeDescription = x.Size.Description,
-						SizeRank = x.Size.Rank
-					})
-					.Select(g => new
-					{
-						sizeID = g.Key.SizeID,
-						sizeDescription = g.Key.SizeDescription,
-						sizeRank = g.Key.SizeRank
-					})
-					.OrderBy(x => x.sizeRank)
-					.ToList();
-
-
-				var types = _dbContext.ProductsSizes
+			var productSizes = _dbContext.ProductsSizes
 				.AsNoTracking()
 				.Where(x => x.ProductID == productId
 							&& x.DeletedDate == null
 							&& x.StatusID == "A")
-				.Select(x => new
+				.GroupBy(x => new
+				{
+					x.SizeID,
+					SizeDescription = x.Size.Description,
+					SizeRank = x.Size.Rank
+				})
+				.Select(g => new
+				{
+					sizeID = g.Key.SizeID,
+					sizeDescription = g.Key.SizeDescription,
+					sizeRank = g.Key.SizeRank
+				})
+				.OrderBy(x => x.sizeRank)
+				.ToList();
+
+
+			var types = _dbContext.ProductsSizes
+				.AsNoTracking()
+				.Where(x => x.ProductID == productId
+							&& x.DeletedDate == null
+							&& x.StatusID == "A")
+				.GroupBy(x => new
 				{
 					x.ProductTypeID,
 					ProductTypeDescription = x.ProductType.Description
 				})
-				.Distinct()
-				.OrderBy(x => x.ProductTypeDescription)
+				.Select(g => new
+				{
+					productTypeID = g.Key.ProductTypeID,
+					productTypeDescription = g.Key.ProductTypeDescription
+				})
+				.OrderBy(x => x.productTypeDescription)
 				.ToList();
 
-				var details = _dbContext.ProductsSizes
+			var details = _dbContext.ProductsSizes
 				.AsNoTracking()
 				.Where(x => x.ProductID == productId
 							&& x.DeletedDate == null
 							&& x.StatusID == "A")
-				.Select(x => new
+				.GroupBy(x => new
 				{
 					x.ProductTypeID,
 					x.ProductDetailID,
 					ProductDetailDescription = x.ProductDetail.Description
 				})
-				.Distinct()
+				.Select(g => new
+				{
+					productTypeID = g.Key.ProductTypeID,
+					productDetailID = g.Key.ProductDetailID,
+					productDetailDescription = g.Key.ProductDetailDescription
+				})
+				.OrderBy(x => x.productTypeID)
+				.ThenBy(x => x.productDetailDescription)
 				.ToList();
+
 				// =========================================
 				// TYPE + DETAIL FOR DROPDOWNS
 				// =========================================

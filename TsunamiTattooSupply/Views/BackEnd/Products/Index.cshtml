@@ -405,6 +405,8 @@
             $("#ProductDescriptionMessage").text("");
             $("#ProductCodeMessage").text("");
             $("#ProductUnitMessage").text("");
+            $("#ProductTypesLabelMessage").text("");
+            $("#ProductDetailsLabelMessage").text("");
 
             $("#ProductUnitID").val("");
 
@@ -825,6 +827,13 @@
 
             $("#ProductSubCategory").empty();
             $("#SubCategoryTags").empty();
+
+
+            $("#ProductDescriptionMessage").text("");
+            $("#ProductCodeMessage").text("");
+            $("#ProductUnitMessage").text("");
+            $("#ProductTypesLabelMessage").text("");
+            $("#ProductDetailsLabelMessage").text("");
 
             $("#productDetails").removeClass("d-none");
 
@@ -1509,6 +1518,7 @@
                     }
 
                     window.STOCK_COLORS  = res.colors;
+                    window.STOCK_TYPES = res.sizeTypes;
                     window.STOCK_DETAILS = res.sizeDetails;
 
                     let html = "";
@@ -1616,140 +1626,114 @@
 
     });
 
-    function buildStockRow(stock = null, sizeID = null) {
+        function buildStockRow(stock = null, sizeID = null) {
+             
+            let colorOptions = `<option value="">Select</option>`;
 
-        let colorOptions = `<option value="">Select</option>`;
+            STOCK_COLORS.forEach(c => {
+                colorOptions += `
+                <option value="${c.colorID}"
+                    ${stock?.colorID == c.colorID ? 'selected' : ''}>
+                    ${c.name}
+                </option>`;
+            });
+             
+            // =========================================
+            // 🔥 UNIQUE TYPES ONLY
+            // =========================================
+            const uniqueTypes = [...new Map(
+                STOCK_TYPES.map(t => [t.productTypeID, t])
+            ).values()];
 
-        STOCK_COLORS.forEach(c => {
-            colorOptions += `
-            <option value="${c.colorID}" 
-                ${stock?.colorID == c.colorID ? 'selected' : ''}>
-                ${c.name}
-            </option>`;
-        });
+            let typeOptions = `<option value="">Select</option>`;
 
-        let typeOptions = `<option value="">Select</option>`;
-        let detailOptions = `<option value="">Select</option>`;
-
-        STOCK_DETAILS.forEach(d => {
-
-            typeOptions += `
-            <option value="${d.productTypeID}"
-                ${stock?.productTypeID == d.productTypeID ? 'selected' : ''}>
-                ${d.productTypeDescription}
-            </option>`;
-
-            detailOptions += `
-            <option value="${d.productDetailID}"
-                ${stock?.productDetailID == d.productDetailID ? 'selected' : ''}>
-                ${d.productDetailDescription}
-            </option>`;
-        });
-
-        return `
-        <tr>
-
-            <td style="width:200px">
-
-                <input type="hidden" class="stock-id" value="${stock?.id ?? 0}">
-                <input type="hidden" class="size-id" value="${sizeID ?? stock?.sizeID ?? ''}">
-
-                <select class="form-control form-control-sm color-id selectpicker" data-live-search="true">
-                    ${colorOptions}
-                </select>
-
-            </td>
-
-            <td style="width:150px">
-                <select class="form-control form-control-sm type-id selectpicker" data-live-search="true">
-                    ${typeOptions}
-                </select>
-            </td>
-
-            <td style="width:150px">
-                <select class="form-control form-control-sm detail-id selectpicker" data-live-search="true">
-                    ${detailOptions}
-                </select>
-            </td>
-
-            <td style="width:100px">
-                <input type="number"
-                       class="form-control form-control-sm qty"
-                       min="0"
-                       value="${stock?.quantity ?? 0}">
-            </td>
-
-            <td style="width:160px">
-                <input type="text"
-                       class="form-control form-control-sm barcode"
-                       value="${stock?.barcode ?? ''}">
-            </td>
-
-            <td style="width:60px" class="align-middle text-center">
-                <input type="checkbox"
-                       class="useinstock"
-                       ${stock?.useInStock ? 'checked' : ''}>
-            </td>
-
-            <td style="width:60px" class="align-middle text-center">
-                <button type="button"
-                        class="btn btn-sm btn-danger remove-row">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </td>
-
-        </tr>`;
-    }
-
-        $(document).on("click", ".remove-row", function () {
-
-            $(this).closest("tr").remove();
-
-        });
-
-        let colorImagesByColorId = {}; // edit mode preload
-        let isColorEditLoading = false;
-
-
-         $(document).on('click', '#btnSetRankProduct', function () {
-
-            const $rankSelect = $('#rankSelect');
-
-            $rankSelect.empty();
-
-            $("#rankMode").val("PRDCT")
-
-            $.ajax({
-                url: '@Url.Action("ListGetProducts","Products")',
-                type: 'GET',
-                success: function (res) {
-
-                    if (!res.success) {
-                        toastr.error(res.message || 'Failed to load products');
-                        return;
-                    }
-
-                    // sort by Rank (safe)
-                    res.data.sort((a, b) => a.rank - b.rank);
-
-                    $.each(res.data, function (index, item) {
-                        $rankSelect.append(
-                            `<option value="${item.id}">
-                                ${index + 1}. ${item.name}
-                            </option>`
-                        );
-                    });
-                     
-                    $('#rankModal').modal('show');
-                },
-                error: function () {
-                    toastr.error('Server error while loading product');
-                }
+            uniqueTypes.forEach(t => {
+                typeOptions += `
+                <option value="${t.productTypeID}"
+                    ${stock?.productTypeID == t.productTypeID ? 'selected' : ''}>
+                    ${t.productTypeDescription}
+                </option>`;
             });
 
-        });
-               
+            // =========================================
+            // 🔥 DETAILS FILTERED BY TYPE (INITIAL)
+            // =========================================
+            let detailOptions = `<option value="">Select</option>`;
 
+            // 🔥 UNIQUE DETAILS
+            const uniqueDetails = [...new Map(
+                STOCK_DETAILS.map(d => [d.productDetailID, d])
+            ).values()];
+
+            // 🔥 FILTER BY CURRENT TYPE (VERY IMPORTANT)
+            uniqueDetails
+                .filter(d => !stock?.productTypeID || d.productTypeID == stock?.productTypeID)
+                .forEach(d => {
+
+                    detailOptions += `
+                    <option value="${d.productDetailID}"
+                        data-type="${d.productTypeID}"
+                        ${stock?.productDetailID == d.productDetailID ? 'selected' : ''}>
+                        ${d.productDetailDescription}
+                    </option>`;
+                });
+
+            return `
+            <tr>
+
+                <td style="width:200px">
+
+                    <input type="hidden" class="stock-id" value="${stock?.id ?? 0}">
+                    <input type="hidden" class="size-id" value="${sizeID ?? stock?.sizeID ?? ''}">
+
+                    <select class="form-control form-control-sm color-id selectpicker" data-live-search="true">
+                        ${colorOptions}
+                    </select>
+
+                </td>
+
+                <td style="width:150px">
+                    <select class="form-control form-control-sm type-id selectpicker" data-live-search="true">
+                        ${typeOptions}
+                    </select>
+                </td>
+
+                <td style="width:150px">
+                    <select class="form-control form-control-sm detail-id selectpicker" data-live-search="true">
+                        ${detailOptions}
+                    </select>
+                </td>
+
+                <td style="width:100px">
+                    <input type="number"
+                           class="form-control form-control-sm qty"
+                           min="0"
+                           value="${stock?.quantity ?? 0}">
+                </td>
+
+                <td style="width:160px">
+                    <input type="text"
+                           class="form-control form-control-sm barcode"
+                           value="${stock?.barcode ?? ''}">
+                </td>
+
+                <td style="width:60px" class="align-middle text-center">
+                    <input type="checkbox"
+                           class="useinstock"
+                           ${stock?.useInStock ? 'checked' : ''}>
+                </td>
+
+                <td style="width:60px" class="align-middle text-center">
+                    <button type="button"
+                            class="btn btn-sm btn-danger remove-row">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+
+            </tr>`;
+        }
+
+       
 
             ////////////////////////////////////////////////////////////////////////////////////////
             const productDetailsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.productDetails));
@@ -1763,119 +1747,119 @@
             }
 
 
-              $(document).on('changed.bs.select', '#ProductTypes', function () {
+        //       $(document).on('changed.bs.select', '#ProductTypes', function () {
 
-                      if (isBuildingUI) return;
+        //               if (isBuildingUI) return;
 
-                  const selectedTypeIds =
-                      ($(this).val() || []).map(String);
+        //           const selectedTypeIds =
+        //               ($(this).val() || []).map(String);
 
-                  // -----------------------------------
-                  // REMOVE unselected types
-                  // -----------------------------------
-                  $('#productTypeTabs button').each(function () {
+        //           // -----------------------------------
+        //           // REMOVE unselected types
+        //           // -----------------------------------
+        //           $('#productTypeTabs button').each(function () {
 
-                      const typeId =
-                          $(this).data('bs-target').replace('#type-', '');
+        //               const typeId =
+        //                   $(this).data('bs-target').replace('#type-', '');
 
-                      if (!selectedTypeIds.includes(typeId)) {
+        //               if (!selectedTypeIds.includes(typeId)) {
 
-                          // remove tab
-                          $(this).parent().remove();
+        //                   // remove tab
+        //                   $(this).parent().remove();
 
-                          // remove tab content
-                          $('#type-' + typeId).remove();
+        //                   // remove tab content
+        //                   $('#type-' + typeId).remove();
 
-                          // remove memory
-                          builtTypeTabs.delete(typeId);
-                          delete editDetails[typeId];
+        //                   // remove memory
+        //                   builtTypeTabs.delete(typeId);
+        //                   delete editDetails[typeId];
 
-                          Object.keys(editSizes).forEach(k => {
-                              if (k.startsWith(typeId + '_')) {
-                                  delete editSizes[k];
-                              }
-                          });
-                      }
-                  });
+        //                   Object.keys(editSizes).forEach(k => {
+        //                       if (k.startsWith(typeId + '_')) {
+        //                           delete editSizes[k];
+        //                       }
+        //                   });
+        //               }
+        //           });
 
-                  // -----------------------------------
-                  // ADD newly selected types
-                  // -----------------------------------
-                  buildProductTypeTabs(selectedTypeIds);
-
-
-
-                  // -----------------------------------
-                  // Activate first tab
-                  // -----------------------------------
-                  const $firstTab =
-                      $('#productTypeTabs button').first();
-
-                  if ($firstTab.length) {
-                      new bootstrap.Tab($firstTab[0]).show();
-                  }
-              });
+        //           // -----------------------------------
+        //           // ADD newly selected types
+        //           // -----------------------------------
+        //           buildProductTypeTabs(selectedTypeIds);
 
 
-                      function buildProductTypeBlocks(typeIds) {
 
-            let container = $('#productTypeBlocks');
-            container.empty();
+        //           // -----------------------------------
+        //           // Activate first tab
+        //           // -----------------------------------
+        //           const $firstTab =
+        //               $('#productTypeTabs button').first();
 
-            typeIds.forEach(typeId => {
-
-                let typeName = $('#ProductTypes option[value="' + typeId + '"]').text();
-
-                container.append(`
-                    <div class="card mb-3 type-block" id="type-${typeId}">
-
-                        <div class="card-header fw-bold">
-                            ${typeName}
-                        </div>
-
-                        <div class="card-body">
+        //           if ($firstTab.length) {
+        //               new bootstrap.Tab($firstTab[0]).show();
+        //           }
+        //       });
 
 
-                                <div class="row mb-3">
+        //               function buildProductTypeBlocks(typeIds) {
 
-                                        <div class="col-1">
+        //     let container = $('#productTypeBlocks');
+        //     container.empty();
 
-                                            <label class="me-3 mb-0" style="min-width: 80px;">
-                                                Details
-                                            </label>
+        //     typeIds.forEach(typeId => {
 
-                                        </div>
+        //         let typeName = $('#ProductTypes option[value="' + typeId + '"]').text();
 
-                                        <div class="col-11">
+        //         container.append(`
+        //             <div class="card mb-3 type-block" id="type-${typeId}">
 
-                                            <select class="form-control selectpicker product-details"
-                                                    style="width: 100%;"
-                                                    name="ProductDetails[${typeId}][${detailId}"
-                                                    multiple
-                                                    data-live-search="true"
-                                                    data-actions-box="true">
+        //                 <div class="card-header fw-bold">
+        //                     ${typeName}
+        //                 </div>
 
-                                                ${generateDetailsOptions()}
-
-                                            </select>
-
-                                        </div>
+        //                 <div class="card-body">
 
 
-                                </div>
+        //                         <div class="row mb-3">
 
-                            <div class="details-container" id="details-${typeId}">
-                            </div>
+        //                                 <div class="col-1">
 
-                        </div>
-                    </div>
-                `);
+        //                                     <label class="me-3 mb-0" style="min-width: 80px;">
+        //                                         Details
+        //                                     </label>
 
-                // initialize selectpicker
-                $(`select[name="ProductDetails[${typeId}][]"]`).selectpicker();
-            });
+        //                                 </div>
 
-        }
+        //                                 <div class="col-11">
+
+        //                                     <select class="form-control selectpicker product-details"
+        //                                             style="width: 100%;"
+        //                                             name="ProductDetails[${typeId}][${detailId}"
+        //                                             multiple
+        //                                             data-live-search="true"
+        //                                             data-actions-box="true">
+
+        //                                         ${generateDetailsOptions()}
+
+        //                                     </select>
+
+        //                                 </div>
+
+
+        //                         </div>
+
+        //                     <div class="details-container" id="details-${typeId}">
+        //                     </div>
+
+        //                 </div>
+        //             </div>
+        //         `);
+
+        //         // initialize selectpicker
+        //         $(`select[name="ProductDetails[${typeId}][]"]`).selectpicker();
+        //     });
+
+        // }
 
         // function buildProductTypeTabs(typeIds) {
 

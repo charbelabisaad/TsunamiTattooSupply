@@ -2254,9 +2254,9 @@
 		// ============================================
 		// 🔥 SAVE CURRENT DETAILS STATE
 		// ============================================
-		$('.product-details').each(function () {
-			detailsState[$(this).attr('name')] = $(this).val() || [];
-		});
+		// $('.product-details').each(function () {
+		// 	detailsState[$(this).attr('name')] = $(this).val() || [];
+		// });
 
 		const selectedValues = $(this).val() || [];
 
@@ -2343,20 +2343,20 @@
 		// ============================================
 		// 🔥 RESTORE STATE (AFTER INIT)
 		// ============================================
-		setTimeout(() => {
+		// setTimeout(() => {
 
-			Object.keys(detailsState).forEach(name => {
+		// 	Object.keys(detailsState).forEach(name => {
 
-				let values = detailsState[name];
-				let $el = $(`.product-details[name="${name}"]`);
+		// 		let values = detailsState[name];
+		// 		let $el = $(`.product-details[name="${name}"]`);
 
-				if ($el.length) {
-					$el.selectpicker('val', values);
-					$el.selectpicker('render');
-				}
-			});
+		// 		if ($el.length) {
+		// 			$el.selectpicker('val', values);
+		// 			$el.selectpicker('render');
+		// 		}
+		// 	});
 
-		}, 50); // 🔥 IMPORTANT DELAY
+		// }, 50); 🔥 IMPORTANT DELAY
 
 	});
 
@@ -2809,93 +2809,129 @@ $(document).on("click", "#btnSaveProductStock", function () {
 					}
 				});
 		}
-
-
+		 
 		function AddStockRow(stock = null, sizeID = null) {
 
-		let colorOptions = `<option value="">Select</option>`;
+			let colorOptions = `<option value="">Select</option>`;
 
-		STOCK_COLORS.forEach(c => {
-			colorOptions += `
-			<option value="${c.colorID}" 
-				${stock?.colorID == c.colorID ? 'selected' : ''}>
-				${c.name}
-			</option>`;
-		});
+			STOCK_COLORS.forEach(c => {
+				colorOptions += `
+				<option value="${c.colorID}"
+					${stock?.colorID == c.colorID ? 'selected' : ''}>
+					${c.name}
+				</option>`;
+			});
 
-		let typeOptions = `<option value="">Select</option>`;
-		let detailOptions = `<option value="">Select</option>`;
+			// =========================================
+			// 🔥 UNIQUE TYPES (FIX HERE)
+			// =========================================
+			const uniqueTypes = [...new Map(
+				STOCK_DETAILS.map(t => [t.productTypeID, t])
+			).values()];
 
-		STOCK_DETAILS.forEach(d => {
+			let typeOptions = `<option value="">Select</option>`;
 
-			typeOptions += `
-			<option value="${d.productTypeID}"
-				${stock?.productTypeID == d.productTypeID ? 'selected' : ''}>
-				${d.productTypeDescription}
-			</option>`;
+			uniqueTypes.forEach(t => {
+				typeOptions += `
+				<option value="${t.productTypeID}"
+					${stock?.productTypeID == t.productTypeID ? 'selected' : ''}>
+					${t.productTypeDescription}
+				</option>`;
+			});
 
-			detailOptions += `
-			<option value="${d.productDetailID}"
-				${stock?.productDetailID == d.productDetailID ? 'selected' : ''}>
-				${d.productDetailDescription}
-			</option>`;
-		});
+			// =========================================
+			// DETAILS (KEEP AS IS)
+			// =========================================
+			let detailOptions = `<option value="">Select</option>`;
 
-		return `
-		<tr>
+			// 🔥 REMOVE DUPLICATES
+			const uniqueDetails = [...new Map(
+				STOCK_DETAILS.map(d => [
+					`${d.productTypeID}_${d.productDetailID}`, d
+				])
+			).values()];
 
-			<td style="width:200px">
+			uniqueDetails.forEach(d => {
+				detailOptions += `
+				<option value="${d.productDetailID}"
+					data-type="${d.productTypeID}"
+					${stock?.productDetailID == d.productDetailID ? 'selected' : ''}>
+					${d.productDetailDescription}
+				</option>`;
+			});
 
-				<input type="hidden" class="stock-id" value="${stock?.id ?? 0}">
-				<input type="hidden" class="size-id" value="${sizeID ?? stock?.sizeID ?? ''}">
+			return `
+			<tr>
 
-				<select class="form-control form-control-sm color-id selectpicker" data-live-search="true">
-					${colorOptions}
-				</select>
+				<td style="width:200px">
+					<input type="hidden" class="stock-id" value="${stock?.id ?? 0}">
+					<input type="hidden" class="size-id" value="${sizeID ?? stock?.sizeID ?? ''}">
 
-			</td>
+					<select class="form-control form-control-sm color-id selectpicker" data-live-search="true">
+						${colorOptions}
+					</select>
+				</td>
 
-			<td style="width:150px">
-				<select class="form-control form-control-sm type-id selectpicker" data-live-search="true">
-					${typeOptions}
-				</select>
-			</td>
+				<td style="width:150px">
+					<select class="form-control form-control-sm type-id selectpicker" data-live-search="true">
+						${typeOptions}
+					</select>
+				</td>
 
-			<td style="width:150px">
-				<select class="form-control form-control-sm detail-id selectpicker" data-live-search="true">
-					${detailOptions}
-				</select>
-			</td>
+				<td style="width:150px">
+					<select class="form-control form-control-sm detail-id selectpicker" data-live-search="true">
+						${detailOptions}
+					</select>
+				</td>
 
-			<td style="width:100px">
-				<input type="number"
-					   class="form-control form-control-sm qty"
-					   min="0"
-					   value="${stock?.quantity ?? 0}">
-			</td>
+				<td style="width:100px">
+					<input type="number" class="form-control form-control-sm qty"
+						   min="0" value="${stock?.quantity ?? 0}">
+				</td>
 
-			<td style="width:160px">
-				<input type="text"
-					   class="form-control form-control-sm barcode"
-					   value="${stock?.barcode ?? ''}">
-			</td>
+				<td style="width:160px">
+					<input type="text" class="form-control form-control-sm barcode"
+						   value="${stock?.barcode ?? ''}">
+				</td>
 
-			<td style="width:60px" class="align-middle text-center">
-				<input type="checkbox"
-					   class="useinstock"
-					   ${stock?.useInStock ? 'checked' : ''}>
-			</td>
+				<td style="width:60px" class="align-middle text-center">
+					<input type="checkbox" class="useinstock"
+						   ${stock?.useInStock ? 'checked' : ''}>
+				</td>
 
-			<td style="width:60px" class="align-middle text-center">
-				<button type="button"
-						class="btn btn-sm btn-danger remove-row">
-					<i class="fas fa-trash"></i>
-				</button>
-			</td>
+				<td style="width:60px" class="align-middle text-center">
+					<button type="button" class="btn btn-sm btn-danger remove-row">
+						<i class="fas fa-trash"></i>
+					</button>
+				</td>
 
-		</tr>`;
+			</tr>`;
 		}
 
+		$(document).on('changed.bs.select', '.type-id', function () {
+
+		const $row = $(this).closest('tr');
+		const typeId = $(this).val();
+		const $detail = $row.find('.detail-id');
+
+		// 🔥 RESET selection
+		$detail.selectpicker('val', []);
+
+		// 🔥 SHOW / HIDE OPTIONS INSTEAD OF REBUILD
+		$detail.find('option').each(function () {
+
+			let optionType = $(this).data('type');
+
+			if (!optionType || optionType == typeId) {
+				$(this).show();
+			} else {
+				$(this).hide();
+			}
+		});
+
+		// 🔥 REFRESH UI
+		$detail.selectpicker('render');
+	});
 
 	});
 
