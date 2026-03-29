@@ -471,7 +471,7 @@
             $("#BannerSubCategoryMessage").html("");
             $("#BannerProductMessage").html("");
 
-            $("#BannerCategoryRadio").prop("checked", true).trigger('change');
+            $("#BannerNoneRadio").prop("checked", true).trigger('change');
              
             // Reset status
             $("#BannerStatusToggle").prop("checked", true);
@@ -504,6 +504,8 @@
                 let shopNow = $(this).data("shopnow");
                 let statusId = $(this).data("statusid");
 
+               
+
                 $("#modalBannerTitle").text("Edit Banner");
 
                 $("#BannerID").val(id);
@@ -516,6 +518,11 @@
                 $("#BannerSubCategoryMessage").text("");
                 $("#BannerGroupMessage").text("");
                 $("#BannerProductMessage").text("");
+
+                if (categoryId == 0 && subCategoryId == 0 && productId == 0 && shopNow == false)
+                    $("#BannerNoneRadio").prop("checked", true).trigger("change");
+
+                $("#BannerShopNowRadio").prop('checked', shopNow).trigger("change");
 
                 if (categoryId) {
                     $("#BannerCategoryRadio").prop("checked", true).trigger("change");
@@ -570,8 +577,6 @@
 
                 $("#BannerProduct").val(productId);
                 $("#BannerProduct").selectpicker('destroy').selectpicker('render');
-
-                $("#BannerShopNow").prop('checked', shopNow);
 
                 $("#saveBannerModal").modal("show");
 
@@ -654,7 +659,7 @@
             $('#BannerCategory, #BannerSubCategory, #BannerGroup, #BannerProduct')
                 .prop('disabled', true);
 
-            if(!$('#BannerShopNow').is(':checked')){ 
+            if(!$('#BannerShopNow').is(':checked') && !$("#BannerNone").is(':checked')){ 
 
                 // enable selected
                 if (map[radioId]) {
@@ -691,6 +696,7 @@
             let groupId = $("#BannerGroup").val();
             let productId = $("#BannerProduct").val();
             let shopNow = $("#BannerShopNowRadio").prop("checked");
+            let none = $("#BannerNoneRadio").prop("checked");
             let imageFile = $("#bannerImage")[0].files[0];
             let bannerLink = $('input[name="BannerLink"]:checked').attr('id');
              
@@ -746,6 +752,7 @@
             formData.append("SubCategoryID", subCategoryId);
             formData.append("ProductID", productId);
             formData.append("ShopNow",shopNow);
+            formData.append("None",none);
             formData.append("StatusID", $("#BannerStatusID").val());
             formData.append("ClearImage", $("#ClearImage").val());
 

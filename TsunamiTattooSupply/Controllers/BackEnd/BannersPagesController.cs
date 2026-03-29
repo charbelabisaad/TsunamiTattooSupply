@@ -610,15 +610,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					SubCategoryID = null;
 					GroupID = null;
 				}
-				else if(BannerLink == "BannerMobileShopNowRadio")
+				else if(BannerLink == "BannerMobileShopNowRadio" || BannerLink == "BannerMobileNoneRadio")
 				{
 					CategoryID = null;
 					SubCategoryID = null;
 					GroupID = null;
 					ProductID = null;
 				}
-
-
+				 
 				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
 				string bannerImagePath = Global.BannerPageMobileImagePath;

@@ -181,6 +181,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			int? GroupID,
 			int? ProductID,
 			bool ShopNow,
+			bool none,
 			string BannerLink, // 👈 add this
 			string StatusID,
 			IFormFile? Image)
@@ -235,7 +236,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					SubCategoryID = null;
 					GroupID = null;
 				}
-				else if (BannerLink == "BannerShopNowRadio")
+				else if (BannerLink == "BannerShopNowRadio" || BannerLink == "BannerNoneRadio")
 				{
 				 
 					CategoryID = null;

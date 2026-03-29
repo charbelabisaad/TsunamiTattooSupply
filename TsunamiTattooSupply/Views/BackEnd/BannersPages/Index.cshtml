@@ -1388,7 +1388,7 @@
             let imagePath       = btn.data("imagepath");
             let categoryId      = btn.data("categoryid");
             let subCategoryId   = btn.data("subcategoryid");
-            let groupId         = btn.data("bannerid");
+            let groupId         = btn.data("groupid");
             let productId       = btn.data("productid");
             let shopNow         = btn.data("shopnow");
             let startDate       = btn.data("startdate");
@@ -1424,6 +1424,11 @@
 
             }
  
+            if (categoryId == 0 && subCategoryId == 0 && groupId == 0 && productId == 0 && shopNow == false)
+                $("#BannerMobileNoneRadio").prop("checked" , true).trigger("change");
+
+            $("#BannerMobileShopNowRadio").prop("checked", shopNow).trigger("change");
+
             if (categoryId) {
                 $("#BannerMobileCategoryRadio").prop("checked", true).trigger("change");
             }
@@ -1436,8 +1441,6 @@
             else if (productId) {
                 $("#BannerMobileProductRadio").prop("checked", true).trigger("change");
             }
-
-            $("#BannerMobileShopNow").prop("checked", shopNow);
 
             // =========================
             // CATEGORY (SELECTPICKER)
@@ -1527,10 +1530,10 @@
             };
 
             // disable all
-            $('#BannerMobileCategory, #BannerMobileSubCategory, #BannerMobileProduct')
+            $('#BannerMobileCategory, #BannerMobileSubCategory, #BannerMobileGroup, #BannerMobileProduct')
                 .prop('disabled', true);
 
-            if (!$("#BannerMobileShopNow").is(":checked")){
+            if (!$("#BannerMobileShopNow").is(":checked") && !$("#BannerMobileNone").is(":checked")){
                  
                 if (map[radioId]) {
                     $(map[radioId]).prop('disabled', false);
@@ -1558,7 +1561,7 @@
             // =========================
             $('#BannerMobileDescription').val('');
 
-             $("#BannerMobileCategoryRadio").prop("checked", true).trigger('change');
+             $("#BannerMobileNoneRadio").prop("checked", true).trigger('change');
 
             // =========================
             // Dropdowns
@@ -1766,6 +1769,8 @@
 
             let shopNow = $("#BannerMobileShopNowRadio").prop("checked");
 
+            let none = $("#BannerMobileNoneRadio").prop("checked");
+
             let present   = $("#BannerMobilePresentToggle").is(":checked");
             let startDate = $("#BannerMobileStartDate").val();
             let endDate   = $("#BannerMobileEndDate").val();
@@ -1864,9 +1869,11 @@
 
             formData.append("ShopNow", shopNow);
 
+            formData.append("none", none);
+ 
             formData.append("Present", present);
 
-             formData.append("StartDate", startDate || "");
+            formData.append("StartDate", startDate || "");
 
             if (!present) { 
                 formData.append("EndDate", endDate || "");
