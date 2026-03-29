@@ -138,6 +138,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Warranty = p.Warranty,
 						WarrantyMonths = p.WarrantyMonths,
 						VideoUrl = p.VideoUrl,
+						TypesLabel = p.TypesLabel,
+						DetailsLabel = p.DetailsLabel,
 						Rank = p.Rank,
 						StatusID = p.Status.ID,
 						StatusDescription = p.Status.Description,
@@ -1106,6 +1108,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					: null,
 					Warranty = form["ProductWarranty"] == "on",
 					WarrantyMonths = Convert.ToInt32(form["ProductWarrantyMonths"]),
+					TypesLabel = form["ProductTypesLabel"],
+					DetailsLabel = form["ProductDetailsLabel"],
 					StatusID = form["ProductStatusID"],
 					CreatedUserID = userId,
 					CreationDate = now
@@ -1133,6 +1137,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					: null;
 				product.Warranty = form["ProductWarranty"] == "on";
 				product.WarrantyMonths = Convert.ToInt32(form["ProductWarrantyMonths"]);
+				product.TypesLabel = form["ProductTypesLabel"];
+				product.DetailsLabel = form["ProductDetailsLabel"];
 				product.StatusID = form["ProductStatusID"];
 				product.EditUserID = userId;
 				product.EditDate = now;
@@ -2507,31 +2513,59 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.OrderBy(x => x.sizeRank)
 					.ToList();
 
+
+				var types = _dbContext.ProductsSizes
+				.AsNoTracking()
+				.Where(x => x.ProductID == productId
+							&& x.DeletedDate == null
+							&& x.StatusID == "A")
+				.Select(x => new
+				{
+					x.ProductTypeID,
+					ProductTypeDescription = x.ProductType.Description
+				})
+				.Distinct()
+				.OrderBy(x => x.ProductTypeDescription)
+				.ToList();
+
+				var details = _dbContext.ProductsSizes
+				.AsNoTracking()
+				.Where(x => x.ProductID == productId
+							&& x.DeletedDate == null
+							&& x.StatusID == "A")
+				.Select(x => new
+				{
+					x.ProductTypeID,
+					x.ProductDetailID,
+					ProductDetailDescription = x.ProductDetail.Description
+				})
+				.Distinct()
+				.ToList();
 				// =========================================
 				// TYPE + DETAIL FOR DROPDOWNS
 				// =========================================
-				var sizeDetails = _dbContext.ProductsSizes
-					.AsNoTracking()
-					.Where(x => x.ProductID == productId
-								&& x.DeletedDate == null
-								&& x.StatusID == "A")
-					.GroupBy(x => new
-					{
-						x.ProductTypeID,
-						ProductTypeDescription = x.ProductType.Description,
-						x.ProductDetailID,
-						ProductDetailDescription = x.ProductDetail.Description
-					})
-					.Select(g => new
-					{
-						productTypeID = g.Key.ProductTypeID,
-						productTypeDescription = g.Key.ProductTypeDescription,
-						productDetailID = g.Key.ProductDetailID,
-						productDetailDescription = g.Key.ProductDetailDescription
-					})
-					.OrderBy(x => x.productTypeDescription)
-					.ThenBy(x => x.productDetailDescription)
-					.ToList();
+				//var sizeDetails = _dbContext.ProductsSizes
+				//	.AsNoTracking()
+				//	.Where(x => x.ProductID == productId
+				//				&& x.DeletedDate == null
+				//				&& x.StatusID == "A")
+				//	.GroupBy(x => new
+				//	{
+				//		x.ProductTypeID,
+				//		ProductTypeDescription = x.ProductType.Description,
+				//		x.ProductDetailID,
+				//		ProductDetailDescription = x.ProductDetail.Description
+				//	})
+				//	.Select(g => new
+				//	{
+				//		productTypeID = g.Key.ProductTypeID,
+				//		productTypeDescription = g.Key.ProductTypeDescription,
+				//		productDetailID = g.Key.ProductDetailID,
+				//		productDetailDescription = g.Key.ProductDetailDescription
+				//	})
+				//	.OrderBy(x => x.productTypeDescription)
+				//	.ThenBy(x => x.productDetailDescription)
+				//	.ToList();
 
 				// =========================================
 				// STOCKS (FIXED - REMOVE DUPLICATES)
@@ -2593,7 +2627,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					success = true,
 					colors = colors,
 					productSizes = productSizes,
-					sizeDetails = sizeDetails,
+					sizeTypes = types,
+					sizeDetails = details,
 					stocks = stocks
 				});
 			}

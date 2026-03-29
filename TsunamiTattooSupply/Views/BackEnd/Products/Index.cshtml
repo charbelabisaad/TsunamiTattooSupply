@@ -357,6 +357,8 @@
                                            data-newarrivaldate="${row.newArrivalDateExpiryDate}"
                                            data-warranty="${row.warranty}"
                                            data-warrantymonths="${row.warrantyMonths}"
+                                           data-typeslabel="${row.typesLabel}"
+                                           data-detailslabel="${row.detailsLabel}"
                                            data-statusid="${row.statusID}">
                                            <i class="fas fa-edit"></i> Edit
                                         </a>
@@ -396,6 +398,9 @@
             $("#ProductName").val("");
             $("#ProductWarrantyMonths").val("");
             $("#ProductExpiryDate").val("");
+
+            $("#ProductTypesLabel").val("");
+            $("#ProductDetailsLabel").val("");
 
             $("#ProductDescriptionMessage").text("");
             $("#ProductCodeMessage").text("");
@@ -809,6 +814,9 @@
             $("#ProductNewArrival").prop('checked', btn.data('newarrival') == 1);
             $("#ProductWarranty").prop('checked', btn.data('warranty') == 1);
 
+            $("#ProductTypesLabel").val(btn.data("typeslabel"));
+            $("#ProductDetailsLabel").val(btn.data("detailslabel"));
+
             $("#ProductStatusID").val(btn.data('statusid'));
 
             let expiry = btn.data('newarrivaldate');
@@ -979,6 +987,10 @@
                     // build tabs
                     buildProductTypeTabs(typeIds);
 
+                            typeIds.forEach(typeId => {
+            loadTypeDetails(typeId);
+        });
+
                         // IMPORTANT: initialize pickers first
                     $('#productTypeTabContent .selectpicker').selectpicker();
 
@@ -993,7 +1005,7 @@
                             firstTab.dataset.bsTarget.replace('#type-', '');
 
                         // show visually
-                        bootstrap.Tab.getOrCreateInstance(firstTab).show();
+                        //bootstrap.Tab.getOrCreateInstance(firstTab).show();
 
                         // 🔥 LOAD DETAILS MANUALLY
                         const tabs = document.querySelectorAll('#productTypeTabs button.nav-link');
@@ -1002,6 +1014,11 @@
                             const typeId = tab.dataset.bsTarget.replace('#type-', '');
                             loadTypeDetails(typeId);
                         });
+
+                        setTimeout(() => {
+                            $('.product-details').trigger('changed.bs.select');
+                        }, 50);
+
                     });
 
                     /* ==================================================
@@ -1070,6 +1087,12 @@
                         }, 0);
 
                     }, 10);
+
+                        setTimeout(() => {
+                    isBuildingUI = false;
+                    isEditMode = false; // 🔥 VERY IMPORTANT
+                }, 200);
+
                 },
 
                 error: function () {
@@ -1080,9 +1103,10 @@
 
 
 
-        function loadTypeDetails(typeId) {
+         function loadTypeDetails(typeId) {
 
-            if (builtTypeTabs.has(typeId)) return;
+            if (!isEditMode && builtTypeTabs.has(typeId)) return;
+
             builtTypeTabs.add(typeId);
 
             const $details =
@@ -1099,10 +1123,25 @@
             const detailIds =
                 (editDetails[typeId] || []).map(String);
 
-            $details
-                .selectpicker('val', detailIds)
-                .selectpicker('render')
-                .trigger('changed.bs.select');
+            const validValues = detailIds.filter(v =>
+                $details.find(`option[value="${v}"]`).length > 0
+            );
+             
+            // 🔥 FIX: DELAY SELECTPICKER VALUE
+            setTimeout(() => {
+
+                $details.selectpicker('val', validValues);
+                $details.selectpicker('render');
+
+            
+
+                // 🔥 THEN TRIGGER CHANGE
+                setTimeout(() => {
+                    $details.trigger('changed.bs.select');
+                    isBuildingUI = false;
+                }, 30);
+
+            }, 50);
         }
 
 
@@ -1764,6 +1803,8 @@
                   // -----------------------------------
                   buildProductTypeTabs(selectedTypeIds);
 
+
+
                   // -----------------------------------
                   // Activate first tab
                   // -----------------------------------
@@ -1776,91 +1817,232 @@
               });
 
 
-        function buildProductTypeTabs(typeIds) {
+                      function buildProductTypeBlocks(typeIds) {
 
-                 const $container = $('#productDetailsTabsContainer');
+            let container = $('#productTypeBlocks');
+            container.empty();
 
-                 if (!$container.find('#productTypeTabs').length) {
-                     $container.html(`
-                         <ul class="nav nav-tabs" id="productTypeTabs"></ul>
-                         <div class="tab-content border border-top-0 p-3"
-                              id="productTypeTabContent"></div>
-                     `);
-                 }
+            typeIds.forEach(typeId => {
 
-                 const $tabs = $('#productTypeTabs');
-                 const $content = $('#productTypeTabContent');
+                let typeName = $('#ProductTypes option[value="' + typeId + '"]').text();
 
-                 typeIds.forEach((typeID, index) => {
+                container.append(`
+                    <div class="card mb-3 type-block" id="type-${typeId}">
 
-                     if ($tabs.find(`[data-bs-target="#type-${typeID}"]`).length)
-                         return;
+                        <div class="card-header fw-bold">
+                            ${typeName}
+                        </div>
 
-                     const typeText =
-                         $('#ProductTypes option[value="' + typeID + '"]').text();
-
-                     const isFirst = $tabs.children().length === 0;
-
-                     $tabs.append(`
-                         <li class="nav-item">
-                             <button class="nav-link ${isFirst ? 'active' : ''}"
-                                     data-bs-toggle="tab"
-                                     data-bs-target="#type-${typeID}"
-                                     type="button">
-                                 ${typeText}
-                             </button>
-                         </li>
-                     `);
-
-                     $content.append(`
-                         <div class="tab-pane fade ${isFirst ? 'show active' : ''}"
-                              id="type-${typeID}">
-                             <div class="row mb-3">
-                                 <div class="col-md-6">
-                                     <label>Details</label>
-                                     <select class="form-control selectpicker product-details"
-                                             name="ProductDetails[${typeID}][]"
-                                             multiple
-                                             data-live-search="true"
-                                             data-actions-box="true">
-                                         ${generateDetailsOptions()}
-                                     </select>
-                                 </div>
-                             </div>
-                             <div id="productDetailsContainer${typeID}"></div>
-                         </div>
-                     `);
-                 });
-
-                 $container.find('.selectpicker').selectpicker();
-             }
-
-                 ////////////////////////////////////////////////////////////////////////////////////////
-
-                 const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes));
-
-                     function generateSizesOptions() {
-                         let html = '';
-                         productSizesData.forEach(s => {
-                             html += `<option value="${s.ID}">${s.Description}</option>`;
-                         });
-                         return html;
-                     }
+                        <div class="card-body">
 
 
-            $(document).on('shown.bs.tab', '#productTypeTabs button', function (e) {
+                                <div class="row mb-3">
 
-                if(isEditMode){
+                                        <div class="col-1">
+
+                                            <label class="me-3 mb-0" style="min-width: 80px;">
+                                                Details
+                                            </label>
+
+                                        </div>
+
+                                        <div class="col-11">
+
+                                            <select class="form-control selectpicker product-details"
+                                                    style="width: 100%;"
+                                                    name="ProductDetails[${typeId}][${detailId}"
+                                                    multiple
+                                                    data-live-search="true"
+                                                    data-actions-box="true">
+
+                                                ${generateDetailsOptions()}
+
+                                            </select>
+
+                                        </div>
+
+
+                                </div>
+
+                            <div class="details-container" id="details-${typeId}">
+                            </div>
+
+                        </div>
+                    </div>
+                `);
+
+                // initialize selectpicker
+                $(`select[name="ProductDetails[${typeId}][]"]`).selectpicker();
+            });
+
+        }
+
+        // function buildProductTypeTabs(typeIds) {
+
+        //          const $container = $('#productDetailsTabsContainer');
+
+        //          if (!$container.find('#productTypeTabs').length) {
+        //              $container.html(`
+        //                  <ul class="nav nav-tabs" id="productTypeTabs"></ul>
+        //                  <div class="tab-content border border-top-0 p-3"
+        //                       id="productTypeTabContent"></div>
+        //              `);
+        //          }
+
+        //          const $tabs = $('#productTypeTabs');
+        //          const $content = $('#productTypeTabContent');
+
+        //          typeIds.forEach((typeID, index) => {
+
+        //              if ($tabs.find(`[data-bs-target="#type-${typeID}"]`).length)
+        //                  return;
+
+        //              const typeText =
+        //                  $('#ProductTypes option[value="' + typeID + '"]').text();
+
+        //              const isFirst = $tabs.children().length === 0;
+
+        //              $tabs.append(`
+        //                  <li class="nav-item">
+        //                      <button class="nav-link ${isFirst ? 'active' : ''}"
+        //                              data-bs-toggle="tab"
+        //                              data-bs-target="#type-${typeID}"
+        //                              type="button">
+        //                          ${typeText}
+        //                      </button>
+        //                  </li>
+        //              `);
+
+        //              $content.append(`
+        //                  <div class="tab-pane fade ${isFirst ? 'show active' : ''}"
+        //                       id="type-${typeID}">
+        //                      <div class="row mb-3">
+        //                          <div class="col-md-6">
+        //                              <label>Details</label>
+        //                              <select class="form-control selectpicker product-details"
+        //                                      name="ProductDetails[${typeID}][]"
+        //                                      multiple
+        //                                      data-live-search="true"
+        //                                      data-actions-box="true">
+        //                                  ${generateDetailsOptions()}
+        //                              </select>
+        //                          </div>
+        //                      </div>
+        //                      <div id="productDetailsContainer${typeID}"></div>
+        //                  </div>
+        //              `);
+        //          });
+
+        //          $container.find('.selectpicker').selectpicker();
+        //      }
+
+        //          //////////////////////////////////////////////////////////////////////////////////////
+
+        //          const productSizesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.sizes));
+
+        //              function generateSizesOptions() {
+        //                  let html = '';
+        //                  productSizesData.forEach(s => {
+        //                      html += `<option value="${s.ID}">${s.Description}</option>`;
+        //                  });
+        //                  return html;
+        //              }
+
+
+        //     $(document).on('shown.bs.tab', '#productTypeTabs button', function (e) {
+
+        //         if(isEditMode){
 
              
 
-                const pane   = $(e.target.dataset.bsTarget);
-                const typeId = pane.attr('id').replace('type-', '');
+        //         const pane   = $(e.target.dataset.bsTarget);
+        //         const typeId = pane.attr('id').replace('type-', '');
 
-                  loadTypeDetails(typeId);  
-                }
+        //           loadTypeDetails(typeId);  
+        //         }
+        //     });
+
+        function buildProductTypeTabs(typeIds) {
+
+            let tabsContainer = $('#productTypeTabs');
+            let contentContainer = $('#productTypeTabContent');
+
+            // not used visually but keep for compatibility
+            tabsContainer.empty();
+            contentContainer.empty();
+
+            typeIds.forEach(typeId => {
+
+                let typeName = $('#ProductTypes option[value="' + typeId + '"]').text();
+
+                contentContainer.append(`
+                    <div class="card mb-3 border type-block" id="type-${typeId}">
+
+                        <div class="card-header bg-light fw-bold">
+                            ${typeName}
+                        </div>
+
+                        <div class="card-body">
+
+                            <div class="row">
+
+                                <div class="col-12 mb-3">
+                                    <label>Details</label>
+
+                                    <select class="form-control selectpicker product-details"
+                                            name="ProductDetails[${typeId}][]"
+                                            multiple
+                                            data-live-search="true"
+                                            data-actions-box="true">
+
+                                        ${generateDetailsOptions()}   <!-- 🔥 FIX -->
+
+                                    </select>
+
+                                </div>
+
+                                <div class="col-12 details-container" id="productDetailsContainer${typeId}">
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                `);
+
             });
 
+            // ============================================
+            // 🔥 INIT SELECTPICKER
+            // ============================================
+            $('#productTypeTabContent .selectpicker').selectpicker();
+
+            // ============================================
+            // 🔥 RESTORE EDIT VALUES (VERY IMPORTANT)
+            // ============================================
+        setTimeout(() => {
+
+            Object.keys(editDetails).forEach(typeId => {
+
+                let detailIds = (editDetails[typeId] || []).map(String);
+
+                let $select = $(`select[name="ProductDetails[${typeId}][]"]`);
+
+                if ($select.length) {
+                    $select.selectpicker('val', detailIds);
+                    $select.selectpicker('render');
+                }
+
+            });
+
+            // 🔥 DELAY TRIGGER (CRITICAL)
+            setTimeout(() => {
+                $('.product-details').trigger('changed.bs.select');
+            }, 50);
+
+        }, 50);
+
+        }
 
 
         $(document).on('changed.bs.select', '.product-details', function () {
@@ -1868,9 +2050,7 @@
             const $select = $(this);
 
             if (isBuildingUI && !isEditMode) return;
-
-          
-
+             
             const typeId = $select.attr('name').match(/\d+/)[0];
             const selectedDetails = ($select.val() || []).map(String);
             const $container = $('#productDetailsContainer' + typeId);
@@ -1882,7 +2062,7 @@
                     $(this).remove();
                 }
             });
-
+ 
             // ADD new
             selectedDetails.forEach(detailId => {
 
@@ -1893,23 +2073,35 @@
                     $select.find(`option[value="${detailId}"]`).text();
 
                 $container.append(`
-                    <div class="detail-block variation-card"
+                    <div class="detail-block"
                          data-detail-id="${detailId}">
-                        <div class="variation-header px-3 py-2">${detailText}</div>
-                        <div class="variation-body p-3">
-                            <label>Sizes</label>
-                            <select class="form-control selectpicker product-sizes"
-                                name="ProductSizes[${typeId}][${detailId}][]"
-                                multiple
-                                data-live-search="true"
-                                data-actions-box="true">
-                                ${generateSizesOptions()}
-                            </select>
+                            <div class="px-3 py-2" style="background-color:#afd0f9">${detailText}</div>
+                                <div class="p-3" style="background-color:#e4edf8">
+                               <div class="row mb-3 align-items-center">
+
+                                <div class="col-md-1">
+                                    <label class="mb-0">Sizes</label>
+                                </div>
+
+                                <div class="col-md-11">
+                                    <select class="form-control selectpicker product-sizes"
+                                            name="ProductSizes[${typeID}][${detailId}][]"
+                                            multiple
+                                            data-live-search="true"
+                                            data-actions-box="true">
+
+                                        ${generateSizesOptions()}
+
+                                    </select>
+                                </div>
+
+                            </div>
                         </div>
                     </div>
                 `);
             });
 
+            
             // init new selects
             $container.find('.selectpicker').selectpicker();
 
@@ -1932,6 +2124,9 @@
 
             // ✅ SAFE UNLOCK POINT
             isBuildingUI = false;
+
+          
+
         });
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1982,6 +2177,7 @@
             $("#modalLoader").addClass("d-none");
         }
         
+
     });
      
     </script>

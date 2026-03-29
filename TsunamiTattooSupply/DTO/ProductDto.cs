@@ -44,7 +44,11 @@ namespace TsunamiTattooSupply.DTO
 		public int WarrantyMonths { get; set; }
  
 		public string VideoUrl { get; set; }
- 
+
+		public string TypesLabel { get; set; }
+
+		public string DetailsLabel { get; set; }
+
 		public int Rank { get; set; } = 0;
  
 		public string StatusID { get; set; }

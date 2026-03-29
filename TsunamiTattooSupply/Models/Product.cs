@@ -55,6 +55,14 @@ namespace TsunamiTattooSupply.Models
 		public string? VideoUrl {  get; set; }
 
 		[Required]
+		[StringLength(50)]
+		public string? TypesLabel { get; set; } = "-";
+
+		[Required]
+		[StringLength(50)]
+		public string? DetailsLabel { get; set; } = "-";
+
+		[Required]
 		public int Rank { get; set; } = 0;
 
 		[Required]

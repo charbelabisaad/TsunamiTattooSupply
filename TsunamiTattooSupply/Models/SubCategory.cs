@@ -17,8 +17,7 @@ namespace TsunamiTattooSupply.Models
 		[Required]
 		[StringLength(500)]
 		public string Description { get; set; }
-
-
+		 
 		[Required]
 		[StringLength(50)]
 		public string? TypesLabel { get; set; }

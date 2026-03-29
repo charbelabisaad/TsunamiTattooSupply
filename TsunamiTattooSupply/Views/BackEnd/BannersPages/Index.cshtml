@@ -520,9 +520,9 @@
                         img.onload = function () {
 
                             const requiredWidth  = 1080;
-                            const requiredHeight = 563;
+                            //const requiredHeight = 563;
 
-                            if (img.width !== requiredWidth || img.height !== requiredHeight) {
+                            if (img.width !== requiredWidth) {
                                 toastr.error("Image dimensions must be exactly 1080 x 563 pixels");
                                 resetBannerWebImage("false");
                                 return;
@@ -1113,9 +1113,9 @@
 
                             // 🔥 You can change mobile dimensions if needed
                             const requiredWidth  = 1080;
-                            const requiredHeight = 563;
+                            //const requiredHeight = 563;
 
-                            if (img.width !== requiredWidth || img.height !== requiredHeight) {
+                            if (img.width !== requiredWidth) {
                                 toastr.error("Image dimensions must be exactly 1080 x 563 pixels");
                                 resetBannerMobileImage("false");
                                 return;

@@ -18,7 +18,7 @@ namespace TsunamiTattooSupply.DTO
 		public string? Sentence { get; set; }
 		 
 		public string? Link { get; set; }
-		
+		 
 		public int Rank { get; set; }
 
 		public string StatusID { get; set; }
