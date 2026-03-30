@@ -12,8 +12,61 @@
 
 					<div class="modal-body">
 
+						<div class="row">
 
- 
+							<div class="col-12 col-md-12 mb-3">
+								<label class="form-label">Category</label>
+								<select id="ProductCategoryFilter" class="form-control" name="ProductCategoryFilter">
+
+									<option value="">-- Select Category --</option>
+
+									@foreach (var obj in Model.categories)
+									{
+										<option value="@obj.ID">@obj.Description</option>
+									}
+
+
+								</select>
+							</div>
+
+						</div>
+
+						<div class="row mt-3">
+
+							<div class="col-12 col-md-12">
+								<div>
+									<label class="form-label">Sub Categories</label>
+									<select id="ProductSubCategoryFilter" name="ProductSubCategoryFilter[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" 
+										multiple 
+										data-live-search="true" 
+										data-actions-box="true"
+										data-title="-- Select Sub Categories --">
+										<!-- Options loaded dynamically -->
+									</select> 
+								</div> 
+							</div>
+
+						</div>
+
+						<div class="row mt-3">
+
+							<div class="col-12 col-md-12">
+								<label class="form-label">Groups</label>
+								<select id="ProductGroupFilter" name="ProductGroupFilter[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" 
+									multiple 
+									data-live-search="true" 
+									data-actions-box="true"
+									data-title="-- Select Groups --">
+
+									@foreach (var obj in Model.groups)
+									{
+										<option value="@obj.ID">@obj.Name (@obj.TypeDescription)</option>
+									}
+								</select>
+							</div>
+
+						</div>
+
 					</div>
 
 					<div class="card-footer text-right bg-white border-top">

@@ -96,7 +96,7 @@
             </div>
         </div>
     </div>
-
+    
     <section class="content">
         <div class="container-fluid">
 
@@ -109,7 +109,7 @@
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
                             <button id="btnSetRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
-                            <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3 d-none"><i class="fas fa-filter"></i> Advcanced Search</button>
+                            <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3"><i class="fas fa-filter"></i> Advcanced Search</button>
                         </div>
                     </div>
                 </div>
@@ -2162,51 +2162,128 @@
         }
 
 
-                $(document).on('click', '#btnSetRankProduct', function () {
+        $(document).on('click', '#btnSetRankProduct', function () {
 
-                    const $rankSelect = $('#rankSelect');
+            const $rankSelect = $('#rankSelect');
 
-                    $rankSelect.empty();
+            $rankSelect.empty();
 
-                    var type = "PRDCT";
+            var type = "PRDCT";
 
-                    $("#rankMode").val(type)
+            $("#rankMode").val(type)
 
-                    $.ajax({
-                        url: '@Url.Action("ListGetProducts", "Products")',
-                        type: 'GET',
-                        data: { "TypeID": type },
-                        success: function (res) {
+            $.ajax({
+                url: '@Url.Action("ListGetProducts", "Products")',
+                type: 'GET',
+                data: { "TypeID": type },
+                success: function (res) {
 
-                            if (!res.success) {
-                                toastr.error(res.message || 'Failed to load products');
-                                return;
-                            }
+                    if (!res.success) {
+                        toastr.error(res.message || 'Failed to load products');
+                        return;
+                    }
 
-                            // sort by Rank (safe)
-                            res.data.sort((a, b) => a.rank - b.rank);
+                    // sort by Rank (safe)
+                    res.data.sort((a, b) => a.rank - b.rank);
 
-                            $.each(res.data, function (index, item) {
-                                $rankSelect.append(
-                                    `<option value="${item.id}">
-                                        ${index + 1}. ${item.name}
-                                    </option>`
-                                );
-                            });
-
-                            $('#rankModal').modal('show');
-                        },
-                        error: function () {
-                            toastr.error('Server error while loading producs');
-                        }
+                    $.each(res.data, function (index, item) {
+                        $rankSelect.append(
+                            `<option value="${item.id}">
+                                ${index + 1}. ${item.name}
+                            </option>`
+                        );
                     });
 
-                });
+                    $('#rankModal').modal('show');
+                },
+                error: function () {
+                    toastr.error('Server error while loading producs');
+                }
+            });
+
+        });
 
         $(document).on('click', '#btnAdvancedSearchProduct', function () {
             let modal = new bootstrap.Modal(document.getElementById('advencedSearchProductModal'));
             modal.show();
         });
+
+        LoadSubCategoriesFilter();
+
+        $(document).on('change', '#ProductCategoryFilter', function () {
+
+            LoadSubCategoriesFilter();
+
+        });
+
+        function LoadSubCategoriesFilter({ restoreSelection = true } = {}) {
+
+            let categoryId = $('#ProductCategoryFilter').val();
+            let subSelect  = $('#ProductSubCategoryFilter');
+
+            subSelect.empty();
+            currentCategoryOptionIds = [];
+
+            // Always add empty option
+            subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+            if (!categoryId) {
+                subSelect.selectpicker('destroy').selectpicker('render');
+                renderTags();
+                return;
+            }
+
+            $.ajax({
+                url: '/Products/GetSubCategoriesByCategory',
+                type: 'GET',
+                data: { categoryId },
+                success: function (items) {
+
+                    (items || []).forEach(sc => {
+                        let id = String(sc.id);
+
+                        subSelect.append(
+                            `<option value="${id}">${sc.name}</option>`
+                        );
+
+                        currentCategoryOptionIds.push(id);
+
+                        if (!subCatMetaById[id]) {
+                            subCatMetaById[id] = {
+                                id: sc.id,
+                                name: sc.name,
+                                categoryId: parseInt(categoryId)
+                            };
+                        }
+                    });
+
+                    // Refresh picker (NO destroy)
+                    subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // ===============================
+                    // RESTORE OR CLEAR SELECTION
+                    // ===============================
+                    if (restoreSelection) {
+                        let validSelected = currentCategoryOptionIds.filter(
+                            id => selectedSubCatIds.has(id)
+                        );
+
+                        subSelect.selectpicker('val', validSelected);
+                    } else {
+                        // 🔥 FORCE CLEAR
+                        subSelect.selectpicker('val', []);
+                    }
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // Keep tags
+                    renderTags();
+                },
+                error: function () {
+                    toastr.error('Failed to load sub-categories');
+                }
+            });
+        }
 
     });
      

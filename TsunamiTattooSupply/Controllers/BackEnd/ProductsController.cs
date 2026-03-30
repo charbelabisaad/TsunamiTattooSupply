@@ -56,6 +56,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			{
 				groupTypes = GetGroupTypes(),
 				categories = GetGategories(),
+				groups = GetGroups(),
 				specs = GetSepcs(),
 				units = GetUnits(),
 				productTypes = GetProductTypes(),
@@ -201,6 +202,20 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					Description = c.Description
 				}).ToList();
 
+		}
+
+		public List<GroupDto> GetGroups()
+		{
+			return _dbContext.Groups
+				.Where(c => c.DeletedDate == null)
+				.OrderBy(c => c.TypeID)
+				.ThenBy(c => c.Rank)
+				.Select(c => new GroupDto
+				{
+					ID = c.ID,
+					Name = c.Name,
+					TypeDescription = c.GroupType.Description
+				}).ToList();
 		}
 
 		public List<SpecDto> GetSepcs()
