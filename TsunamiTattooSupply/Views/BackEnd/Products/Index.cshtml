@@ -109,7 +109,7 @@
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
                             <button id="btnSetRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
-                            <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3"><i class="fas fa-filter"></i> Advcanced Search</button>
+                            <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3 d-none"><i class="fas fa-filter"></i> Advcanced Search</button>
                         </div>
                     </div>
                 </div>
@@ -2160,6 +2160,48 @@
         function hideModalLoader() {
             $("#modalLoader").addClass("d-none");
         }
+
+
+                $(document).on('click', '#btnSetRankProduct', function () {
+
+                    const $rankSelect = $('#rankSelect');
+
+                    $rankSelect.empty();
+
+                    var type = "PRDCT";
+
+                    $("#rankMode").val(type)
+
+                    $.ajax({
+                        url: '@Url.Action("ListGetProducts", "Products")',
+                        type: 'GET',
+                        data: { "TypeID": type },
+                        success: function (res) {
+
+                            if (!res.success) {
+                                toastr.error(res.message || 'Failed to load products');
+                                return;
+                            }
+
+                            // sort by Rank (safe)
+                            res.data.sort((a, b) => a.rank - b.rank);
+
+                            $.each(res.data, function (index, item) {
+                                $rankSelect.append(
+                                    `<option value="${item.id}">
+                                        ${index + 1}. ${item.name}
+                                    </option>`
+                                );
+                            });
+
+                            $('#rankModal').modal('show');
+                        },
+                        error: function () {
+                            toastr.error('Server error while loading producs');
+                        }
+                    });
+
+                });
 
         $(document).on('click', '#btnAdvancedSearchProduct', function () {
             let modal = new bootstrap.Modal(document.getElementById('advencedSearchProductModal'));
