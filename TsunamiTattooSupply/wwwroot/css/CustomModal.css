@@ -17,10 +17,11 @@
         display: flex;
         flex-direction: column;
     }
+ 
 
-    .fullmodal-right.show .modal-dialog {
-        transform: translateX(0);
-    }
+.fullmodal-right.show .modal-dialog {
+    transform: translateX(0);
+}
 
     /* Core flex layout */
     .fullmodal-right .modal-content {

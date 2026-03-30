@@ -79,12 +79,11 @@
     }
      
 </style>
-
-
-
+ 
 <partial name="SaveProduct" />
 <partial name="DeleteProduct" />  
 <partial name="Rank" />
+<partial name="AdvancedSearch" />
 
 <div class="content-wrapper">
 
@@ -110,6 +109,7 @@
                         <div class="col-6 d-flex align-items-center justify-content-end">
                             <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
                             <button id="btnSetRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
+                            <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3"><i class="fas fa-filter"></i> Advcanced Search</button>
                         </div>
                     </div>
                 </div>
@@ -2160,7 +2160,11 @@
         function hideModalLoader() {
             $("#modalLoader").addClass("d-none");
         }
-        
+
+        $(document).on('click', '#btnAdvancedSearchProduct', function () {
+            let modal = new bootstrap.Modal(document.getElementById('advencedSearchProductModal'));
+            modal.show();
+        });
 
     });
      

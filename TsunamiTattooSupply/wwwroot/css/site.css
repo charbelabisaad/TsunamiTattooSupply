@@ -45,6 +45,16 @@ body {
     color: #000000 !important;
 }
 
+.btn-advanced-search{
+    background-color:gainsboro !important;
+    border:1px solid gainsboro;
+    color: #808080 !important;
+}
+
+.btn-advanced-search:hover{
+    background-color: #ffffff !important;
+}
+
 .btn-close{
     background-color:transparent;
     border:none;
