@@ -2933,6 +2933,18 @@ $(document).on("click", "#btnSaveProductStock", function () {
 		$detail.selectpicker('render');
 	});
 
+			// 🔥 trigger on change
+			$(document).on('changed.bs.select', '.selectpicker', function () {
+				renderSelectTags(this);
+			});
+
+			// 🔥 trigger on load
+			$('.selectpicker').each(function () {
+				renderSelectTags(this);
+			});
+
+
+
 	});
 
 

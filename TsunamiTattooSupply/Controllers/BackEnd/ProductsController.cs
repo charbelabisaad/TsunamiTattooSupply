@@ -72,7 +72,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			return View("~/Views/BackEnd/Products/Index.cshtml",vm);
 		}
 		 
-		public IActionResult ListGetProducts()
+		public IActionResult ListGetProducts([FromBody] ProductFilterDto filter)
 		{
 
 			try
@@ -80,7 +80,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				var products = new List<ProductDto>();
 
-				products = GetProducts();
+				products = GetProducts(filter);
 
 				return Json(new { data = products, success = true });
 				 
@@ -96,34 +96,80 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
-		public List<ProductDto> GetProducts() { 
-		 
-			List<ProductDto> products = new List<ProductDto>();
-			 
+		public List<ProductDto> GetProducts(ProductFilterDto filter)
+		{
 			try
 			{
-				products = _dbContext.Products
-					.Where(p => p.DeletedDate == null)
+				var query = _dbContext.Products
+	.Where(p => p.DeletedDate == null)
+	.AsQueryable();
+
+				// ============================
+				// 🔥 CATEGORY FILTER
+				// ============================
+				if (filter.CategoryId.HasValue)
+				{
+					var subCategoryIds = _dbContext.SubCategories
+						.Where(sc => sc.CategoryID == filter.CategoryId.Value)
+						.Select(sc => sc.ID);
+
+					query = query.Where(p =>
+						_dbContext.ProductsSubCategories
+							.Any(psc =>
+								psc.ProductID == p.ID &&
+								subCategoryIds.Contains(psc.SubCategoryID)
+							)
+					);
+				}
+
+				// ============================
+				// 🔥 SUB CATEGORY FILTER
+				// ============================
+				if (filter.SubCategoryIds != null && filter.SubCategoryIds.Any())
+				{
+					query = query.Where(p =>
+						_dbContext.ProductsSubCategories
+							.Any(psc =>
+								psc.ProductID == p.ID &&
+								filter.SubCategoryIds.Contains(psc.SubCategoryID)
+							)
+					);
+				}
+
+				// ============================
+				// 🔥 GROUP FILTER
+				// ============================
+				if (filter.GroupIds != null && filter.GroupIds.Any())
+				{
+					query = query.Where(p => filter.GroupIds.Contains(p.GroupID));
+				}
+
+				// ============================
+				// 🔥 FINAL SELECT
+				// ============================
+				return query
 					.OrderBy(p => p.Rank)
 					.Select(p => new ProductDto
 					{
 						ID = p.ID,
 						Code = p.Code,
-						ImagePath =  Global.ProductSmallImagePath,
+						ImagePath = Global.ProductSmallImagePath,
+
 						Image = (_dbContext.ProductsImages
-									.Join(_dbContext.ProductsColors,
-									pi => new { pi.ProductID, pi.ColorID },
-									pc => new { pc.ProductID, pc.ColorID },
-									(pi, pc) => new { pi, pc })
-								.Where(x =>
-									x.pi.ProductID == p.ID &&
-									x.pi.IsInitial == true &&
-									x.pi.DeletedDate == null &&
-									x.pc.IsCover == true &&
-									x.pc.DeletedDate == null
-								)
-								.Select(x => x.pi.SmallImage)
-								.FirstOrDefault()),
+							.Join(_dbContext.ProductsColors,
+								pi => new { pi.ProductID, pi.ColorID },
+								pc => new { pc.ProductID, pc.ColorID },
+								(pi, pc) => new { pi, pc })
+							.Where(x =>
+								x.pi.ProductID == p.ID &&
+								x.pi.IsInitial == true &&
+								x.pi.DeletedDate == null &&
+								x.pc.IsCover == true &&
+								x.pc.DeletedDate == null
+							)
+							.Select(x => x.pi.SmallImage)
+							.FirstOrDefault()),
+
 						Name = p.Name,
 						Description = p.Description,
 						UnitID = p.Unit.ID,
@@ -144,21 +190,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Rank = p.Rank,
 						StatusID = p.Status.ID,
 						StatusDescription = p.Status.Description,
-						StatusColor = p.Status.Color,
-					}
-					).ToList();
-
-				
+						StatusColor = p.Status.Color
+					})
+					.ToList();
 			}
-			catch (Exception ex) {
-
-				products = null;
+			catch (Exception ex)
+			{
 				_logger.LogError(ex, "Fetch Products [ERROR]");
-			
+				return new List<ProductDto>();
 			}
-
-			return products;
-
 		}
 
 		public List<GroupTypeDto> GetGroupTypes()
@@ -2075,7 +2115,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveRankProducts([FromBody] List<ProductDto> products)
+		public IActionResult SaveRankProducts([FromBody] List<ProductDto> products, [FromBody] ProductFilterDto filter)
 		{
 			try
 			{
@@ -2112,13 +2152,12 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				_dbContext.SaveChanges();
 
 				// 🔁 Return refreshed list (ordered by Rank)
-
-
+				 
 				return Json(new
 				{
 					success = true,
 					message = "Products rank saved successfully",
-					data = GetProducts()
+					data = GetProducts(filter)
 				});
 			}
 			catch (Exception ex)

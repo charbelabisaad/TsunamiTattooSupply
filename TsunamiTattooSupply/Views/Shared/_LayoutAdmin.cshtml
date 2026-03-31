@@ -1089,6 +1089,35 @@
             });
         });
 
+        function renderSelectTags(select) {
+
+            let selected = $(select).find('option:selected').map(function () {
+                return $(this).text();
+            }).get();
+
+            let container = $(select)
+                .closest('.bootstrap-select')
+                .find('.filter-option-inner-inner');
+
+            if (!selected.length) {
+                container.html('<span class="text-muted">Nothing selected</span>');
+                return;
+            }
+
+            let html = selected.map(v => `<span class="bs-tag">${v}</span>`).join('');
+
+            container.html(html);
+        }
+
+        // 🔥 trigger on change
+        $(document).on('changed.bs.select', '.selectpicker', function () {
+            renderSelectTags(this);
+        });
+
+        // 🔥 trigger on load
+        $('.selectpicker').each(function () {
+            renderSelectTags(this);
+        });
 
     </script>
 

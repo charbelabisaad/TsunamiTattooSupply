@@ -110,6 +110,7 @@
                             <button id="btnNewProduct" type="button" class="btn btn-sm btn-black"><i class="fas fa-plus"></i> Add New Product</button>
                             <button id="btnSetRankProduct" type="button" class="btn btn-sm btn-primary btn-rank ml-3"><i class="fa-solid fa-arrow-down-1-9"></i> Set Rank</button> 
                             <button id="btnAdvancedSearchProduct" type="button" class="btn btn-sm btn-outline-dark ml-3"><i class="fas fa-filter"></i> Advcanced Search</button>
+                            <button id="btnClearSearchProduct" type="button" class="btn btn-sm btn-outline-danger ml-3 d-none"><i class="fas fa-eraser"></i>Clear Search</button>
                         </div>
                     </div>
                 </div>
@@ -154,12 +155,24 @@
 
     $(document).ready(function () {
          
-            var table = $('#tableProducts').DataTable({
+        var table = $('#tableProducts').DataTable({
                 processing: true,
                 responsive: true,
                 ajax: {
                     url: '@Url.Action("ListGetProducts", "Products")',
-                    type: 'GET',
+                    type: 'POST',
+                    contentType: 'application/json',
+
+                    data: function (d) {
+                        const category = $('#ProductCategoryFilter').val();
+
+                        return JSON.stringify({
+                            categoryId: category ? parseInt(category) : null,
+                            subCategoryIds: ($('#ProductSubCategoryFilter').val() || []).map(Number),
+                            groupIds: ($('#ProductGroupFilter').val() || []).map(Number)
+                        });
+                    },
+
                     dataSrc: function (json) {
                         if (json && json.success === false) {
                             toastr.error(json.message || "Failed to load products.");
@@ -378,6 +391,83 @@
 
             });
 
+        $(document).on('keyup', '#tableProducts_filter input', function () {
+
+            const value = $(this).val();
+
+            if (value && value.trim().length > 0) {
+                $('#btnClearSearchProduct').removeClass('d-none');
+            } else {
+                $("#btnClearSearchProduct").addClass("d-none");
+            }
+
+        });
+
+        $(document).on('click', '#btnSearchProduct', function () {
+
+            $('#btnSeachProductSpinner').removeClass('d-none');
+
+            table.search('').draw();
+
+            // ✅ Properly close modal
+            const modalEl = document.getElementById('advencedSearchProductModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+
+            if (modal) {
+                modal.hide();
+            }
+
+
+            $('#tableProducts').DataTable().ajax.reload(function () {
+
+                $('#btnSeachProductSpinner').addClass('d-none');
+
+            });
+
+            $("#btnClearSearchProduct").removeClass("d-none");
+
+        });
+        
+        $(document).on('click', '#btnClearSearchProduct', function () {
+
+            table.search('').draw();
+
+            // ============================
+            // 🔹 CLEAR CATEGORY
+            // ============================
+            $('#ProductCategoryFilter').val('');
+
+            // ============================
+            // 🔹 CLEAR SUB CATEGORIES
+            // ============================
+            $('#ProductSubCategoryFilter')
+                .val([])
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            // ============================
+            // 🔹 CLEAR GROUPS
+            // ============================
+            $('#ProductGroupFilter')
+                .val([])
+                .selectpicker('destroy')
+                .selectpicker('render');
+
+            // ============================
+            // 🔹 RELOAD SUBCATEGORIES (EMPTY STATE)
+            // ============================
+            LoadSubCategoriesFilter({ restoreSelection: false });
+
+            // ============================
+            // 🔹 RELOAD DATATABLE
+            // ============================
+            $('#tableProducts').DataTable().ajax.reload();
+
+            $("#btnClearSearchProduct").addClass("d-none");
+
+        });
+
+
 
               // =====================================
         // 🔹 NEW PRODUCT BUTTON (Open Create Modal)
@@ -427,51 +517,52 @@
             showModalLoader();
 
             resetImageBuffers();
+             
 
             // ================================
             // AFTER MODAL IS VISIBLE ✅
             // ================================
-        $('#saveProductModal').one('shown.bs.modal', function () {
+            $('#saveProductModal').one('shown.bs.modal', function () {
 
-            Promise.all([
-                LoadGroups(0),
-                LoadSubCategories({ restoreSelection: false }),
-                loadProductEditExtras(0)
-            ])
-            .then(function () {
+                Promise.all([
+                    LoadGroups(0),
+                    LoadSubCategories({ restoreSelection: false }),
+                    loadProductEditExtras(0)
+                ])
+                .then(function () {
 
-                // After ALL finished
+                    // After ALL finished
 
-                excludeExpiryDate();
-                excludeWarrantyMonths();
+                    excludeExpiryDate();
+                    excludeWarrantyMonths();
 
-                // Clear Specs
-                let $specs = $('#ProductSpecs');
-                $specs.selectpicker('val', []);
-                $specs.selectpicker('destroy').selectpicker('render');
+                    // Clear Specs
+                    let $specs = $('#ProductSpecs');
+                    $specs.selectpicker('val', []);
+                    $specs.selectpicker('destroy').selectpicker('render');
 
-                // Clear Types
-                let types = $('#ProductTypes');
-                types.selectpicker('val', []);
-                types.selectpicker('destroy').selectpicker('render');
+                    // Clear Types
+                    let types = $('#ProductTypes');
+                    types.selectpicker('val', []);
+                    types.selectpicker('destroy').selectpicker('render');
 
-                $('#SizeVariationsContainer').empty();
-                $('#ColorVariationsContainer').empty();
+                    $('#SizeVariationsContainer').empty();
+                    $('#ColorVariationsContainer').empty();
 
-                $("#ProductDescription").focus();
+                    $("#ProductDescription").focus();
 
-            })
-            .catch(function (error) {
-                console.error("Modal loading error:", error);
-                toastr.error("Error loading data");
-            })
-            .finally(function () {
+                })
+                .catch(function (error) {
+                    console.error("Modal loading error:", error);
+                    toastr.error("Error loading data");
+                })
+                .finally(function () {
 
-                hideModalLoader();   // 🔥 hide spinner here
+                    hideModalLoader();   // 🔥 hide spinner here
+
+                });
 
             });
-
-        });
         });
 
         $(document).on('change', '#ProductGroupType', function () {
@@ -662,6 +753,13 @@
 
                     // Keep tags
                     renderTags();
+
+
+                        subSelect.on('changed.bs.select', function () {
+                            renderSelectTags(this);
+                        });
+
+
                 },
                 error: function () {
                     toastr.error('Failed to load sub-categories');
@@ -2278,13 +2376,18 @@
 
                     // Keep tags
                     renderTags();
+ 
+                    subSelect.on('changed.bs.select', function () {
+                        renderSelectTags(this);
+                    });
+ 
                 },
                 error: function () {
                     toastr.error('Failed to load sub-categories');
                 }
             });
         }
-
+      
     });
      
     </script>
