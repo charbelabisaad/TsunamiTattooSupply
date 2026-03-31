@@ -80,7 +80,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				var products = new List<ProductDto>();
 
-				products = GetProducts(filter);
+				products = GetProducts(filter, true);
 
 				return Json(new { data = products, success = true });
 				 
@@ -96,54 +96,58 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 		}
 
-		public List<ProductDto> GetProducts(ProductFilterDto filter)
+		public List<ProductDto> GetProducts(ProductFilterDto filter, bool search)
 		{
 			try
 			{
 				var query = _dbContext.Products
-	.Where(p => p.DeletedDate == null)
-	.AsQueryable();
+				.Where(p => p.DeletedDate == null)
+				.AsQueryable();
 
-				// ============================
-				// 🔥 CATEGORY FILTER
-				// ============================
-				if (filter.CategoryId.HasValue)
-				{
-					var subCategoryIds = _dbContext.SubCategories
-						.Where(sc => sc.CategoryID == filter.CategoryId.Value)
-						.Select(sc => sc.ID);
+				if(search == true) { 
+					// ============================
+					// 🔥 CATEGORY FILTER
+					// ============================
+					if (filter.CategoryId.HasValue)
+					{
+						var subCategoryIds = _dbContext.SubCategories
+							.Where(sc => sc.CategoryID == filter.CategoryId.Value)
+							.Select(sc => sc.ID);
 
-					query = query.Where(p =>
-						_dbContext.ProductsSubCategories
-							.Any(psc =>
-								psc.ProductID == p.ID &&
-								subCategoryIds.Contains(psc.SubCategoryID)
-							)
-					);
+						query = query.Where(p =>
+							_dbContext.ProductsSubCategories
+								.Any(psc =>
+									psc.ProductID == p.ID &&
+									subCategoryIds.Contains(psc.SubCategoryID)
+								)
+						);
+					}
+
+					// ============================
+					// 🔥 SUB CATEGORY FILTER
+					// ============================
+					if (filter.SubCategoryIds != null && filter.SubCategoryIds.Any())
+					{
+						query = query.Where(p =>
+							_dbContext.ProductsSubCategories
+								.Any(psc =>
+									psc.ProductID == p.ID &&
+									filter.SubCategoryIds.Contains(psc.SubCategoryID)
+								)
+						);
+					}
+
+					// ============================
+					// 🔥 GROUP FILTER
+					// ============================
+					if (filter.GroupIds != null && filter.GroupIds.Any())
+					{
+						query = query.Where(p => filter.GroupIds.Contains(p.GroupID));
+					}
+					 
 				}
 
-				// ============================
-				// 🔥 SUB CATEGORY FILTER
-				// ============================
-				if (filter.SubCategoryIds != null && filter.SubCategoryIds.Any())
-				{
-					query = query.Where(p =>
-						_dbContext.ProductsSubCategories
-							.Any(psc =>
-								psc.ProductID == p.ID &&
-								filter.SubCategoryIds.Contains(psc.SubCategoryID)
-							)
-					);
-				}
-
-				// ============================
-				// 🔥 GROUP FILTER
-				// ============================
-				if (filter.GroupIds != null && filter.GroupIds.Any())
-				{
-					query = query.Where(p => filter.GroupIds.Contains(p.GroupID));
-				}
-
+			
 				// ============================
 				// 🔥 FINAL SELECT
 				// ============================
@@ -2157,7 +2161,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					success = true,
 					message = "Products rank saved successfully",
-					data = GetProducts(filter)
+					data = GetProducts(filter, false)
 				});
 			}
 			catch (Exception ex)

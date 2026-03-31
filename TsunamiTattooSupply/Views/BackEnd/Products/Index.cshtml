@@ -2263,17 +2263,23 @@
         $(document).on('click', '#btnSetRankProduct', function () {
 
             const $rankSelect = $('#rankSelect');
-
             $rankSelect.empty();
 
-            var type = "PRDCT";
-
-            $("#rankMode").val(type)
+            $("#rankMode").val("PRDCT");
 
             $.ajax({
                 url: '@Url.Action("ListGetProducts", "Products")',
-                type: 'GET',
-                data: { "TypeID": type },
+                type: 'POST',
+                contentType: 'application/json',
+
+                // 🔥 EMPTY FILTER
+                data: JSON.stringify({
+                    categoryId: null,
+                    subCategoryIds: [],
+                    groupIds: [],
+                    search: null
+                }),
+
                 success: function (res) {
 
                     if (!res.success) {
@@ -2281,21 +2287,22 @@
                         return;
                     }
 
-                    // sort by Rank (safe)
+                    // 🔥 sort by rank
                     res.data.sort((a, b) => a.rank - b.rank);
 
                     $.each(res.data, function (index, item) {
-                        $rankSelect.append(
-                            `<option value="${item.id}">
+                        $rankSelect.append(`
+                            <option value="${item.id}">
                                 ${index + 1}. ${item.name}
-                            </option>`
-                        );
+                            </option>
+                        `);
                     });
 
                     $('#rankModal').modal('show');
                 },
+
                 error: function () {
-                    toastr.error('Server error while loading producs');
+                    toastr.error('Server error while loading products');
                 }
             });
 
