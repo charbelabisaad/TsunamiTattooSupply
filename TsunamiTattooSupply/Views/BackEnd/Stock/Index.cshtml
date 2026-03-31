@@ -6,6 +6,8 @@
     ViewData["Title"] = "Stock";
 }
 
+<partial name="AdvancedSearchStock" />
+
 <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <div class="content-header">
@@ -24,16 +26,28 @@
 
             <div class="card">
 
-                <div class="card-header font-weight-bold">Stock List</div>
+                <div class="card-header font-weight-bold">
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center">
+                            <h3 class="card-title">Stock List</h3>
+                        </div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                            <button id="btnAdvancedSearchStock" type="button" class="btn btn-sm btn-outline-dark ml-3"><i class="fas fa-filter"></i> Advcanced Search</button>
+                            <button id="btnClearSearchStock" type="button" class="btn btn-sm btn-outline-danger ml-3 d-none"><i class="fas fa-eraser"></i>Clear Search</button>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="card-body">
+
+
 
                     <div class="col-sm-12 mt-3">
 
                         <table id="tableStock" class="table table-striped w-100">
                             <thead>
                                 <tr style="vertical-align:middle"> 
-                                    <th>Product</th>
+                                    <th>Stock</th>
                                     <th style="width:100px">Group</th>
                                     <th style="width:200px">Color</th>
                                     <th style="width:150px">Type</th>
@@ -53,6 +67,9 @@
             </div>
 
         </div>
+
+
+
     </section>
 
     @section Scripts{
@@ -67,7 +84,17 @@
 
                     ajax: {
                         url: '@Url.Action("ListGetStock", "Stock")',
-                        type: 'GET',
+                        type: 'POST',
+                    contentType: 'application/json',
+                    data: function (d) {
+                        const category = $('#StockCategoryFilter').val();
+
+                        return JSON.stringify({
+                            categoryId: category ? parseInt(category) : null,
+                            subCategoryIds: ($('#StockSubCategoryFilter').val() || []).map(Number),
+                            groupIds: ($('#StockGroupFilter').val() || []).map(Number)
+                        });
+                    },
                         dataSrc: function (json) {
 
                             if (json && json.success === false) {
@@ -276,11 +303,11 @@
                     ],
 
                     order:[[0,"asc"]],
-            lengthMenu: [
-                [10, 25, 50, 100, -1],
-                [10, 25, 50, 100, "All"]
-            ],
-            pageLength: 25,
+                    lengthMenu: [
+                        [10, 25, 50, 100, -1],
+                        [10, 25, 50, 100, "All"]
+                    ],
+                    pageLength: 25,
                 });
 
                 // ================= SAVE STOCK =================
@@ -338,10 +365,166 @@
                 });
 
 
+                $(document).on('keyup', '#tableStock_filter input', function () {
+
+                    const value = $(this).val();
+
+                    if (value && value.trim().length > 0) {
+                        $('#btnClearSearchStock').removeClass('d-none');
+                    } else {
+                        $("#btnClearSearchStock").addClass("d-none");
+                    }
+
+                });
+
+                $(document).on('click', '#btnSearchStock', function () {
+
+                    $('#btnSeachStockSpinner').removeClass('d-none');
+
+                    tableStock.search('').draw();
+
+                    // ✅ Properly close modal
+                    const modalEl = document.getElementById('advencedSearchStockModal');
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+
+                    if (modal) {
+                        modal.hide();
+                    }
+
+
+                    $('#tableStock').DataTable().ajax.reload(function () {
+
+                        $('#btnSeachStockSpinner').addClass('d-none');
+
+                    });
+
+                    $("#btnClearSearchStock").removeClass("d-none");
+
+                });
+
+            $(document).on('click', '#btnClearSearchStock', function () {
+
+               
+
+                tableStock.search('').draw();
+
+                // ============================
+                // 🔹 CLEAR CATEGORY
+                // ============================
+                $('#StockCategoryFilter').val('');
+
+                // ============================
+                // 🔹 CLEAR SUB CATEGORIES
+                // ============================
+                $('#StockSubCategoryFilter')
+                    .val([])
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+                // ============================
+                // 🔹 CLEAR GROUPS
+                // ============================
+                $('#StockGroupFilter')
+                    .val([])
+                    .selectpicker('destroy')
+                    .selectpicker('render');
+
+                // ============================
+                // 🔹 RELOAD SUBCATEGORIES (EMPTY STATE)
+                // ============================
+                LoadSubCategoriesFilter({ restoreSelection: false });
+
+                // ============================
+                // 🔹 RELOAD DATATABLE
+                // ============================
+                $('#tableStock').DataTable().ajax.reload();
+
+                $("#btnClearSearchStock").addClass("d-none");
+
             });
 
-        </script>
+            $(document).on('click', '#btnAdvancedSearchStock', function () {
+                let modal = new bootstrap.Modal(document.getElementById('advencedSearchStockModal'));
+                modal.show();
+            });
 
-    }
+            LoadSubCategoriesFilter();
 
-</div>
+            $(document).on('change', '#StockCategoryFilter', function () {
+  
+                LoadSubCategoriesFilter();
+
+            });
+
+            let currentCategoryOptionIds = [];
+            let selectedSubCatIds = new Set();
+ 
+            function LoadSubCategoriesFilter() {
+                 
+                let categoryId = $('#StockCategoryFilter').val();
+                let subSelect  = $('#StockSubCategoryFilter');
+
+                subSelect.empty();
+                subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+                if (!categoryId) {
+                    subSelect.selectpicker('refresh');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/Stock/GetSubCategoriesByCategory',
+                    type: 'GET',
+                    data: { categoryId },
+                    success: function (items) {
+
+                        (items || []).forEach(sc => {
+                            subSelect.append(`<option value="${sc.id}">${sc.name}</option>`);
+                        });
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                                renderTags();
+
+
+                        subSelect.on('changed.bs.select', function () {
+                            renderSelectTags(this);
+                        });
+
+                    },
+                    error: function () {
+                        toastr.error('Failed to load sub-categories');
+                    }
+                });
+            }
+
+             function renderTags() {
+
+                    let container = $('#SubCategoryTags').empty();
+
+                    // render ALL selected subcategories (across categories) from StockId
+                    Array.from(selectedSubCatIds).forEach(id => {
+
+                        let meta = subCatMetaById[id];
+                        let name = meta?.name || `SubCategory #${id}`;
+
+                        container.append(`
+                            <span class="badge badge-primary d-flex align-items-center px-2 py-1 mr-1 mb-1"
+                                  style="font-size:13px;">
+                                ${name}
+                                <input type="hidden" name="SubCategories[${id}].ID" value="${id}">
+                                <i class="fas fa-times ml-2 remove-tag"
+                                   data-id="${id}"
+                                   style="cursor:pointer;"></i>
+                            </span>
+                        `);
+                    });
+                }
+
+        });
+
+    </script>
+
+}
+
+

@@ -327,6 +327,92 @@
 
             });
 
+        $(document).on('click', '#btnAdvancedSearchProduct', function () {
+            let modal = new bootstrap.Modal(document.getElementById('advencedSearchProductModal'));
+            modal.show();
+        });
+
+        LoadSubCategoriesFilter();
+
+        $(document).on('change', '#ProductCategoryFilter', function () {
+
+            LoadSubCategoriesFilter();
+
+        });
+
+        function LoadSubCategoriesFilter({ restoreSelection = true } = {}) {
+
+            let categoryId = $('#ProductCategoryFilter').val();
+            let subSelect  = $('#ProductSubCategoryFilter');
+
+            subSelect.empty();
+            currentCategoryOptionIds = [];
+
+            // Always add empty option
+            subSelect.append('<option value="">-- Select Sub Category --</option>');
+
+            if (!categoryId) {
+                subSelect.selectpicker('destroy').selectpicker('render');
+                renderTags();
+                return;
+            }
+
+            $.ajax({
+                url: '/Products/GetSubCategoriesByCategory',
+                type: 'GET',
+                data: { categoryId },
+                success: function (items) {
+
+                    (items || []).forEach(sc => {
+                        let id = String(sc.id);
+
+                        subSelect.append(
+                            `<option value="${id}">${sc.name}</option>`
+                        );
+
+                        currentCategoryOptionIds.push(id);
+
+                        if (!subCatMetaById[id]) {
+                            subCatMetaById[id] = {
+                                id: sc.id,
+                                name: sc.name,
+                                categoryId: parseInt(categoryId)
+                            };
+                        }
+                    });
+
+                    // Refresh picker (NO destroy)
+                    subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // ===============================
+                    // RESTORE OR CLEAR SELECTION
+                    // ===============================
+                    if (restoreSelection) {
+                        let validSelected = currentCategoryOptionIds.filter(
+                            id => selectedSubCatIds.has(id)
+                        );
+
+                        subSelect.selectpicker('val', validSelected);
+                    } else {
+                        // 🔥 FORCE CLEAR
+                        subSelect.selectpicker('val', []);
+                    }
+
+                        subSelect.selectpicker('destroy').selectpicker('render');
+
+                    // Keep tags
+                    renderTags();
+
+                    subSelect.on('changed.bs.select', function () {
+                        renderSelectTags(this);
+                    });
+
+                },
+                error: function () {
+                    toastr.error('Failed to load sub-categories');
+                }
+            });
+        }
         });
 
     </script>

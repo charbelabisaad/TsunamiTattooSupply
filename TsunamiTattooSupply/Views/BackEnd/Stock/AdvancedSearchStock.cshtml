@@ -1,0 +1,86 @@
+﻿
+<div class="modal fade fullmodal-right" id="advencedSearchStockModal" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg" style="width:25% !important;" role="document">
+
+		<div class="modal-content" style="position:relative">
+
+			<div class="modal-header">
+				<h5 id="modalAdvancedStockTitle" class="modal-title">Advanced Search</h5>
+				<button id="btnCloseAdvancedSearchStock" type="button" class="btn-close border-0" data-bs-dismiss="modal"><i class="fas fa-close"></i></button>
+			</div>
+
+			<form method="post">
+
+				<div class="modal-body">
+
+					<div class="row">
+
+						<div class="col-12 col-md-12 mb-3">
+							<label class="form-label">Category</label>
+							<select id="StockCategoryFilter" class="form-control" name="StockCategoryFilter">
+
+								<option value="">-- Select Category --</option>
+
+								@foreach (var obj in Model.categories)
+								{
+									<option value="@obj.ID">@obj.Description</option>
+								}
+
+							</select>
+						</div>
+
+					</div>
+
+					<div class="row mt-3">
+
+						<div class="col-12 col-md-12">
+							<div>
+								<label class="form-label">Sub Categories</label>
+								<select id="StockSubCategoryFilter" name="StockSubCategoryFilter[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important"
+										multiple
+										data-live-search="true"
+										data-actions-box="true"
+										data-title="-- Select Sub Categories --">
+									<!-- Options loaded dynamically -->
+								</select>
+							</div>
+						</div>
+
+					</div>
+
+					<div class="row mt-3">
+
+						<div class="col-12 col-md-12">
+							<label class="form-label">Groups</label>
+							<select id="StockGroupFilter" name="StockGroupFilter[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important"
+									multiple
+									data-live-search="true"
+									data-actions-box="true"
+									data-title="-- Select Groups --">
+
+								@foreach (var obj in Model.groups)
+								{
+									<option value="@obj.ID">@obj.Name (@obj.TypeDescription)</option>
+								}
+							</select>
+						</div>
+
+					</div>
+
+				</div>
+
+				<div class="card-footer text-right bg-white border-top">
+
+					<button id="btnSearchStock" type="button" class="btn btn-primary" style="width:150px">
+						<span class="spinner-border spinner-border-sm d-none" id="btnSeachStockSpinner" role="status" aria-hidden="true"></span>
+						<i class="fas fa-search"></i> Search
+					</button>
+
+				</div>
+
+			</form>
+
+		</div>
+
+	</div>
+</div>
