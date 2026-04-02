@@ -1,0 +1,143 @@
+﻿@font-face {
+    font-family: 'Inter';
+    src: url('/Fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+    font-weight: 100 900; /* variable font range */
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Inter';
+    src: url('/Fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
+    font-weight: 100 900;
+    font-style: italic;
+}
+
+body {
+    background-color:#000000;
+    margin:0;
+}
+
+.body-content{
+    background: #232323;
+    max-width:1440px; 
+    margin:0px auto 0px auto;
+}
+
+.header-bar {
+    background: linear-gradient(259.66deg, #ffd600 0%, #be1e2d 100%);
+    height: 38px;
+}
+
+.header-bar-content {
+    height:100%;
+    color: #FFFFFF;
+}
+
+.header-bar-content-offer {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px; 
+    line-height: 100%;
+    letter-spacing: 0%;
+    text-align: center;
+}
+
+.header-bar-content-signup {
+    color:#ffffff;
+    font-family: Inter;
+    font-weight: 700;
+    font-style: normal;
+    font-size: 14px; 
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    text-decoration: underline;
+    text-decoration-style: solid; 
+    text-decoration-thickness: 0%;
+    text-decoration:none;
+    transition:.5s;
+}
+
+.header-bar-content-signup:hover{
+    color:gainsboro;
+}
+
+.header { 
+    height: 55px;
+    margin: 24px 0% 24px 0%;
+ 
+    opacity: 1;
+    gap: 40px;
+}
+
+.header-logo {
+    width: 73px;
+    height: 55px; 
+}
+
+.header-menu {  
+    margin:0px 15px 0px 15px;
+}
+
+.header-menu-item {
+    color: #ffffff;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;  
+    line-height: 100%;
+    letter-spacing: 0;
+    text-decoration:none;
+    transition:.5s;
+}
+
+.header-menu-item:hover {
+    color: #ffd600;
+}
+
+.header-search{
+    position:relative;
+}
+ 
+.header-search-input {
+    width: 100%; 
+    opacity: 1;
+    border-radius: 62px;
+    gap: 12px;
+    padding: 12px 16px 12px 50px; 
+}
+
+.header-search-input:focus{
+    outline:none;
+}
+
+.header-search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #555;
+    font-size: 16px;
+    transition: 0.2s;
+    z-index:500;
+}
+
+.header-search-icon:hover {
+    color: #000;
+}
+
+.header-user-cart{
+
+    background-color:transparent;
+    color:#ffffff;
+    border:none;
+
+}
+
+.header-user-cart:hover{
+    color:#ffd600;
+}
+
+
