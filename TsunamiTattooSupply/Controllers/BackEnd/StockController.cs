@@ -57,63 +57,13 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			try
 			{
-				// ============================
-				// 🔥 BASE PRODUCT QUERY
-				// ============================
-				var productQuery = _dbContext.Products
-					.Where(p => p.DeletedDate == null)
-					.AsQueryable();
+				var stocksQuery =
+					from s in _dbContext.Stocks.AsNoTracking()
 
-				// ============================
-				// 🔥 CATEGORY FILTER
-				// ============================
-				if (filter.CategoryId.HasValue)
-				{
-					var subCategoryIds = _dbContext.SubCategories
-						.Where(sc => sc.CategoryID == filter.CategoryId.Value)
-						.Select(sc => sc.ID);
-
-					productQuery = productQuery.Where(p =>
-						_dbContext.ProductsSubCategories.Any(psc =>
-							psc.ProductID == p.ID &&
-							subCategoryIds.Contains(psc.SubCategoryID)
-						)
-					);
-				}
-
-				// ============================
-				// 🔥 SUB CATEGORY FILTER
-				// ============================
-				if (filter.SubCategoryIds?.Any() == true)
-				{
-					productQuery = productQuery.Where(p =>
-						_dbContext.ProductsSubCategories.Any(psc =>
-							psc.ProductID == p.ID &&
-							filter.SubCategoryIds.Contains(psc.SubCategoryID)
-						)
-					);
-				}
-
-				// ============================
-				// 🔥 GROUP FILTER
-				// ============================
-				if (filter.GroupIds?.Any() == true)
-				{
-					productQuery = productQuery.Where(p =>
-						filter.GroupIds.Contains(p.GroupID)
-					);
-				}
-
-				// ============================
-				// 🔥 MAIN QUERY (JOIN WITH STOCK)
-				// ============================
-				var stocks = (
-					from s in _dbContext.Stocks
-
-					join p in productQuery
+					join p in _dbContext.Products.AsNoTracking()
 						on s.ProductID equals p.ID
 
-					join ps in _dbContext.ProductsSizes
+					join ps in _dbContext.ProductsSizes.AsNoTracking()
 						on new
 						{
 							s.ProductID,
@@ -131,8 +81,39 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 					where s.UseInStock == true
 						&& s.DeletedDate == null
+						&& p.DeletedDate == null
 						&& ps.DeletedDate == null
 						&& ps.StatusID == "A"
+
+					// ============================
+					// 🔥 CATEGORY FILTER (INSIDE)
+					// ============================
+					where !filter.CategoryId.HasValue ||
+						  _dbContext.ProductsSubCategories.Any(psc =>
+							  psc.ProductID == s.ProductID &&
+							  psc.DeletedDate == null &&
+							  _dbContext.SubCategories.Any(sc =>
+								  sc.ID == psc.SubCategoryID &&
+								  sc.CategoryID == filter.CategoryId.Value &&
+								  sc.DeletedDate == null
+							  )
+						  )
+
+					// ============================
+					// 🔥 SUB CATEGORY FILTER (INSIDE)
+					// ============================
+					where !(filter.SubCategoryIds.Any() == true) ||
+						  _dbContext.ProductsSubCategories.Any(psc =>
+							  psc.ProductID == s.ProductID &&
+							  psc.DeletedDate == null &&
+							  filter.SubCategoryIds.Contains(psc.SubCategoryID)
+						  )
+
+					// ============================
+					// 🔥 GROUP FILTER
+					// ============================
+					where !(filter.GroupIds.Any() == true) ||
+						  filter.GroupIds.Contains(p.GroupID)
 
 					select new StockDto
 					{
@@ -140,33 +121,32 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ProductID = s.ProductID,
 						ProductName = p.Name,
 
-						GroupID = p.Group.ID,
+						GroupID = p.GroupID,
 						GroupName = p.Group.Name,
 
-						ProductTypeID = s.ProductType.ID,
+						ProductTypeID = s.ProductTypeID,
 						ProductTypeDescription = s.ProductType.Description,
 
-						ProductDetailID = s.ProductDetail.ID,
+						ProductDetailID = s.ProductDetailID,
 						ProductDetailDescription = s.ProductDetail.Description,
 
-						SizeID = s.Size.ID,
+						SizeID = s.SizeID,
 						SizeDescription = s.Size.Description,
 
-						ColorID = s.Color.ID,
+						ColorID = s.ColorID,
 						ColorName = s.Color.Name,
 						ColorCode = s.Color.Code,
 
 						Quantity = s.Quantity,
 						Barcode = s.Barcode
-					}
-				).ToList();
+					};
 
-				return stocks;
+				return stocksQuery.ToList();
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "Fetch Stock! [ERROR]");
-				return null;
+				return new List<StockDto>();
 			}
 		}
 

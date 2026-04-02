@@ -111,13 +111,15 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					if (filter.CategoryId.HasValue)
 					{
 						var subCategoryIds = _dbContext.SubCategories
-							.Where(sc => sc.CategoryID == filter.CategoryId.Value)
+							.Where(sc => sc.CategoryID == filter.CategoryId.Value
+							&& sc.DeletedDate == null)
 							.Select(sc => sc.ID);
 
 						query = query.Where(p =>
 							_dbContext.ProductsSubCategories
 								.Any(psc =>
 									psc.ProductID == p.ID &&
+									psc.DeletedDate == null &&
 									subCategoryIds.Contains(psc.SubCategoryID)
 								)
 						);
@@ -132,6 +134,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 							_dbContext.ProductsSubCategories
 								.Any(psc =>
 									psc.ProductID == p.ID &&
+									psc.DeletedDate == null &&
 									filter.SubCategoryIds.Contains(psc.SubCategoryID)
 								)
 						);
@@ -142,7 +145,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					// ============================
 					if (filter.GroupIds != null && filter.GroupIds.Any())
 					{
-						query = query.Where(p => filter.GroupIds.Contains(p.GroupID));
+						query = query.Where(p => filter.GroupIds.Contains(p.GroupID) && p.DeletedDate == null);
 					}
 					 
 				}
