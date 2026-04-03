@@ -14,11 +14,13 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 	{
 		private readonly TsunamiDbContext _dbContext;
 		private readonly ILogger<HomeController> _logger;
+		private readonly string _imagesRoot;
 
-		public HomeController(TsunamiDbContext dbContext,  ILogger<HomeController> logger)
+		public HomeController(TsunamiDbContext dbContext,  ILogger<HomeController> logger, IConfiguration config)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
+			_imagesRoot = config["StaticFiles:ImagesRoot"];
 		}
 
 		[HttpGet]
@@ -40,10 +42,8 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			try
 			{
 
-				 return  _dbContext.Banners
-				.Where(b => b.DeletedDate == null &&
-				            b.StatusID == "A")
-				.Include(b => b.Status)
+				return _dbContext.Banners
+				.Where(b => b.DeletedDate == null && b.StatusID == "A")
 				.OrderBy(b => b.Rank)
 				.Select(b => new BannerDto
 				{
@@ -53,13 +53,9 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 					Link = b.Link,
 					ImagePath = Global.BannerWebImagePath,
 					Image = b.Image,
-					Rank = b.Rank,
-					StatusID = b.Status.ID,
-					Status = b.Status.Description,
-					StatusColor = b.Status.Color
-
-				}
-				).ToList();
+					Rank = b.Rank, 
+				})
+				.ToList();
 			}
 			catch (Exception ex)
 			{
