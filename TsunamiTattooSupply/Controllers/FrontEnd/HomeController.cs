@@ -28,10 +28,12 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 		{
 			FilePathService fp = new FilePathService(_dbContext);
 			Global.BannerWebImagePath = fp.GetFilePath("BNNRWBIMG").Description;
+			Global.GroupImagePath = fp.GetFilePath("GRPIMG").Description;
 
 			var vm = new PageViewModel
 			{
-				banners = GetBanners()
+				banners = GetBanners(),
+				groups = GetGroups("BRND")
 			};
 
 			return View("~/Views/FrontEnd/Home/Index.cshtml",vm);
@@ -43,7 +45,7 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			{
 
 				return _dbContext.Banners
-				.Where(b => b.DeletedDate == null && b.StatusID == "A")
+				.Where(b => b.StatusID == "A" && b.DeletedDate == null)
 				.OrderBy(b => b.Rank)
 				.Select(b => new BannerDto
 				{
@@ -64,8 +66,42 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				_logger.LogError(ex, "Fetch Banners [ERROR]");
 
 			}
+			 
+		}
 
-		 
+		public List<GroupDto> GetGroups(string typeID)
+		{
+			try
+			{
+				return _dbContext.Groups
+					.Where(g => g.TypeID == typeID &&
+								g.StatusID == "A" && 
+								g.DeletedDate == null)
+					.OrderBy(g => g.Rank)
+					.Select(g => new GroupDto
+					{
+						ID = g.ID,
+						Name = g.Name,
+						Summary = g.Summary,
+						ShowHome = g.ShowHome,
+						Rank = g.Rank,
+						Image = g.Image,
+						ImagePath = Global.GroupImagePath,
+
+						TypeID = g.GroupType != null ? g.GroupType.ID : "",
+						TypeDescription = g.GroupType != null ? g.GroupType.Description : "",
+
+						StatusID = g.Status != null ? g.Status.ID : "",
+						Status = g.Status != null ? g.Status.Description : "",
+						StatusColor = g.Status != null ? g.Status.Color : ""
+					})
+					.ToList();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Fetch Groups [ERROR]");
+				return new List<GroupDto>();
+			}
 		}
 
 		public IActionResult Privacy()

@@ -1,4 +1,43 @@
 ﻿body {
+    overflow-x: hidden; /* safety */
 }
 
+.home-brand-bar {
+    background-color: #F57906;
+    height: 122px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+}
 
+.brand-track {
+    display: flex;
+    animation: scrollLeft 20s linear infinite;
+}
+
+.home-brand {
+    min-width: 120px;
+    height: 120px;
+    margin: 0 15px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.home-brand-image{
+    max-width:120px;
+    max-height:120px;
+    width:100%;
+}
+
+/* Animation */
+@keyframes scrollLeft {
+    0% {
+        transform: translateX(0);
+    }
+
+    100% {
+        transform: translateX(-50%);
+    }
+}

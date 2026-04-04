@@ -84,268 +84,267 @@
 
     <script>
 
-    $(document).ready(function () {
+        $(document).ready(function () {
 
-        var table = $('#tableColors').DataTable({
-            processing: true,
-            responsive: true,
-            ajax: {
-                url: '@Url.Action("ListGetColors", "Colors")',
-                type: 'GET',
-                dataSrc: function (json) {
+            var table = $('#tableColors').DataTable({
+                processing: true,
+                responsive: true,
+                ajax: {
+                    url: '@Url.Action("ListGetColors", "Colors")',
+                    type: 'GET',
+                    dataSrc: function (json) {
 
-                    // backend typo: "sucess"
-                    if (json && json.success === false) {
-                        toastr.error(json.message || "Failed to load colors.");
-                        return [];
-                    }
+                        // backend typo: "sucess"
+                        if (json && json.success === false) {
+                            toastr.error(json.message || "Failed to load colors.");
+                            return [];
+                        }
 
-                    // backend uses "Data" (capital D)
-                    if (!json || !json.data) {
-                        toastr.error("Unexpected response from server.");
-                        return [];
-                    }
+                        // backend uses "Data" (capital D)
+                        if (!json || !json.data) {
+                            toastr.error("Unexpected response from server.");
+                            return [];
+                        }
 
-                    return json.data;
-                }
-            },
-            dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
-            language: {
-                search: "",
-                searchPlaceholder: "Search colors..."
-            },
-            buttons: [
-                { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
-                { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
-                {
-                    extend: 'pdfHtml5',
-                    className: 'btn btn-danger btn-sm',
-                    exportOptions: { columns: ':visible:not(.no-export)' },
-                    text: '<i class="fas fa-file-pdf"></i> PDF',
-                    customize: function (doc) {
-                        var tableBody = doc.content[1].table.body;
-                        var colCount = tableBody[0].length;
-                        doc.content[1].table.widths = Array(colCount).fill('*');
-                        doc.defaultStyle.fontSize = 8;
-                        doc.pageMargins = [10, 10, 10, 10];
+                        return json.data;
                     }
                 },
-                { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
-                {
-                    text: '<i class="fas fa-sync"></i> Refresh',
-                    className: 'btn btn-primary btn-sm',
-                    action: function () {
-                        table.ajax.reload();
+                dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t<"row mt-2"<"col-md-6"l><"col-md-6 text-right"ip>>',
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search colors..."
+                },
+                buttons: [
+                    { extend: 'copy', className: 'btn btn-secondary btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-copy"></i> Copy' },
+                    { extend: 'excel', className: 'btn btn-success btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-file-excel"></i> Excel' },
+                    {
+                        extend: 'pdfHtml5',
+                        className: 'btn btn-danger btn-sm',
+                        exportOptions: { columns: ':visible:not(.no-export)' },
+                        text: '<i class="fas fa-file-pdf"></i> PDF',
+                        customize: function (doc) {
+                            var tableBody = doc.content[1].table.body;
+                            var colCount = tableBody[0].length;
+                            doc.content[1].table.widths = Array(colCount).fill('*');
+                            doc.defaultStyle.fontSize = 8;
+                            doc.pageMargins = [10, 10, 10, 10];
+                        }
+                    },
+                    { extend: 'print', className: 'btn btn-dark btn-sm', exportOptions: { columns: ':visible:not(.no-export)' }, text: '<i class="fas fa-print"></i> Print' },
+                    {
+                        text: '<i class="fas fa-sync"></i> Refresh',
+                        className: 'btn btn-primary btn-sm',
+                        action: function () {
+                            table.ajax.reload();
+                        }
                     }
-                }
-            ],
-            columns: [
-                // Code
-                { data: 'code',
-                 className: 'align-middle',
-                   render: function(data, type, row){
+                ],
+                columns: [
+                    // Code
+                    { data: 'code',
+                     className: 'align-middle',
+                       render: function(data, type, row){
                     
-                       return `<div class="d-inline-block align-middle" style="background-color: ${ row.isCustom ? 'transparent' : '#' + row.code}; width:30px; height:30px; border:1px solid #000000">&nbsp;</div>
-                       <div class="d-inline-block align-middle">${ row.isCustom ? 'Custom' : row.code}</div>`;
+                           return `<div class="d-inline-block align-middle" style="background-color: ${ row.isCustom ? 'transparent' : '#' + row.code}; width:30px; height:30px; border:1px solid #000000">&nbsp;</div>
+                           <div class="d-inline-block align-middle">${ row.isCustom ? 'Custom' : row.code}</div>`;
                    
-                   }
-                },
+                       }
+                    },
 
-                // Description (Name)
-                { 
-                    data: 'name',
-                    className: 'align-middle'
+                    // Description (Name)
+                    { 
+                        data: 'name',
+                        className: 'align-middle'
                 
-                },
+                    },
 
-                // IsCustom
-                {
-                    data: 'typeDescription',
-                    className: 'align-middle', 
-                }, 
+                    // IsCustom
+                    {
+                        data: 'typeDescription',
+                        className: 'align-middle', 
+                    }, 
                    
-                {
-                    data: 'parentName',
-                    className: 'align-middle',
-                    render: function (data, type, row) {
+                    {
+                        data: 'parentName',
+                        className: 'align-middle',
+                        render: function (data, type, row) {
 
-                        let parentID = row.parentID;
+                            let parentID = row.parentID;
 
-                        let color = (!row.isCustom && row.parentCode)
-                            ? `#${row.parentCode}`
-                            : 'transparent';
+                            let color = (!row.isCustom && row.parentCode)
+                                ? `#${row.parentCode}`
+                                : 'transparent';
 
-                        let name = row.isCustom
-                            ? 'Custom'
-                            : (row.parentName || '');
+                            let name = row.isCustom
+                                ? 'Custom'
+                                : (row.parentName || '');
 
-                            let parentcolor = parentID == 0 ? `` :  `
-                                    <span
-                                        style="
-                                            display:inline-block;
-                                            width:30px;
-                                            height:30px;
-                                            background-color:${color};
-                                            border:1px solid #000;
-                                            border-radius:4px;
-                                        ">
-                                    </span>` 
+                                let parentcolor = parentID == 0 ? `` :  `
+                                        <span
+                                            style="
+                                                display:inline-block;
+                                                width:30px;
+                                                height:30px;
+                                                background-color:${color};
+                                                border:1px solid #000;
+                                                border-radius:4px;
+                                            ">
+                                        </span>` 
 
-                                return `<div class="d-flex align-items-center gap-2">
-                                            ${parentcolor}<span>&nbsp; ${name}</span>
-                                        </div>`;
-                            }
-                },
-   // Rank
-                {
-                    data: 'rank',
-                    className: 'align-middle',
-                    visible: false
-                },
+                                    return `<div class="d-flex align-items-center gap-2">
+                                                ${parentcolor}<span>&nbsp; ${name}</span>
+                                            </div>`;
+                                }
+                    },
+       // Rank
+                    {
+                        data: 'rank',
+                        className: 'align-middle',
+                        visible: false
+                    },
 
-                {
-                    data: 'showFront',
-                    className: 'text-center align-items-center',
-                    render: function (data) {
-                        return data
-                            ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
-                            : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
+                    {
+                        data: 'showFront',
+                        className: 'text-center align-items-center',
+                        render: function (data) {
+                            return data
+                                ? '<span class="text-success" style="font-size:1.5em"><i class="fas fa-check"></span>'
+                                : '<span class="text-danger" style="font-size:1.5em"><i class="fas fa-close"></span>';
+                        }
+                    },
+                    // Status (derived frontend-only)
+                    { data: 'statusDescription',
+                        className: "align-middle text-center",
+                        render: function (data, type, row) {
+                            return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${row.statusDescription}</div>`;
+                        }
+                    },
+
+                    // Actions
+                    {
+                        data: null,
+                        orderable: false,
+                        searchable: false,
+                        className: 'no-export text-center',
+                        render: function (data, type, row) {
+                            return `
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-light" data-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <div class="dropdown-menu">
+                                    <a class="dropdown-item btnEditColor" style="cursor:pointer"
+                                       data-id="${row.id}"
+                                       data-code="${row.code}"
+                                       data-name="${row.name}"
+                                       data-typeid="${row.typeID}"
+                                       data-typecode="${row.typeCode}"
+                                       data-parentid="${row.parentID}"
+                                       data-parentname="${row.parentName}"
+                                       data-showfront="${row.showFront}"
+                                       data-statusid="${row.statusID}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a class="dropdown-item btnDeleteColor" style="cursor:pointer"
+                                       data-id="${row.id}">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            </div>`;
+                        }
                     }
-                },
-                // Status (derived frontend-only)
-                { data: 'statusDescription',
-                    className: "align-middle text-center",
-                    render: function (data, type, row) {
-                        return `<div class="badge text-center text-white" style="background-color:#${row.statusColor}; width:100px">${row.statusDescription}</div>`;
-                    }
-                },
+                ],
+                order: [[4,"asc"]]
+            });
 
-                // Actions
-                {
-                    data: null,
-                    orderable: false,
-                    searchable: false,
-                    className: 'no-export text-center',
-                    render: function (data, type, row) {
-                        return `
-                        <div class="dropdown">
-                            <button class="btn btn-sm btn-light" data-toggle="dropdown">
-                                <i class="fas fa-ellipsis-v"></i>
-                            </button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item btnEditColor" style="cursor:pointer"
-                                   data-id="${row.id}"
-                                   data-code="${row.code}"
-                                   data-name="${row.name}"
-                                   data-typeid="${row.typeID}"
-                                   data-typecode="${row.typeCode}"
-                                   data-parentid="${row.parentID}"
-                                   data-parentname="${row.parentName}"
-                                   data-showfront="${row.showFront}"
-                                   data-statusid="${row.statusID}">
-                                    <i class="fas fa-edit"></i> Edit
-                                </a>
-                                <a class="dropdown-item btnDeleteColor" style="cursor:pointer"
-                                   data-id="${row.id}">
-                                    <i class="fas fa-trash"></i> Delete
-                                </a>
-                            </div>
-                        </div>`;
-                    }
-                }
-            ],
-            order: [[4,"asc"]]
-        });
-
-        // filter position
-        $('#tableColors_filter').css("position", "relative");
+            // filter position
+            $('#tableColors_filter').css("position", "relative");
          
-            $("#ColorType").on("change", function () {
+                $("#ColorType").on("change", function () {
 
-                let typeCode = $("#ColorType option:selected").data("code");
+                    let typeCode = $("#ColorType option:selected").data("code");
                    
-                if (typeCode !== "SGL") {
-                    $("#ColorPicker").val("#000000");
-                    $("#ColorCode").val('');
-                    $("#ColorPicker").prop("disabled", true);
-                    $("#ColorCode").prop("readonly", true);
-                }
-                else {
-                    $("#ColorCode").val($("#ColorPicker").val().replace("#",""));
-                    $("#ColorPicker").prop("disabled", false);
-                    $("#ColorCode").prop("readonly", false);
-                }
+                    if (typeCode !== "SGL") {
+                        $("#ColorPicker").val("#000000");
+                        $("#ColorCode").val('');
+                        $("#ColorPicker").prop("disabled", true);
+                        $("#ColorCode").prop("readonly", true);
+                    }
+                    else {
+                        $("#ColorCode").val($("#ColorPicker").val().replace("#",""));
+                        $("#ColorPicker").prop("disabled", false);
+                        $("#ColorCode").prop("readonly", false);
+                    }
 
-            });
-
-            const btnNewColor = document.getElementById("btnNewColor");
-
-            btnNewColor.addEventListener("click", function () {
-
-                const modalEl = document.getElementById("saveColorModal");
-                const modal = new bootstrap.Modal(modalEl);
-
-                $("#modalColorTitle").text('Create New Color');
-
-                // Reset fields
-                $("#ColorID").val(0);
-                $("#ColorName").val('');
-                $("#ColorType").prop("selectedIndex", 0);
-                $("#ColorParent").val(0);
-
-                LoadColorsParent(0);
-
-                   // $("#ColorParent").selectpicker("destroy").selectpicker("render")
-
-
-                // Reset picker + code
-                $("#ColorPicker").prop("disabled", false).val("#000000");
-                $("#ColorCode").val("000000");
-                $("#ColorCode").prop("readonly", false);
-                 
-                $("#ColorShowFrontToggle").prop("checked", true);
-                $("#ColorShowFront").val(1);
-
-                // Status
-                $("#ColorStatusID").val('A');
-                $("#ColorStatusToggle").prop("checked", true);
-                $("#ColorStatusLabel").text("Active");
-
-                // Clear validation
-                $("#ColorNameMessage").text('');
-                $("#ColorCodeMessage").text('');
-                $("#modalColorMessage").hide();
-
-                $("#ColorName").removeClass('border-danger');
-
-                modal.show();
-
-                $(modalEl).one('shown.bs.modal', function () {
-                    $("#ColorName").focus();
                 });
-            });
-             
-            $(document).on('click', '.btnEditColor', function () {
 
-                $("#modalColorTitle").text('Modify Color');
+                const btnNewColor = document.getElementById("btnNewColor");
 
-                const modalEl = document.getElementById("saveColorModal");
-                const modal = new bootstrap.Modal(modalEl);
+                btnNewColor.addEventListener("click", function () {
 
-                const ColorID     = $(this).data('id');
-                const ColorName   = $(this).data('name');
-                const ColorCode   = '#' + $(this).data('code');
-                const TypeID    = $(this).data('typeid');
-                const TypeCode  = $(this).data('typecode')
-                const ParentID = $(this).data('parentid')
-                const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
-                const StatusID    = $(this).data('statusid');
+                    const modalEl = document.getElementById("saveColorModal");
+                    const modal = new bootstrap.Modal(modalEl);
+
+                    $("#modalColorTitle").text('Create New Color');
+
+                    // Reset fields
+                    $("#ColorID").val(0);
+                    $("#ColorName").val('');
+                    $("#ColorType").prop("selectedIndex", 0);
+                    $("#ColorParent").val(0);
+
+                    LoadColorsParent(0);
+
+                       // $("#ColorParent").selectpicker("destroy").selectpicker("render")
+                    
+                    // Reset picker + code
+                    $("#ColorPicker").prop("disabled", false).val("#000000");
+                    $("#ColorCode").val("000000");
+                    $("#ColorCode").prop("readonly", false);
                  
-                // Fill fields
-                $("#ColorID").val(ColorID);
-                $("#ColorName").val(ColorName);
-                $("#ColorType").val(TypeID); 
-                LoadColorsParent(ParentID); 
+                    $("#ColorShowFrontToggle").prop("checked", true);
+                    $("#ColorShowFront").val(1);
+
+                    // Status
+                    $("#ColorStatusID").val('A');
+                    $("#ColorStatusToggle").prop("checked", true);
+                    $("#ColorStatusLabel").text("Active");
+
+                    // Clear validation
+                    $("#ColorNameMessage").text('');
+                    $("#ColorCodeMessage").text('');
+                    $("#modalColorMessage").hide();
+
+                    $("#ColorName").removeClass('border-danger');
+
+                    modal.show();
+
+                    $(modalEl).one('shown.bs.modal', function () {
+                        $("#ColorName").focus();
+                    });
+                });
+             
+                $(document).on('click', '.btnEditColor', function () {
+
+                    $("#modalColorTitle").text('Modify Color');
+
+                    const modalEl = document.getElementById("saveColorModal");
+                    const modal = new bootstrap.Modal(modalEl);
+
+                    const ColorID     = $(this).data('id');
+                    const ColorName   = $(this).data('name');
+                    const ColorCode   = '#' + $(this).data('code');
+                    const TypeID    = $(this).data('typeid');
+                    const TypeCode  = $(this).data('typecode')
+                    const ParentID = $(this).data('parentid')
+                    const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
+                    const StatusID    = $(this).data('statusid');
+                 
+                    // Fill fields
+                    $("#ColorID").val(ColorID);
+                    $("#ColorName").val(ColorName);
+                    $("#ColorType").val(TypeID); 
+                    LoadColorsParent(ParentID); 
 
                 
 
@@ -354,143 +353,143 @@
 
                
 
-                $("#ColorShowFrontToggle").prop("checked", ShowFront);
-                $("#ColorShowFront").val(ShowFront ? 1 : 0);
+                    $("#ColorShowFrontToggle").prop("checked", ShowFront);
+                    $("#ColorShowFront").val(ShowFront ? 1 : 0);
 
-                // Status
-                $("#ColorStatusID").val(StatusID);
-                $("#ColorStatusToggle").prop("checked", StatusID === 'A');
-                $("#ColorStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
+                    // Status
+                    $("#ColorStatusID").val(StatusID);
+                    $("#ColorStatusToggle").prop("checked", StatusID === 'A');
+                    $("#ColorStatusLabel").text(StatusID === 'A' ? 'Active' : 'Inactive');
 
-                // Color logic
-                if (TypeCode !== "SGL") {  
-                    $("#ColorPicker").val("#000000");
-                    $("#ColorCode").val('');
-                    $("#ColorPicker").prop("disabled", true );
-                    $("#ColorCode").prop("readonly", true);
-                } else {
-                    $("#ColorPicker").prop("disabled", false);
-                    $("#ColorCode").prop("readonly", false);
-                    $("#ColorPicker").val(ColorCode);
-                    $("#ColorCode").val(ColorCode);
-                }
- 
-                // Clear validation
-                $("#ColorNameMessage").text('');
-                $("#ColorCodeMessage").text('');
-                $("#modalColorMessage").hide();
-                $("#ColorName").removeClass('border-danger');
-
-                modal.show();
-
-                $(modalEl).one('shown.bs.modal', function () {
-                    $("#ColorName").focus();
-                });
-            });
-             
-            $(document).on("click", ".btnDeleteColor", function (e) {
-                e.preventDefault();
-
-                const colorId = $(this).data("id");
-                $("#deletedColorId").val(colorId);
-
-                const colorName = $(this).closest("tr").find("td:nth-child(2)").text();
-
-                $("#deleteColorMessage").html(
-                    `Are you sure you want to delete <strong>${colorName}</strong>?`
-                );
-
-                $("#deleteColorModal").modal("show");
-            });
-            
-            $(document).on('click', '#btnSetRankColor', function () {
-
-                const $rankSelect = $('#rankSelect');
-
-                $rankSelect.empty();
-
-                var type = "CLR";
-
-                $("#rankMode").val(type)
-
-                $.ajax({
-                    url: '@Url.Action("ListGetColors", "Colors")',
-                    type: 'GET',
-                    data: { "TypeID": type },
-                    success: function (res) {
-
-                        if (!res.success) {
-                            toastr.error(res.message || 'Failed to load colors');
-                            return;
-                        }
-
-                        // sort by Rank (safe)
-                        res.data.sort((a, b) => a.rank - b.rank);
-
-                        $.each(res.data, function (index, item) {
-                            $rankSelect.append(
-                                `<option value="${item.id}">
-                                    ${index + 1}. ${item.name}
-                                </option>`
-                            );
-                        });
-
-                        $('#rankModal').modal('show');
-                    },
-                    error: function () {
-                        toastr.error('Server error while loading colors');
+                    // Color logic
+                    if (TypeCode !== "SGL") {  
+                        $("#ColorPicker").val("#000000");
+                        $("#ColorCode").val('');
+                        $("#ColorPicker").prop("disabled", true );
+                        $("#ColorCode").prop("readonly", true);
+                    } else {
+                        $("#ColorPicker").prop("disabled", false);
+                        $("#ColorCode").prop("readonly", false);
+                        $("#ColorPicker").val(ColorCode);
+                        $("#ColorCode").val(ColorCode);
                     }
-                });
+ 
+                    // Clear validation
+                    $("#ColorNameMessage").text('');
+                    $("#ColorCodeMessage").text('');
+                    $("#modalColorMessage").hide();
+                    $("#ColorName").removeClass('border-danger');
 
-            }); 
+                    modal.show();
+
+                    $(modalEl).one('shown.bs.modal', function () {
+                        $("#ColorName").focus();
+                    });
+                });
+             
+                $(document).on("click", ".btnDeleteColor", function (e) {
+                    e.preventDefault();
+
+                    const colorId = $(this).data("id");
+                    $("#deletedColorId").val(colorId);
+
+                    const colorName = $(this).closest("tr").find("td:nth-child(2)").text();
+
+                    $("#deleteColorMessage").html(
+                        `Are you sure you want to delete <strong>${colorName}</strong>?`
+                    );
+
+                    $("#deleteColorModal").modal("show");
+                });
+            
+                $(document).on('click', '#btnSetRankColor', function () {
+
+                    const $rankSelect = $('#rankSelect');
+
+                    $rankSelect.empty();
+
+                    var type = "CLR";
+
+                    $("#rankMode").val(type)
+
+                    $.ajax({
+                        url: '@Url.Action("ListGetColors", "Colors")',
+                        type: 'GET',
+                        data: { "TypeID": type },
+                        success: function (res) {
+
+                            if (!res.success) {
+                                toastr.error(res.message || 'Failed to load colors');
+                                return;
+                            }
+
+                            // sort by Rank (safe)
+                            res.data.sort((a, b) => a.rank - b.rank);
+
+                            $.each(res.data, function (index, item) {
+                                $rankSelect.append(
+                                    `<option value="${item.id}">
+                                        ${index + 1}. ${item.name}
+                                    </option>`
+                                );
+                            });
+
+                            $('#rankModal').modal('show');
+                        },
+                        error: function () {
+                            toastr.error('Server error while loading colors');
+                        }
+                    });
+
+                }); 
 
                 function LoadColorsParent(selectedId = 0) {
 
-        let select = $('#ColorParent');
+                    let select = $('#ColorParent');
 
-        if (select.data('selectpicker')) {
-            select.selectpicker('destroy');
-        }
+                    if (select.data('selectpicker')) {
+                        select.selectpicker('destroy');
+                    }
 
-        select.empty();
-        select.append('<option value="0">Parent</option>');
+                    select.empty();
+                    select.append('<option value="0">Parent</option>');
 
-        $.ajax({
-            url: '/Colors/ListGetColorsParent',
-            type: 'GET',
-            success: function (res) {
+                    $.ajax({
+                        url: '/Colors/ListGetColorsParent',
+                        type: 'GET',
+                        success: function (res) {
 
-                if (!res || res.success === false) {
-                    toastr.error(res?.message || "Failed to load colors");
-                    return;
+                            if (!res || res.success === false) {
+                                toastr.error(res?.message || "Failed to load colors");
+                                return;
+                            }
+
+                            res.data.forEach(obj => {
+
+                                select.append(`
+                                    <option value="${obj.id}"
+                                        data-content="
+                                            <div class='d-flex align-items-center'>
+                                                <span class='colorparentoption'
+                                                      style='background-color:#${obj.code};'></span>
+                                                <span>${obj.name}</span>
+                                            </div>
+                                        ">
+                                        ${obj.name}
+                                    </option>
+                                `);
+                            });
+
+                            // ✅ SET VALUE AFTER LOAD
+                            select.val(selectedId);
+
+                            // ✅ refresh UI
+                            select.selectpicker('render');
+                        }
+                    });
                 }
 
-                res.data.forEach(obj => {
-
-                    select.append(`
-                        <option value="${obj.id}"
-                            data-content="
-                                <div class='d-flex align-items-center'>
-                                    <span class='colorparentoption'
-                                          style='background-color:#${obj.code};'></span>
-                                    <span>${obj.name}</span>
-                                </div>
-                            ">
-                            ${obj.name}
-                        </option>
-                    `);
-                });
-
-                // ✅ SET VALUE AFTER LOAD
-                select.val(selectedId);
-
-                // ✅ refresh UI
-                select.selectpicker('render');
-            }
-        });
-    }
-
-        });
+    });
 
     </script>
 }
