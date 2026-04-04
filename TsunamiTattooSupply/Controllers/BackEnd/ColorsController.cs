@@ -26,7 +26,8 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		{
 			var vm = new PageViewModel
 			{
-				colortypes = GetColorTypes()
+				colortypes = GetColorTypes(),
+				colorsparent = GetColorsParent(),
 			};
 
 			return View("~/Views/BackEnd/Colors/Index.cshtml", vm);
@@ -44,6 +45,53 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				 }
 				
 				).ToList();
+
+		}
+
+		public IActionResult ListGetColorsParent()
+		{
+			List<ColorDto> colors = new List<ColorDto>();
+
+			try
+			{
+				colors = GetColorsParent();
+
+				return Json(new { data = colors, success = true });
+
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Fetching colors parent![ERROR].");
+
+				return Json(new
+				{
+					data = new List<object>(),
+					success = false,
+					message = "An expected error occurred while loading colors parent!"
+				});
+
+			}
+
+		}
+
+		public List<ColorDto> GetColorsParent()
+		{
+
+			return (_dbContext.Colors.Where(c => c.ParentID == null && 
+												 c.DeletedDate == null)
+					.OrderBy(c => c.Rank)
+					.Select(c => new ColorDto
+					{
+						ID = c.ID,
+						Code = c.Code,
+						Name = c.Name, 
+						TypeCode = c.ColorType.Code,
+						TypeDescription = c.ColorType.Description,
+						StatusID = c.Status.ID,
+						StatusDescription = c.Status.Description,
+						StatusColor = c.Status.Color,
+
+					})).ToList();
 
 		}
 
@@ -86,6 +134,9 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						ShowFront = c.ShowFront,
 						TypeCode = c.ColorType.Code,
 						TypeDescription = c.ColorType.Description,	
+						ParentID = c.ParentID == null ? 0 : c.Parent.ID,
+						ParentCode = c.ParentID == null ? "" : c.Parent.Code.ToString(),
+						ParentName = c.ParentID == null ? "Parent" : c.Parent.Name,
 						StatusID = c.Status.ID,
 						StatusDescription = c.Status.Description,
 						StatusColor = c.Status.Color,
@@ -94,7 +145,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveColor(int ID, string Code, string Name, int TypeID, bool ShowFront, string StatusID)
+		public IActionResult SaveColor(int ID, string Code, string Name, int TypeID, int ParentID, bool ShowFront, string StatusID)
 		{
 			try
 			{
@@ -133,6 +184,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					existingColor.Name = Name;
 					existingColor.Code = Code;
 					existingColor.TypeID = TypeID;
+					existingColor.ParentID = ParentID == 0 ? null : ParentID;
 					existingColor.ShowFront = ShowFront;
 					existingColor.StatusID = StatusID;
 					existingColor.EditUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
@@ -157,6 +209,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						Name = Name,
 						Code = Code, 
 						TypeID = TypeID,
+						ParentID = ParentID == 0 ? null : ParentID,
 						ShowFront = ShowFront,
 						StatusID = StatusID,
 						CreatedUserID = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier)),

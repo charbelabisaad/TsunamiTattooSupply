@@ -277,6 +277,25 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}).ToList ();
 		}
 
+
+		[HttpGet]
+		public IActionResult GetSubCategoriesWithoutCategory()
+		{
+			var subCategories = _dbContext.SubCategories
+				.Where(sc =>
+					sc.DeletedDate == null &&
+					sc.StatusID == "A")
+				.OrderBy(sc => sc.Rank)
+				.Select(sc => new
+				{
+					id = sc.ID,
+					name = $"{sc.Description} ({sc.Category.Description})"
+				})
+				.ToList();
+
+			return Json(subCategories);
+		}
+
 		[HttpGet]
 		public IActionResult GetSubCategoriesByCategory(int categoryId)
 		{
@@ -1886,7 +1905,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				.Select(ps => new
 				{
 					id = ps.SubCategoryID,
-					name = ps.SubCategory.Description,
+					name = $"{ps.SubCategory.Description} ({ps.SubCategory.Category.Description})",
 					categoryId = ps.SubCategory.CategoryID
 				})
 				.ToList();
@@ -1908,9 +1927,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					id = pc.SpecID
 				})
 				.ToList();
-
 			 
-
 			// ============================================================
 			// 🔥 PRODUCT TYPES / DETAILS / SIZES
 			// ============================================================

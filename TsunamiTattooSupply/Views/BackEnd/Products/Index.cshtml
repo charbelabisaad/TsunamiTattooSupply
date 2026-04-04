@@ -552,6 +552,8 @@
 
                     $("#ProductDescription").focus();
 
+                    
+
                 })
                 .catch(function (error) {
                     console.error("Modal loading error:", error);
@@ -668,11 +670,11 @@
 
         }
 
-        $(document).on('change', '#ProductCategory', function () {
+        // $(document).on('change', '#ProductCategory', function () {
 
-            LoadSubCategories();
+        //     LoadSubCategories();
 
-        });
+        // });
 
         function renderProductSubCategoryTags(subCategories) {
 
@@ -694,7 +696,7 @@
 
         function LoadSubCategories({ restoreSelection = true } = {}) {
 
-            let categoryId = $('#ProductCategory').val();
+            //let categoryId = $('#ProductCategory').val();
             let subSelect  = $('#ProductSubCategory');
 
             subSelect.empty();
@@ -703,16 +705,15 @@
             // Always add empty option
             subSelect.append('<option value="">-- Select Sub Category --</option>');
 
-            if (!categoryId) {
-                subSelect.selectpicker('destroy').selectpicker('render');
-                renderTags();
-                return;
-            }
+            // if (!categoryId) {
+            //     subSelect.selectpicker('destroy').selectpicker('render');
+            //     renderTags();
+            //     return;
+            // }
 
             $.ajax({
-                url: '/Products/GetSubCategoriesByCategory',
+                    url: '/Products/GetSubCategoriesWithoutCategory',
                 type: 'GET',
-                data: { categoryId },
                 success: function (items) {
 
                     (items || []).forEach(sc => {
@@ -727,8 +728,8 @@
                         if (!subCatMetaById[id]) {
                             subCatMetaById[id] = {
                                 id: sc.id,
-                                name: sc.name,
-                                categoryId: parseInt(categoryId)
+                                name: sc.name //,
+                                //categoryId: parseInt(categoryId)
                             };
                         }
                     });
@@ -1044,9 +1045,7 @@
                                 selectedSpecIds.push(id);
  
                         });
-                       
-                              
-
+                        
                         $("#ProductSpecs")
                            .selectpicker('val', selectedSpecIds)
 
@@ -1063,7 +1062,7 @@
                         });
 
                         if (res.categoryId) {
-                            $("#ProductCategory").val(res.categoryId);
+                            //$("#ProductCategory").val(res.categoryId);
                             LoadSubCategories();
                         } else {
                             renderTags();

@@ -22,6 +22,12 @@ namespace TsunamiTattooSupply.DTO
 
 		public string TypeDescription { get; set; }
 
+		public int? ParentID { get; set ; }
+
+		public string? ParentCode { get; set; }
+
+		public string? ParentName { get; set; }
+
 		public string StatusID { get; set; }
 
 		public string StatusDescription { get; set; }

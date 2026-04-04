@@ -6,6 +6,19 @@
     ViewData["Title"] = "Colors";
 }
 
+<style type="text/css">
+
+.colorparentoption{
+        width: 15px;
+        height: 15px;
+        border:1px solid #000000;
+        display: inline-block;
+        border-radius: 3px;
+        margin-right: 8px;
+}    
+
+</style>
+
 <partial name="SaveColor" />
 <partial name="DeleteColor" />
 <partial name="Rank" />
@@ -47,6 +60,7 @@
                                     <th style="width:100px">Code</th>
                                     <th>Name</th> 
                                     <th style="width:50px">Type</th>
+                                    <th>Parent</th>
                                     <th class="d-none"></th>
                                     <th style="width:100px">Show Front</th>
                                     <th style="width:50px">Status</th>
@@ -81,7 +95,7 @@
                 dataSrc: function (json) {
 
                     // backend typo: "sucess"
-                    if (json && json.sucess === false) {
+                    if (json && json.success === false) {
                         toastr.error(json.message || "Failed to load colors.");
                         return [];
                     }
@@ -149,12 +163,46 @@
                     data: 'typeDescription',
                     className: 'align-middle', 
                 }, 
-                      // Rank
+                   
+                {
+                    data: 'parentName',
+                    className: 'align-middle',
+                    render: function (data, type, row) {
+
+                        let parentID = row.parentID;
+
+                        let color = (!row.isCustom && row.parentCode)
+                            ? `#${row.parentCode}`
+                            : 'transparent';
+
+                        let name = row.isCustom
+                            ? 'Custom'
+                            : (row.parentName || '');
+
+                            let parentcolor = parentID == 0 ? `` :  `
+                                    <span
+                                        style="
+                                            display:inline-block;
+                                            width:30px;
+                                            height:30px;
+                                            background-color:${color};
+                                            border:1px solid #000;
+                                            border-radius:4px;
+                                        ">
+                                    </span>` 
+
+                                return `<div class="d-flex align-items-center gap-2">
+                                            ${parentcolor}<span>&nbsp; ${name}</span>
+                                        </div>`;
+                            }
+                },
+   // Rank
                 {
                     data: 'rank',
                     className: 'align-middle',
                     visible: false
                 },
+
                 {
                     data: 'showFront',
                     className: 'text-center align-items-center',
@@ -191,6 +239,8 @@
                                    data-name="${row.name}"
                                    data-typeid="${row.typeID}"
                                    data-typecode="${row.typeCode}"
+                                   data-parentid="${row.parentID}"
+                                   data-parentname="${row.parentName}"
                                    data-showfront="${row.showFront}"
                                    data-statusid="${row.statusID}">
                                     <i class="fas fa-edit"></i> Edit
@@ -204,7 +254,7 @@
                     }
                 }
             ],
-            order: [[3,"asc"]]
+            order: [[4,"asc"]]
         });
 
         // filter position
@@ -241,6 +291,12 @@
                 $("#ColorID").val(0);
                 $("#ColorName").val('');
                 $("#ColorType").prop("selectedIndex", 0);
+                $("#ColorParent").val(0);
+
+                LoadColorsParent(0);
+
+                   // $("#ColorParent").selectpicker("destroy").selectpicker("render")
+
 
                 // Reset picker + code
                 $("#ColorPicker").prop("disabled", false).val("#000000");
@@ -281,16 +337,25 @@
                 const ColorCode   = '#' + $(this).data('code');
                 const TypeID    = $(this).data('typeid');
                 const TypeCode  = $(this).data('typecode')
+                const ParentID = $(this).data('parentid')
                 const ShowFront = $(this).data('showfront') === true || $(this).data('showfront') === 1;
                 const StatusID    = $(this).data('statusid');
                  
                 // Fill fields
                 $("#ColorID").val(ColorID);
                 $("#ColorName").val(ColorName);
-                $("#ColorType").val(TypeID);
+                $("#ColorType").val(TypeID); 
+                LoadColorsParent(ParentID); 
 
-                $("#SizeShowFrontToggle").prop("checked", ShowFront);
-                $("#SizeShowFront").val(ShowFront ? 1 : 0);
+                
+
+                
+
+
+               
+
+                $("#ColorShowFrontToggle").prop("checked", ShowFront);
+                $("#ColorShowFront").val(ShowFront ? 1 : 0);
 
                 // Status
                 $("#ColorStatusID").val(StatusID);
@@ -377,7 +442,53 @@
                     }
                 });
 
-            });
+            }); 
+
+                function LoadColorsParent(selectedId = 0) {
+
+        let select = $('#ColorParent');
+
+        if (select.data('selectpicker')) {
+            select.selectpicker('destroy');
+        }
+
+        select.empty();
+        select.append('<option value="0">Parent</option>');
+
+        $.ajax({
+            url: '/Colors/ListGetColorsParent',
+            type: 'GET',
+            success: function (res) {
+
+                if (!res || res.success === false) {
+                    toastr.error(res?.message || "Failed to load colors");
+                    return;
+                }
+
+                res.data.forEach(obj => {
+
+                    select.append(`
+                        <option value="${obj.id}"
+                            data-content="
+                                <div class='d-flex align-items-center'>
+                                    <span class='colorparentoption'
+                                          style='background-color:#${obj.code};'></span>
+                                    <span>${obj.name}</span>
+                                </div>
+                            ">
+                            ${obj.name}
+                        </option>
+                    `);
+                });
+
+                // ✅ SET VALUE AFTER LOAD
+                select.val(selectedId);
+
+                // ✅ refresh UI
+                select.selectpicker('render');
+            }
+        });
+    }
 
         });
 

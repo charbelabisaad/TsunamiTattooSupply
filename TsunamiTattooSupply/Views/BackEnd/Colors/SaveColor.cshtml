@@ -145,6 +145,34 @@
                          
                     </div>
 
+                    <div class="row">
+
+                        <div class="col-12 col-md-2 d-flex align-items-center">
+                            <label for="ColorParent" class="form-label mb-0">Parent</label>
+                        </div>
+
+                        <div class="col-12 col-md-10 d-flex align-items-center">
+
+                        <select id="ColorParent" class="form-control form-control-sm selectpicker w-100 bg-white" data-live-search="true">
+
+                            @* <option value="0">Parent</option> *@
+
+                            @* @foreach (var obj in Model.colorsparent) *@
+                            @* { *@
+                            @*     <option value="@obj.ID" *@
+                            @*             data-content='<div class="d-flex align-items-center"> *@
+                            @*             <span class="colorparentoption" style="background-color:#@obj.Code;"></span> *@
+                            @*             <span>@obj.Name</span> *@
+                            @*         </div>'> @obj.Name *@
+                            @*     </option> *@
+                            @* } *@
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
                 <div class="modal-footer">
@@ -253,13 +281,12 @@
                     ? null
                     : $('#ColorCode').val(),
                 TypeID: $('#ColorType').val(),
+                ParentID: $('#ColorParent').val(),
                 ShowFront: $('#ColorShowFrontToggle').is(':checked'),
                 // ✅ THIS LINE IS REQUIRED
                 StatusID: $('#ColorStatusToggle').is(':checked') ? 'A' : 'I'
             };
-             
-         
-
+            
             // Validation
             if (!data.Name) {
                 $('#ColorNameMessage').text("Name is required!");

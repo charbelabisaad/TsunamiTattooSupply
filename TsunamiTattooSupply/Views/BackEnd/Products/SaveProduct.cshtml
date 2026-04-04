@@ -212,22 +212,22 @@
 							<div class="row">
 
 								<!-- CATEGORY (single selection) -->
-								<div class="col-12 col-md-4 mb-3">
-									<label class="form-label">Category</label>
-									<select id="ProductCategory" class="form-control" name="ProductCategory">
+								@* <div class="col-12 col-md-4 mb-3"> *@
+								@* 	<label class="form-label">Category</label> *@
+								@* 	<select id="ProductCategory" class="form-control" name="ProductCategory"> *@
 
-										@foreach (var obj in Model.categories)
-										{
-											<option value="@obj.ID">@obj.Description</option>
-										}
+								@* 		@foreach (var obj in Model.categories) *@
+								@* 		{ *@
+								@* 			<option value="@obj.ID">@obj.Description</option> *@
+								@* 		} *@
 
 
-									</select>
-									<div id="ProductCategoryMessage" class="text-danger fw-normal"></div>
-								</div>
+								@* 	</select> *@
+								@* 	<div id="ProductCategoryMessage" class="text-danger fw-normal"></div> *@
+								@* </div> *@
 
 								<!-- SUBCATEGORY (multiple selection) -->
-								<div class="col-12 col-md-4 mb-3">
+								<div class="col-12 col-md-8 mb-3">
 									<div>
 										<label class="form-label">Sub Categories</label>
 										<select id="ProductSubCategory" name="ProductSubCategory[]" class="form-control selectpicker bg-white" style="background-color:#ffffff !important" multiple data-live-search="true" data-actions-box="true">
@@ -408,9 +408,7 @@
                                         <div id="productDetailsTabsContainer" class="col-12"></div>
 
 									</div>
-
-                                  
-										
+									 
 										@* <div class="col-12 col-md-3"> *@
 										@* 	<label class="form-label">Details</label> *@
 
