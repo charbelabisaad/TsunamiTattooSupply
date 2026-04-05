@@ -33,7 +33,7 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			var vm = new PageViewModel
 			{
 				banners = GetBanners(),
-				groups = GetGroups("BRND")
+				groups = GetGroups("BRD")
 			};
 
 			return View("~/Views/FrontEnd/Home/Index.cshtml",vm);

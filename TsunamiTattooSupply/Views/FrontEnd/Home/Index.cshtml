@@ -70,8 +70,54 @@
                      alt="@obj.Name" />
             </div>
         }
-
-         
-
+ 
     </div>
 </div>
+
+<script>
+    const container = document.querySelector('.home-brand-bar');
+    const items = document.querySelectorAll('.home-brand');
+
+    const speed = 0.5;
+
+    // initial positioning (stack from right → left)
+    let startX = container.offsetWidth;
+
+    items.forEach(item => {
+        item.x = startX;
+        item.style.transform = `translateX(${item.x}px)`;
+
+        const style = getComputedStyle(item);
+        const margin = parseInt(style.marginLeft) + parseInt(style.marginRight);
+
+        startX += item.offsetWidth + margin;
+    });
+
+    function animate() {
+        items.forEach(item => {
+            item.x -= speed;
+
+            const style = getComputedStyle(item);
+            const margin = parseInt(style.marginLeft) + parseInt(style.marginRight);
+            const width = item.offsetWidth + margin;
+
+            // if item fully left → move to right (green)
+            if (item.x + width < 0) {
+
+                // find rightmost item
+                let maxX = 0;
+                items.forEach(i => {
+                    if (i.x > maxX) maxX = i.x;
+                });
+
+                item.x = container.offsetWidth;
+            }
+
+            item.style.transform = `translateX(${item.x}px)`;
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+</script>

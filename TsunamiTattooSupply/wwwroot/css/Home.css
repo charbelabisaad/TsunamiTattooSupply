@@ -1,43 +1,28 @@
-﻿body {
-    overflow-x: hidden; /* safety */
-}
-
-.home-brand-bar {
+﻿.home-brand-bar {
     background-color: #F57906;
     height: 122px;
     overflow: hidden;
-    display: flex;
-    align-items: center;
+    position: relative; /* 🔥 important */
 }
 
 .brand-track {
-    display: flex;
-    animation: scrollLeft 20s linear infinite;
+    position: relative;
+    height: 100%;
 }
 
 .home-brand {
+    position: absolute; /* 🔥 key change */
+    top: 0;
     min-width: 120px;
     height: 120px;
-    margin: 0 15px; 
+    margin: 0 15px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 6px;
 }
 
-.home-brand-image{
-    max-width:120px;
-    max-height:120px;
-    width:100%;
-}
-
-/* Animation */
-@keyframes scrollLeft {
-    0% {
-        transform: translateX(0);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
+.home-brand-image {
+    max-width: 100px;
+    max-height: 100px;
+    width: 100%;
 }
