@@ -75,46 +75,39 @@
 </div>
 
 <script>
+    const track = document.querySelector('.brand-track');
     const container = document.querySelector('.home-brand-bar');
-    const items = document.querySelectorAll('.home-brand');
 
+    // 🔥 duplicate ONCE
+    const original = [...track.children];
+    original.forEach(el => track.appendChild(el.cloneNode(true)));
+
+    let position = 0;
     const speed = 0.5;
 
-    // initial positioning (stack from right → left)
-    let startX = container.offsetWidth;
+    let paused = false;
 
-    items.forEach(item => {
-        item.x = startX;
-        item.style.transform = `translateX(${item.x}px)`;
-
-        const style = getComputedStyle(item);
-        const margin = parseInt(style.marginLeft) + parseInt(style.marginRight);
-
-        startX += item.offsetWidth + margin;
-    });
+    // ✅ hover events
+    container.addEventListener('mouseenter', () => paused = true);
+    container.addEventListener('mouseleave', () => paused = false);
 
     function animate() {
-        items.forEach(item => {
-            item.x -= speed;
 
-            const style = getComputedStyle(item);
-            const margin = parseInt(style.marginLeft) + parseInt(style.marginRight);
-            const width = item.offsetWidth + margin;
+        if (!paused) {
+            position -= speed;
 
-            // if item fully left → move to right (green)
-            if (item.x + width < 0) {
+            const first = track.children[0];
+            const style = getComputedStyle(first);
+            const margin = parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+            const width = first.offsetWidth + margin;
 
-                // find rightmost item
-                let maxX = 0;
-                items.forEach(i => {
-                    if (i.x > maxX) maxX = i.x;
-                });
-
-                item.x = container.offsetWidth;
+            if (-position >= width) {
+                track.appendChild(first);
+                position += width;
             }
 
-            item.style.transform = `translateX(${item.x}px)`;
-        });
+            track.style.transform = `translate3d(${position}px,0,0)`;
+        }
 
         requestAnimationFrame(animate);
     }

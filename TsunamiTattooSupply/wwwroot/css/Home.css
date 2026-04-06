@@ -2,27 +2,27 @@
     background-color: #F57906;
     height: 122px;
     overflow: hidden;
-    position: relative; /* 🔥 important */
+    display: flex;
+    align-items: center;
 }
 
 .brand-track {
-    position: relative;
-    height: 100%;
+    display: flex;
+    white-space: nowrap; 
+    width: max-content; /* 🔥 VERY IMPORTANT */
 }
 
 .home-brand {
-    position: absolute; /* 🔥 key change */
-    top: 0;
     min-width: 120px;
     height: 120px;
     margin: 0 15px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .home-brand-image {
-    max-width: 100px;
     max-height: 100px;
-    width: 100%;
+    max-width: 200px;
 }
