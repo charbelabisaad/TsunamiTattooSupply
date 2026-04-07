@@ -96,10 +96,72 @@
 
                         </div>
 
+                        <div class="home-new-arrival-product-info">
+
+                            <div class="home-new-arrival-product-name">
+                                @obj.Name
+                            </div>
+
+                            <div class="home-new-arrival-product-brand">
+
+                                <span class="home-new-arrival-product-brand-icon"><i class="fas fa-store"></i></span>
+                                <span class="home-new-arrival-product-brand-name">@obj.GroupName</span>
+
+                            </div>
+
+                            <div class="home-new-arrival-product-price">
+                                @if (obj.MinPrice == null)
+                                {
+                                    <span>-</span>
+                                }
+                                else if (obj.MinPrice == obj.MaxPrice)
+                                {
+                                    <span>@obj.CurrencySymbol @obj.MinPrice.ToString("0.00")</span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        @obj.CurrencySymbol @obj.MinPrice.ToString("0.00")
+                                        -
+                                        @obj.CurrencySymbol @obj.MaxPrice.ToString("0.00")
+                                    </span>
+                                }
+                            </div>
+
+                        </div>
+
                     </div>
             }
 
         </div>
+
+        <div class="row text-center mt-5">
+
+            <div class="col-12">
+
+                <button id="btnNewArrivalViewAll" type="button" class="home-new-arrival-view-all" value="SHWMR">View All</button>
+
+            </div>
+
+        </div>
+
+        <hr class="home-horizontal-separator" />
+
+            <div>
+
+                @if(string.IsNullOrEmpty(Model.banneradvertising.Link)){
+                    <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising" />
+                }
+                else{
+                <a href="@Model.banneradvertising.Link"> 
+                    <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising" />
+                </a>
+                }
+
+                
+            </div>
+
+        <hr class="home-horizontal-separator" />
 
     </div>
 

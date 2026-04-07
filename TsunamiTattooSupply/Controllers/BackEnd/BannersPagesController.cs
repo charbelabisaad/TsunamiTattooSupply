@@ -124,7 +124,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					ID = ps.Product.ID,
 					Name = ps.Product.Name,
-					GroupDescription = ps.Product.Group.Name
+					GroupName = ps.Product.Group.Name
 				})
 				.ToList();
 		}

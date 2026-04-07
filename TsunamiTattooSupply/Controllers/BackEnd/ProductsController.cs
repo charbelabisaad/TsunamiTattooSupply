@@ -184,7 +184,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 						UnitLongDescription = p.Unit.LongDescription,
 						GroupTypeID = p.Group.GroupType.ID,
 						GroupID = p.Group.ID,
-						GroupDescription = p.Group.Name,
+						GroupName = p.Group.Name,
 						VAT = p.VAT,
 						Feature = p.Feature,
 						NewArrival = p.NewArrival,

@@ -29,7 +29,7 @@ namespace TsunamiTattooSupply.DTO
 
 		public int GroupID { get; set; }
 
-		public string GroupDescription { get; set; }
+		public string GroupName { get; set; }
  
 		public bool VAT { get; set; }
  
@@ -64,6 +64,12 @@ namespace TsunamiTattooSupply.DTO
 		public string? OriginalImagePath { get; set; }
 
 		public string? OriginalImage { get; set; }
+
+		public decimal? MinPrice { get; set; }
+
+		public decimal? MaxPrice { get; set; }
+
+		public string CurrencySymbol { get; set; }
 
 		public int CreatedUserID { get; set; }
 

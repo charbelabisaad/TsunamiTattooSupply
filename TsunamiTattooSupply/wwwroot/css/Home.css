@@ -67,3 +67,83 @@
     max-height: 100%;
     object-fit: contain;
 }
+
+.home-new-arrival-product-info{ 
+    color: #FFFFFF;
+    padding:15px 0px 15px 0px;
+}
+
+.home-new-arrival-product-name {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle; 
+}
+
+.home-new-arrival-product-brand {
+    padding:5px 0px 5px 0px;
+}
+
+.home-new-arrival-product-brand-icon {
+    color: #F57906;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 18px;
+}
+
+.home-new-arrival-product-brand-name{
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 20px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle; 
+}
+ 
+.home-new-arrival-product-price {
+    font-family: Inter;
+    font-weight: 700;
+    font-style: bold;
+    font-size: 24px;
+    leading-trim: NONE;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+    padding:15px 0px 15px 0px;
+}
+
+.home-new-arrival-view-all {
+    width: 218px;
+    padding: 16px 54px;
+    border-radius: 62px;
+    background: linear-gradient(#232323, #232323) padding-box, linear-gradient(259.66deg, #FFD600, #BE1E2D) border-box;
+    border: 3px solid transparent;
+    transition: all 0.5s ease;
+    color: #FFFFFF;
+}
+
+.home-new-arrival-view-all:hover {
+    background: linear-gradient(#2f2f2f, #2f2f2f) padding-box, linear-gradient(259.66deg, #FFD600, #BE1E2D) border-box;
+}
+
+.home-horizontal-separator {
+    border: none; /* remove default border */
+    height: 1px; /* line thickness */
+    background-color: #FFFFFF; /* line color */
+    margin: 75px 0px 75px 0px
+}
+
+
+
+.home-banner-advertising { 
+    border-radius: 20px;
+    width:100%;
+}

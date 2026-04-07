@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using TsunamiTattooSupply.Models;
 using System.Data.SqlClient;
@@ -30,12 +30,14 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			Global.BannerWebImagePath = fp.GetFilePath("BNNRWBIMG").Description;
 			Global.GroupImagePath = fp.GetFilePath("GRPIMG").Description;
 			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
+			Global.BannerPageWebImagePath = fp.GetFilePath("BNNRPGEWBIMG").Description;
 
 			var vm = new PageViewModel
 			{
 				banners = GetBanners(),
 				groups = GetGroups("BRD"),
 				newarrivals = GetNewArrivals(),
+				banneradvertising = GetBannerAdvertising("WEB","HMAD")
 			};
 
 			return View("~/Views/FrontEnd/Home/Index.cshtml",vm);
@@ -110,27 +112,79 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 		{
 			var products = (
 				from p in _dbContext.Products
+
 				join pc in _dbContext.ProductsColors on p.ID equals pc.ProductID
 				join pi in _dbContext.ProductsImages on p.ID equals pi.ProductID
-				where p.NewArrival == true 
-				&& pc.IsCover == true
-				&& pi.IsInitial == true
-				&& p.DeletedDate == null 
-				&& pc.DeletedDate == null 
-				&& pi.DeletedDate == null
-				//&& p.NewArrivalDateExpiryDate >=  DateTime.UtcNow
-				 
+
+				where p.NewArrival
+					&& pc.IsCover
+					&& pi.IsInitial
+					&& p.DeletedDate == null
+					&& pc.DeletedDate == null
+					&& pi.DeletedDate == null
+					&& (p.NewArrivalDateExpiryDate == null
+						|| p.NewArrivalDateExpiryDate >= DateTime.UtcNow)
+
 				select new ProductDto
 				{
 					ID = p.ID,
 					Name = p.Name,
-					SmallImagePath = Global.ProductSmallImagePath, 
-					SmallImage = pi.SmallImage
-					 
+					GroupName = p.Group.Name,
+					SmallImagePath = Global.ProductSmallImagePath,
+					SmallImage = pi.SmallImage,
+
+					// 🔥 MIN PRICE
+					MinPrice = _dbContext.Prices
+						.Where(pr => pr.ProductID == p.ID
+							&& pr.DeletedDate == null
+							&& pr.UseInPrice
+							&& pr.AmountNet != 0)
+						.Min(pr => (decimal?)pr.AmountNet),
+
+					// 🔥 MAX PRICE
+					MaxPrice = _dbContext.Prices
+						.Where(pr => pr.ProductID == p.ID
+							&& pr.DeletedDate == null
+							&& pr.UseInPrice
+							&& pr.AmountNet != 0)
+						.Max(pr => (decimal?)pr.AmountNet),
+
+					// 🔥 Currency (from lowest price)
+					CurrencySymbol = _dbContext.Prices
+						.Where(pr => pr.ProductID == p.ID
+							&& pr.DeletedDate == null
+							&& pr.UseInPrice
+							&& pr.AmountNet != 0)
+						.OrderBy(pr => pr.AmountNet)
+						.Select(pr => pr.Currency.Symbol)
+						.First()
 				}
-			).Distinct().Take(4).ToList(); 
+			)
+			.GroupBy(x => x.ID)
+			.Select(g => g.First())
+			.Take(4)
+			.ToList();
 
 			return products;
+		}
+
+		public BannerPageDto GetBannerAdvertising(string AppType, string PageLocationCode)
+		{
+			return _dbContext.BannersPages.Where(bp => bp.AppType == AppType
+													&& bp.PageLocation.Code == PageLocationCode
+													&& bp.StatusID == "A"
+													&& bp.DeletedDate == null
+													&& bp.StartDate <= DateTime.UtcNow
+													&& (bp.EndDate == null || bp.EndDate >= DateTime.UtcNow))
+											.Select(bp => new BannerPageDto
+											{
+												ID = bp.ID,
+												Name = bp.Name,
+												ImagePath = Global.BannerPageWebImagePath,
+												Image = bp.Image,
+												Link = bp.Link
+
+											}).First();
 		}
 
 		public IActionResult Privacy()
