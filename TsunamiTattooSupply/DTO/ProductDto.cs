@@ -57,6 +57,14 @@ namespace TsunamiTattooSupply.DTO
 
 		public string StatusColor { get; set; }
 
+		public string? SmallImagePath { get; set; }
+
+		public string? SmallImage { get; set; }
+
+		public string? OriginalImagePath { get; set; }
+
+		public string? OriginalImage { get; set; }
+
 		public int CreatedUserID { get; set; }
 
 		public DateTime CreationDate { get; set; }
@@ -68,6 +76,8 @@ namespace TsunamiTattooSupply.DTO
 		public int? DeletedUserID { get; set; }
 
 		public DateTime? DeletedDate { get; set; }
+
+
   
 	}
 }

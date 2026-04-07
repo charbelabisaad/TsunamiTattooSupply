@@ -1,4 +1,5 @@
 ﻿using TsunamiTattooSupply.DTO;
+using TsunamiTattooSupply.Models;
 
 namespace TsunamiTattooSupply.ViewModels
 {
@@ -12,6 +13,7 @@ namespace TsunamiTattooSupply.ViewModels
 		public List<ProductDto> products { get; set; }
 		public List<ColorDto> colorsparent { get; set; }
 		public List<PageLocationDto> locations { get; set; }
+		public List<ProductDto> newarrivals { get; set; }
 
 	}
 }

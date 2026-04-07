@@ -29,11 +29,13 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			FilePathService fp = new FilePathService(_dbContext);
 			Global.BannerWebImagePath = fp.GetFilePath("BNNRWBIMG").Description;
 			Global.GroupImagePath = fp.GetFilePath("GRPIMG").Description;
+			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
 
 			var vm = new PageViewModel
 			{
 				banners = GetBanners(),
-				groups = GetGroups("BRD")
+				groups = GetGroups("BRD"),
+				newarrivals = GetNewArrivals(),
 			};
 
 			return View("~/Views/FrontEnd/Home/Index.cshtml",vm);
@@ -102,6 +104,33 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				_logger.LogError(ex, "Fetch Groups [ERROR]");
 				return new List<GroupDto>();
 			}
+		}
+
+		public List<ProductDto> GetNewArrivals()
+		{
+			var products = (
+				from p in _dbContext.Products
+				join pc in _dbContext.ProductsColors on p.ID equals pc.ProductID
+				join pi in _dbContext.ProductsImages on p.ID equals pi.ProductID
+				where p.NewArrival == true 
+				&& pc.IsCover == true
+				&& pi.IsInitial == true
+				&& p.DeletedDate == null 
+				&& pc.DeletedDate == null 
+				&& pi.DeletedDate == null
+				//&& p.NewArrivalDateExpiryDate >=  DateTime.UtcNow
+				 
+				select new ProductDto
+				{
+					ID = p.ID,
+					Name = p.Name,
+					SmallImagePath = Global.ProductSmallImagePath, 
+					SmallImage = pi.SmallImage
+					 
+				}
+			).Distinct().Take(4).ToList(); 
+
+			return products;
 		}
 
 		public IActionResult Privacy()

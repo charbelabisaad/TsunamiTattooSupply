@@ -74,6 +74,37 @@
     </div>
 </div>
 
+<<div class="home-new-arrival">
+
+    <div class="home-new-arrival-title text-center mb-4">
+        NEW ARRIVALS
+    </div>
+
+    <div class="home-new-arrival-content">
+
+        <div class="row g-4">
+
+            @foreach (var obj in Model.newarrivals)
+            {
+                    <div class="col-6 col-md-4 col-lg-3">
+
+                        <div class="home-new-arrival-product-cover">
+
+                            <img src="@Url.Content(obj.SmallImagePath + obj.SmallImage)"
+                                 class="home-new-arrival-product-image"
+                                 alt="@obj.Name" />
+
+                        </div>
+
+                    </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
 <script>
     const track = document.querySelector('.brand-track');
     const container = document.querySelector('.home-brand-bar');
@@ -113,4 +144,5 @@
     }
 
     animate();
+
 </script>
