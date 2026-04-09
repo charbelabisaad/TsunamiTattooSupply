@@ -37,7 +37,9 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				banners = GetBanners(),
 				groups = GetGroups("BRD"),
 				newarrivals = GetNewArrivals(),
-				banneradvertising = GetBannerAdvertising("WEB","HMAD")
+				banneradvertising = GetBannerAdvertising("WEB","HMAD"),
+				about = GetAbout("ABT")
+
 			};
 
 			return View("~/Views/FrontEnd/Home/Index.cshtml",vm);
@@ -186,6 +188,23 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 
 											}).First();
 		}
+
+
+		public AboutDto GetAbout(string ID)
+		{
+			return _dbContext.Abouts
+			.Where(a => a.ID == ID)
+			.Select(a => new AboutDto
+			{
+				ID = a.ID,
+				ShortText = a.ShortText,
+				LongText = a.LongText,
+				Image = a.Image
+
+			}).FirstOrDefault();
+
+		}
+
 
 		public IActionResult Privacy()
 		{

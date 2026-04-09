@@ -45,6 +45,20 @@ body {
     color: #000000 !important;
 }
 
+.btn-border-gradient {
+    width: 218px;
+    padding: 16px 54px;
+    border-radius: 62px;
+    background: linear-gradient(#232323, #232323) padding-box, linear-gradient(259.66deg, #FFD600, #BE1E2D) border-box;
+    border: 3px solid transparent;
+    transition: all 0.5s ease;
+    color: #FFFFFF;
+}
+
+.btn-border-gradient:hover {
+    background: linear-gradient(#2f2f2f, #2f2f2f) padding-box, linear-gradient(259.66deg, #FFD600, #BE1E2D) border-box;
+}
+
 .btn-advanced-search{
     background-color:gainsboro !important;
     border:1px solid gainsboro;

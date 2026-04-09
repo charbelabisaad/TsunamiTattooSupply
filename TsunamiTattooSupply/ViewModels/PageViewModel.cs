@@ -15,6 +15,8 @@ namespace TsunamiTattooSupply.ViewModels
 		public List<ColorDto> colorsparent { get; set; }
 		public List<PageLocationDto> locations { get; set; }
 		public List<ProductDto> newarrivals { get; set; }
+		public ServiceDto service { get; set; }
+		public AboutDto about { get; set; }
 
 	}
 }

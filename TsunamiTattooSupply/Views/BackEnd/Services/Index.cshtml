@@ -43,7 +43,7 @@
 
                 <div id="cardServicesFooter" class="card-footer align-items-center justify-content-end text-right">
 
-                    <button id="btnSaveServices" type="button" class="btn btn-primary">
+                    <button id="btnSaveServices" type="button" class="btn btn-primary" style="width:100px">
                         <span class="spinner-border spinner-border-sm d-none" id="btnSaveServicesSpinner" role="status" aria-hidden="true"></span>
                         <i class="fas fa-save"></i> Save
                     </button>
@@ -83,7 +83,7 @@
 
                 $.ajax({
                     url: '@Url.Action("SaveServices","Services")',
-                    type: 'GET',
+                    type: 'POST',
                         data: { ID: serviceId, Text: serviceDetails },
                     success: function (res) { 
 

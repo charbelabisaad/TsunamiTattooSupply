@@ -23,7 +23,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		public IActionResult Index()
 		{
 
-			 var vm = new ServicePageViewModel
+			 var vm = new PageViewModel
 			 {
 				service = GetServices("SRVC")
 			 };
@@ -32,20 +32,19 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		public ServiceDto GetServices(string ID)
-		{
-			 
-				 
-			    return _dbContext.Services
-				.Where(s => s.ID == ID)
-				.Select(s => new ServiceDto
-				{
-					ID = s.ID,
-					Text = s.Text,
+		{ 
+			return _dbContext.Services
+			.Where(s => s.ID == ID)
+			.Select(s => new ServiceDto
+			{
+				ID = s.ID,
+				Text = s.Text,
 
-				}).FirstOrDefault();
+			}).FirstOrDefault();
   
 		}
 
+		[HttpPost]
 		public IActionResult SaveServices(string ID,  string Text)
 		{
 
@@ -97,7 +96,5 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 	}
-
-
-
+	 
 }

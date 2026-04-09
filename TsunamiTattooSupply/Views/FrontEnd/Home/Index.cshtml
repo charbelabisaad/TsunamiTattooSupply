@@ -74,7 +74,7 @@
     </div>
 </div>
 
-<<div class="home-new-arrival">
+<div class="home-new-arrival">
 
     <div class="home-new-arrival-title text-center mb-4">
         NEW ARRIVALS
@@ -139,33 +139,98 @@
 
             <div class="col-12">
 
-                <button id="btnNewArrivalViewAll" type="button" class="home-new-arrival-view-all" value="SHWMR">View All</button>
+                <button id="btnNewArrivalViewAll" type="button" class="btn-border-gradient" value="SHWMR">View All</button>
 
             </div>
 
         </div>
 
-        <hr class="home-horizontal-separator" />
+    </div>
 
-            <div>
+</div>
 
-                @if(string.IsNullOrEmpty(Model.banneradvertising.Link)){
-                    <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising" />
-                }
-                else{
-                <a href="@Model.banneradvertising.Link"> 
-                    <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising" />
-                </a>
-                }
 
-                
+<hr class="home-horizontal-separator" />
+
+<div class="home-banner-advertising">
+
+    @if (string.IsNullOrEmpty(Model.banneradvertising.Link))
+    {
+        <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising-image" />
+    }
+    else
+    {
+        <a href="@Model.banneradvertising.Link">
+            <img src="@Url.Content(Model.banneradvertising.ImagePath + Model.banneradvertising.Image)" class="home-banner-advertising-image" />
+        </a>
+    }
+
+
+</div>
+
+<hr class="home-horizontal-separator" />
+
+<div class="home-about">
+
+    <div class="row align-items-stretch home-about-row">
+
+        <!-- IMAGE -->
+        <div class="col-12 col-md-6">
+            <img src="~/Images/GENERAL/About.png"
+                 class="home-about-image"
+                 alt="About Tsunami Tattoo Supply" />
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-12 col-md-6 d-flex flex-column">
+
+            <div class="flex-fill d-flex align-items-end">
+                <div class="home-about-title">
+                    <p>ABOUT</p>
+                    <p>TSUNAMI</p>
+                    <p>TATTOO SUPPLY</p>
+                </div>
             </div>
 
-        <hr class="home-horizontal-separator" />
+            <div class="flex-fill position-relative">
+
+                <div class="home-about-cover">
+
+                    <div class="home-about-text">
+                       @Html.Raw(@Model.about.ShortText)
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row text-center" style="margin-top:160px">
+
+        <div class="col-12">
+
+            <button id="btnAbountLearnMore" type="button" class="btn-border-gradient" value="LRNMR">Learn More</button>
+
+        </div>
 
     </div>
 
 </div>
+
+<hr class="home-horizontal-separator" />
+
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 
 <script>
     const track = document.querySelector('.brand-track');
