@@ -205,3 +205,74 @@
     line-height: 1.6;
     margin:0px auto 0px auto;
 }
+
+.home-category {
+    background: linear-gradient(102.53deg, rgba(255, 255, 255, 0.1) 10.88%, rgba(255, 255, 255, 0.03) 83.94%);
+    backdrop-filter: blur(8px);
+    border: 1px solid #FFFFFF42;
+    margin: 0px 100px 0px 100px;
+    opacity: 1;
+    border-radius: 45px;
+    border-width: 1px;
+    padding:75px;
+}
+
+.home-category-title {
+    color:#FFFFFF;
+    font-family: Black Ops One;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 48px; 
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center; 
+    vertical-align: middle; 
+    opacity: 1;
+}
+
+.home-category-content {
+    margin-top: 30px;
+}
+
+.category-box-large,
+.category-box-small,
+.category-box-medium {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* HEIGHT CONTROL */
+.category-box-large {
+    aspect-ratio: 3 / 1;
+}
+
+.category-box-small {
+    aspect-ratio: 1 / 1;
+}
+
+.category-box-medium {
+    aspect-ratio: 4 / 1;
+}
+ 
+.home-category-description {
+   
+    margin-top: 30px;
+    margin-left: 40px;
+    color: white;
+    font-family: Inter;
+    font-weight: 700;
+    font-size: 36px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+@media (max-width:768px) {
+    .home-category-description {
+        top: 15px;
+        left: 20px;
+        font-size: 22px;
+    }
+}

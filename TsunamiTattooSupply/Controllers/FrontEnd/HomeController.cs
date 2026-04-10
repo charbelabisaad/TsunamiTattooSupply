@@ -31,14 +31,16 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			Global.GroupImagePath = fp.GetFilePath("GRPIMG").Description;
 			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
 			Global.BannerPageWebImagePath = fp.GetFilePath("BNNRPGEWBIMG").Description;
+			Global.CategoryWebImagePath = fp.GetFilePath("CTGWBIMG").Description;
 
 			var vm = new PageViewModel
 			{
 				banners = GetBanners(),
 				groups = GetGroups("BRD"),
 				newarrivals = GetNewArrivals(),
-				banneradvertising = GetBannerAdvertising("WEB","HMAD"),
-				about = GetAbout("ABT")
+				banneradvertising = GetBannerAdvertising("WEB", "HMAD"),
+				about = GetAbout("ABT"),
+				categories = GetGategories()
 
 			};
 
@@ -205,6 +207,22 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 
 		}
 
+		public List<CategoryDto> GetGategories()
+		{
+			return _dbContext.Categories
+				.Where(c => c.StatusID == "A" 
+						 && c.DeletedDate == null)
+				.OrderBy(c => c.Rank)
+				.Select(c => new CategoryDto
+				{
+					ID = c.ID,
+					Description = c.Description,
+					WebImagePath = Global.CategoryWebImagePath,
+					WebImage = c.WebImage,
+					Rank = c.Rank
+				}).ToList();
+
+		}
 
 		public IActionResult Privacy()
 		{

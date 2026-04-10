@@ -13,27 +13,27 @@
     <div class="carousel-indicators">
 
 
-            @{
-                int SlideCount = 0;
-            }
+        @{
+            int SlideCount = 0;
+        }
 
-            @foreach (var obj in Model.banners)
-            {
-                <button type="button"
-                        data-bs-target="#carouselExampleCaptions"
-                        data-bs-slide-to="@SlideCount"
-                        class="@(SlideCount == 0 ? "active" : "")"
-                        aria-current="@(SlideCount == 0 ? "true" : null)"
-                        aria-label="Slide @(SlideCount + 1)">
-                </button>
+        @foreach (var obj in Model.banners)
+        {
+            <button type="button"
+            data-bs-target="#carouselExampleCaptions"
+            data-bs-slide-to="@SlideCount"
+            class="@(SlideCount == 0 ? "active" : "")"
+            aria-current="@(SlideCount == 0 ? "true" : null)"
+            aria-label="Slide @(SlideCount + 1)">
+            </button>
 
-                SlideCount++;
-            }
- 
+            SlideCount++;
+        }
+
     </div>
-     
 
-    
+
+
     <div class="carousel-inner">
 
         @{
@@ -47,7 +47,7 @@
 
             SlideCount++;
         }
- 
+
     </div>
     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -66,11 +66,11 @@
         {
             <div class="home-brand">
                 <img src="@Url.Content(obj.ImagePath + obj.Image)"
-                     class="home-brand-image"
-                     alt="@obj.Name" />
+                class="home-brand-image"
+                alt="@obj.Name" />
             </div>
         }
- 
+
     </div>
 </div>
 
@@ -86,51 +86,51 @@
 
             @foreach (var obj in Model.newarrivals)
             {
-                    <div class="col-6 col-md-4 col-lg-3">
+                <div class="col-6 col-md-4 col-lg-3">
 
-                        <div class="home-new-arrival-product-cover">
+                    <div class="home-new-arrival-product-cover">
 
-                            <img src="@Url.Content(obj.SmallImagePath + obj.SmallImage)"
-                                 class="home-new-arrival-product-image"
-                                 alt="@obj.Name" />
+                        <img src="@Url.Content(obj.SmallImagePath + obj.SmallImage)"
+                        class="home-new-arrival-product-image"
+                        alt="@obj.Name" />
+
+                    </div>
+
+                    <div class="home-new-arrival-product-info">
+
+                        <div class="home-new-arrival-product-name">
+                            @obj.Name
+                        </div>
+
+                        <div class="home-new-arrival-product-brand">
+
+                            <span class="home-new-arrival-product-brand-icon"><i class="fas fa-store"></i></span>
+                            <span class="home-new-arrival-product-brand-name">@obj.GroupName</span>
 
                         </div>
 
-                        <div class="home-new-arrival-product-info">
-
-                            <div class="home-new-arrival-product-name">
-                                @obj.Name
-                            </div>
-
-                            <div class="home-new-arrival-product-brand">
-
-                                <span class="home-new-arrival-product-brand-icon"><i class="fas fa-store"></i></span>
-                                <span class="home-new-arrival-product-brand-name">@obj.GroupName</span>
-
-                            </div>
-
-                            <div class="home-new-arrival-product-price">
-                                @if (obj.MinPrice == null)
-                                {
-                                    <span>-</span>
-                                }
-                                else if (obj.MinPrice == obj.MaxPrice)
-                                {
-                                    <span>@obj.CurrencySymbol @obj.MinPrice.ToString("0.00")</span>
-                                }
-                                else
-                                {
-                                    <span>
-                                        @obj.CurrencySymbol @obj.MinPrice.ToString("0.00")
-                                        -
-                                        @obj.CurrencySymbol @obj.MaxPrice.ToString("0.00")
-                                    </span>
-                                }
-                            </div>
-
+                        <div class="home-new-arrival-product-price">
+                            @if (obj.MinPrice == null)
+                            {
+                                <span>-</span>
+                            }
+                            else if (obj.MinPrice == obj.MaxPrice)
+                            {
+                                <span>@obj.CurrencySymbol @obj.MinPrice.ToString("0.00")</span>
+                            }
+                            else
+                            {
+                                <span>
+                                    @obj.CurrencySymbol @obj.MinPrice.ToString("0.00")
+                                    -
+                                    @obj.CurrencySymbol @obj.MaxPrice.ToString("0.00")
+                                </span>
+                            }
                         </div>
 
                     </div>
+
+                </div>
             }
 
         </div>
@@ -177,8 +177,8 @@
         <!-- IMAGE -->
         <div class="col-12 col-md-6">
             <img src="~/Images/GENERAL/About.png"
-                 class="home-about-image"
-                 alt="About Tsunami Tattoo Supply" />
+            class="home-about-image"
+            alt="About Tsunami Tattoo Supply" />
         </div>
 
         <!-- RIGHT SIDE -->
@@ -197,7 +197,7 @@
                 <div class="home-about-cover">
 
                     <div class="home-about-text">
-                       @Html.Raw(@Model.about.ShortText)
+                        @Html.Raw(@Model.about.ShortText)
                     </div>
 
                 </div>
@@ -222,16 +222,85 @@
 
 <hr class="home-horizontal-separator" />
 
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
-<br />
+<div class="home-category">
+    <div class="row">
+        <div class="col-12 home-category-title">
+            SHOP BY CATEGORY
+        </div>
 
+        <div class="col-12 home-category-content">
+
+            @{
+                string htmlRow = string.Empty;
+            }
+
+            @foreach (var obj in Model.categories)
+            {
+                switch (obj.Rank)
+                {
+                    case 1:
+
+                        htmlRow += "<div class='row'>";
+
+                        htmlRow += "<div class='col-12 col-md-12'>";
+
+                                htmlRow += "<div class='row pb-3'>";
+
+                                    htmlRow += "<div class='col-12 category-box-large' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">"; 
+                                         htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
+                                    htmlRow += "</div>";
+
+                                htmlRow += "</div>";
+
+                            htmlRow += "</div>";
+
+                        htmlRow += "</div>";
+
+                        break;
+
+
+                    case 2:
+
+                        htmlRow += "<div class='row'>";
+
+                            htmlRow += "<div class='col-12 col-md-4'>";
+
+                                htmlRow += "<div class='row pe-3'>";
+
+                                    htmlRow += "<div class='col-12 category-box-small' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">";
+                                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
+
+                                    htmlRow += "</div>";
+
+                                htmlRow += "</div>";
+
+                            htmlRow += "</div>";
+
+                        break;
+
+
+                    case 3:
+
+
+                        htmlRow += "<div class='col-12 col-md-8 category-box-medium' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">";
+                                 
+                                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
+ 
+
+                        htmlRow += "</div>";
+
+                    htmlRow += "</div>";
+
+                        break;
+                }
+            }
+
+            @Html.Raw(htmlRow)
+
+        </div>
+    </div>
+</div>
+ 
 <script>
     const track = document.querySelector('.brand-track');
     const container = document.querySelector('.home-brand-bar');
