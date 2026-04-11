@@ -71,7 +71,7 @@
                                 
                         <div class="col-3" style="width:85px">
                             <div class="d-inline-block">
-                                <a asp-area="" asp-controller="Home" asp-action="Index" class=" @((currentController == "Home" && currentAction == "Index") ? "active" : string.Empty)"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="header-logo" alt="Tsunami Tattoo Supply Logo" /> </a>
+                                <a asp-area="" asp-controller="Home" asp-action="Index" class=" @((currentController == "Home" && currentAction == "Index") ? "active" : string.Empty)"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="header-logo" alt="Tsunami Tattoo Supply Logo" /></a>
                             </div> 
                         </div>
                         <div class="col-9 d-flex justify-content-center">
@@ -153,11 +153,276 @@
             </main>
         </div>
     
-    @* <footer class="border-top footer text-muted" style="min-width:1000px">
-        <div class="container">
-             &copy; 2025 - TsunamiTattooSupply - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> 
-        </div>
-    </footer>*@
+    <footer style="min-width:1000px">
+        
+        <div class="footer-content" style="margin-top:50px">
+             
+            <div class="row footer-subscribe d-flex align-items-center">
+
+                    <div class="col-12 col-md-6">
+                        <div class="footer-subscribe-sentence">
+                            STAY UP TO DATE ABOUT OUR LATEST OFFERS
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6 d-flex justify-content-end text-right">
+
+                        <div>
+                            <div class="position-relative">
+                                <input id="footerEmailSubscription" name="footerEmailSubscription" class="footer-subscribe-email-input" placeholder="Enter your email address" />
+                                <span class="footer-subscribe-email-input-icon">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M21 4.125H3C2.70163 4.125 2.41548 4.24353 2.2045 4.4545C1.99353 4.66548 1.875 4.95163 1.875 5.25V18C1.875 18.4973 2.07254 18.9742 2.42417 19.3258C2.77581 19.6775 3.25272 19.875 3.75 19.875H20.25C20.7473 19.875 21.2242 19.6775 21.5758 19.3258C21.9275 18.9742 22.125 18.4973 22.125 18V5.25C22.125 4.95163 22.0065 4.66548 21.7955 4.4545C21.5845 4.24353 21.2984 4.125 21 4.125ZM12 11.9738L5.89219 6.375H18.1078L12 11.9738ZM8.69906 12L4.125 16.1925V7.8075L8.69906 12ZM10.3641 13.5262L11.2397 14.3297C11.4472 14.52 11.7185 14.6255 12 14.6255C12.2815 14.6255 12.5528 14.52 12.7603 14.3297L13.6359 13.5262L18.1078 17.625H5.89219L10.3641 13.5262ZM15.3009 12L19.875 7.8075V16.1925L15.3009 12Z" fill="black" fill-opacity="0.4" />
+                                    </svg>
+                                </span>
+                            </div>
+
+                            <div class="mt-3">
+                                <button id="btnFooterSubscribe" type="button" name="footerSubscribe" class="footer-subscribe-button" value="FTRSBSCRB">
+                                    Subscribe to Our Newsletter
+                                </button>
+                            </div>
+                        </div>
+                        
+                    </div>
+
+                </div>
+
+                <div class="footer-details">
+
+                    <div class="row">
+
+                        <div class="col-12 col-md-3">
+
+                            <div>
+
+                                <a asp-area="" asp-controller="Home" asp-action="Index" class=" @((currentController == "Home" && currentAction == "Index") ? "active" : string.Empty)"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="footer-logo" alt="Tsunami Tattoo Supply" /></a>
+
+                            </div>
+
+                            <div class="footer-sentence">
+
+                                We treasure the bond we’ve built with artists and studios worldwide.
+
+                            </div>
+
+                            <div class="footer-social-media">
+
+                                <div class="footer-social-media-type">
+                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="14" cy="14" r="14" fill="#F57906" />
+                                        <path d="M12.7087 20.3038V14.7503H10.8398V12.5859H12.7087V10.9898C12.7087 9.13752 13.84 8.12891 15.4924 8.12891C16.2839 8.12891 16.9642 8.18784 17.1624 8.21417V10.1499L16.0164 10.1505C15.1178 10.1505 14.9438 10.5775 14.9438 11.2041V12.5859H17.087L16.8079 14.7503H14.9438V20.3038H12.7087Z" fill="white" />
+                                    </svg> 
+                                </div>
+
+                                <div class="footer-social-media-type">
+                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="14" cy="14" r="14" fill="#F57906" />
+                                        <circle cx="14" cy="14" r="13.5" stroke="black" stroke-opacity="0.2" />
+                                        <path d="M14.0008 8.44721C15.8095 8.44721 16.0237 8.45398 16.7382 8.48656C17.1678 8.49182 17.5933 8.5707 17.9962 8.71979C18.2884 8.83248 18.5538 9.00511 18.7753 9.22656C18.9967 9.44802 19.1694 9.71339 19.282 10.0056C19.4311 10.4085 19.51 10.8341 19.5153 11.2637C19.5475 11.9782 19.5546 12.1924 19.5546 14.0011C19.5546 15.8098 19.5479 16.024 19.5153 16.7385C19.51 17.1681 19.4311 17.5936 19.282 17.9966C19.1694 18.2888 18.9967 18.5541 18.7753 18.7756C18.5538 18.997 18.2884 19.1697 17.9962 19.2824C17.5933 19.4315 17.1678 19.5103 16.7382 19.5156C16.024 19.5479 15.8098 19.5549 14.0008 19.5549C12.1917 19.5549 11.9775 19.5482 11.2633 19.5156C10.8337 19.5103 10.4082 19.4315 10.0053 19.2824C9.71307 19.1697 9.44769 18.997 9.22624 18.7756C9.00479 18.5541 8.83216 18.2888 8.71947 17.9966C8.57038 17.5936 8.4915 17.1681 8.48624 16.7385C8.45398 16.024 8.44689 15.8098 8.44689 14.0011C8.44689 12.1924 8.45366 11.9782 8.48624 11.2637C8.4915 10.8341 8.57038 10.4085 8.71947 10.0056C8.83216 9.71339 9.00479 9.44802 9.22624 9.22656C9.44769 9.00511 9.71307 8.83248 10.0053 8.71979C10.4082 8.5707 10.8337 8.49182 11.2633 8.48656C11.9779 8.4543 12.192 8.44721 14.0008 8.44721ZM14.0008 7.22656C12.162 7.22656 11.9304 7.2343 11.2079 7.26721C10.6456 7.27839 10.0893 7.38485 9.56269 7.58205C9.11092 7.75226 8.70172 8.019 8.36366 8.36366C8.01869 8.70184 7.75172 9.11127 7.5814 9.56334C7.3842 10.09 7.27775 10.6463 7.26656 11.2085C7.2343 11.9304 7.22656 12.162 7.22656 14.0008C7.22656 15.8395 7.2343 16.0711 7.26721 16.7937C7.27839 17.3559 7.38485 17.9122 7.58205 18.4388C7.75218 18.8908 8.01892 19.3002 8.36366 19.6385C8.70191 19.9832 9.11133 20.25 9.56334 20.4201C10.09 20.6173 10.6463 20.7238 11.2085 20.7349C11.9311 20.7672 12.1617 20.7756 14.0014 20.7756C15.8411 20.7756 16.0717 20.7679 16.7943 20.7349C17.3565 20.7238 17.9128 20.6173 18.4395 20.4201C18.8893 20.2457 19.2978 19.9794 19.6389 19.6381C19.98 19.2968 20.246 18.8882 20.4201 18.4382C20.6173 17.9115 20.7238 17.3553 20.735 16.793C20.7672 16.0711 20.775 15.8395 20.775 14.0008C20.775 12.162 20.7672 11.9304 20.7343 11.2079C20.7231 10.6456 20.6167 10.0893 20.4195 9.56269C20.2493 9.11068 19.9826 8.70126 19.6379 8.36301C19.2996 8.01828 18.8902 7.75153 18.4382 7.5814C17.9115 7.3842 17.3553 7.27775 16.793 7.26656C16.0711 7.2343 15.8395 7.22656 14.0008 7.22656Z" fill="white" />
+                                        <path d="M14.0021 10.5234C13.3141 10.5234 12.6416 10.7275 12.0695 11.1097C11.4974 11.492 11.0515 12.0353 10.7882 12.6709C10.5249 13.3066 10.4561 14.006 10.5903 14.6808C10.7245 15.3556 11.0558 15.9755 11.5423 16.462C12.0288 16.9485 12.6487 17.2798 13.3235 17.414C13.9983 17.5482 14.6977 17.4794 15.3334 17.2161C15.969 16.9528 16.5123 16.5069 16.8946 15.9348C17.2768 15.3627 17.4809 14.6902 17.4809 14.0021C17.4809 13.0795 17.1144 12.1947 16.462 11.5423C15.8096 10.8899 14.9248 10.5234 14.0021 10.5234ZM14.0021 16.2602C13.5555 16.2602 13.119 16.1278 12.7476 15.8797C12.3763 15.6315 12.0869 15.2789 11.916 14.8663C11.7451 14.4537 11.7003 13.9996 11.7875 13.5616C11.8746 13.1236 12.0897 12.7213 12.4055 12.4055C12.7213 12.0897 13.1236 11.8746 13.5616 11.7875C13.9996 11.7003 14.4537 11.7451 14.8663 11.916C15.2789 12.0869 15.6315 12.3763 15.8797 12.7476C16.1278 13.119 16.2602 13.5555 16.2602 14.0021C16.2602 14.601 16.0223 15.1754 15.5988 15.5988C15.1754 16.0223 14.601 16.2602 14.0021 16.2602Z" fill="white" />
+                                        <path d="M17.6176 11.1981C18.0665 11.1981 18.4305 10.8341 18.4305 10.3852C18.4305 9.93621 18.0665 9.57227 17.6176 9.57227C17.1686 9.57227 16.8047 9.93621 16.8047 10.3852C16.8047 10.8341 17.1686 11.1981 17.6176 11.1981Z" fill="white" />
+                                    </svg> 
+                                </div>
+
+                                <div class="footer-social-media-type">
+                                    <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="14" cy="14" r="14" fill="#F57906" />
+                                        <circle cx="14" cy="14" r="13.5" stroke="black" stroke-opacity="0.2" />
+                                        <path d="M14.0122 18.0445C12.4562 18.0445 10.9489 18.0202 9.44161 17.8743C8.66364 17.8014 8.08017 17.2179 8.08017 16.4157C8.08017 14.7868 8.08017 13.1822 8.08017 11.5534C8.08017 10.7268 8.66364 10.1919 9.53885 10.0947C11.5324 9.9002 13.5016 9.92451 15.4951 9.94882C16.5162 9.94882 17.5373 10.0218 18.5341 10.119C19.3607 10.1919 19.9198 10.7997 19.9198 11.6263C19.9198 13.2066 19.9198 14.7868 19.9198 16.367C19.9198 17.2179 19.3363 17.8014 18.4854 17.8987C16.9781 18.0445 15.4708 18.0688 14.0122 18.0688V18.0445ZM16.1759 14.0088C16.1759 13.9845 16.1516 13.9602 16.1272 13.9602C14.863 13.2309 13.5989 12.5015 12.3347 11.7722C12.1888 11.6749 12.1888 11.7722 12.1888 11.8937C12.1888 13.3038 12.1888 14.7139 12.1888 16.1239C12.1888 16.3184 12.2374 16.2941 12.3833 16.2212C13.6475 15.4918 14.8874 14.7625 16.1759 14.0331V14.0088Z" fill="white" />
+                                    </svg> 
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    <div class="col-12 col-md-3 d-flex justify-content-center">
+
+                            <div>
+
+                                <div class="footer-menu-title">MENU</div>
+
+                                <div class="footer-menu-item"><a class="footer-menu-item-link-active">Home</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">About</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">Services</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">Contact Us</a></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-md-3 d-flex justify-content-center">
+
+                            <div>
+
+                                <div class="footer-menu-title">HELP</div>
+
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">Shipping Policy</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">Refund Policy</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link"> Terms & Conditions</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-link">Privacy Policy</a></div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-md-3 d-flex justify-content-end">
+
+                            <div>
+
+                                <div class="footer-menu-title">CONTACT</div>
+
+                                <div class="footer-menu-item"><a class="footer-menu-item-contact">+ 961 3 273 511</a></div>
+                                <div class="footer-menu-item"><a class="footer-menu-item-contact">info@tsunamitattoosupply.com</a></div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <hr class="footer-horizontal-separator" />
+
+                    <div class="row footer-copy-right-credit-card align-items-end">
+
+                        <div class="col-12 col-md-6">
+
+                            <span class="footer-copy-right">
+                                TsunamiTattooSupply © @DateTime.UtcNow.Year, All Rights Reserved
+                            </span>
+
+                        </div>
+
+                        <div class="col-12 col-md-6 d-flex justify-content-end">
+
+                            <div class="footer-credit-card">
+                                <svg width="65" height="49" viewBox="0 0 65 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_dd_2768_3168)">
+                                        <rect x="9.18835" y="4.70605" width="46.6143" height="30.0304" rx="5.37857" fill="white" />
+                                        <rect x="9.0763" y="4.594" width="46.8384" height="30.2545" rx="5.49062" stroke="#D6DCE5" stroke-width="0.224107" />
+                                        <path d="M32.2105 14.8275L30.0362 24.9911H27.4071L29.5817 14.8275H32.2105ZM43.2722 21.3902L44.6563 17.5734L45.4528 21.3902H43.2722ZM46.2056 24.9911H48.6375L46.5153 14.8275H44.2707C43.7663 14.8275 43.3407 15.1209 43.1512 15.5732L39.2067 24.9911H41.9677L42.5159 23.4734H45.889L46.2056 24.9911ZM39.3438 21.6726C39.355 18.9901 35.6341 18.8425 35.6599 17.6442C35.6676 17.2791 36.0153 16.8918 36.7748 16.7924C37.1522 16.7432 38.1896 16.7055 39.3676 17.2475L39.8289 15.0923C39.1961 14.8626 38.3819 14.6416 37.3693 14.6416C34.7707 14.6416 32.9417 16.0232 32.9262 18.0016C32.9098 19.4646 34.2319 20.281 35.2282 20.7674C36.2524 21.2657 36.5966 21.5848 36.5921 22.0303C36.5854 22.7126 35.775 23.0131 35.0191 23.025C33.697 23.0459 32.9298 22.6682 32.3182 22.3832L31.8418 24.6102C32.4559 24.8923 33.5898 25.1374 34.7662 25.15C37.5279 25.15 39.3348 23.7854 39.3438 21.6726ZM28.4536 14.8275L24.1938 24.9911H21.4142L19.3181 16.8799C19.1907 16.3803 19.0801 16.1976 18.6931 15.9869C18.0616 15.6443 17.0178 15.3223 16.0994 15.1228L16.1621 14.8275H20.6357C21.2057 14.8275 21.7188 15.2071 21.8481 15.8637L22.9554 21.7453L25.6913 14.8275H28.4536Z" fill="#1434CB" />
+                                    </g>
+                                    <defs>
+                                        <filter id="filter0_dd_2768_3168" x="-5.24521e-05" y="-0.000209332" width="64.9911" height="48.4071" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="0.448214" />
+                                            <feGaussianBlur stdDeviation="2.24107" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2768_3168" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="4.48214" />
+                                            <feGaussianBlur stdDeviation="4.48214" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="effect1_dropShadow_2768_3168" result="effect2_dropShadow_2768_3168" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_2768_3168" result="shape" />
+                                        </filter>
+                                    </defs>
+                                </svg> 
+                            </div>
+
+                            <div class="footer-credit-card">
+                                <svg width="65" height="49" viewBox="0 0 65 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_dd_2768_3170)">
+                                        <rect x="9.18835" y="4.70605" width="46.6143" height="30.0304" rx="5.37857" fill="white" />
+                                        <rect x="9.0763" y="4.594" width="46.8384" height="30.2545" rx="5.49062" stroke="#D6DCE5" stroke-width="0.224107" />
+                                        <path d="M35.844 13.5549H28.9807V25.8884H35.844V13.5549Z" fill="#FF5F00" />
+                                        <path d="M29.4165 19.7217C29.4155 18.5339 29.6846 17.3614 30.2037 16.293C30.7227 15.2246 31.478 14.2883 32.4124 13.5549C31.2553 12.6454 29.8656 12.0798 28.4022 11.9227C26.9389 11.7657 25.4608 12.0235 24.1371 12.6667C22.8133 13.31 21.6972 14.3127 20.9164 15.5602C20.1355 16.8078 19.7214 18.2499 19.7214 19.7217C19.7214 21.1935 20.1355 22.6355 20.9164 23.8831C21.6972 25.1307 22.8133 26.1334 24.1371 26.7766C25.4608 27.4199 26.9389 27.6777 28.4022 27.5206C29.8656 27.3636 31.2553 26.798 32.4124 25.8884C31.478 25.1551 30.7227 24.2188 30.2037 23.1504C29.6846 22.082 29.4155 20.9095 29.4165 19.7217Z" fill="#EB001B" />
+                                        <path d="M45.103 19.7217C45.103 21.1934 44.689 22.6355 43.9082 23.8831C43.1274 25.1307 42.0113 26.1334 40.6876 26.7766C39.3638 27.4199 37.8858 27.6777 36.4225 27.5206C34.9591 27.3636 33.5695 26.798 32.4124 25.8884C33.346 25.1543 34.1007 24.2179 34.6196 23.1496C35.1386 22.0814 35.4082 20.9093 35.4082 19.7217C35.4082 18.5341 35.1386 17.3619 34.6196 16.2937C34.1007 15.2255 33.346 14.289 32.4124 13.5549C33.5695 12.6454 34.9591 12.0798 36.4225 11.9227C37.8858 11.7657 39.3638 12.0235 40.6876 12.6667C42.0113 13.31 43.1274 14.3127 43.9082 15.5603C44.689 16.8078 45.103 18.2499 45.103 19.7217Z" fill="#F79E1B" />
+                                        <path d="M44.3546 24.5821V24.3296H44.4564V24.2782H44.1971V24.3296H44.299V24.5821H44.3546ZM44.8581 24.5821V24.2777H44.7786L44.6872 24.4871L44.5957 24.2777H44.5162V24.5821H44.5723V24.3525L44.658 24.5505H44.7162L44.802 24.352V24.5821H44.8581Z" fill="#F79E1B" />
+                                    </g>
+                                    <defs>
+                                        <filter id="filter0_dd_2768_3170" x="-5.24521e-05" y="-0.000209332" width="64.9911" height="48.4071" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="0.448214" />
+                                            <feGaussianBlur stdDeviation="2.24107" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2768_3170" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="4.48214" />
+                                            <feGaussianBlur stdDeviation="4.48214" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="effect1_dropShadow_2768_3170" result="effect2_dropShadow_2768_3170" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_2768_3170" result="shape" />
+                                        </filter>
+                                    </defs>
+                                </svg> 
+                            </div>
+
+                            <div class="footer-credit-card">
+                                <svg width="65" height="49" viewBox="0 0 65 49" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g filter="url(#filter0_dd_2768_3172)">
+                                        <rect x="9.18835" y="4.70605" width="46.6143" height="30.0304" rx="5.37857" fill="white" />
+                                        <rect x="9.18835" y="4.70605" width="46.6143" height="30.0304" rx="5.37857" fill="url(#pattern0_2768_3172)" />
+                                        <rect x="9.0763" y="4.594" width="46.8384" height="30.2545" rx="5.49062" stroke="#D6DCE5" stroke-width="0.224107" />
+                                    </g>
+                                    <defs>
+                                        <filter id="filter0_dd_2768_3172" x="-5.24521e-05" y="-0.000209332" width="64.9911" height="48.4071" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="0.448214" />
+                                            <feGaussianBlur stdDeviation="2.24107" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2768_3172" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="4.48214" />
+                                            <feGaussianBlur stdDeviation="4.48214" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="effect1_dropShadow_2768_3172" result="effect2_dropShadow_2768_3172" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_2768_3172" result="shape" />
+                                        </filter>
+                                        <pattern id="pattern0_2768_3172" patternContentUnits="objectBoundingBox" width="1" height="1">
+                                            <use xlink:href="#image0_2768_3172" transform="matrix(0.00390625 0 0 0.00606343 0 -0.276119)" />
+                                        </pattern>
+                                        <image id="image0_2768_3172" width="256" height="256" preserveAspectRatio="none" xlink:href="data:image/png;base64,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" />
+                                    </defs>
+                                </svg> 
+                            </div>
+
+                            <div class="footer-credit-card">
+                                <svg width="65" height="49" viewBox="0 0 65 49" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <g filter="url(#filter0_dd_2768_3174)">
+                                        <rect x="9.18835" y="4.70605" width="46.6143" height="30.0304" rx="5.37857" fill="white" />
+                                        <rect x="9.0763" y="4.594" width="46.8384" height="30.2545" rx="5.49062" stroke="#D6DCE5" stroke-width="0.224107" />
+                                        <path d="M32.5095 27.6053C27.3907 29.9771 25.2204 31.0412 24.8782 31.2615C24.8207 31.3206 24.7486 31.3635 24.6693 31.3859C24.5899 31.4082 24.506 31.4092 24.4261 31.3887C24.3462 31.3683 24.2732 31.3271 24.2143 31.2694C24.1554 31.2117 24.1128 31.1394 24.0907 31.06L22.2439 24.4318C22.227 24.3686 22.2236 24.3026 22.2337 24.2379C22.2437 24.1733 22.2672 24.1115 22.3024 24.0564C22.3377 24.0013 22.384 23.9541 22.4385 23.9179C22.493 23.8816 22.5544 23.8571 22.6189 23.8459L30.6907 22.5475C31.3077 23.5376 31.7797 24.611 32.0923 25.735C32.2694 26.3493 32.4087 26.9739 32.5095 27.6053ZM45.2689 18.4131C44.5797 17.1886 42.6761 17.6568 42.0908 18.76L41.4439 19.8709C41.2875 20.1405 41.0671 20.3675 40.8023 20.5318C40.5374 20.6961 40.2361 20.7927 39.9251 20.8131L38.5751 20.9068L39.2407 20.0537C39.54 19.6685 39.744 19.2181 39.836 18.7391C39.9281 18.2601 39.9056 17.7661 39.7704 17.2975L39.6532 16.8896C39.6052 16.7298 39.517 16.585 39.3969 16.4691C39.2769 16.3532 39.1291 16.2701 38.9677 16.2277C38.8063 16.1854 38.6367 16.1852 38.4752 16.2273C38.3137 16.2693 38.1657 16.3521 38.0454 16.4678C37.9112 16.611 34.05 20.2098 34.1267 20.2412C34.037 20.3241 33.5101 21.0715 33.4235 21.1787C33.0026 21.7715 32.3845 22.1952 31.6798 22.374C32.5327 23.8693 33.1135 25.504 33.3954 27.2021C34.4158 26.7166 40.3656 24.6262 41.5376 24.1786C42.2067 23.9348 42.819 23.5572 43.3372 23.0688C43.8554 22.5804 44.2687 21.9915 44.5517 21.3381L45.3157 19.5756C45.3964 19.3909 45.4341 19.1903 45.4259 18.9889C45.4178 18.7876 45.3641 18.5907 45.2689 18.4131ZM23.697 9.4834H29.261C29.3393 9.06825 29.5601 8.69348 29.8854 8.42386C30.2106 8.15425 30.6198 8.00675 31.0423 8.00684H42.0673C42.548 8.008 43.0088 8.1995 43.3487 8.53945C43.6887 8.8794 43.8802 9.34014 43.8814 9.8209V16.7537C43.353 16.7661 42.8365 16.9134 42.3812 17.1817C41.9258 17.45 41.5466 17.8303 41.2798 18.2865L40.6376 19.3928C40.9119 18.4864 40.8822 17.5152 40.5532 16.6272C40.4588 16.3146 40.286 16.0312 40.0513 15.8041C39.8166 15.5769 39.5277 15.4136 39.2121 15.3295C38.8965 15.2454 38.5647 15.2434 38.2481 15.3237C37.9315 15.404 37.6406 15.5638 37.4032 15.7881C36.6942 16.5143 33.4075 19.4 32.9501 20.2413C32.7288 20.6073 32.4373 20.9259 32.0923 21.1788H31.0423C30.56 21.1771 30.0982 20.9841 29.7581 20.6422C29.418 20.3004 29.2274 19.8375 29.2282 19.3553V11.3585H31.3329C31.4572 11.3585 31.5764 11.3091 31.6643 11.2212C31.7523 11.1332 31.8016 11.014 31.8016 10.8897C31.8016 10.7654 31.7523 10.6462 31.6643 10.5582C31.5764 10.4703 31.4572 10.421 31.3329 10.421C31.3329 10.421 24.3701 10.4144 23.697 10.421C23.5736 10.4195 23.4558 10.3695 23.3691 10.2817C23.2823 10.1939 23.2337 10.0755 23.2337 9.95217C23.2337 9.82879 23.2824 9.7104 23.3691 9.62265C23.4558 9.5349 23.5736 9.48485 23.697 9.4834ZM40.6142 14.7709H41.4064C41.516 14.7711 41.6245 14.7496 41.7258 14.7077C41.8271 14.6658 41.9192 14.6044 41.9967 14.5269C42.0742 14.4493 42.1357 14.3573 42.1775 14.256C42.2194 14.1547 42.2409 14.0461 42.2407 13.9365V10.7912C42.2389 10.6681 42.1887 10.5506 42.101 10.4642C42.0133 10.3778 41.8951 10.3294 41.772 10.3294C41.6488 10.3294 41.5307 10.3778 41.443 10.4642C41.3552 10.5506 41.3051 10.6681 41.3032 10.7912V11.8459H40.6142C40.2282 11.8488 39.8591 12.0042 39.5872 12.2782C39.3153 12.5521 39.1627 12.9224 39.1627 13.3084C39.1627 13.6944 39.3153 14.0647 39.5872 14.3386C39.859 14.6126 40.2282 14.768 40.6142 14.7709ZM35.6735 13.4256C35.6855 15.2288 38.5679 15.2193 38.5798 13.4256V11.9491C38.5652 10.1532 35.6893 10.149 35.6735 11.949V13.4256ZM33.5548 14.7709C34.1421 14.8414 35.6123 13.9988 34.8907 13.3365C34.8406 13.301 34.7839 13.2757 34.724 13.2622C34.6641 13.2486 34.6021 13.247 34.5416 13.2575C34.4811 13.2679 34.4232 13.2902 34.3713 13.3231C34.3194 13.356 34.2745 13.3987 34.2392 13.449C34.1652 13.5641 34.0642 13.6594 33.9448 13.7264C33.8255 13.7934 33.6916 13.8301 33.5548 13.8334C33.2845 13.797 33.0387 13.6578 32.8684 13.4448C32.6982 13.2317 32.6166 12.9613 32.6407 12.6896C32.6133 12.4168 32.6935 12.1441 32.8642 11.9295C33.035 11.715 33.2828 11.5756 33.5548 11.5412C33.6914 11.5454 33.8249 11.5826 33.9441 11.6495C34.0632 11.7164 34.1645 11.8111 34.2392 11.9256C34.2746 11.9757 34.3195 12.0184 34.3714 12.0512C34.4233 12.084 34.4811 12.1063 34.5416 12.1167C34.6022 12.1272 34.6641 12.1256 34.724 12.1121C34.7839 12.0986 34.8406 12.0734 34.8907 12.0381C34.9409 12.0027 34.9836 11.9577 35.0164 11.9058C35.0492 11.8539 35.0715 11.7961 35.0819 11.7356C35.0924 11.6751 35.0908 11.6131 35.0773 11.5532C35.0638 11.4933 35.0386 11.4367 35.0032 11.3865C34.8434 11.1483 34.628 10.9526 34.3757 10.8163C34.1233 10.6799 33.8416 10.6069 33.5548 10.6037C31.1119 10.6869 31.1073 14.689 33.5548 14.7709ZM22.0589 12.7172H27.515C27.6393 12.7172 27.7586 12.6679 27.8465 12.58C27.9344 12.492 27.9838 12.3728 27.9838 12.2485C27.9838 12.1242 27.9344 12.0049 27.8465 11.917C27.7586 11.8291 27.6393 11.7797 27.515 11.7797H22.0589C21.9358 11.7816 21.8184 11.8318 21.7319 11.9195C21.6455 12.0072 21.5971 12.1254 21.5971 12.2485C21.5971 12.3716 21.6455 12.4898 21.7319 12.5775C21.8184 12.6652 21.9358 12.7154 22.0589 12.7172ZM25.256 14.7776C25.256 14.7161 25.2439 14.6551 25.2203 14.5982C25.1968 14.5414 25.1622 14.4897 25.1187 14.4461C25.0752 14.4026 25.0235 14.3681 24.9666 14.3445C24.9097 14.321 24.8488 14.3089 24.7872 14.3089H19.647C19.5227 14.3089 19.4034 14.3583 19.3155 14.4462C19.2276 14.5341 19.1782 14.6533 19.1782 14.7776C19.1782 14.902 19.2276 15.0212 19.3155 15.1091C19.4034 15.197 19.5227 15.2464 19.647 15.2464H24.7872C24.8488 15.2464 24.9097 15.2343 24.9666 15.2107C25.0235 15.1872 25.0752 15.1527 25.1187 15.1091C25.1622 15.0656 25.1967 15.0139 25.2203 14.957C25.2439 14.9002 25.256 14.8392 25.256 14.7776ZM40.6142 13.8334H41.3032V12.7834H40.6142C40.4749 12.7834 40.3414 12.8387 40.2429 12.9372C40.1445 13.0356 40.0891 13.1692 40.0891 13.3084C40.0891 13.4476 40.1445 13.5812 40.2429 13.6796C40.3414 13.7781 40.4749 13.8334 40.6142 13.8334ZM37.0188 13.8334C37.3204 13.8632 37.632 13.7783 37.6423 13.4256V11.949C37.6485 11.3941 36.6081 11.377 36.611 11.949V13.4256C36.6111 13.5337 36.6541 13.6374 36.7306 13.7139C36.807 13.7903 36.9107 13.8333 37.0188 13.8334Z" fill="url(#paint0_linear_2768_3174)" />
+                                    </g>
+                                    <defs>
+                                        <filter id="filter0_dd_2768_3174" x="-5.24521e-05" y="-0.000209332" width="64.9911" height="48.4071" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+                                            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="0.448214" />
+                                            <feGaussianBlur stdDeviation="2.24107" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_2768_3174" />
+                                            <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
+                                            <feOffset dy="4.48214" />
+                                            <feGaussianBlur stdDeviation="4.48214" />
+                                            <feColorMatrix type="matrix" values="0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0 0.717647 0 0 0 0.08 0" />
+                                            <feBlend mode="normal" in2="effect1_dropShadow_2768_3174" result="effect2_dropShadow_2768_3174" />
+                                            <feBlend mode="normal" in="SourceGraphic" in2="effect2_dropShadow_2768_3174" result="shape" />
+                                        </filter>
+                                        <linearGradient id="paint0_linear_2768_3174" x1="19.1781" y1="19.7058" x2="45.4272" y2="19.7058" gradientUnits="userSpaceOnUse">
+                                            <stop stop-color="#FFDE00" />
+                                            <stop offset="1" stop-color="#FD5900" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg> 
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        
+             
+    </footer>
+   
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

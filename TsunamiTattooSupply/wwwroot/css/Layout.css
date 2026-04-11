@@ -91,8 +91,8 @@ body {
     line-height: 100%;
     letter-spacing: 0;
     text-decoration:none;
-    transition:.5s;
     margin:0px 10px 0px 10px;
+    transition:.5s;
     cursor:pointer;
 }
 
@@ -146,4 +146,205 @@ body {
     color:#ffd600;
 }
 
+.footer-content{
+    margin:0px 100px 0px 100px;
+}
 
+.footer-subscribe {
+    background: linear-gradient(259.66deg, #FFD600 0%, #BE1E2D 100%);
+    height: 177px;
+    justify-content: space-between;
+    opacity: 1;
+    border-radius: 20px;
+    padding: 0px 64px 0px 64px;  
+    align-items: center;
+}
+
+.footer-subscribe-sentence {
+    color: #FFFFFF;
+    width: 624px;
+    height: 81px; 
+    font-family: Black Ops One;
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 45px;
+}
+
+.footer-subscribe-email {
+    width: 349px;
+    height: 105px; 
+    opacity: 1;
+    gap: 14px;
+}
+
+.footer-subscribe-email-input {
+    width: 349px;
+    height: 48px; 
+    border:none;
+    opacity: 1;
+    border-radius: 62px;
+    padding: 12px 16px 15px 50px; 
+    gap: 12px;
+}
+
+.footer-subscribe-email-input:focus{
+    outline:none;
+}
+
+.footer-subscribe-email-input-icon {
+    position:absolute;
+    width: 20px;
+    height: 15px;
+    top: 11px;
+    left: 15px; 
+    opacity: 1;
+}
+
+.footer-subscribe-button {
+    background: #000000;
+    color:#FFFFFF;
+    width: 349px;
+    height: 43px; 
+    border-radius: 62px;  
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;  
+    transition: .5s;
+}
+
+.footer-subscribe-button:hover{
+    background-color:#2b2a2a; 
+}
+
+.footer-details{
+    margin-top:50px;
+}
+
+.footer-logo {
+    width: 73px;
+    height: 55px; 
+}
+
+.footer-sentence {
+    color: #FFFFFF99;
+    width: 248px;
+    height: 44px;
+    opacity: 1;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
+    line-height: 22px;
+    letter-spacing: 0px;
+    margin-top:30px;
+}
+
+.footer-social-media{
+    margin-top:30px;
+}
+
+.footer-social-media-type {
+    width: 28px;
+    height: 28px; 
+    display:inline-block;
+    margin-right:10px;
+}
+
+.footer-menu-title {
+    color:#FFFFFF;
+    width: 57px;
+    height: 18px;
+    font-family: Inter;
+    font-weight: 600; 
+    font-size: 16px; 
+    line-height: 18px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+.footer-menu-item {
+   
+    margin-top:20px;
+}
+
+.footer-menu-item-link {
+    color: #FFFFFF99 !important; 
+    font-family: Inter;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 19px;
+    letter-spacing: 0px;
+    text-decoration: none;
+    text-decoration-style: solid;
+    text-decoration-thickness: 0%;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.footer-menu-item-link:hover{
+    color: #F57906 !important;
+}
+
+.footer-menu-item-link-active {
+    color: #F57906 !important;
+    font-family: Inter;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 19px;
+    letter-spacing: 0px;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-thickness: 0%;
+    transition: .5s;
+    cursor: default;
+}
+
+.footer-menu-item-contact {
+    color: #FFFFFF99 !important;
+    font-family: Inter;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 19px;
+    letter-spacing: 0px;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-thickness: 0%;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.footer-menu-item-contact:hover{
+    color: #F57906;
+    text-decoration:underline;
+}
+
+.footer-copy-right-credit-card{
+    margin:40px 0px 50px 0px;
+}
+
+.footer-copy-right {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px; 
+    line-height: 100%;
+    letter-spacing: 0;
+}
+
+.footer-horizontal-separator{
+    border:none;
+    height:1px;
+    background-color:#000000;
+    margin-top:50px;
+}
+
+.footer-credit-card { 
+    width: 47px;
+    height: 30px; 
+    border-radius: 5.38px;
+    border-width: 0.22px;
+    margin: 0px 5px 0px 5px;
+    box-shadow: 0px 0.45px 4.48px 0px #B7B7B714;
+    box-shadow: 0px 4.48px 8.96px 0px #B7B7B714;
+}
