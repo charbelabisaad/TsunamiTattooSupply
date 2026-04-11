@@ -184,7 +184,7 @@
         <!-- RIGHT SIDE -->
         <div class="col-12 col-md-6 d-flex flex-column">
 
-            <div class="flex-fill d-flex align-items-end">
+            <div class="flex-fill d-flex align-items-center">
                 <div class="home-about-title">
                     <p>ABOUT</p>
                     <p>TSUNAMI</p>
@@ -194,7 +194,7 @@
 
             <div class="flex-fill position-relative">
 
-                <div class="home-about-cover">
+                <div class="home-about-cover d-flex align-items-center">
 
                     <div class="home-about-text">
                         @Html.Raw(@Model.about.ShortText)
@@ -240,19 +240,15 @@
                 {
                     case 1:
 
-                        htmlRow += "<div class='row'>";
+                        htmlRow += "<div class='mb-3'>";
 
-                        htmlRow += "<div class='col-12 col-md-12'>";
+                        htmlRow += "<div class='position-relative'>";
 
-                                htmlRow += "<div class='row pb-3'>";
+                        htmlRow += "<img class='category-box-large' src='" + Url.Content(obj.WebImagePath + obj.WebImage) + "' />";
 
-                                    htmlRow += "<div class='col-12 category-box-large' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">"; 
-                                         htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
-                                    htmlRow += "</div>";
+                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
 
-                                htmlRow += "</div>";
-
-                            htmlRow += "</div>";
+                        htmlRow += "</div>";
 
                         htmlRow += "</div>";
 
@@ -261,34 +257,30 @@
 
                     case 2:
 
-                        htmlRow += "<div class='row'>";
+                        htmlRow += "<div class='d-flex mb-3' style='gap:15px; flex-wrap:nowrap;'>";
 
-                            htmlRow += "<div class='col-12 col-md-4'>";
+                        htmlRow += "<div class='position-relative' style='flex:407;'>";
 
-                                htmlRow += "<div class='row pe-3'>";
+                        htmlRow += "<img class='category-box-small' src='" + Url.Content(obj.WebImagePath + obj.WebImage) + "' />";
 
-                                    htmlRow += "<div class='col-12 category-box-small' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">";
-                                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
+                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
 
-                                    htmlRow += "</div>";
-
-                                htmlRow += "</div>";
-
-                            htmlRow += "</div>";
+                        htmlRow += "</div>";
 
                         break;
 
 
                     case 3:
 
+                        htmlRow += "<div class='position-relative' style='flex:685;'>";
 
-                        htmlRow += "<div class='col-12 col-md-8 category-box-medium' style=\"background-image:url('" + Url.Content(obj.WebImagePath + obj.WebImage) + "')\">";
-                                 
-                            htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
-  
+                        htmlRow += "<img class='category-box-medium' src='" + Url.Content(obj.WebImagePath + obj.WebImage) + "' />";
+
+                        htmlRow += "<label class='home-category-description'>" + obj.Description + "</label>";
+
                         htmlRow += "</div>";
 
-                    htmlRow += "</div>";
+                        htmlRow += "</div>"; // close flex
 
                         break;
                 }

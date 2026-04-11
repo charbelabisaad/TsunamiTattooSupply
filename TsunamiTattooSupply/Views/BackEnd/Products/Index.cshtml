@@ -1831,7 +1831,9 @@
             </tr>`;
         }
 
-       
+        $(document).on('click', '.remove-row', function () {
+            $(this).closest('tr').remove();
+        });
 
             ////////////////////////////////////////////////////////////////////////////////////////
             const productDetailsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.productDetails));

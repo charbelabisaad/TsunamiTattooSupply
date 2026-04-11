@@ -2767,6 +2767,35 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					.OrderBy(x => x)
 					.ToList();
 
+				var barcodes = rows
+				.Select(i => form[$"StockBarcode[{i}]"].ToString().Trim())
+				.Where(b => !string.IsNullOrWhiteSpace(b))
+				.ToList();
+
+				// =====================================
+				// VALIDATE BARCODES (ALLOW SAME ROW)
+				// =====================================
+				var existingStockIds = existingStocks
+				.Select(x => x.ID)
+				.ToList();
+
+							var existingBarcodes = await _dbContext.Stocks
+				.Where(x => barcodes.Contains(x.Barcode)
+							&& x.DeletedDate == null
+							&& !existingStockIds.Contains(x.ID)) // ✅ THIS WORKS
+				.Select(x => x.Barcode)
+				.Distinct()
+				.ToListAsync();
+
+				if (existingBarcodes.Any())
+				{
+					return Json(new
+					{
+						success = false,
+						message = $"Barcode already exists in database: {existingBarcodes.First()}"
+					});
+				}
+
 				foreach (var i in rows)
 				{
 					int.TryParse(form[$"StockSizeID[{i}]"], out int sizeId);
@@ -2777,6 +2806,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					decimal.TryParse(form[$"StockQty[{i}]"], out decimal qty);
 
 					string barcode = form[$"StockBarcode[{i}]"];
+
 					bool useInStock = form[$"StockInUse[{i}]"] == "1";
 
 					var key = (typeId, detailId, sizeId, colorId);

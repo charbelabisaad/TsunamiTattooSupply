@@ -31,8 +31,10 @@ body {
 }
 
 .header-bar-content {
+    max-width:1240px;
     height:100%;
     color: #FFFFFF;
+    margin: 0px auto 0px auto;
 }
 
 .header-bar-content-offer {
@@ -66,8 +68,9 @@ body {
 }
 
 .header { 
+    max-width:1240px;
     height: 55px;
-    margin: 24px 0px 24px 0px;
+    margin: 24px auto 24px auto;
  
     opacity: 1;
     gap: 40px;
@@ -147,11 +150,13 @@ body {
 }
 
 .footer-content{
-    margin:0px 100px 0px 100px;
+
 }
 
 .footer-subscribe {
     background: linear-gradient(259.66deg, #FFD600 0%, #BE1E2D 100%);
+    max-width:1240px;
+    margin:0px auto 0px auto;
     height: 177px;
     justify-content: space-between;
     opacity: 1;
@@ -218,7 +223,8 @@ body {
 }
 
 .footer-details{
-    margin-top:50px;
+    max-width:1240px;
+    margin:50px auto 0px auto;
 }
 
 .footer-logo {
@@ -320,14 +326,16 @@ body {
 }
 
 .footer-copy-right-credit-card{
-    margin:40px 0px 50px 0px;
+    max-width:1240px;
+    margin:40px auto 50px auto;
 }
 
 .footer-copy-right {
+    color: #FFFFFF99;
     font-family: Inter;
     font-weight: 400;
     font-style: normal;
-    font-size: 14px; 
+    font-size: 14px;
     line-height: 100%;
     letter-spacing: 0;
 }

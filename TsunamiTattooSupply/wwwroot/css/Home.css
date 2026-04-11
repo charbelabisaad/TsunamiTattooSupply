@@ -7,6 +7,7 @@
 }
 
 .brand-track {
+    max-width:1240px;
     display: flex;
     white-space: nowrap; 
     width: max-content; /* 🔥 VERY IMPORTANT */
@@ -28,7 +29,8 @@
 }
 
 .home-new-arrival {
-    margin: 70px 100px 0px 100px;
+    max-width:1240px;
+    margin: 70px auto 0px auto;
 }
 
 .home-new-arrival-title {
@@ -53,6 +55,8 @@
 
 .home-new-arrival-product-cover {
     background: #ffffff;
+    max-width:300px;
+    max-height:300px;
     width: 100%;
     aspect-ratio: 1 / 1; /* ✅ makes it PERFECT square */
     border-radius: 20px;
@@ -128,7 +132,8 @@
 }
    
 .home-banner-advertising { 
-    margin:0px 100px 0px 100px;
+    max-width:1240px;
+    margin:0px auto 0px auto;
 }
 
 .home-banner-advertising-image{
@@ -137,13 +142,15 @@
 }
 
 .home-about{
-    margin:0px 100px 0px 100px;
+    max-width:1240px;
+    margin:0px auto 0px auto;
 }
  
 /* IMAGE */
 .home-about-image {
-    width: 100%;
-    height: 100%;
+    max-width:570px;
+    max-height:570px;
+    width: 100%;  
     object-fit: cover;
     border-radius: 40px;
     display: block;
@@ -151,7 +158,7 @@
 
 /* TITLE */
 .home-about-title {
-    color: #FFF;
+    color: #FFFFFF;
     font-family: 'Black Ops One', cursive;
     font-size: 48px;
     line-height: 1.1;
@@ -163,43 +170,27 @@
 .home-about-row {
     align-items: stretch;
 }
-
-/* IMAGE */
-.home-about-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 40px;
-}
-
-/* TITLE */
-.home-about-title {
-    color: #FFF;
-    font-family: 'Black Ops One';
-    font-size: 48px;
-    line-height: 1.1;
-    margin-left: 40px;
-}
-
+  
 /* COVER */
 .home-about-cover {
-    background: linear-gradient( 102deg, rgba(255,255,255,0.10) 10%, rgba(255,255,255,0.03) 84% );
+    position: absolute; 
+    background: linear-gradient(102deg, rgba(255,255,255,0.10) 10%, rgba(255,255,255,0.03) 84%);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 30px;
-    width: 117%;
-    height: 105%; /* proportional */
-    display:flex;
-    align-items:center;
-    transform: translate(-16%,13%); 
-    position: relative;
-    z-index: 5;
+    top:-49%;
+    left:-25%;
+    right:0;
+    bottom:-49%;
+    max-width: 760px;
+    max-height: 296px;
+    border-radius: 32px;
 }
 
 /* TEXT */
 .home-about-text {
     color: #FFF;
     max-width:468px;
+    font-weight:normal;
     font-family: Inter;
     font-size: 20px;
     line-height: 1.6;
@@ -210,7 +201,8 @@
     background: linear-gradient(102.53deg, rgba(255, 255, 255, 0.1) 10.88%, rgba(255, 255, 255, 0.03) 83.94%);
     backdrop-filter: blur(8px);
     border: 1px solid #FFFFFF42;
-    margin: 0px 100px 0px 100px;
+    max-width: 1240px;
+    margin: 0px auto 0px auto;
     opacity: 1;
     border-radius: 45px;
     border-width: 1px;
@@ -230,38 +222,50 @@
     opacity: 1;
 }
 
+ 
+
 .home-category-content {
     margin-top: 30px;
 }
 
-.category-box-large,
-.category-box-small,
-.category-box-medium {
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-/* HEIGHT CONTROL */
 .category-box-large {
-    aspect-ratio: 3 / 1;
+    width: 100%;
+    max-width: 1112px;
+    aspect-ratio: 1112 / 289;
+    border-radius: 20px;
+    object-fit: cover;
 }
 
 .category-box-small {
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    max-width: 407px;
+    aspect-ratio: 407 / 289;
+    border-radius: 20px;
+    object-fit: cover;
 }
 
 .category-box-medium {
-    aspect-ratio: 4 / 1;
+    width: 100%;
+    max-width: 685px;
+    aspect-ratio: 685 / 289;
+    border-radius: 20px;
+    object-fit: cover;
+}
+
+.home-category-description {
+    position: absolute;
+    top: 25px;
+    left: 50px;
+    color: white;
+    font-weight: 700;
+    font-size: 36px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }
  
 .home-category-description {
-   
-    margin-top: 30px;
-    margin-left: 40px;
+    position:absolute;
+    top:25px;
+    left:50px;
     color: white;
     font-family: Inter;
     font-weight: 700;
