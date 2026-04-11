@@ -61,6 +61,7 @@ body {
     text-decoration-thickness: 0%;
     text-decoration:none;
     transition:.5s;
+    cursor:pointer;
 }
 
 .header-bar-content-signup:hover{

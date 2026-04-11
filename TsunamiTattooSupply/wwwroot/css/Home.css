@@ -1,4 +1,63 @@
-﻿.home-brand-bar {
+﻿
+.home-banner-info{ 
+    position:absolute;
+    left:100px;
+    bottom:100px; 
+}
+
+.home-banner-arrow{
+    width:50px; height:50px; top:45%
+}
+
+.home-banner-shop-now-button {
+    margin-left:20px;
+    background: linear-gradient(259.66deg, #FFD600 0%, #BE1E2D 100%);
+    border:none;
+    color: #FFFFFF;
+    width: 210px;
+    height: 52px;
+    border-radius: 62px;  
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;  
+    z-index:1000;
+}
+
+.home-banner-shop-now-button:hover {
+    background: linear-gradient(259.66deg, #BE1E2D 0%, #FFD600 100%);
+}
+
+.home-banner-numbers { 
+    color:#FFFFFF;
+    margin-top:50px;
+    border-radius:5px;
+}
+
+.home-banner-numbers-counter-label {
+    padding:0px 20px 0px 20px;
+}
+
+.home-banner-numbers-counter {
+    font-family: Black Ops One;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 40px; 
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+}
+
+.home-banner-numbers-label{
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px; 
+    line-height: 22px;
+    letter-spacing: 0;
+}
+
+.home-brand-bar {
     background-color: #F57906;
     height: 122px;
     overflow: hidden;
@@ -221,35 +280,54 @@
     vertical-align: middle; 
     opacity: 1;
 }
-
  
-
 .home-category-content {
     margin-top: 30px;
+}
+
+.category-box-cover{
+    position:relative;
+    overflow:hidden;
+    border-radius: 20px;
 }
 
 .category-box-large {
     width: 100%;
     max-width: 1112px;
     aspect-ratio: 1112 / 289;
-    border-radius: 20px;
     object-fit: cover;
+    transition:.5s;
+    cursor:pointer;
+}
+
+.category-box-large:hover{
+    transform:scale(1.1);
 }
 
 .category-box-small {
     width: 100%;
     max-width: 407px;
     aspect-ratio: 407 / 289;
-    border-radius: 20px;
     object-fit: cover;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.category-box-small:hover{ 
+    transform:scale(1.1); 
 }
 
 .category-box-medium {
     width: 100%;
     max-width: 685px;
     aspect-ratio: 685 / 289;
-    border-radius: 20px;
     object-fit: cover;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.category-box-medium:hover{
+    transform:scale(1.1);
 }
 
 .home-category-description {
