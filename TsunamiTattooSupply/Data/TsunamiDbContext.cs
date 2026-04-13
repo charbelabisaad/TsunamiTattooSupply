@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using TsunamiTattooSupply.Models;
 namespace TsunamiTattooSupply.Data
 {
-	public class TsunamiDbContext :DbContext
+	public class TsunamiDbContext : DbContext
 	{
 		public TsunamiDbContext(DbContextOptions<TsunamiDbContext> options) : base(options) { }
 

@@ -5,17 +5,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TsunamiTattooSupply.Models
 {
 
-	[Table("ClientsOTP")]
-	[Index(nameof(ClientID))]
+	[Table("ClientsOTP")] 
 	public class ClientOTP
 	{
 		[Key]
 		[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 		public int ID { get; set; }
-
-		[Required]
-		public int ClientID { get; set; }
-
+		 
 		[Required]
 		public string Email { get; set; }
 
