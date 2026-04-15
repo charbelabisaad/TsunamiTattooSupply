@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260415205058_CreateStatisticsTable")]
+    partial class CreateStatisticsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -2483,11 +2486,6 @@ namespace TsunamiTattooSupply.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
 
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");

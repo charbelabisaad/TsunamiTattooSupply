@@ -3,7 +3,7 @@
 *@
 @{
     Layout = "_LayoutAdmin";
-    ViewData["Title"] = "Items";
+    ViewData["Title"] = "Clients";
 }
 
 <div class="content-wrapper">
@@ -21,7 +21,299 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+
+            <div class="card">
+
+                <div class="card-header">
+
+                    <div class="row">
+                        <div class="col-6 d-flex align-items-center"><h3 class="card-title">Clients List</h3></div>
+                        <div class="col-6 d-flex align-items-center justify-content-end">
+                        
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="card-body p-0">
+
+                    <div class="row p-2">
+                        <div class="col-12">
+                            <div class="form-group d-flex align-items-center justify-content-end">
+
+                                <div class="custom-control custom-switch mr-3">
+                                    <input id="calculatedClients" type="checkbox" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="calculatedClients">
+                                        Calculated
+                                    </label>
+                                </div>
+
+                                <input type="text" class="form-control mr-2" id="txtClientsNumber" placeholder="Enter value" style="max-width:250px;" readonly>
+
+                                <button id="btnSaveClientsNumber" type="button" class="btn btn-primary" disabled>
+                                    <span class="spinner-border spinner-border-sm d-none" id="btnSaveClientsNumberSpinner" role="status" aria-hidden="true"></span>
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row p-2">
+
+                        <div class="col-sm-12">
+                            <table id="tableClients" class="table table-striped w-100 ">
+                                <thead>
+                                    <tr style="vertical-align:middle">
+                                        <th style="width:300px">Name</th>
+                                        <th style="width:70px">Email</th>
+                                        <th style="width:70%">Phone Number</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
         </div>
     </section>
 
 </div>
+
+@section Scripts {
+
+<script>
+
+    $(document).ready(function(){
+    
+        var table = $('#tableClients').DataTable({
+            destory:true,
+            processing: true,
+            responsive: true,
+            ajax: {
+                   url: '@Url.Action("ListGetClients", "Clients")',
+                type: 'GET',
+                dataSrc: function (json) {
+                    if (json && json.success === false) {
+                        toastr.error(json.message || "Failed to load clients.");
+                        return [];
+                    }
+
+                    if (!json || !json.data) {
+                        toastr.error("Unexpected response from server.");
+                        return [];
+                    }
+
+                    return json.data;
+                }
+            },
+            dom: '<"row mb-2"<"col-md-6"f><"col-md-6 text-right"B>>t' +
+                '<"row mt-2 mb-2 d-flex align-items-center"' +
+                '<"col-md-6 d-flex align-items-center" l>' +
+                '<"col-md-4 d-flex align-items-center justify-content-end" i>' +
+                '<"col-md-2 d-flex justify-content-end" p>' +
+                '>',
+
+
+            language: {
+                search: "",
+                searchPlaceholder: "Search clients..."
+            },
+
+            buttons: [
+                {
+                    extend: 'copy',
+                    className: 'btn btn-secondary btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-copy"></i> Copy'
+                },
+                {
+                    extend: 'excel',
+                    className: 'btn btn-success btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-excel"></i> Excel'
+                },
+                {
+                    extend: 'pdfHtml5',
+                    className: 'btn btn-danger btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-file-pdf"></i> PDF',
+                    customize: function (doc) {
+
+                        var tableBody = doc.content[1].table.body;
+                        var colCount = tableBody[0].length;
+
+                        var colWidths = [];
+                        for (var i = 0; i < colCount; i++) {
+                            colWidths.push('*');
+                        }
+
+                        doc.content[1].table.widths = colWidths;
+
+                        doc.styles.tableBodyEven.alignment = 'center';
+                        doc.styles.tableBodyOdd.alignment = 'center';
+                        doc.styles.tableHeader.alignment = 'center';
+                        doc.defaultStyle.fontSize = 8;
+                        doc.pageMargins = [10, 10, 10, 10];
+                    }
+                },
+                {
+                    extend: 'print',
+                    className: 'btn btn-dark btn-sm',
+                    exportOptions: { columns: ':visible:not(.no-export)' },
+                    text: '<i class="fas fa-print"></i> Print'
+                },
+                {
+                    text: '<i class="fas fa-sync"></i> Refresh',
+                    className: 'btn btn-primary btn-sm',
+                    action: function () {
+                        table.ajax.reload();
+                    }
+                }
+            ],
+
+            columns: [
+                {
+                    data: 'name',
+                    className: 'align-middle'
+                },
+                {
+                    data: 'email',
+                    className: 'align-middle',
+                    render: function (data) {
+                        return data
+                            ? `<a href="mailto:${data}">${data}</a>`
+                            : `<span class="text-muted">No Email</span>`;
+                    }
+                },
+                {
+                    data: 'phoneNumber',
+                    className: 'align-middle',
+                    render: function (data) {
+                        return data
+                            ? data
+                            : `<span class="text-muted">No Phone Number</span>`;
+                    }
+                }
+            ],
+            order: [[0, 'asc']]
+        });
+
+      
+
+        $('#calculatedClients').on('change', function () {
+
+              GetClientsNumber();
+
+        });
+
+          $('#calculatedClients').on('change', function () {
+            GetClientsNumber();
+        });
+
+        LoadStatistics();
+
+        function LoadStatistics() {
+
+            $.ajax({
+                    url: '@Url.Action("GetStatistics", "Clients")',
+                type: 'GET',
+                success: function (response) {
+
+                    $('#calculatedClients').prop('checked', response.isCalculated);
+
+                    GetClientsNumber();
+                },
+                error: function () {
+                    toastr.error('Failed to load statistics');
+                }
+            });
+
+        }
+
+        function GetClientsNumber() {
+
+            if ($('#calculatedClients').is(':checked')) {
+
+                table.ajax.reload(function () {
+
+                    let clientsCount = table.rows().count();
+
+                    $('#txtClientsNumber')
+                        .val(clientsCount)
+                        .prop('readonly', true);
+
+                    $('#btnSaveClientsNumber').prop('disabled', true);
+
+                }, false);
+
+            } else {
+
+                $.ajax({
+                    url: '@Url.Action("GetStatistics", "Clients")',
+                    type: 'GET',
+                    success: function (response) {
+
+                        $('#txtClientsNumber')
+                            .val(response.number)
+                            .prop('readonly', false);
+
+                        $('#btnSaveClientsNumber').prop('disabled', false);
+
+                    },
+                    error: function () {
+                        toastr.error('Failed to load clients number');
+                    }
+                });
+
+            }
+        }
+
+        $('#btnSaveClientsNumber').on('click', function () {
+
+            let number = $('#txtClientsNumber').val();
+            let isCalculated = $('#SaveStatistics').is(':checked');
+             
+            $('#btnSaveClientsNumber').prop('disabled', true);
+            $('#btnSaveClientsNumberSpinner').removeClass('d-none');
+
+            $.ajax({
+                url: '@Url.Action("SaveStatistics", "Clients")',
+                type: 'POST',
+                data: {
+                    number: number,
+                    isCalculated: isCalculated
+                },
+                success: function (response) {
+
+                    if (response.success) {
+                         
+                        toastr.success(response.message);
+                         
+
+                    } else {
+
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error('Failed to save clients number');
+                },
+                complete: function () {
+
+                    $('#btnSaveClientsNumber').prop('disabled', false);
+                    $('#btnSaveClientsNumberSpinner').addClass('d-none');
+                }
+            });
+
+        });
+
+    });
+
+</script>
+
+}

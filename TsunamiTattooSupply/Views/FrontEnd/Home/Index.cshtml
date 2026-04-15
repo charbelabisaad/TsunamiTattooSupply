@@ -47,7 +47,7 @@
             </div>
 
             SlideCount++; 
-            
+
             <div class="home-banner-info">
 
                 <div>
@@ -76,7 +76,15 @@
 
                         <div class="col-auto home-banner-numbers-counter-label">
 
-                            <div class="home-banner-numbers-counter">30,000+</div>
+                            <div class="home-banner-numbers-counter">
+
+                                @{
+                                    int ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
+                                }
+
+                                @ClientsNumber.ToString("N0")+
+                                
+                            </div>
                             <div class="home-banner-numbers-label">Happy Customers</div>
 
                         </div>
@@ -375,5 +383,27 @@
     }
 
     animate();
+
+     let counter = $('#clientsCounter');
+        let target = parseInt(counter.data('count'));
+        let duration = 1500;
+        let stepTime = 20;
+        let increment = Math.ceil(target / (duration / stepTime));
+
+        let current = 0;
+
+        let timer = setInterval(function () {
+
+            current += increment;
+
+            if (current >= target) {
+                current = target;
+                clearInterval(timer);
+            }
+
+            counter.text(current.toLocaleString());
+
+        }, stepTime);
+
 
 </script>

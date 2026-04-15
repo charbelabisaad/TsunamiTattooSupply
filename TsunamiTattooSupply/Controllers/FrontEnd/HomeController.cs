@@ -36,6 +36,8 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			var vm = new PageViewModel
 			{
 				banners = GetBanners(),
+				clientsstatistics = GetStatitics("CLNT"),
+				clients = GetClients(),
 				groups = GetGroups("BRD"),
 				newarrivals = GetNewArrivals(),
 				banneradvertising = GetBannerAdvertising("WEB", "HMAD"),
@@ -75,6 +77,31 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 
 			}
 			 
+		}
+
+		public Statistic GetStatitics(string Code)
+		{
+			return _dbContext.Statistics
+				.Where(s => s.Code == Code.ToString())
+				.Select(s => new Statistic
+				{
+					ID = s.ID,
+					Name = s.Name,
+					IsCalculated = s.IsCalculated,
+					Number = s.Number,
+				}).FirstOrDefault();
+		}
+
+		public List<ClientsDto> GetClients()
+		{
+			return _dbContext.Clients 
+				.Select(c => new ClientsDto
+				{
+					ID = c.ID,
+					Name = c.Name,
+					Email = c.Email,
+					PhoneNumber = (c.Country != null ? c.Country.Code + " " : "") + c.PhoneNumber
+				}).ToList();
 		}
 
 		public List<GroupDto> GetGroups(string typeID)

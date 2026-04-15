@@ -24,7 +24,6 @@ namespace TsunamiTattooSupply.Models
 		 
 		[Column(TypeName ="text")]
 		public string? About { get; set; }
-
 		  
 		[Column(TypeName = "text")]
 		public string? Services { get; set; }
