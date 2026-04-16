@@ -101,13 +101,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				var statistic = _dbContext.Statistics
 					.FirstOrDefault(x => x.Code == "CLNT");
 
+
 				if (statistic == null)
 				{
 					statistic = new Statistic
 					{
 						Code = "CLNT",
 						Name = "Client",
-						Number = number,
+						Number = 0,
 						IsCalculated = isCalculated,
 						StatusID = "A",
 						CreatedUserID = userId,
@@ -118,11 +119,14 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				}
 				else
 				{
-					statistic.Number = number;
+				
 					statistic.IsCalculated = isCalculated;
 					statistic.EditUserID = userId;
 					statistic.EditDate = DateTime.UtcNow;
 				}
+
+				if(!isCalculated)
+					statistic.Number = number;
 
 				_dbContext.SaveChanges();
 

@@ -396,6 +396,85 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			}
 		}
 
+		public IActionResult GetStatistics()
+		{
+			try
+			{
+				var statistics = _dbContext.Statistics
+					.FirstOrDefault(c => c.Code == "BRND");
+
+				return Json(new
+				{
+					success = true,
+					isCalculated = statistics == null ? false : statistics.IsCalculated,
+					number = statistics == null ? 0 : statistics.Number
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					isCalculated = false,
+					number = 0,
+					message = ex.Message
+				});
+			}
+		}
+
+		[HttpPost]
+		public IActionResult SaveStatistics(int number, bool isCalculated)
+		{
+			try
+			{
+				int userId = Convert.ToInt32(User.FindFirstValue(ClaimTypes.NameIdentifier));
+
+				var statistic = _dbContext.Statistics
+					.FirstOrDefault(x => x.Code == "BRND");
+
+				if (statistic == null)
+				{
+					statistic = new Statistic
+					{
+						Code = "BRND",
+						Name = "Brand",
+						Number = 0,
+						IsCalculated = isCalculated,
+						StatusID = "A",
+						CreatedUserID = userId,
+						CreationDate = DateTime.UtcNow
+					};
+
+					_dbContext.Statistics.Add(statistic);
+				}
+				else
+				{
+					statistic.IsCalculated = isCalculated;
+					statistic.EditUserID = userId;
+					statistic.EditDate = DateTime.UtcNow;
+				}
+
+				if(!isCalculated)
+					statistic.Number = number;
+
+
+				_dbContext.SaveChanges();
+
+				return Json(new
+				{
+					success = true,
+					message = "Brands number saved successfully"
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
+			}
+		}
 	}
 
 }

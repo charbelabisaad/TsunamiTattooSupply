@@ -311,8 +311,28 @@
                     if (response.group) {
                         $("#saveGroupModal").modal("hide");
 
-                        if (table) table.ajax.reload(null, false);
+                        if (table){
 
+                            if ($('#calculatedBrands').is(':checked')) {
+
+                                table.ajax.reload(function () {
+
+                                    let brandsCount = table.rows(function (idx, data, node) {
+                                        return data.statusID === 'A';
+                                    }).count();
+
+                                    $('#txtBrandsNumber')
+                                        .val(brandsCount)
+                                        .prop('readonly', true);
+
+                                    //$('#btnSaveBrandsNumber').prop('disabled', true);
+
+                                }, false);
+
+                            }
+                        
+                        }  
+                
                         toastr.success(response.message);
 
                         // Reset image area

@@ -62,15 +62,28 @@
                 success: function (response) {
 
                     if (response.success) {
+
                         toastr.success(response.message);
 
-                        // hide modal
                         $("#deleteGroupModal").modal("hide");
 
-                        // reload table
-                        if ($.fn.DataTable.isDataTable("#tableGroups")) {
-                            $("#tableGroups").DataTable().ajax.reload(null, false);
-                        }
+                        let dt = $('#tableGroups').DataTable();
+
+                        dt.ajax.reload(function () {
+
+                            if ($('#calculatedBrands').is(':checked')) {
+
+                                let brandsCount = dt.rows(function (idx, data, node) {
+                                    return data.statusID === 'A';
+                                }).count();
+
+                                $('#txtBrandsNumber')
+                                    .val(brandsCount)
+                                    .prop('readonly', true);
+                            }
+
+                        }, false);
+
                     }
                     else {
                         toastr.error(response.message || "Failed to delete group.");

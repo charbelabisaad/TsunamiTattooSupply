@@ -48,9 +48,9 @@
                                     </label>
                                 </div>
 
-                                <input type="text" class="form-control mr-2" id="txtClientsNumber" placeholder="Enter value" style="max-width:250px;" readonly>
+                                <input id="txtClientsNumber" type="number" min="0" step="1" class="form-control form-control-sm mr-2" style="max-width:150px" placeholder="Clients Number" readonly onkeydown="return event.key !=='.' && event.key !== '-'">
 
-                                <button id="btnSaveClientsNumber" type="button" class="btn btn-primary" disabled>
+                                <button id="btnSaveClientsNumber" type="button" class="btn btn-sm btn-primary" disabled>
                                     <span class="spinner-border spinner-border-sm d-none" id="btnSaveClientsNumberSpinner" role="status" aria-hidden="true"></span>
                                     <i class="fas fa-save"></i> Save
                                 </button>
@@ -202,16 +202,14 @@
             ],
             order: [[0, 'asc']]
         });
-
-      
-
+ 
         $('#calculatedClients').on('change', function () {
 
               GetClientsNumber();
 
         });
 
-          $('#calculatedClients').on('change', function () {
+        $('#calculatedClients').on('change', function () {
             GetClientsNumber();
         });
 
@@ -247,7 +245,7 @@
                         .val(clientsCount)
                         .prop('readonly', true);
 
-                    $('#btnSaveClientsNumber').prop('disabled', true);
+                    //$('#btnSaveClientsNumber').prop('disabled', true);
 
                 }, false);
 
@@ -276,7 +274,7 @@
         $('#btnSaveClientsNumber').on('click', function () {
 
             let number = $('#txtClientsNumber').val();
-            let isCalculated = $('#SaveStatistics').is(':checked');
+            let isCalculated = $('#calculatedClients').is(':checked');
              
             $('#btnSaveClientsNumber').prop('disabled', true);
             $('#btnSaveClientsNumberSpinner').removeClass('d-none');

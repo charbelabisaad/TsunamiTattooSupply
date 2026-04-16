@@ -38,6 +38,10 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				banners = GetBanners(),
 				clientsstatistics = GetStatitics("CLNT"),
 				clients = GetClients(),
+				brandsstatistics = GetStatitics("BRND"),
+				brands = GetGroups("BRD"),
+				productsstatistics = GetStatitics("PRDCT"),
+				products = GetProducts(),
 				groups = GetGroups("BRD"),
 				newarrivals = GetNewArrivals(),
 				banneradvertising = GetBannerAdvertising("WEB", "HMAD"),
@@ -101,6 +105,17 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 					Name = c.Name,
 					Email = c.Email,
 					PhoneNumber = (c.Country != null ? c.Country.Code + " " : "") + c.PhoneNumber
+				}).ToList();
+		}
+
+		public List<ProductDto> GetProducts()
+		{
+			return _dbContext.Products.Where(p => p.DeletedDate == null
+											   && p.StatusID == "A")
+				.Select(c => new ProductDto
+				{
+					ID = c.ID,
+					Name = c.Name, 
 				}).ToList();
 		}
 

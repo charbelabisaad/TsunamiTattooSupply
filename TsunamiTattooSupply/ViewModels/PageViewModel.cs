@@ -18,7 +18,10 @@ namespace TsunamiTattooSupply.ViewModels
 		public ServiceDto service { get; set; }
 		public AboutDto about { get; set; }
 		public Statistic clientsstatistics { get; set; }
+		public Statistic brandsstatistics { get; set; }
+		public Statistic productsstatistics { get; set; }
 		public List<ClientsDto> clients { get; set; }
+		public List<GroupDto> brands { get; set; }
 
 	}
 }

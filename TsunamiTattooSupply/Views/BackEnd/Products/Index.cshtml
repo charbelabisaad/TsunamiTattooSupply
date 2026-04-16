@@ -116,26 +116,54 @@
                 </div>
 
                 <div class="card-body p-0">
-                    <div class="col-sm-12 mt-3">
-                        <table id="tableProducts" class="table table-striped w-100">
-                            <thead>
-                                <tr style="vertical-align:middle">
-                                    <th style="width:70px">Image</th>
-                                    <th>Code</th>
-                                    <th>Name</th>
-                                    <th class="done">Rank</th>
-                                    <th style="width:70px">Unit</th>
-                                    <th style="width:50px">VAT</th>
-                                    <th style="width:50px">Feature</th>
-                                    <th style="width:90px">New Arrival</th>
-                                    <th style="width:90px">Expiry Date</th>
-                                    <th style="width:50px">Warranty</th>
-                                    <th style="width:50px">Months</th>
-                                    <th style="width:50px">Status</th>
-                                    <th class="no-export" style="width:50px">Actions</th>
-                                </tr>
-                            </thead>
-                        </table>
+
+
+                    <div class="row p-2">
+                        <div class="col-12">
+                            <div class="form-group d-flex align-items-center justify-content-end">
+
+                                <div class="custom-control custom-switch mr-3">
+                                    <input id="calculatedProducts" type="checkbox" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="calculatedProducts">
+                                        Calculated
+                                    </label>
+                                </div>
+
+                                <input id="txtProductsNumber" type="number" min="0" step="1" class="form-control form-control-sm mr-2" style="max-width:150px" placeholder="Products Number" readonly onkeydown="return event.key !=='.' && event.key !== '-'">
+
+                                <button id="btnSaveProductsNumber" type="button" class="btn btn-sm btn-primary" disabled>
+                                    <span class="spinner-border spinner-border-sm d-none" id="btnSaveProductsNumberSpinner" role="status" aria-hidden="true"></span>
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-sm-12">
+                            <table id="tableProducts" class="table table-striped w-100">
+                                <thead>
+                                    <tr style="vertical-align:middle">
+                                        <th style="width:70px">Image</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th class="done">Rank</th>
+                                        <th style="width:70px">Unit</th>
+                                        <th style="width:50px">VAT</th>
+                                        <th style="width:50px">Feature</th>
+                                        <th style="width:90px">New Arrival</th>
+                                        <th style="width:90px">Expiry Date</th>
+                                        <th style="width:50px">Warranty</th>
+                                        <th style="width:50px">Months</th>
+                                        <th style="width:50px">Status</th>
+                                        <th class="no-export" style="width:50px">Actions</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+
                     </div>
                 </div>
 
@@ -2208,9 +2236,7 @@
 
             // ✅ SAFE UNLOCK POINT
             isBuildingUI = false;
-
-          
-
+ 
         });
 
         /////////////////////////////////////////////////////////////////////////////////////////////
@@ -2397,6 +2423,115 @@
             });
         }
       
+        $('#calculatedProducts').on('change', function () {
+
+              GetProductsNumber();
+
+        });
+
+        $('#calculatedProducts').on('change', function () {
+            GetProductsNumber();
+        });
+
+        LoadStatistics();
+
+        function LoadStatistics() {
+
+            $.ajax({
+                    url: '@Url.Action("GetStatistics", "Products")',
+                type: 'GET',
+                success: function (response) {
+
+                    $('#calculatedProducts').prop('checked', response.isCalculated);
+
+                    GetProductsNumber();
+                },
+                error: function () {
+                    toastr.error('Failed to load statistics');
+                }
+            });
+
+        }
+
+        function GetProductsNumber() {
+
+            if ($('#calculatedProducts').is(':checked')) {
+
+                table.ajax.reload(function () {
+
+                    let productsCount = table.rows(function (idx, data, node) {
+                        return data.statusID === 'A';
+                    }).count();
+
+                    $('#txtProductsNumber')
+                        .val(productsCount)
+                        .prop('readonly', true);
+
+                    //$('#btnSaveProductsNumber').prop('disabled', true);
+
+                }, false);
+
+            } else {
+
+                $.ajax({
+                    url: '@Url.Action("GetStatistics", "Products")',
+                    type: 'GET',
+                    success: function (response) {
+
+                        $('#txtProductsNumber')
+                            .val(response.number)
+                            .prop('readonly', false);
+
+                        $('#btnSaveProductsNumber').prop('disabled', false);
+
+                    },
+                    error: function () {
+                        toastr.error('Failed to load products number');
+                    }
+                });
+
+            }
+        }
+
+        $('#btnSaveProductsNumber').on('click', function () {
+
+            let number = $('#txtProductsNumber').val();
+            let isCalculated = $('#calculatedProducts').is(':checked');
+             
+            $('#btnSaveProductsNumber').prop('disabled', true);
+            $('#btnSaveProductsNumberSpinner').removeClass('d-none');
+
+            $.ajax({
+                url: '@Url.Action("SaveStatistics", "Products")',
+                type: 'POST',
+                data: {
+                    number: number,
+                    isCalculated: isCalculated
+                },
+                success: function (response) {
+
+                    if (response.success) {
+                         
+                        toastr.success(response.message);
+                         
+
+                    } else {
+
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error('Failed to save products number');
+                },
+                complete: function () {
+
+                    $('#btnSaveProductsNumber').prop('disabled', false);
+                    $('#btnSaveProductsNumberSpinner').addClass('d-none');
+                }
+            });
+
+        });
+
     });
      
     </script>

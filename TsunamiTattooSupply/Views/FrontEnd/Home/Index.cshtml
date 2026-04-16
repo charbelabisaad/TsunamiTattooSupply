@@ -56,42 +56,79 @@
                     </button>
                 </div>
 
+                @if (Model.brandsstatistics != null || Model.productsstatistics != null || Model.clientsstatistics != null){
+
                 <div class="home-banner-numbers p-3">
 
                     <div class="row">
+                        @if (Model.brandsstatistics != null) {
+                            <div class="col-auto home-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF1A">
 
-                        <div class="col-auto home-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF1A">
+                                <div class="home-banner-numbers-counter">
 
-                            <div class="home-banner-numbers-counter">200+</div>
-                            <div class="home-banner-numbers-label">International Brands</div>
+                                    @{
+                                        int BrandsNumber = 0;
 
-                        </div>
+                                   
+                                            BrandsNumber = Model.brandsstatistics.IsCalculated == true ? @Model.brands.Count : @Model.brandsstatistics.Number;
+                                        }
+                                        
+                               
 
-                        <div class="col-auto home-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF1A">
+                                    @BrandsNumber.ToString("N0")+
 
-                            <div class="home-banner-numbers-counter">2,000+</div>
-                            <div class="home-banner-numbers-label">High-Quality Products</div>
+                                </div>
+                                <div class="home-banner-numbers-label">International Brands</div>
 
-                        </div>
-
-                        <div class="col-auto home-banner-numbers-counter-label">
-
-                            <div class="home-banner-numbers-counter">
-
-                                @{
-                                    int ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
-                                }
-
-                                @ClientsNumber.ToString("N0")+
-                                
                             </div>
-                            <div class="home-banner-numbers-label">Happy Customers</div>
+                        }
+                        @if(Model.productsstatistics != null){
+                            <div class="col-auto home-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF1A">
 
-                        </div>
+                                <div class="home-banner-numbers-counter">
 
+                                    @{
+                                        int ProductsNumber = 0;
+
+                                    
+                                            ProductsNumber = Model.productsstatistics.IsCalculated == true ? @Model.products.Count : @Model.productsstatistics.Number;
+                                        }
+                                        
+                               
+
+                                    @ProductsNumber.ToString("N0")+
+
+                                </div>
+                                <div class="home-banner-numbers-label">High-Quality Products</div>
+
+                            </div>
+                        }
+                        @if(Model.clientsstatistics != null){
+                            <div class="col-auto home-banner-numbers-counter-label">
+
+                                <div class="home-banner-numbers-counter">
+
+                                    @{
+                                        int ClientsNumber = 0;
+
+                                    
+                                            ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
+                                        } 
+                                       
+                                
+
+                                    @ClientsNumber.ToString("N0")+
+                                
+                                </div>
+                                <div class="home-banner-numbers-label">Happy Customers</div>
+
+                            </div>
+                        }
                     </div>
 
                 </div>
+
+                }
 
             </div>
              

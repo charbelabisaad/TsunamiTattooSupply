@@ -113,18 +113,47 @@
 
                 <div class="card-body p-0">
 
-					<div id="groupTypeFilter" class="m-3 d-flex align-items-center justify-content-start">
+                   
 
-					 
-						<label class="mr-2">
-							<input type="radio" name="groupType" value="BRD" checked> Brands
-						</label>
+					
+                    <div class="row p-2">
+                        <div class="col-6">
+                            <div id="groupTypeFilter" class="m-3 d-flex align-items-center justify-content-start">
 
-						<label class="mr-2">
-							<input type="radio" name="groupType" value="CLC"> Collections
-						</label>
-					</div>
-                    <div class="col-sm-12 mt-3">
+                                <div>
+                                    <label class="mr-2">
+                                        <input type="radio" name="groupType" value="BRD" checked> Brands
+                                    </label>
+
+                                    <label class="mr-2">
+                                        <input type="radio" name="groupType" value="CLC"> Collections
+                                    </label>
+                                </div>
+
+                             </div>
+                        </div>
+                        <div class="col-6">
+
+                            <div id="brandsTotal" class="form-group d-flex align-items-center justify-content-end">
+
+                                <div class="custom-control custom-switch mr-3">
+                                    <input id="calculatedBrands" type="checkbox" class="custom-control-input" checked>
+                                    <label class="custom-control-label" for="calculatedBrands">
+                                        Calculated
+                                    </label>
+                                </div>
+
+                                <input id="txtBrandsNumber" type="number" min="0" step="1" class="form-control form-control-sm mr-2" style="max-width:150px" placeholder="Brands Number" readonly onkeydown="return event.key !=='.' && event.key !== '-'">
+
+                                <button id="btnSaveBrandsNumber" type="button" class="btn btn-sm btn-primary" disabled>
+                                    <span class="spinner-border spinner-border-sm d-none" id="btnSaveBrandsNumberSpinner" role="status" aria-hidden="true"></span>
+                                    <i class="fas fa-save"></i> Save
+                                </button>
+
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="col-sm-12">
                          
                         <table id="tableGroups" class="table table-striped w-100">
                             <thead>
@@ -141,6 +170,7 @@
 
                     </div>
 
+                   
                 </div>
 
             </div>
@@ -370,6 +400,7 @@
 
         $('input[name="groupType"]').on('change', function () {
             table.ajax.reload();
+                  ToggleBrandsTotal();
         });
 
         $(document).on("click", ".btnEditGroup", function () {
@@ -521,7 +552,128 @@
             placeholder: 'Write details here...'
 
         })
+
+            function ToggleBrandsTotal() {
+
+            let selectedType = $('input[name="groupType"]:checked').val();
+
+            if (selectedType === "BRD") {
+                $('#brandsTotal').css('visibility', 'visible');
+                LoadStatistics();
+            } else {
+                $('#brandsTotal').css('visibility', 'hidden');
+            }
+        }
          
+        // Initial load
+        ToggleBrandsTotal();
+
+        $('#calculatedBrands').on('change', function () {
+
+              GetBrandsNumber();
+
+        });
+
+        $('#calculatedBrands').on('change', function () {
+            GetBrandsNumber();
+        });
+         
+        function LoadStatistics() {
+
+            $.ajax({
+                    url: '@Url.Action("GetStatistics", "Groups")',
+                type: 'GET',
+                success: function (response) {
+
+                    $('#calculatedBrands').prop('checked', response.isCalculated);
+
+                    GetBrandsNumber();
+                },
+                error: function () {
+                    toastr.error('Failed to load statistics');
+                }
+            });
+
+        }
+
+        function GetBrandsNumber() {
+
+            if ($('#calculatedBrands').is(':checked')) {
+
+                table.ajax.reload(function () {
+
+                    let brandsCount = table.rows(function (idx, data, node) {
+                        return data.statusID === 'A';
+                    }).count();
+
+                    $('#txtBrandsNumber')
+                        .val(brandsCount)
+                        .prop('readonly', true);
+
+                    //$('#btnSaveBrandsNumber').prop('disabled', true);
+
+                }, false);
+
+            } else {
+
+                $.ajax({
+                    url: '@Url.Action("GetStatistics", "Groups")',
+                    type: 'GET',
+                    success: function (response) {
+
+                        $('#txtBrandsNumber')
+                            .val(response.number)
+                            .prop('readonly', false);
+
+                        $('#btnSaveBrandsNumber').prop('disabled', false);
+
+                    },
+                    error: function () {
+                        toastr.error('Failed to load brands number');
+                    }
+                });
+
+            }
+        }
+
+        $('#btnSaveBrandsNumber').on('click', function () {
+
+            let number = $('#txtBrandsNumber').val();
+            let isCalculated = $('#calculatedBrands').is(':checked');
+             
+            $('#btnSaveBrandsNumber').prop('disabled', true);
+            $('#btnSaveBrandsNumberSpinner').removeClass('d-none');
+
+            $.ajax({
+                url: '@Url.Action("SaveStatistics", "Groups")',
+                type: 'POST',
+                data: {
+                    number: number,
+                    isCalculated: isCalculated
+                },
+                success: function (response) {
+
+                    if (response.success) {
+                         
+                        toastr.success(response.message);
+                         
+
+                    } else {
+
+                        toastr.error(response.message);
+                    }
+                },
+                error: function () {
+                    toastr.error('Failed to save brands number');
+                },
+                complete: function () {
+
+                    $('#btnSaveBrandsNumber').prop('disabled', false);
+                    $('#btnSaveBrandsNumberSpinner').addClass('d-none');
+                }
+            });
+
+        });
     });
  
     </script>
