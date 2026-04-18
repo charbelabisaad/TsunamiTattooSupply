@@ -2902,19 +2902,24 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 			return Json(new { exists = false });
 		}
-		
+
 		public IActionResult GetStatistics()
 		{
 			try
 			{
+				var stockCount = _dbContext.Stocks
+					.Where(s => s.DeletedDate == null)  
+					.Count();
+
 				var statistics = _dbContext.Statistics
 					.FirstOrDefault(c => c.Code == "PRDCT");
 
 				return Json(new
 				{
 					success = true,
-					isCalculated = statistics == null ? false : statistics.IsCalculated,
-					number = statistics == null ? 0 : statistics.Number
+					isCalculated = statistics?.IsCalculated ?? false,
+					count = stockCount,
+					number = statistics?.Number ?? 0
 				});
 			}
 			catch (Exception ex)
@@ -2923,6 +2928,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					success = false,
 					isCalculated = false,
+					count = 0,
 					number = 0,
 					message = ex.Message
 				});

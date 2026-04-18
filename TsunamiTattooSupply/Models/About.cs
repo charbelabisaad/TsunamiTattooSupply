@@ -11,15 +11,22 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		[Column(TypeName = "text")]
-		public string ShortText { get; set; }
+		public string ShortText1 { get; set; }
+
+		[Required]
+		[Column(TypeName = "text")]
+		public string ShortText2 { get; set; }
 
 		[Required]
 		[Column(TypeName = "text")]
 		public string LongText {  get; set; }
 
 		[Column(TypeName = "text")]
-		public string? Image {  get; set; }
+		public string? Image1 {  get; set; }
 
+		[Column(TypeName = "text")]
+		public string? Image2 { get; set; }
+		 
 		[Required]
 		public int CreatedUserID { get; set; }
 

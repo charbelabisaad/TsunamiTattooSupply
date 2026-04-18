@@ -2438,13 +2438,19 @@
         function LoadStatistics() {
 
             $.ajax({
-                    url: '@Url.Action("GetStatistics", "Products")',
+                url: '@Url.Action("GetStatistics", "Products")',
                 type: 'GET',
                 success: function (response) {
 
                     $('#calculatedProducts').prop('checked', response.isCalculated);
 
-                    GetProductsNumber();
+                    let productNumber = response.isCalculated
+                        ? response.count
+                        : response.number;
+
+                    $('#txtProductsNumber')
+                        .val(productNumber)
+                        .prop('readonly', response.isCalculated);
                 },
                 error: function () {
                     toastr.error('Failed to load statistics');
@@ -2455,42 +2461,29 @@
 
         function GetProductsNumber() {
 
-            if ($('#calculatedProducts').is(':checked')) {
+            $.ajax({
+                url: '@Url.Action("GetStatistics", "Products")',
+                type: 'GET',
+                success: function (response) {
 
-                table.ajax.reload(function () {
+                    let isCalculated = $('#calculatedProducts').is(':checked');
 
-                    let productsCount = table.rows(function (idx, data, node) {
-                        return data.statusID === 'A';
-                    }).count();
+                    let productNumber = isCalculated
+                        ? response.count
+                        : response.number;
 
                     $('#txtProductsNumber')
-                        .val(productsCount)
-                        .prop('readonly', true);
+                        .val(productNumber)
+                        .prop('readonly', isCalculated);
 
-                    //$('#btnSaveProductsNumber').prop('disabled', true);
+                    $('#btnSaveProductsNumber').prop('disabled', false);
 
-                }, false);
+                },
+                error: function () {
+                    toastr.error('Failed to load products number');
+                }
+            });
 
-            } else {
-
-                $.ajax({
-                    url: '@Url.Action("GetStatistics", "Products")',
-                    type: 'GET',
-                    success: function (response) {
-
-                        $('#txtProductsNumber')
-                            .val(response.number)
-                            .prop('readonly', false);
-
-                        $('#btnSaveProductsNumber').prop('disabled', false);
-
-                    },
-                    error: function () {
-                        toastr.error('Failed to load products number');
-                    }
-                });
-
-            }
         }
 
         $('#btnSaveProductsNumber').on('click', function () {

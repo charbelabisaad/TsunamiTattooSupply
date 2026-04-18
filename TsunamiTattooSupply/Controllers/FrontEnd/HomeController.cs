@@ -42,11 +42,12 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				brands = GetGroups("BRD"),
 				productsstatistics = GetStatitics("PRDCT"),
 				products = GetProducts(),
-				groups = GetGroups("BRD"),
+				groups = GetGroupsFront("BRD"),
 				newarrivals = GetNewArrivals(),
 				banneradvertising = GetBannerAdvertising("WEB", "HMAD"),
 				about = GetAbout("ABT"),
-				categories = GetGategories()
+				categories = GetGategories(),
+				stocks = GetStock()
 
 			};
 
@@ -96,6 +97,55 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				}).FirstOrDefault();
 		}
 
+		public List<StockDto> GetStock()
+		{
+			try
+			{
+				var stocksQuery =
+					from s in _dbContext.Stocks.AsNoTracking()
+
+					join p in _dbContext.Products.AsNoTracking()
+						on s.ProductID equals p.ID
+
+					join ps in _dbContext.ProductsSizes.AsNoTracking()
+						on new
+						{
+							s.ProductID,
+							s.SizeID,
+							s.ProductTypeID,
+							s.ProductDetailID
+						}
+						equals new
+						{
+							ps.ProductID,
+							ps.SizeID,
+							ps.ProductTypeID,
+							ps.ProductDetailID
+						}
+
+					where s.UseInStock == true
+						&& s.DeletedDate == null
+						&& p.DeletedDate == null
+						&& ps.DeletedDate == null
+						&& ps.StatusID == "A"
+
+					select new StockDto
+					{
+						ID = s.ID,
+						ProductID = s.ProductID,
+						ProductName = p.Name,
+						 
+					};
+
+				return stocksQuery.ToList();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Fetch Stock! [ERROR]");
+				return new List<StockDto>();
+			}
+		}
+
 		public List<ClientsDto> GetClients()
 		{
 			return _dbContext.Clients 
@@ -118,15 +168,56 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 					Name = c.Name, 
 				}).ToList();
 		}
+		public List<GroupDto> GetGroups(string TypeID)
+		{
+			List<GroupDto> brands = new List<GroupDto>();
 
-		public List<GroupDto> GetGroups(string typeID)
+			try
+			{
+
+				brands = _dbContext.Groups
+				.Where(g => g.TypeID == TypeID && g.DeletedDate == null && g.StatusID == "A")
+				.Include(g => g.Status)
+				.OrderBy(g => g.Rank)
+				.Select(g => new GroupDto
+				{
+					ID = g.ID,
+					Name = g.Name,
+					Summary = g.Summary,
+					ShowHome = g.ShowHome,
+					Rank = g.Rank,
+					Image = g.Image,
+					ImagePath = Global.GroupImagePath,
+					TypeID = g.GroupType.ID,
+					TypeDescription = g.GroupType.Description,
+					StatusID = g.Status.ID,
+					Status = g.Status.Description,
+					StatusColor = g.Status.Color
+
+				}
+				).ToList();
+			}
+			catch (Exception ex)
+			{
+
+				brands = new List<GroupDto>();
+				_logger.LogError(ex, "Fetch Groups [ERROR]");
+
+			}
+
+			return brands;
+
+		}
+
+		public List<GroupDto> GetGroupsFront(string typeID)
 		{
 			try
 			{
 				return _dbContext.Groups
-					.Where(g => g.TypeID == typeID &&
-								g.StatusID == "A" && 
-								g.DeletedDate == null)
+					.Where(g => g.TypeID == typeID
+							 && g.StatusID == "A"
+							 && g.ShowHome == true
+							 && g.DeletedDate == null)
 					.OrderBy(g => g.Rank)
 					.Select(g => new GroupDto
 					{
@@ -241,9 +332,11 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			.Select(a => new AboutDto
 			{
 				ID = a.ID,
-				ShortText = a.ShortText,
+				ShortText1 = a.ShortText1,
+				ShortText2 = a.ShortText2,
 				LongText = a.LongText,
-				Image = a.Image
+				Image1 = a.Image2,
+				Image2 = a.Image2
 
 			}).FirstOrDefault();
 
