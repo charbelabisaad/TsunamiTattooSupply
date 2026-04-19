@@ -183,7 +183,7 @@
     padding:15px 0px 15px 0px;
 }
 
-.home-horizontal-separator {
+.horizontal-separator {
     border: none; /* remove default border */
     height: 1px; /* line thickness */
     background-color: #FFFFFF; /* line color */
@@ -207,11 +207,10 @@
  
 /* IMAGE */
 .home-about-image {
-    max-width:570px;
-    max-height:570px;
-    width: 100%;  
+    width:570px;
+    height:570px; 
     object-fit: cover;
-    border-radius: 40px;
+    border-radius: 43px;
     display: block;
 }
 

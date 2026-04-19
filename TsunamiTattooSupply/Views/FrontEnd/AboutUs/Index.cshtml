@@ -1,0 +1,191 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "About";
+}
+
+
+<link rel="stylesheet" href="~/css/About.css" asp-append-version="true" />
+
+<div class="about-banner">
+
+    @if(Model.bannerabout != null){
+        <img src="@Url.Content(Model.bannerabout.ImagePath + Model.bannerabout.Image)" class="about-banner-image" />
+    }
+
+    <div class="d-inline-block about-banner-title">About Us</div>
+
+</div>
+
+<div class="about">
+
+    <div class="row align-items-stretch about-row">
+
+        <!-- IMAGE -->
+        <div class="col-12 col-md-6">
+            <img src="@Url.Content(Model.about.ImagePath + Model.about.Image1)"
+            class="about-image1"
+            alt="About Tsunami Tattoo Supply first image" />
+        </div>
+
+        <!-- RIGHT SIDE -->
+        <div class="col-12 col-md-6 d-flex flex-column">
+
+            <div class="flex-fill d-flex align-items-center">
+                <div class="about-title">
+                    <p>ABOUT</p>
+                    <p>TSUNAMI</p>
+                    <p>TATTOO SUPPLY</p>
+                </div>
+            </div>
+
+            <div class="flex-fill position-relative">
+
+                <div class="about-cover-shorttext1 d-flex align-items-center">
+
+                    <div class="about-shorttext1">
+                        @Html.Raw(@Model.about.ShortText1)
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="row" style="margin-top:130px">
+
+        <div class="col-12 col-md-6">
+
+            <div class="flex-fill position-relative">
+
+                <div class="row">
+
+                    <div class="col-12">
+
+                        <div class="about-cover-shorttext2">
+
+                            <div class="about-shorttext2">
+                                @Html.Raw(@Model.about.ShortText2)
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-12">
+
+                        <div class="about-cover-longtext d-flex align-items-end">
+
+                            <div class="about-longtext">
+                                @Html.Raw(@Model.about.LongText)
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-6 d-flex align-items-stretch justify-content-end">
+
+            <img src="@Url.Content(Model.about.ImagePath + Model.about.Image2)"
+                 class="about-image2"
+                 alt="About Tsunami Tattoo Supply second image" />
+
+        </div>
+
+    </div>
+     
+    <div class="about-horizontal-separator">&nbsp;</div>
+
+    <div>
+
+        <div class="row about-banner-numbers">
+
+            @if (Model.brandsstatistics != null)
+            {
+                <div class="col-4 about-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF">
+
+                    <div class="about-banner-numbers-counter">
+
+                        @{
+                            int BrandsNumber = 0;
+
+
+                            BrandsNumber = Model.brandsstatistics.IsCalculated == true ? @Model.brands.Count : @Model.brandsstatistics.Number;
+                        }
+
+
+
+                        @BrandsNumber.ToString("N0")+
+
+                    </div>
+                    <div class="about-banner-numbers-label">International Brands</div>
+
+                </div>
+            }
+            @if (Model.stocksstatistics != null)
+            {
+                <div class="col-4 about-banner-numbers-counter-label text-center" style="border-right: 1px solid #FFFFFF">
+
+                    <div class="d-inline-block text-start">
+
+                        <div class="about-banner-numbers-counter">
+
+                            @{
+                                int ProductsNumber = 0;
+
+
+                                ProductsNumber = Model.stocksstatistics.IsCalculated == true ? @Model.stocks.Count : @Model.stocksstatistics.Number;
+                            }
+
+                            @ProductsNumber.ToString("N0")+
+
+                        </div>
+                        <div class="about-banner-numbers-label text-left">High-Quality Products</div>
+
+                    </div>
+
+                </div>
+            }
+            @if (Model.clientsstatistics != null)
+            {
+
+                <div class="col-4 about-banner-numbers-counter-label text-end">
+
+                    <div class="d-inline-block text-start">
+
+                        <div class="about-banner-numbers-counter">
+
+                            @{
+                                int ClientsNumber = 0;
+
+
+                                ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
+                            }
+
+                            @ClientsNumber.ToString("N0")+
+
+                        </div>
+
+                        <div class="about-banner-numbers-label">Happy Customers</div>
+
+                    </div>
+
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

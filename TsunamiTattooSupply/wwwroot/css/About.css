@@ -1,0 +1,156 @@
+﻿body {
+}
+ 
+.about-banner{
+    position:relative;
+}
+
+.about-banner-image{
+    width:100%;
+}
+
+.about-banner-title {
+    position: absolute;
+    color: #ffffff;
+    top: 45%;
+    left: 100px;
+    font-family: Black Ops One;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 64px; 
+    line-height: 64px;
+    letter-spacing: 0;
+    vertical-align: middle;
+    opacity: 1;
+}
+
+.about {
+    max-width: 1240px;
+    margin: 60px auto 0px auto;
+}
+
+.about-image1 {
+    width: 570px;
+    height: 570px; 
+    object-fit: cover;
+    border-radius: 43px;
+    display: block;
+}
+
+.about-title {
+    color: #FFFFFF;
+    font-family: 'Black Ops One', cursive;
+    font-size: 48px;
+    line-height: 1.1;
+    margin-left: 40px;
+    margin-bottom: 50px;
+}
+
+.about-row {
+    align-items: stretch;
+}
+
+.about-cover-shorttext1 {
+    position: absolute;
+    background: linear-gradient(102deg, rgba(255,255,255,0.10) 10%, rgba(255,255,255,0.03) 84%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2);
+    top: -49%;
+    left: -25%;
+    right: 0;
+    bottom: -49%;
+    max-width: 760px;
+    max-height: 296px;
+    border-radius: 32px;
+}
+
+.about-shorttext1  {
+    color: #FFF;
+    max-width: 468px;
+    font-weight: normal;
+    font-family: Inter;
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 0px auto 0px auto;
+}
+
+.about-cover-shorttext2 {
+    background: linear-gradient(102deg, rgba(255,255,255,0.10) 10%, rgba(255,255,255,0.03) 84%);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.2); 
+    margin: 0px 30px 0px 30px;
+    padding: 55px 0px 55px 0px;
+    border-radius: 32px;
+    margin-bottom: 30px;
+}
+
+.about-shorttext2 {
+    color: #FFF; 
+    font-weight: normal;
+    font-family: Inter;
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 0px 50px 0px 50px;
+}
+
+.about-cover-longtext { 
+    margin:0px 0px 0px 30px;
+}
+
+.about-longtext {
+    color: #FFF; 
+    font-weight: normal;
+    font-family: Inter;
+    font-size: 20px;
+    line-height: 1.6;
+    margin: 0px 34px 0px 50px;
+}
+
+.about-image2 {
+    width: 100%;
+    max-width: 614px;
+    height: 100%;
+    min-height: 769px;
+    object-fit: cover;
+    border-radius: 45px;
+    display: block;
+    margin-left: auto;
+}
+
+
+.about-horizontal-separator {
+    border: none; /* remove default border */
+    height: 1px; /* line thickness */
+    background-color: #FFFFFF; /* line color */
+    margin: 60px 0px 75px 0px
+}
+
+
+.about-banner-numbers {
+    color: #F57906;
+    border-radius: 5px;
+}
+
+.about-banner-numbers-counter-label {
+    padding: 0px 20px 0px 20px;
+}
+
+.about-banner-numbers-counter {
+    font-family: Black Ops One;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 64px;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+}
+
+.about-banner-numbers-label {
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 22px;
+    letter-spacing: 0;
+}
+ 

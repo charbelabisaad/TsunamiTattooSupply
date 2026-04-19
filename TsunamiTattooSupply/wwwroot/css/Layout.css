@@ -1,14 +1,12 @@
 ﻿@font-face {
     font-family: 'Inter';
-    src: url('/Fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
-    font-weight: 100 900; /* variable font range */
+    src: url('/Fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); 
     font-style: normal;
 }
 
 @font-face {
     font-family: 'Inter';
-    src: url('/Fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
-    font-weight: 100 900;
+    src: url('/Fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype'); 
     font-style: italic;
 }
 
@@ -86,7 +84,7 @@ body {
     margin:0px 0px 0px 0px;
 }
 
-.header-menu-item {
+.header-menu-item-link {
     color: #ffffff !important;
     font-family: Inter;
     font-weight: 400;
@@ -100,8 +98,22 @@ body {
     cursor:pointer;
 }
 
-.header-menu-item:hover {
+.header-menu-item-link:hover {
     color: #F57906 !important;
+}
+
+.header-menu-item-link-active {
+    color: #F57906 !important;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-decoration: underline;
+    margin: 0px 10px 0px 10px;
+    transition: .5s;
+    cursor: pointer;
 }
 
 .header-search {

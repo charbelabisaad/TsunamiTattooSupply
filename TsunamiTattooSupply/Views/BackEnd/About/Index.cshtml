@@ -315,65 +315,88 @@
             </text>
         }
 
-                // save / load about
-              $('#btnSaveAbout').on('click', function () {
+                     let clearImage1 = false;
+        let clearImage2 = false;
 
-                    const aboutId = $('#AboutID').val();
-                    const aboutShortDetails1 = $('#aboutShortDetails1').summernote('code');
-                    const aboutShortDetails2 = $('#aboutShortDetails2').summernote('code');
-                    const aboutLongDetails = $('#aboutLongDetails').summernote('code');
+        // save / load about
+        $('#btnSaveAbout').on('click', function () {
 
-                    // Remove HTML tags and spaces to validate Summernote content
-                    const shortText1Value = $('<div>').html(aboutShortDetails1).text().trim();
-                    const shortText2Value = $('<div>').html(aboutShortDetails2).text().trim();
-                    const longTextValue = $('<div>').html(aboutLongDetails).text().trim();
+            const aboutId = $('#AboutID').val();
+            const aboutShortDetails1 = $('#aboutShortDetails1').summernote('code');
+            const aboutShortDetails2 = $('#aboutShortDetails2').summernote('code');
+            const aboutLongDetails = $('#aboutLongDetails').summernote('code');
 
-                    if (shortText1Value === '') {
-                        toastr.error('Short Details 1 is required');
-                        return;
+            // Remove HTML tags and spaces to validate Summernote content
+            const shortText1Value = $('<div>').html(aboutShortDetails1).text().trim();
+            const shortText2Value = $('<div>').html(aboutShortDetails2).text().trim();
+            const longTextValue = $('<div>').html(aboutLongDetails).text().trim();
+
+            if (shortText1Value === '') {
+                toastr.error('Short Details 1 is required');
+                return;
+            }
+
+            if (shortText2Value === '') {
+                toastr.error('Short Details 2 is required');
+                return;
+            }
+
+            if (longTextValue === '') {
+                toastr.error('Long Details is required');
+                return;
+            }
+
+            const formData = new FormData();
+
+            formData.append('ID', aboutId);
+            formData.append('ShortText1', aboutShortDetails1);
+            formData.append('ShortText2', aboutShortDetails2);
+            formData.append('LongText', aboutLongDetails);
+
+            formData.append('ClearImage1', clearImage1);
+            formData.append('ClearImage2', clearImage2);
+
+            if ($('#aboutImage1')[0].files.length > 0) {
+                formData.append('Image1', $('#aboutImage1')[0].files[0]);
+            }
+
+            if ($('#aboutImage2')[0].files.length > 0) {
+                formData.append('Image2', $('#aboutImage2')[0].files[0]);
+            }
+
+            // UI loading state
+            $('#btnSaveAboutSpinner').removeClass('d-none');
+            $('#btnSaveAbout').prop('disabled', true);
+
+            $.ajax({
+                url: '@Url.Action("SaveAbout", "About")',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (res) {
+
+                    if (res.success === true) {
+
+                        toastr.success(res.message);
+
+                        clearImage1 = false;
+                        clearImage2 = false;
+
+                    } else {
+                        toastr.error(res.message || 'Error saving about!');
                     }
-
-                    if (shortText2Value === '') {
-                        toastr.error('Short Details 2 is required');
-                        return;
-                    }
-
-                    if (longTextValue === '') {
-                        toastr.error('Long Details is required');
-                        return;
-                    }
-
-                    // UI loading state
-                    $('#btnSaveAboutSpinner').removeClass('d-none');
-                    $('#btnSaveAbout').prop('disabled', true);
-
-                    $.ajax({
-                        url: '@Url.Action("SaveAbout", "About")',
-                        type: 'POST',
-                        data: {
-                            ID: aboutId,
-                            ShortText1: aboutShortDetails1,
-                            ShortText2: aboutShortDetails2,
-                            LongText: aboutLongDetails
-                        },
-                        success: function (res) {
-
-                            if (res.success === true) {
-                                toastr.success(res.message);
-                            } else {
-                                toastr.error(res.message || 'Error saving about!');
-                            }
-                        },
-                        error: function (xhr) {
-                            toastr.error('Server error while saving about');
-                            console.log(xhr.responseText);
-                        },
-                        complete: function () {
-                            $('#btnSaveAboutSpinner').addClass('d-none');
-                            $('#btnSaveAbout').prop('disabled', false);
-                        }
-                    });
-                });
+                },
+                error: function (xhr) {
+                    toastr.error('Server error while saving about');
+                    console.log(xhr.responseText);
+                },
+                complete: function () {
+                    $('#btnSaveAboutSpinner').addClass('d-none');
+                    $('#btnSaveAbout').prop('disabled', false);
+                }
+            });
+        });
 
                         //////////////////////////////////////////////////////
             // IMAGE 1

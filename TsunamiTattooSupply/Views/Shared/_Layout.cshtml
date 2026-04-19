@@ -71,14 +71,14 @@
                                 
                         <div class="col-3" style="width:85px">
                             <div class="d-inline-block">
-                                <a asp-area="" asp-controller="Home" asp-action="Index" class=" @((currentController == "Home" && currentAction == "Index") ? "active" : string.Empty)"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="header-logo" alt="Tsunami Tattoo Supply Logo" /></a>
+                                <a asp-area="" asp-controller="Home" asp-action="Index" class="@((currentController == "Home" && currentAction == "Index") ? "active" : string.Empty)"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="header-logo" alt="Tsunami Tattoo Supply Logo" /></a>
                             </div> 
                         </div>
                         <div class="col-9 d-flex justify-content-center">
                             <div >
-                                <a class="header-menu-item" style="margin-left:0px">Shop <i class="fas fa-chevron-down"></i></a>
-                                <a class="header-menu-item">About Us</a>
-                                <a class="header-menu-item" style="margin-right:0px">Contact Us</a>
+                                <a class="header-menu-item-link" style="margin-left:0px">Shop <i class="fas fa-chevron-down"></i></a>
+                                <a class=" @((currentController == "AboutUs" && currentAction == "Index") ? "header-menu-item-link-active active" : "header-menu-item-link")" asp-controller="AboutUs" asp-action="Index">About Us</a>
+                                <a class="header-menu-item-link" style="margin-right:0px">Contact Us</a>
                             </div>
                         </div>
                              
@@ -243,8 +243,8 @@
 
                                 <div class="footer-menu-title">MENU</div>
 
-                                <div class="footer-menu-item"><a class="footer-menu-item-link-active">Home</a></div>
-                                <div class="footer-menu-item"><a class="footer-menu-item-link">About</a></div>
+                            <div class="footer-menu-item"><a asp-controller="Home" asp-action="Index" class="@((currentController == "Home" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">Home</a></div>
+                            <div class="footer-menu-item"><a asp-controller="AboutUs" asp-action="Index" class="@((currentController == "AboutUs" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">About</a></div>
                                 <div class="footer-menu-item"><a class="footer-menu-item-link">Services</a></div>
                                 <div class="footer-menu-item"><a class="footer-menu-item-link">Contact Us</a></div>
 

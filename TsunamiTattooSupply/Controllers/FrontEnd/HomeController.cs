@@ -32,6 +32,7 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 			Global.ProductSmallImagePath = fp.GetFilePath("PRDSMLIMG").Description;
 			Global.BannerPageWebImagePath = fp.GetFilePath("BNNRPGEWBIMG").Description;
 			Global.CategoryWebImagePath = fp.GetFilePath("CTGWBIMG").Description;
+			Global.AboutUsImagePath = fp.GetFilePath("ABTUSIMG").Description;
 
 			var vm = new PageViewModel
 			{
@@ -40,14 +41,13 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				clients = GetClients(),
 				brandsstatistics = GetStatitics("BRND"),
 				brands = GetGroups("BRD"),
-				productsstatistics = GetStatitics("PRDCT"),
-				products = GetProducts(),
+				stocksstatistics = GetStatitics("PRDCT"),
+				stocks = GetStock(), 
 				groups = GetGroupsFront("BRD"),
 				newarrivals = GetNewArrivals(),
 				banneradvertising = GetBannerAdvertising("WEB", "HMAD"),
 				about = GetAbout("ABT"),
 				categories = GetGategories(),
-				stocks = GetStock()
 
 			};
 
@@ -97,6 +97,59 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				}).FirstOrDefault();
 		}
 
+		public List<ClientsDto> GetClients()
+		{
+			return _dbContext.Clients 
+				.Select(c => new ClientsDto
+				{
+					ID = c.ID,
+					Name = c.Name,
+					Email = c.Email,
+					PhoneNumber = (c.Country != null ? c.Country.Code + " " : "") + c.PhoneNumber
+				}).ToList();
+		}
+		 
+		public List<GroupDto> GetGroups(string TypeID)
+		{
+			List<GroupDto> brands = new List<GroupDto>();
+
+			try
+			{
+
+				brands = _dbContext.Groups
+				.Where(g => g.TypeID == TypeID && g.DeletedDate == null && g.StatusID == "A")
+				.Include(g => g.Status)
+				.OrderBy(g => g.Rank)
+				.Select(g => new GroupDto
+				{
+					ID = g.ID,
+					Name = g.Name,
+					Summary = g.Summary,
+					ShowHome = g.ShowHome,
+					Rank = g.Rank,
+					Image = g.Image,
+					ImagePath = Global.GroupImagePath,
+					TypeID = g.GroupType.ID,
+					TypeDescription = g.GroupType.Description,
+					StatusID = g.Status.ID,
+					Status = g.Status.Description,
+					StatusColor = g.Status.Color
+
+				}
+				).ToList();
+			}
+			catch (Exception ex)
+			{
+
+				brands = new List<GroupDto>();
+				_logger.LogError(ex, "Fetch Groups [ERROR]");
+
+			}
+
+			return brands;
+
+		}
+
 		public List<StockDto> GetStock()
 		{
 			try
@@ -144,69 +197,6 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				_logger.LogError(ex, "Fetch Stock! [ERROR]");
 				return new List<StockDto>();
 			}
-		}
-
-		public List<ClientsDto> GetClients()
-		{
-			return _dbContext.Clients 
-				.Select(c => new ClientsDto
-				{
-					ID = c.ID,
-					Name = c.Name,
-					Email = c.Email,
-					PhoneNumber = (c.Country != null ? c.Country.Code + " " : "") + c.PhoneNumber
-				}).ToList();
-		}
-
-		public List<ProductDto> GetProducts()
-		{
-			return _dbContext.Products.Where(p => p.DeletedDate == null
-											   && p.StatusID == "A")
-				.Select(c => new ProductDto
-				{
-					ID = c.ID,
-					Name = c.Name, 
-				}).ToList();
-		}
-		public List<GroupDto> GetGroups(string TypeID)
-		{
-			List<GroupDto> brands = new List<GroupDto>();
-
-			try
-			{
-
-				brands = _dbContext.Groups
-				.Where(g => g.TypeID == TypeID && g.DeletedDate == null && g.StatusID == "A")
-				.Include(g => g.Status)
-				.OrderBy(g => g.Rank)
-				.Select(g => new GroupDto
-				{
-					ID = g.ID,
-					Name = g.Name,
-					Summary = g.Summary,
-					ShowHome = g.ShowHome,
-					Rank = g.Rank,
-					Image = g.Image,
-					ImagePath = Global.GroupImagePath,
-					TypeID = g.GroupType.ID,
-					TypeDescription = g.GroupType.Description,
-					StatusID = g.Status.ID,
-					Status = g.Status.Description,
-					StatusColor = g.Status.Color
-
-				}
-				).ToList();
-			}
-			catch (Exception ex)
-			{
-
-				brands = new List<GroupDto>();
-				_logger.LogError(ex, "Fetch Groups [ERROR]");
-
-			}
-
-			return brands;
-
 		}
 
 		public List<GroupDto> GetGroupsFront(string typeID)
@@ -335,7 +325,8 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				ShortText1 = a.ShortText1,
 				ShortText2 = a.ShortText2,
 				LongText = a.LongText,
-				Image1 = a.Image2,
+				ImagePath = Global.AboutUsImagePath,
+				Image1 = a.Image1,
 				Image2 = a.Image2
 
 			}).FirstOrDefault();

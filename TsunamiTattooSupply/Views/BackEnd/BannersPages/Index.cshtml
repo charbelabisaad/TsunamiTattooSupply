@@ -519,11 +519,11 @@
 
                         img.onload = function () {
 
-                            const requiredWidth  = 1080;
-                            //const requiredHeight = 563;
+                            const requiredWidth  = 1920;
+                            const requiredHeight = 768;
 
                             if (img.width !== requiredWidth) {
-                                toastr.error("Image dimensions must be exactly 1080 x 563 pixels");
+                                toastr.error("Image dimensions must be exactly 1920 x 768 pixels");
                                 resetBannerWebImage("false");
                                 return;
                             }

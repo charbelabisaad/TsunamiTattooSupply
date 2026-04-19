@@ -82,7 +82,7 @@
 
                             </div>
                         }
-                        @if(Model.productsstatistics != null){
+                        @if(Model.stocksstatistics != null){
                             <div class="col-auto home-banner-numbers-counter-label" style="border-right: 1px solid #FFFFFF1A">
 
                                 <div class="home-banner-numbers-counter">
@@ -91,7 +91,7 @@
                                         int ProductsNumber = 0;
 
                                     
-                                            ProductsNumber = Model.productsstatistics.IsCalculated == true ? @Model.stocks.Count : @Model.productsstatistics.Number;
+                                            ProductsNumber = Model.stocksstatistics.IsCalculated == true ? @Model.stocks.Count : @Model.stocksstatistics.Number;
                                         }
                                          
                                     @ProductsNumber.ToString("N0")+
@@ -263,7 +263,7 @@
 
         <!-- IMAGE -->
         <div class="col-12 col-md-6">
-            <img src="~/Images/GENERAL/About.png"
+            <img src="@Url.Content(Model.about.ImagePath + Model.about.Image1)"
             class="home-about-image"
             alt="About Tsunami Tattoo Supply" />
         </div>
@@ -299,7 +299,7 @@
 
         <div class="col-12">
 
-            <button id="btnAbountLearnMore" type="button" class="btn-border-gradient" value="LRNMR">Learn More</button>
+            <button id="btnAboutLearnMore" type="button" class="btn-border-gradient" value="LRNMR">Learn More</button>
 
         </div>
 

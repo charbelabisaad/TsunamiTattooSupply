@@ -17,7 +17,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		//private readonly IWebHostEnvironment _env;
 		private readonly string _imagesRoot;
 
-		public AboutController(TsunamiDbContext dbContext, ILogger<AboutController> logger, string imagesRoot, IConfiguration config)
+		public AboutController(TsunamiDbContext dbContext, ILogger<AboutController> logger, IConfiguration config)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
@@ -100,7 +100,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				bool IsTrue(string key)
 					=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
 
-				string aboutFolder = "ABOUT_US";
+				string aboutFolder = Global.AboutUsImagePath;
 
 				var existingAbout = _dbContext.Abouts.FirstOrDefault(a => a.ID == ID);
 
