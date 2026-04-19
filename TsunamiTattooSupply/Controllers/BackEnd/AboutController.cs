@@ -75,28 +75,44 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 					if (string.IsNullOrWhiteSpace(urlPath))
 						throw new Exception("About image path is not configured.");
 
-					var relative = urlPath.Trim().TrimStart('/', '\\');
-					return Path.Combine(_imagesRoot, relative);
+					var root = _imagesRoot.Replace("\\", "/").TrimEnd('/');
+					var relative = urlPath.Replace("\\", "/").Trim().TrimStart('/');
+
+					return Path.Combine(root, relative).Replace("\\", "/");
 				}
 
 				string? SaveFile(IFormFile? file, string urlFolder, string prefix, string aboutId)
 				{
-					if (file == null || file.Length == 0)
-						return null;
+					try
+					{
+						if (file == null || file.Length == 0)
+							return null;
 
-					var physicalFolder = PhysicalPath(urlFolder);
-					Directory.CreateDirectory(physicalFolder);
+						var physicalFolder = PhysicalPath(urlFolder);
 
-					var ext = Path.GetExtension(file.FileName);
-					var name = $"{prefix}_{aboutId}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
-					var fullPath = Path.Combine(physicalFolder, name);
+						_logger.LogInformation("Physical Folder: " + physicalFolder);
 
-					using var stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
-					file.CopyTo(stream);
+						Directory.CreateDirectory(physicalFolder);
 
-					return name;
+						var ext = Path.GetExtension(file.FileName);
+						var name = $"{prefix}_{aboutId}_{DateTime.Now:yyyyMMddHHmmssfff}{ext}";
+						var fullPath = Path.Combine(physicalFolder, name);
+
+						_logger.LogInformation("Full Path: " + fullPath);
+
+						using var stream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+						file.CopyTo(stream);
+
+						_logger.LogInformation("File saved successfully");
+
+						return name;
+					}
+					catch (Exception ex)
+					{
+						_logger.LogError(ex, "SaveFile failed");
+						throw;
+					}
 				}
-
 				bool IsTrue(string key)
 					=> string.Equals(Request.Form[key], "true", StringComparison.OrdinalIgnoreCase);
 

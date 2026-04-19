@@ -408,28 +408,41 @@
             });
 
             // Preview selected image
-            $('#aboutImage1').on('change', function () {
+        $('#aboutImage1').on('change', function () {
 
-                const file = this.files[0];
+            const file = this.files[0];
 
-                if (file) {
+            if (!file) return;
 
-                    const reader = new FileReader();
+            const maxSizeKB = 150;
+            const maxSizeBytes = maxSizeKB * 1024;
 
-                    reader.onload = function (e) {
-                        $('#aboutImagePreview1')
-                            .attr('src', e.target.result)
-                            .removeClass('d-none');
+            if (file.size > maxSizeBytes) {
 
-                        $('#aboutImagePreview1')
-                            .closest('.image-box')
-                            .find('.placeholder-icon')
-                            .addClass('d-none');
-                    };
+                setTimeout(function () {
+                    toastr.error('Image 1 size must not exceed 150 KB');
+                }, 100);
 
-                    reader.readAsDataURL(file);
-                }
-            });
+                $('#aboutImage1').val('');
+
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#aboutImagePreview1')
+                    .attr('src', e.target.result)
+                    .removeClass('d-none');
+
+                $('#aboutImagePreview1')
+                    .closest('.image-box')
+                    .find('.placeholder-icon')
+                    .addClass('d-none');
+            };
+
+            reader.readAsDataURL(file);
+        });
 
             // View
             $(document).on('click', '.btn-view1', function () {
@@ -471,28 +484,41 @@
             });
 
             // Preview selected image
-            $('#aboutImage2').on('change', function () {
+                 $('#aboutImage2').on('change', function () {
 
-                const file = this.files[0];
+            const file = this.files[0];
 
-                if (file) {
+            if (!file) return;
 
-                    const reader = new FileReader();
+            const maxSizeKB = 150;
+            const maxSizeBytes = maxSizeKB * 1024;
 
-                    reader.onload = function (e) {
-                        $('#aboutImagePreview2')
-                            .attr('src', e.target.result)
-                            .removeClass('d-none');
+            if (file.size > maxSizeBytes) {
 
-                        $('#aboutImagePreview2')
-                            .closest('.image-box')
-                            .find('.placeholder-icon')
-                            .addClass('d-none');
-                    };
+                setTimeout(function () {
+                    toastr.error('Image 2 size must not exceed 150 KB');
+                }, 100);
 
-                    reader.readAsDataURL(file);
-                }
-            });
+                $('#aboutImage2').val('');
+
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                $('#aboutImagePreview2')
+                    .attr('src', e.target.result)
+                    .removeClass('d-none');
+
+                $('#aboutImagePreview2')
+                    .closest('.image-box')
+                    .find('.placeholder-icon')
+                    .addClass('d-none');
+            };
+
+            reader.readAsDataURL(file);
+        });
 
             // View
             $(document).on('click', '.btn-view2', function () {

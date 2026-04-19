@@ -299,7 +299,7 @@
 
         <div class="col-12">
 
-            <button id="btnAboutLearnMore" type="button" class="btn-border-gradient" value="LRNMR">Learn More</button>
+            <button id="btnAboutLearnMore" type="button" asp-controller="AboutUs" asp-action="Index" class="btn-border-gradient" value="LRNMR" onclick="window.location.href='@Url.Action("Index","AboutUs")'">Learn More</button>
 
         </div>
 
