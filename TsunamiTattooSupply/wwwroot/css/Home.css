@@ -1,4 +1,9 @@
 ﻿
+.home{
+    max-width:1240px;
+    margin: 70px auto 0px auto;
+}
+
 .home-banner-info{ 
     position:absolute;
     left:100px;
@@ -88,8 +93,7 @@
 }
 
 .home-new-arrival {
-    max-width:1240px;
-    margin: 70px auto 0px auto;
+    
 }
 
 .home-new-arrival-title {
@@ -183,11 +187,11 @@
     padding:15px 0px 15px 0px;
 }
 
-.horizontal-separator {
+.home-horizontal-separator {
     border: none; /* remove default border */
     height: 1px; /* line thickness */
     background-color: #FFFFFF; /* line color */
-    margin: 75px 100px 75px 100px
+    margin: 75px 0px 75px 0px
 }
    
 .home-banner-advertising { 

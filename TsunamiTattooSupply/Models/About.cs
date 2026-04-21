@@ -7,6 +7,7 @@ namespace TsunamiTattooSupply.Models
 	public class About
 	{
 		[Key]
+		[StringLength(10)]
 		public string ID { get; set; }
 
 		[Required]

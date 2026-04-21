@@ -53,9 +53,7 @@
                 <div id="cardAboutHeader" class="card-header font-weight-bold">About</div>
 
                 <div id="cardAboutBody" class="card-body">
-
-                    <input id="AboutID" type="hidden" value="ABT" />
-
+                     
                     <div class="row">
 
                         <div class="col-12 col-md-6">
@@ -320,8 +318,7 @@
 
         // save / load about
         $('#btnSaveAbout').on('click', function () {
-
-            const aboutId = $('#AboutID').val();
+             
             const aboutShortDetails1 = $('#aboutShortDetails1').summernote('code');
             const aboutShortDetails2 = $('#aboutShortDetails2').summernote('code');
             const aboutLongDetails = $('#aboutLongDetails').summernote('code');
@@ -348,7 +345,7 @@
 
             const formData = new FormData();
 
-            formData.append('ID', aboutId);
+         
             formData.append('ShortText1', aboutShortDetails1);
             formData.append('ShortText2', aboutShortDetails2);
             formData.append('LongText', aboutLongDetails);

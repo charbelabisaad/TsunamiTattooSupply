@@ -72,12 +72,12 @@
                                    
                                             BrandsNumber = Model.brandsstatistics.IsCalculated == true ? @Model.brands.Count : @Model.brandsstatistics.Number;
                                         }
-                                        
-                               
 
-                                    @BrandsNumber.ToString("N0")+
 
-                                </div>
+
+                                        <span id="BrandsNumber" style="visibility:hidden;">@BrandsNumber</span>
+
+                                    </div>
                                 <div class="home-banner-numbers-label">International Brands</div>
 
                             </div>
@@ -93,10 +93,10 @@
                                     
                                             ProductsNumber = Model.stocksstatistics.IsCalculated == true ? @Model.stocks.Count : @Model.stocksstatistics.Number;
                                         }
-                                         
-                                    @ProductsNumber.ToString("N0")+
 
-                                </div>
+                                        <span id="ProductsNumber" style="visibility:hidden;">@ProductsNumber</span>
+
+                                    </div>
                                 <div class="home-banner-numbers-label">High-Quality Products</div>
 
                             </div>
@@ -112,11 +112,11 @@
 
                                     
                                             ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
-                                    } 
-                                     
-                                    @ClientsNumber.ToString("N0")+
-                                
-                                </div>
+                                    }
+
+                                        <span id="ClientsNumber" style="visibility:hidden;">@ClientsNumber</span>
+
+                                    </div>
 
                                 <div class="home-banner-numbers-label">Happy Customers</div>
 
@@ -160,6 +160,8 @@
 
     </div>
 </div>
+
+<div class="home">
 
 <div class="home-new-arrival">
 
@@ -235,9 +237,8 @@
     </div>
 
 </div>
-
-
-<hr class="home-horizontal-separator" />
+ 
+<div class="home-horizontal-separator">&nbsp;</div>
 
 <div class="home-banner-advertising">
 
@@ -255,7 +256,7 @@
 
 </div>
 
-<hr class="home-horizontal-separator" />
+<div class="home-horizontal-separator">&nbsp;</div>
 
 <div class="home-about">
 
@@ -307,7 +308,7 @@
 
 </div>
 
-<hr class="home-horizontal-separator" />
+<div class="home-horizontal-separator">&nbsp;</div>
 
 <div class="home-category">
     <div class="row">
@@ -379,66 +380,101 @@
     </div>
 </div>
  
-<script>
-    const track = document.querySelector('.brand-track');
-    const container = document.querySelector('.home-brand-bar');
+</div>
 
-    // 🔥 duplicate ONCE
-    const original = [...track.children];
-    original.forEach(el => track.appendChild(el.cloneNode(true)));
+@section Scripts {
+    <script>
 
-    let position = 0;
-    const speed = 0.5;
+        $(document).ready(function () {
 
-    let paused = false;
+            // ==========================================
+            // BRAND BAR ANIMATION
+            // ==========================================
+            const track = document.querySelector('.brand-track');
+            const container = document.querySelector('.home-brand-bar');
 
-    // ✅ hover events
-    container.addEventListener('mouseenter', () => paused = true);
-    container.addEventListener('mouseleave', () => paused = false);
+            if (track && container) {
 
-    function animate() {
+                const original = [...track.children];
+                original.forEach(el => track.appendChild(el.cloneNode(true)));
 
-        if (!paused) {
-            position -= speed;
+                let position = 0;
+                const speed = 0.5;
+                let paused = false;
 
-            const first = track.children[0];
-            const style = getComputedStyle(first);
-            const margin = parseFloat(style.marginLeft) + parseFloat(style.marginRight);
-            const width = first.offsetWidth + margin;
+                container.addEventListener('mouseenter', () => paused = true);
+                container.addEventListener('mouseleave', () => paused = false);
 
-            if (-position >= width) {
-                track.appendChild(first);
-                position += width;
+                function animateBrandBar() {
+
+                    if (!paused) {
+                        position -= speed;
+
+                        const first = track.children[0];
+
+                        if (first) {
+                            const style = getComputedStyle(first);
+                            const margin = parseFloat(style.marginLeft) + parseFloat(style.marginRight);
+                            const width = first.offsetWidth + margin;
+
+                            if (-position >= width) {
+                                track.appendChild(first);
+                                position += width;
+                            }
+
+                            track.style.transform = `translate3d(${position}px,0,0)`;
+                        }
+                    }
+
+                    requestAnimationFrame(animateBrandBar);
+                }
+
+                animateBrandBar();
             }
 
-            track.style.transform = `translate3d(${position}px,0,0)`;
+               // ==========================================
+        // COUNTER ANIMATION
+        // ==========================================
+        let brandsnumber = $("#BrandsNumber").text().replace('+', '');
+        let productsnumber = $("#ProductsNumber").text().replace('+', '');
+        let clientsnumber = $("#ClientsNumber").text().replace('+', '');
+
+        $("#BrandsNumber").css("visibility", "visible").text("0+");
+        $("#ProductsNumber").css("visibility", "visible").text("0+");
+        $("#ClientsNumber").css("visibility", "visible").text("0+");
+
+        animateCounter("#BrandsNumber", brandsnumber);
+        animateCounter("#ProductsNumber", productsnumber);
+        animateCounter("#ClientsNumber", clientsnumber);
+
+        function animateCounter(selector, targetValue) {
+
+            let element = $(selector);
+
+            let currentValue = parseInt(element.text().replace(/,/g, '').replace('+', '')) || 0;
+            let target = parseInt(targetValue.toString().replace(/,/g, '').replace('+', '')) || 0;
+
+            if (target === 0) {
+                element.text('0+');
+                return;
+            }
+
+            $({ countNum: currentValue }).animate(
+                { countNum: target },
+                {
+                    duration: 1500,
+                    easing: 'swing',
+                    step: function () {
+                        element.text(Math.floor(this.countNum).toLocaleString() + '+');
+                    },
+                    complete: function () {
+                        element.text(target.toLocaleString() + '+');
+                    }
+                }
+            );
         }
 
-        requestAnimationFrame(animate);
-    }
+        });
 
-    animate();
-
-     let counter = $('#clientsCounter');
-        let target = parseInt(counter.data('count'));
-        let duration = 1500;
-        let stepTime = 20;
-        let increment = Math.ceil(target / (duration / stepTime));
-
-        let current = 0;
-
-        let timer = setInterval(function () {
-
-            current += increment;
-
-            if (current >= target) {
-                current = target;
-                clearInterval(timer);
-            }
-
-            counter.text(current.toLocaleString());
-
-        }, stepTime);
-
-
-</script>
+    </script>
+}

@@ -21,7 +21,157 @@
     <!-- Main content -->
     <section class="content">
         <div class="container-fluid">
+
+              <div id="cardContact" class="card">
+
+                <div id="cardContactHeader" class="card-header font-weight-bold">Contact</div>
+
+                <div id="cardContactBody" class="card-body">
+                     
+                    <div class="row">
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ContactPhone">Phone</label>
+                                <input id="ContactPhone"
+                                       type="text"
+                                       class="form-control"
+                                       maxlength="100"
+                                       value="@(Model != null && Model.contact != null ? Model.contact.Phone : "")"
+                                       autofocus
+                                       placeholder="Enter Phone" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ContactEmail">Email</label>
+                                <input id="ContactEmail"
+                                       type="email"
+                                       class="form-control"
+                                       maxlength="300"
+                                       value="@(Model != null && Model.contact != null ? Model.contact.Email : "")"
+                                       placeholder="Enter Email" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ContactLocation">Location</label>
+                                <textarea id="ContactLocation"
+                                          class="form-control"
+                                          rows="3"
+                                          placeholder="Enter Location">@(Model != null && Model.contact != null ? Model.contact.Location : "")</textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="ContactLocationMapLink">Location Map Link</label>
+                                <input id="ContactLocationMapLink"
+                                       type="text"
+                                       class="form-control"
+                                       value="@(Model != null && Model.contact != null ? Model.contact.LocationMapLink : "")"
+                                       placeholder="Enter Google Map Link" />
+                            </div>
+                        </div>
+
+                    </div>
+
+                 </div>
+
+                <div id="cardContactFooter" class="card-footer align-items-center justify-content-end text-right">
+
+                    <button id="btnSaveContact" type="button" class="btn btn-primary" style="width:100px">
+                        <span class="spinner-border spinner-border-sm d-none" id="btnSaveContactSpinner" role="status" aria-hidden="true"></span>
+                        <i class="fas fa-save"></i> Save
+                    </button>
+
+                </div>
+
+            </div>
+
         </div>
     </section>
 
 </div>
+
+@section Scripts{
+
+    <script>
+
+        $(document).ready(function(){
+
+            $('#btnSaveContact').on('click', function () {
+
+                let phone = $('#ContactPhone').val().trim();
+                let email = $('#ContactEmail').val().trim();
+                let location = $('#ContactLocation').val().trim();
+                let locationMapLink = $('#ContactLocationMapLink').val().trim();
+
+                if (phone === '') {
+                    toastr.error('Phone is required');
+                    $('#ContactPhone').focus();
+                    return;
+                }
+
+                if (email === '') {
+                    toastr.error('Email is required');
+                    $('#ContactEmail').focus();
+                    return;
+                }
+
+                if (location === '') {
+                    toastr.error('Location is required');
+                    $('#ContactLocation').focus();
+                    return;
+                }
+
+                if (locationMapLink === '') {
+                    toastr.error('Location Map Link is required');
+                    $('#ContactLocationMapLink').focus();
+                    return;
+                }
+
+                $('#btnSaveContactSpinner').removeClass('d-none');
+                $('#btnSaveContact').prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("SaveContact", "Contact")',
+                    type: 'POST',
+                    data: {
+                        Phone: phone,
+                        Email: email,
+                        Location: location,
+                        LocationMapLink: locationMapLink
+                    },
+                    success: function (response) {
+
+                        $('#btnSaveContactSpinner').addClass('d-none');
+                        $('#btnSaveContact').prop('disabled', false);
+
+                        if (response.success) {
+                            toastr.success(response.message);
+                        }
+                        else {
+                            toastr.error(response.message);
+                        }
+                    },
+                    error: function (xhr) {
+
+                    $('#btnSaveContactSpinner').addClass('d-none');
+                    $('#btnSaveContact').prop('disabled', false);
+
+                    console.log(xhr.responseText);
+
+                    toastr.error('Something went wrong');
+                }
+                });
+
+            });
+
+        });
+
+    </script>
+
+}

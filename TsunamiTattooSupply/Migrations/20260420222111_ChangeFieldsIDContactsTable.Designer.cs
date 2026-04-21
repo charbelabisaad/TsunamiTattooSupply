@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260420222111_ChangeFieldsIDContactsTable")]
+    partial class ChangeFieldsIDContactsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -780,9 +783,12 @@ namespace TsunamiTattooSupply.Migrations
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Contact", b =>
                 {
-                    b.Property<string>("ID")
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
                         .HasMaxLength(10)
-                        .HasColumnType("character varying(10)");
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
 
                     b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
@@ -820,6 +826,9 @@ namespace TsunamiTattooSupply.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<int>("TypeID")
+                        .HasColumnType("integer");
+
                     b.HasKey("ID");
 
                     b.HasIndex("CreatedUserID");
@@ -828,7 +837,26 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasIndex("EditUserID");
 
+                    b.HasIndex("TypeID");
+
                     b.ToTable("Contacts");
+                });
+
+            modelBuilder.Entity("TsunamiTattooSupply.Models.ContactType", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ContactTypes");
                 });
 
             modelBuilder.Entity("TsunamiTattooSupply.Models.Country", b =>
@@ -3327,6 +3355,14 @@ namespace TsunamiTattooSupply.Migrations
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
                         .WithMany()
                         .HasForeignKey("EditUserID");
+
+                    b.HasOne("TsunamiTattooSupply.Models.ContactType", "ContactType")
+                        .WithMany()
+                        .HasForeignKey("TypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ContactType");
 
                     b.Navigation("CreatedUser");
 

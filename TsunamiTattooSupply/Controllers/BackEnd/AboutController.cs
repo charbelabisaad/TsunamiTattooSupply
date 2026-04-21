@@ -58,8 +58,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 		}
 
 		[HttpPost]
-		public IActionResult SaveAbout(
-	string ID,
+		public IActionResult SaveAbout( 
 	string ShortText1,
 	string ShortText2,
 	string LongText,
@@ -118,7 +117,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 
 				string aboutFolder = Global.AboutUsImagePath;
 
-				var existingAbout = _dbContext.Abouts.FirstOrDefault(a => a.ID == ID);
+				var existingAbout = _dbContext.Abouts.FirstOrDefault(a => a.ID == "ABT");
 
 				if (existingAbout != null)
 				{
@@ -202,7 +201,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 				{
 					var about = new About
 					{
-						ID = ID,
+						ID = "ABT",
 						ShortText1 = ShortText1?.Trim(),
 						ShortText2 = ShortText2?.Trim(),
 						LongText = LongText?.Trim(),

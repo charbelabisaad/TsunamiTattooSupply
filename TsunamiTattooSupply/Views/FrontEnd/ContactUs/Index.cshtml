@@ -1,0 +1,139 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Contact Us";
+}
+
+<link rel="stylesheet" href="~/css/Contact.css" asp-append-version="true" />
+
+<div class="contact-banner">
+
+    <div class="about-banner">
+
+        @if (Model.bannercontact != null)
+        {
+            <img src="@Url.Content(Model.bannercontact.ImagePath + Model.bannercontact.Image)" class="contact-banner-image" />
+
+            <div class="d-inline-block contact-banner-title">@Model.bannercontact.Name</div>
+
+        }
+
+    </div>
+
+</div>
+
+<div class="contact">
+
+    <div class="row align-items-start">
+
+        <div class="col-12 col-md-5 d-flex justify-content-start">
+
+            <div class="text-center">
+
+                <svg width="115" height="114" viewBox="0 0 115 114" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2768_5352)">
+                        <path d="M115 53.6349V60.3121C114.657 61.6782 114.705 63.2004 114.519 64.6223C111.216 89.6917 90.5433 110.256 65.2115 113.484C63.7795 113.668 62.2406 113.624 60.862 113.961C58.6282 113.872 56.3522 114.084 54.124 113.961C4.9966 111.254 -18.2476 51.2819 16.8578 16.594C51.907 -18.0382 112.271 5.01553 115 53.6349ZM54.9764 17.8625C39.2805 19.0056 29.2846 31.1862 30.0779 46.6315C30.6941 58.6254 44.9664 79.4152 52.239 89.2261C53.4403 90.8459 55.7501 94.3866 57.0443 95.5938C57.2046 95.7416 57.3003 95.9813 57.5844 95.92C58.1584 95.8001 63.833 87.7764 64.6404 86.65C71.6795 76.8308 85.2034 56.8634 84.908 44.8333C84.486 27.6566 72.3294 16.5995 54.9764 17.8625Z" fill="url(#paint0_linear_2768_5352)" />
+                        <path d="M72.2421 30.3387C75.9699 34.1247 78.0771 41.1811 77.7085 46.3946C77.0418 55.7761 64.7895 74.3188 59.0276 82.1949C58.7576 82.5629 57.7025 84.2078 57.3874 84.1269C56.9429 84.0154 52.7172 77.5947 52.1011 76.6747C47.3352 69.5793 37.8738 54.6637 37.283 46.3918C36.9116 41.1755 39.0245 34.1164 42.7494 30.3359C49.9151 23.0593 65.0792 23.0593 72.2449 30.3359L72.2421 30.3387ZM57.4212 37.2472C46.5981 37.3504 45.7597 53.0271 55.6882 54.6469C68.8379 56.7881 69.831 37.1301 57.4212 37.2472Z" fill="url(#paint1_linear_2768_5352)" />
+                    </g>
+                    <defs>
+                        <linearGradient id="paint0_linear_2768_5352" x1="87.603" y1="-148.928" x2="-43.9191" y2="-124.733" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FFD600" />
+                            <stop offset="1" stop-color="#BE1E2D" />
+                        </linearGradient>
+                        <linearGradient id="paint1_linear_2768_5352" x1="68.0994" y1="-52.5262" x2="20.936" y2="-46.6459" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FFD600" />
+                            <stop offset="1" stop-color="#BE1E2D" />
+                        </linearGradient>
+                        <clipPath id="clip0_2768_5352">
+                            <rect width="115" height="114" fill="white" />
+                        </clipPath>
+                    </defs>
+                </svg>
+
+
+                <div class="text-center mt-4 contact-label">Location</div>
+
+                <div class="text-center mt-1">
+                    @if (Model != null && Model.contact != null)
+                    {
+                        <span class="contact-field">@Model.contact.Location</span>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-2 d-flex justify-content-center">
+
+            <div class="text-center">
+
+                <svg width="114" height="114" viewBox="0 0 114 114" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2768_5346)">
+                        <path d="M114 53.641V60.3175L112.784 68.7838C107.979 91.9718 88.2278 110.488 64.656 113.487C63.2589 113.666 61.6917 113.59 60.342 113.961C58.1335 113.869 55.8663 114.087 53.6634 113.961C5.01656 111.207 -18.0534 51.3858 16.6115 16.7152C51.3795 -18.0585 111.147 4.89816 114 53.641ZM36.4634 27.2053C36.0144 27.2304 35.5404 27.4395 35.1667 27.6959C33.8142 28.6298 30.0831 32.7584 29.2103 34.208C25.0246 41.1577 27.4507 47.7032 30.8333 54.3128C37.6709 67.6743 54.0259 83.0149 68.9783 86.2933C75.4757 87.7178 82.3913 84.8325 86.2591 79.4411C87.4582 77.7713 87.171 77.0632 85.9496 75.5606C84.427 73.6901 77.2352 66.3055 75.4645 65.1207C74.4829 64.4628 73.8834 64.3402 72.7958 64.8698C70.0435 66.2107 66.7418 72.3213 63.5489 72.7646C62.2578 72.943 61.0531 72.8259 59.9098 72.2126C55.3337 69.7567 44.7538 59.3279 42.1242 54.8258C38.6469 48.8713 46.3015 45.8299 49.0762 41.824C49.988 40.5082 49.8402 39.7499 48.8782 38.501C47.3528 36.519 40.267 29.3853 38.3039 27.9273C37.7657 27.5259 37.1717 27.1691 36.4634 27.2081V27.2053Z" fill="url(#paint0_linear_2768_5346)" />
+                    </g>
+                    <defs>
+                        <linearGradient id="paint0_linear_2768_5346" x1="86.8412" y1="-148.925" x2="-43.6107" y2="-125.136" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FFD600" />
+                            <stop offset="1" stop-color="#BE1E2D" />
+                        </linearGradient>
+                        <clipPath id="clip0_2768_5346">
+                            <rect width="114" height="114" fill="white" />
+                        </clipPath>
+                    </defs>
+                </svg>
+
+
+                <div class="text-center mt-4 contact-label">Phone</div>
+
+                <div class="text-center mt-1">
+                    @if (Model != null && Model.contact != null)
+                    {
+                        <span class="contact-field">@Model.contact.Phone</span>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-5 d-flex justify-content-end">
+
+            <div class="text-center">
+
+                <svg width="114" height="114" viewBox="0 0 114 114" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g clip-path="url(#clip0_2768_5340)">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M57 0C88.4803 0 114 25.5197 114 57C114 88.4803 88.4803 114 57 114C25.5197 114 0 88.4803 0 57C0 25.5197 25.5197 0 57 0ZM93.1816 79.0966V36.7334L71.9988 57.9149L93.1816 79.0966ZM25.3436 79.9596H88.6577L69.3071 60.609L61.9321 67.983C61.5745 68.3396 61.09 68.5398 60.585 68.5396H53.4155C53.1653 68.5398 52.9176 68.4908 52.6864 68.3953C52.4553 68.2998 52.2452 68.1597 52.0682 67.983L44.6933 60.609L25.3427 79.9596H25.3436ZM20.8184 36.732V79.0977L42.0012 57.9149L20.8184 36.732ZM90.4888 34.0404H23.5125L54.2043 64.7322H59.7968L90.4888 34.0404Z" fill="url(#paint0_linear_2768_5340)" />
+                    </g>
+                    <defs>
+                        <linearGradient id="paint0_linear_2768_5340" x1="86.8414" y1="-148.927" x2="-43.6101" y2="-125.137" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#FFD600" />
+                            <stop offset="1" stop-color="#BE1E2D" />
+                        </linearGradient>
+                        <clipPath id="clip0_2768_5340">
+                            <rect width="114" height="114" fill="white" />
+                        </clipPath>
+                    </defs>
+                </svg>
+
+
+                <div class="text-center mt-4 contact-label">Email</div>
+
+                <div class="text-center mt-1">
+                    @if (Model != null && Model.contact != null)
+                    {
+                        <span class="contact-field">@Model.contact.Email</span>
+                    }
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="contact-horizontal-separator"></div>
+
+</div>

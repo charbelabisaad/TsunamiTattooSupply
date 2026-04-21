@@ -12,10 +12,12 @@
 <div class="about-banner">
 
     @if(Model.bannerabout != null){
-        <img src="@Url.Content(Model.bannerabout.ImagePath + Model.bannerabout.Image)" class="about-banner-image" />
-    }
 
-    <div class="d-inline-block about-banner-title">About Us</div>
+        <img src="@Url.Content(Model.bannerabout.ImagePath + Model.bannerabout.Image)" class="about-banner-image" />
+
+        <div class="d-inline-block about-banner-title">@Model.bannerabout.Name</div>
+
+    }
 
 </div>
 

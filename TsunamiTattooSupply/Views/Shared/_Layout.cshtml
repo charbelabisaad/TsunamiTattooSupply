@@ -62,9 +62,7 @@
         <div class="header">
  
             <div class=" d-flex align-items-center flex-nowrap">
-
-                <div class="col-auto" style="width:100px"></div>
-
+                 
                 <div class="col-auto text-start" style="width:430px">
 
                     <div class="row d-flex align-items-center">
@@ -78,7 +76,7 @@
                             <div >
                                 <a class="header-menu-item-link" style="margin-left:0px">Shop <i class="fas fa-chevron-down"></i></a>
                                 <a class=" @((currentController == "AboutUs" && currentAction == "Index") ? "header-menu-item-link-active active" : "header-menu-item-link")" asp-controller="AboutUs" asp-action="Index">About Us</a>
-                                <a class="header-menu-item-link" style="margin-right:0px">Contact Us</a>
+                                <a class="@((currentController == "ContactUs" && currentAction == "Index") ? "header-menu-item-link-active active" : "header-menu-item-link")" asp-controller="ContactUs" asp-action="Index">Contact Us</a>
                             </div>
                         </div>
                              
@@ -119,9 +117,7 @@
                     </button>
                          
                 </div>
-
-                <div class="col-auto" style="width:100px"></div>
-
+                 
             </div>
 
         </div>
@@ -243,10 +239,10 @@
 
                                 <div class="footer-menu-title">MENU</div>
 
-                            <div class="footer-menu-item"><a asp-controller="Home" asp-action="Index" class="@((currentController == "Home" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">Home</a></div>
-                            <div class="footer-menu-item"><a asp-controller="AboutUs" asp-action="Index" class="@((currentController == "AboutUs" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">About</a></div>
+                                <div class="footer-menu-item"><a asp-controller="Home" asp-action="Index" class="@((currentController == "Home" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">Home</a></div>
+                                <div class="footer-menu-item"><a asp-controller="AboutUs" asp-action="Index" class="@((currentController == "AboutUs" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">About</a></div>
                                 <div class="footer-menu-item"><a class="footer-menu-item-link">Services</a></div>
-                                <div class="footer-menu-item"><a class="footer-menu-item-link">Contact Us</a></div>
+                                <div class="footer-menu-item"><a asp-controller="ContactUs" asp-action="Index" class="@((currentController == "ContactUs" && currentAction == "Index") ? "footer-menu-item-link-active active" : "footer-menu-item-link")">Contact Us</a></div>
 
                             </div>
 
