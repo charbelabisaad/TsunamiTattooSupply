@@ -66,6 +66,52 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 										  }
 										).FirstOrDefault();
 		}
-		 
+		[HttpPost]
+		public IActionResult SendEmail(string Name, string Email, string Phone, string Subject, string Message)
+		{
+			try
+			{
+				var smtpClient = new SmtpClient("mail.tsunamitattoosupply.com")
+				{
+					Port = 587,
+					Credentials = new NetworkCredential("info@tsunamitattoosupply.com", ""),
+					EnableSsl = true
+				};
+
+				var mailMessage = new MailMessage
+				{
+					From = new MailAddress("info@tsunamitattoosupply.com", "Tsunami Tattoo Supply"),
+					Subject = "Contact Form - " + Subject,
+					Body = $@"
+                <h3>New Contact Request</h3>
+                <p><strong>Name:</strong> {Name}</p>
+                <p><strong>Email:</strong> {Email}</p>
+                <p><strong>Phone:</strong> {Phone}</p>
+                <p><strong>Subject:</strong> {Subject}</p>
+                <p><strong>Message:</strong><br/>{Message}</p>
+            ",
+					IsBodyHtml = true
+				};
+
+				mailMessage.To.Add("info@tsunamitattoosupply.com");
+				mailMessage.CC.Add("charbel.b.abisaad@gmail.com");
+
+				smtpClient.Send(mailMessage);
+
+				return Json(new
+				{
+					success = true,
+					message = "Email sent successfully"
+				});
+			}
+			catch (Exception ex)
+			{
+				return Json(new
+				{
+					success = false,
+					message = ex.Message
+				});
+			}
+		}
 	}
 }
