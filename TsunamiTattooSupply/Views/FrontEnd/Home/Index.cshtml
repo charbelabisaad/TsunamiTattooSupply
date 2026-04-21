@@ -75,7 +75,7 @@
 
 
 
-                                        <span id="BrandsNumber" style="visibility:hidden;">@BrandsNumber</span>
+                                        <span class="BrandsNumber" style="visibility:hidden;">@BrandsNumber</span>
 
                                     </div>
                                 <div class="home-banner-numbers-label">International Brands</div>
@@ -94,7 +94,7 @@
                                             ProductsNumber = Model.stocksstatistics.IsCalculated == true ? @Model.stocks.Count : @Model.stocksstatistics.Number;
                                         }
 
-                                        <span id="ProductsNumber" style="visibility:hidden;">@ProductsNumber</span>
+                                        <span class="ProductsNumber" style="visibility:hidden;">@ProductsNumber</span>
 
                                     </div>
                                 <div class="home-banner-numbers-label">High-Quality Products</div>
@@ -114,7 +114,7 @@
                                             ClientsNumber = Model.clientsstatistics.IsCalculated == true ? @Model.clients.Count : @Model.clientsstatistics.Number;
                                     }
 
-                                        <span id="ClientsNumber" style="visibility:hidden;">@ClientsNumber</span>
+                                        <span class="ClientsNumber" style="visibility:hidden;">@ClientsNumber</span>
 
                                     </div>
 
@@ -432,47 +432,51 @@
                 animateBrandBar();
             }
 
-               // ==========================================
-        // COUNTER ANIMATION
-        // ==========================================
-        let brandsnumber = $("#BrandsNumber").text().replace('+', '');
-        let productsnumber = $("#ProductsNumber").text().replace('+', '');
-        let clientsnumber = $("#ClientsNumber").text().replace('+', '');
+            // ==========================================
+            // COUNTER ANIMATION
+            // ==========================================
+            $('.BrandsNumber').each(function () {
+                let target = $(this).text().replace('+', '');
+                $(this).css('visibility', 'visible').text('0+');
+                animateCounter($(this), target);
+            });
 
-        $("#BrandsNumber").css("visibility", "visible").text("0+");
-        $("#ProductsNumber").css("visibility", "visible").text("0+");
-        $("#ClientsNumber").css("visibility", "visible").text("0+");
+            $('.ProductsNumber').each(function () {
+                let target = $(this).text().replace('+', '');
+                $(this).css('visibility', 'visible').text('0+');
+                animateCounter($(this), target);
+            });
 
-        animateCounter("#BrandsNumber", brandsnumber);
-        animateCounter("#ProductsNumber", productsnumber);
-        animateCounter("#ClientsNumber", clientsnumber);
+            $('.ClientsNumber').each(function () {
+                let target = $(this).text().replace('+', '');
+                $(this).css('visibility', 'visible').text('0+');
+                animateCounter($(this), target);
+            });
 
-        function animateCounter(selector, targetValue) {
+            function animateCounter(element, targetValue) {
 
-            let element = $(selector);
+                let currentValue = parseInt(element.text().replace(/,/g, '').replace('+', '')) || 0;
+                let target = parseInt(targetValue.toString().replace(/,/g, '').replace('+', '')) || 0;
 
-            let currentValue = parseInt(element.text().replace(/,/g, '').replace('+', '')) || 0;
-            let target = parseInt(targetValue.toString().replace(/,/g, '').replace('+', '')) || 0;
-
-            if (target === 0) {
-                element.text('0+');
-                return;
-            }
-
-            $({ countNum: currentValue }).animate(
-                { countNum: target },
-                {
-                    duration: 1500,
-                    easing: 'swing',
-                    step: function () {
-                        element.text(Math.floor(this.countNum).toLocaleString() + '+');
-                    },
-                    complete: function () {
-                        element.text(target.toLocaleString() + '+');
-                    }
+                if (target === 0) {
+                    element.text('0+');
+                    return;
                 }
-            );
-        }
+
+                $({ countNum: currentValue }).animate(
+                    { countNum: target },
+                    {
+                        duration: 1500,
+                        easing: 'swing',
+                        step: function () {
+                            element.text(Math.floor(this.countNum).toLocaleString() + '+');
+                        },
+                        complete: function () {
+                            element.text(target.toLocaleString() + '+');
+                        }
+                    }
+                );
+            }
 
         });
 

@@ -15,8 +15,11 @@
     <link rel="stylesheet" href="~/css/Layout.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TsunamiTattooSupply.styles.css" asp-append-version="true" />
 
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.css" asp-append-version="true" />
+
     <link rel="icon" href="~/Images/GENERAL/favicon32.png" />
     <link rel="icon" href="~/Images/GENERAL/favicon16.png" />
+
 
         <!-- 🔥 Open Graph (WhatsApp / Facebook) -->
     <meta property="og:title" content="Tsunami Tattoo Supply" />
@@ -423,7 +426,17 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/plugins/toastr/toastr.min.js" asp-append-version="true"></script>
      
+    <script>
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "timeOut": "3000"
+        };
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -136,4 +136,227 @@
 
     <div class="contact-horizontal-separator"></div>
 
+    <div class="row">
+
+        <div class="col-12 col-md-6">
+
+            <div class="contact-get-in-touch vh-100">
+
+                <div class="contact-get-in-touch-title">GET IN TOUCH</div>
+
+                <div class="contact-get-in-touch-text mt-3">
+
+                    Have a question or need assistance? <br />
+                    Reach out to us via email, phone or the contact 
+                    form below. <br />
+                    We are eager to assist you!
+
+                </div>
+
+                <div class="contact-get-in-touch-content">
+
+                    <div class="row">
+
+                        <div class="col-12">
+                            <input id="contactFullName" type="text" name="contactfullname" class="contact-get-in-touch-input-text w-100" placeholder="Full Name" />
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-12">
+                            <input id="contactEmailAddress" type="text" name="contactemailaddress" class="contact-get-in-touch-input-text w-100" placeholder="Email Address" />
+                        </div>
+                         
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-3">
+                            <input id="contactPhoneCountryCode" type="text" name="contactphonecountrycode" class="contact-get-in-touch-input-text w-100" placeholder="Code" />
+                        </div>
+
+                        <div class="col-9">
+                            <input id="contactPhoneNumber" type="text" name="contactphonenumber" class="contact-get-in-touch-input-text w-100" placeholder="Phone Number" />
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-12">
+
+                            <textarea id="contactMessage" class="contact-get-in-touch-textarea w-100" placeholder="Enter Your Message Here..."></textarea>
+
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <button id="btnContactSend" type="button" name="contactsend" class="contact-btn-border-gradient" value="CNTCTSND">Send</button>
+                        <span class="btn-spinner d-none">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-12">
+                            <label id="contactErrorMessage" class="bg-white text-danger text-center rounded-pill w-100" style="display:none"></label>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="col-12 col-md-6">
+
+            <div class="contact-map-location vh-100">
+
+                <iframe src="@Model.contact.LocationMapLink"
+                        width="100%"
+                        height="100%"
+                        style="border:0; border-radius:45px;"
+                        allowfullscreen=""
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+
+            </div>
+
+        </div>
+
+    </div>
+
 </div>
+
+@section Scripts{
+
+    <script>
+
+               $(document).ready(function () {
+
+            $('#btnContactSend').on('click', function () {
+
+                let name = $('#contactFullName').val().trim();
+                let email = $('#contactEmailAddress').val().trim();
+                let phoneCode = $('#contactPhoneCountryCode').val().trim();
+                let phoneNumber = $('#contactPhoneNumber').val().trim();
+                let phone = phoneCode + ' ' + phoneNumber;
+                let message = $('#contactMessage').val().trim();
+                let errorMessage = $('#contactErrorMessage');
+
+                let required = false;
+
+                errorMessage.hide().text("");
+
+                $('.contact-get-in-touch-input-text, .contact-get-in-touch-textarea')
+                    .css('background-color', '');
+
+                if (name === '') {
+                    $('#contactFullName').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (email === '') {
+                    $('#contactEmailAddress').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (phoneCode === '') {
+                    $('#contactPhoneCountryCode').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (phoneNumber === '') {
+                    $('#contactPhoneNumber').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (message === '') {
+                    $('#contactMessage').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (required === true) {
+                    errorMessage
+                        .hide()
+                        .text("Please fill all required fields!")
+                        .fadeIn(500);
+
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SendEmail", "ContactUs")',
+                    type: 'POST',
+                    data: {
+                        Name: name,
+                        Email: email,
+                        Phone: phone,
+                        Message: message
+                    },
+                    beforeSend: function () {
+
+                        errorMessage.hide().text("");
+
+                        $('#btnContactSend').prop('disabled', true);
+
+                        $('#btnContactSend .btn-text').addClass('d-none');
+                        $('#btnContactSend .btn-spinner').removeClass('d-none');
+                    },
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            $('#contactFullName').val('');
+                            $('#contactEmailAddress').val('');
+                            $('#contactPhoneCountryCode').val('');
+                            $('#contactPhoneNumber').val('');
+                            $('#contactMessage').val('');
+
+                            $('.contact-get-in-touch-input-text, .contact-get-in-touch-textarea')
+                                .css('background-color', '');
+
+                            toastr.success(response.message);
+                        }
+                        else {
+                            errorMessage
+                                .hide()
+                                .text(response.message)
+                                .fadeIn(500);
+                        }
+                    },
+                    error: function () {
+                        errorMessage
+                            .hide()
+                            .text('Something went wrong')
+                            .fadeIn(500);
+                    },
+                    complete: function () {
+
+                        $('#btnContactSend').prop('disabled', false);
+
+                        $('#btnContactSend .btn-text').removeClass('d-none');
+                        $('#btnContactSend .btn-spinner').addClass('d-none');
+                    }
+                });
+
+            });
+            $('.contact-get-in-touch-input-text, .contact-get-in-touch-textarea').on('input', function () {
+
+                $(this).css('background-color', '');
+
+                $('#contactErrorMessage').hide().text('');
+            });
+        });
+
+    </script>
+
+}

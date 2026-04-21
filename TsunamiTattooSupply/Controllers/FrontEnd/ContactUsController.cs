@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using System.Net.Mail;
+using System.Net;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions;
@@ -64,6 +66,6 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 										  }
 										).FirstOrDefault();
 		}
-
+		 
 	}
 }
