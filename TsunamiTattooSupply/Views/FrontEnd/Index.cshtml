@@ -1,5 +1,187 @@
 ﻿@{
-    Layout = Layout;
-    ViewData["Title"] = "Home Page";
+    Layout = null;
+    ViewData["Title"] = "Log In";
 }
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - LawTrack (v 0.1.5)</title>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css" asp-append-version="true" />
+
+    <!-- AdminLTE -->
+    <link rel="stylesheet" href="~/dist/css/adminlte.min.css" asp-append-version="true" />
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/AdminLogIn.css" asp-append-version="true" />
+
+    <link rel="icon" href="~/Images/GENERAL/favicon32.png" />
+    <link rel="icon" href="~/Images/GENERAL/favicon16.png" />
+
+    <script src="~/plugins/jquery/jquery.min.js" asp-append-version="true"></script>
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js" asp-append-version="true"></script>
+    <script src="~/dist/js/adminlte.min.js" asp-append-version="true"></script>
+</head>
+
+<partial name="ChangePassword" />
+
+<body class="hold-transition login-page">
+    <div class="login-box">
+        <div class="card">
+            <div class="card-body login-card-body">
+                <div class="login-row d-flex flex-column flex-md-row align-items-center">
+
+                    <!-- Logo -->
+                    <div class="login-logo-col mb-3 mb-md-0 text-center text-md-left">
+                        <img id="imgLogInLogo" src="~/Images/GENERAL/TsunamiLogoLogIn.png" style="max-width: 100%; height: auto;" />
+                    </div>
+
+                    <!-- Form -->
+                    <div class="login-form-col ml-md-4 w-100">
+                        <p class="login-box-msg">Sign in to start your session</p>
+                        <form method="post" id="loginForm" asp-controller="BackEnd" asp-action="LogIn">
+                            <div class="input-group mb-3">
+                                <input type="text" class="form-control" name="Username" placeholder="Username" required>
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><span class="fas fa-user"></span></div>
+                                </div>
+                            </div>
+
+                            <div class="input-group mb-3">
+                                <input type="password" class="form-control" name="Password" placeholder="Password" required>
+                                <div class="input-group-append">
+                                    <div class="input-group-text"><span class="fas fa-key"></span></div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-6">
+                                    <div class="icheck-primary">
+                                        <input type="checkbox" id="remember" name="RememberMe">
+                                        <label for="remember">Remember Me</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <button id="btnLogIn" type="button" class="btn btn-orange btn-block" style="width:150px">
+                                        <i class="fas fa-sign-in-alt"></i> Log In
+                                    </button>
+                                </div>
+
+                            </div>
+
+                            @if (ViewBag.Error != null)
+                            {
+                                <div class="row mt-2">
+                                    <div class="col-12 text-danger text-center">@ViewBag.Error</div>
+                                </div>
+
+                            }
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @if (ViewData["ErrorHandling"] != null)
+    {
+        <div class="alert alert-danger error-handling">@ViewData["ErrorHandling"]</div>
+    }
+    <!-- Scripts -->
+
+    <script>
+        $(document).ready(function() {
+
+            $('#btnLogIn').on('click', function () {
+
+                let btn  = $(this);
+                let form = $('#loginForm');
+
+                // Remove previous errors
+                $('.login-error').remove();
+
+                // Disable button + spinner
+                btn.prop('disabled', true).html(
+                    '<span class="spinner-border spinner-border-sm"></span> Logging in...'
+                );
+
+                $.ajax({
+                    url: form.attr('action'),      // /BackEnd/LogIn
+                    type: 'POST',
+                    data: form.serialize(),
+                    dataType: 'json',
+
+                    success: function (res) {
+
+                        // ❌ Validation / Login error
+                        if (!res.success) {
+                            form.append(
+                                `<div class="login-error text-danger text-center mt-2">
+                                    ${res.message}
+                                    </div>`
+                            );
+                            return;
+                        }
+
+                        if (res.changepassword === true) {
+
+                            $('#ChangePasswordDestination').val('LOGIN');
+
+                            $('#changePasswordModal').modal({
+                                backdrop: 'static',   // ❌ no click outside
+                                keyboard: false       // ❌ no ESC
+                            });
+
+                            // Reset fields
+                            $('#NewPassword').val('');
+                            $('#ConfirmPassword').val('');
+
+                            // Focus first input
+                            $('#changePasswordModal').on('shown.bs.modal', function () {
+                                $('#NewPassword').focus();
+                            });
+
+                            return;
+                        }
+
+
+                        // ✅ Login OK → redirect
+                        window.location.href = '/BackEnd/Dashboard/Index'; // adjust if needed
+                    },
+
+                    error: function () {
+                        form.append(
+                            `<div class="login-error text-danger text-center mt-2">
+                                Server error. Please try again.
+                                </div>`
+                        );
+                    },
+
+                    complete: function () {
+                        btn.prop('disabled', false).html(
+                            '<i class="fas fa-sign-in-alt"></i> Log In'
+                        );
+                    }
+                });
+            });
+
+            // 🔥 LOGIN ON ENTER
+            $(document).on('keypress', '#loginForm input', function (e) {
+                if (e.which === 13) {
+                    e.preventDefault();
+                    $('#btnLogIn').click();
+                }
+            });
+
+        });
+    </script>
+</body>
+</html>

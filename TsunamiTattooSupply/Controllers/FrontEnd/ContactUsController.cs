@@ -67,41 +67,47 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 										).FirstOrDefault();
 		}
 		[HttpPost]
-		public IActionResult SendEmail(string Name, string Email, string Phone, string Subject, string Message)
+		public IActionResult SendEmail(string Name, string Email, string Phone, string Message)
 		{
 			try
 			{
-				var smtpClient = new SmtpClient("mail.tsunamitattoosupply.com")
-				{
-					Port = 587,
-					Credentials = new NetworkCredential("info@tsunamitattoosupply.com", ""),
-					EnableSsl = true
-				};
+				MailAddress mfrom = new MailAddress("info@tsunamitattoosupply.com", "Tsunami Tattoo Supply");
 
-				var mailMessage = new MailMessage
-				{
-					From = new MailAddress("info@tsunamitattoosupply.com", "Tsunami Tattoo Supply"),
-					Subject = "Contact Form - " + Subject,
-					Body = $@"
-                <h3>New Contact Request</h3>
-                <p><strong>Name:</strong> {Name}</p>
-                <p><strong>Email:</strong> {Email}</p>
-                <p><strong>Phone:</strong> {Phone}</p>
-                <p><strong>Subject:</strong> {Subject}</p>
-                <p><strong>Message:</strong><br/>{Message}</p>
-            ",
-					IsBodyHtml = true
-				};
+				// send TO yourself
+				MailAddress mto = new MailAddress("info@tsunamitattoosupply.com");
 
-				mailMessage.To.Add("info@tsunamitattoosupply.com");
+				MailMessage mailMessage = new MailMessage(mfrom, mto);
 				mailMessage.CC.Add("charbel.b.abisaad@gmail.com");
+				mailMessage.Subject = "Contact Form Message";
+				mailMessage.IsBodyHtml = true;
 
-				smtpClient.Send(mailMessage);
+				mailMessage.Body = $@"
+            <h3>New Contact Request</h3>
+            <p><b>Name:</b> {Name}</p>
+            <p><b>Email:</b> {Email}</p>
+            <p><b>Phone:</b> {Phone}</p>
+            <p><b>Message:</b><br/>{Message}</p>
+        ";
+
+				// Optional: reply to user email
+				mailMessage.ReplyToList.Add(new MailAddress(Email));
+
+				SmtpClient smtpclient = new SmtpClient("relay-hosting.secureserver.net", 25)
+				{
+					EnableSsl = false,
+					UseDefaultCredentials = false,
+					Credentials = new NetworkCredential(
+						"tsunamitattoosupply",
+						Global.Decrypt("R0VPZXNwZXIwMzI3MzUxMSQ=")
+					)
+				};
+
+				smtpclient.Send(mailMessage);
 
 				return Json(new
 				{
 					success = true,
-					message = "Email sent successfully"
+					message = "Your message has been sent successfully."
 				});
 			}
 			catch (Exception ex)
@@ -109,7 +115,7 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				return Json(new
 				{
 					success = false,
-					message = ex.Message
+					message = ex.Message // keep for debugging
 				});
 			}
 		}
