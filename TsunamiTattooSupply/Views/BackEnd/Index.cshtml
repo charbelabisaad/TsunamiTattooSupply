@@ -113,6 +113,8 @@
                     '<span class="spinner-border spinner-border-sm"></span> Logging in...'
                 );
 
+                let redirect = false;
+
                 $.ajax({
                     url: form.attr('action'),      // /BackEnd/LogIn
                     type: 'POST',
@@ -152,9 +154,10 @@
                             return;
                         }
 
+                        redirect = true;
 
                         // ✅ Login OK → redirect
-                        window.location.href = '/BackEnd/Dashboard/Index'; // adjust if needed
+                       
                     },
 
                     error: function () {
@@ -166,6 +169,12 @@
                     },
 
                     complete: function () {
+
+                        if(redirect){
+                            window.location.href = '/BackEnd/Dashboard/Index'; // adjust if needed
+                            return;
+                        }
+
                         btn.prop('disabled', false).html(
                             '<i class="fas fa-sign-in-alt"></i> Log In'
                         );
