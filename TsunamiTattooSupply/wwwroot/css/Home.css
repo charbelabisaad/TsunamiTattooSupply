@@ -14,25 +14,6 @@
     width:50px; height:50px; top:45%
 }
 
-.home-banner-shop-now-button {
-    margin-left:20px;
-    background: linear-gradient(259.66deg, #FFD600 0%, #BE1E2D 100%);
-    border:none;
-    color: #FFFFFF;
-    width: 210px;
-    height: 52px;
-    border-radius: 62px;  
-    font-family: Inter;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 16px;  
-    z-index:1000;
-}
-
-.home-banner-shop-now-button:hover {
-    background: linear-gradient(259.66deg, #BE1E2D 0%, #FFD600 100%);
-}
-
 .home-banner-numbers { 
     color:#FFFFFF;
     margin-top:50px;

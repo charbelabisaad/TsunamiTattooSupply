@@ -1,0 +1,106 @@
+﻿ 
+.login-input {
+    width: 250px;
+    height: 40px; 
+    opacity: 1;
+    border-radius: 20px; 
+    border:none;
+    gap: 10px;
+    padding: 16px;
+}
+
+.login-input:focus{
+    outline:none;
+}
+
+.login-forgot-password {
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 500;
+    font-size: 13px;
+    line-height: 100%;
+    letter-spacing: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    transition: .5s;
+}
+
+.login-forgot-password:hover{
+    color:#ff6a00;
+}
+
+.login-or-continue-with {
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 13px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.login-by-social-media {
+    background-color: #FFFFFF; 
+    height:35px;
+    opacity: 1;
+    border-radius: 7.11px;
+    border-width: 0.71px; 
+    transition: .5s;
+}
+ 
+.login-by-social-media:hover{
+    background-color: silver;
+}
+
+.login-by-social-media-icon {
+    width: 17px;
+    height: 17px; 
+    opacity: 1;
+    border-radius: 28px;
+}
+
+.login-have-an-account-yet {
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 9.96px; 
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.login-register {
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: bold;
+    font-style: normal;
+    font-size: 9.96px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-thickness: 0%;
+    transition: .5s;
+    cursor:pointer;
+}
+
+.login-register:hover{
+    color:gainsboro;
+}
+
+
+
+
+
+
+
+
+
+
+

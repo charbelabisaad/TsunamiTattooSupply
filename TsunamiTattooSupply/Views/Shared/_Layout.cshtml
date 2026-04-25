@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/Layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/LogIn.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/TsunamiTattooSupply.styles.css" asp-append-version="true" />
 
     <link rel="stylesheet" href="~/plugins/toastr/toastr.css" asp-append-version="true" />
@@ -39,10 +40,14 @@
 
 </head>
 <body>
+
     @{
         var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
         var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
     }
+
+    <partial name="LogIn" />
+
     <header style="min-width:1000px">   
 
         <div class="header-bar">
@@ -437,6 +442,25 @@
         };
     </script>
 
+    <script>
+         
+        $('#btnHeaderUser').on('click', function () {
+            $('#LogInModalParent')
+                .css('display', 'flex')   // 🔥 force flex
+                .hide()
+                .fadeIn(200);
+
+                $("#LogInEmail").focus();
+
+        });
+
+        $('#btnCloseLogIn').on('click', function () {
+            $('#LogInModalParent').fadeOut(200);
+        });
+
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

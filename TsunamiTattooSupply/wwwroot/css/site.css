@@ -73,6 +73,25 @@ body {
     background-color:transparent;
     border:none;
 }
+ 
+.btn-orange-gradiant {
+    margin-left:20px;
+    background: linear-gradient(259.66deg, #FFD600 0%, #BE1E2D 100%);
+    border:none;
+    color: #FFFFFF;
+    width: 210px;
+    height: 52px;
+    border-radius: 62px;  
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 16px;  
+    z-index:1000;
+}
+
+.btn-orange-gradiant:hover {
+    background: linear-gradient(259.66deg, #BE1E2D 0%, #FFD600 100%);
+}
 
 .admin-login-logo{
     max-width:300px;
