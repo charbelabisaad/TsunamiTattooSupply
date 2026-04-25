@@ -230,7 +230,10 @@
                 $("#FirstName").val('');
                 $("#LastName").val('');
 
-                 $("#UserTypeID").val('RGL').change();
+                 $("#UserType").val('RGL').change();
+
+                 if($("#Role").length > 0)
+                    $("#Role").prop("selectedIndex", 0);
 
                 $("#StatusID").val('A');
                 $("#StatusToggle").prop("checked", true);
@@ -263,6 +266,7 @@
                 const FirstName = $(this).data('firstname');
                 const LastName = $(this).data('lastname');
                 const UserTypeID = $(this).data('usertypeid');
+                const UserRoleID = $(this).data('userroleid');
                 const StatusID = $(this).data('statusid'); 
                 const modalEl = document.getElementById("saveUserModal");
                 const modal = new bootstrap.Modal(modalEl);
@@ -271,7 +275,8 @@
                 $("#Username").val(Username);
                 $("#FirstName").val(FirstName);
                 $("#LastName").val(LastName);
-                $("#UserTypeID").val(UserTypeID).change();
+                $("#UserType").val(UserTypeID).change();
+                $("#Role").val(UserRoleID).change();
                 $("#StatusID").val(StatusID);
 
                 $("#UsernameMessage").text('');

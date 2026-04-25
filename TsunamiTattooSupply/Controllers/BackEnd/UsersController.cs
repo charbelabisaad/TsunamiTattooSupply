@@ -36,6 +36,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 			roles  = GetRoles();
 			ViewBag.UserTypes = usertypes;
 			ViewBag.Roles = roles;	
+
 			return View("~/Views/BackEnd/Users/Index.cshtml");
 
 		}
