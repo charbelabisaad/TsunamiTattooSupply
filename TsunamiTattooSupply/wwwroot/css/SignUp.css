@@ -1,0 +1,66 @@
+﻿body {
+   
+}
+
+.signup {
+    background: url('/Images/GENERAL/SignUp.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    max-width: 1240px;
+    min-height: 882px;
+    margin:70px auto 0px auto;
+}
+
+.signup-input-wrapper {
+    width: 250px;
+}
+ 
+.signup-input {
+    width: 100%;
+    height: 40px;
+    opacity: 1;
+    border-radius: 20px;
+    border: none;
+    gap: 10px;
+    padding: 16px;
+}
+
+.signup-input:focus {
+    outline: none;
+}
+
+.signup-already-have-an-account{
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 9.96px; 
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.signup-login {
+    color: #FFFFFF;
+    font-family: Inter;
+    font-weight: bold;
+    font-style: normal;
+    font-size: 9.96px;
+    line-height: 100%;
+    letter-spacing: 0;
+    text-align: center;
+    vertical-align: middle;
+    text-decoration: underline;
+    text-decoration-style: solid;
+    text-decoration-thickness: 0%;
+    transition: .5s;
+    cursor: pointer;
+}
+
+.signup-login:hover {
+    color: gainsboro;
+}
+
+
+
+

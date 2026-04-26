@@ -403,7 +403,7 @@ body {
     color:#F57906;
 }
 
-.custom-modal {
+.custom-card {
     background: linear-gradient(102.53deg, rgba(255, 255, 255, 0.1) 10.88%, rgba(255, 255, 255, 0.03) 83.94%);
     border: 1px solid #FFFFFF42;
     backdrop-filter: blur(30px);
@@ -413,17 +413,17 @@ body {
     /*    display:none;*/
 }
 
-.custom-modal-logo {
+.custom-card-logo {
     width: 91px;
-    height: 69px; 
+    height: 69px;
     opacity: 1;
 }
 
-.custom-modal-content{
-    margin:20px auto 10px auto;
+.custom-card-content {
+    margin: 20px auto 10px auto;
 }
 
-.custom-modal-header {
+.custom-card-header {
     color: #FFFFFF;
     font-family: Inter;
     font-weight: bold;
@@ -433,8 +433,8 @@ body {
     vertical-align: middle;
 }
 
-.custom-modal-body {
-    margin-top:20px;
+.custom-card-body {
+    margin-top: 20px;
 }
 
 

@@ -8,15 +8,15 @@
 
     <button id="btnCloseLogIn" type="button" class="custom-modal-close" value="CLSLOGIN"><i class="fas fa-close"></i></button>
 
-    <div id="LogInModal" class="custom-modal">
+    <div id="LogInCard" class="custom-card">
 
-        <div class="text-center"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="custom-modal-logo" /></div>
+        <div class="text-center"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="custom-card-logo" /></div>
 
-        <div class="custom-modal-content">
+        <div class="custom-card-content">
 
-            <div class="custom-modal-header">Login</div>
+            <div class="custom-card-header">Login</div>
 
-            <div class="custom-modal-body mt-4">
+            <div class="custom-card-body mt-4">
 
                 <div>
                      <input id="LogInEmail" type="text" name="LogInEmail" class="login-input" placeholder="Username@gmail.com" />
@@ -74,8 +74,8 @@
                     </div>
                 </div>
 
-                <div class="login-have-an-account-yet mt-4">
-                    <span>Don’t have an account yet? <a href="" class="login-register">Register Here</a></span>
+                <div class="text-center mt-4">
+                    <span class="login-have-an-account-yet">Don’t have an account yet? <a asp-area="" asp-controller="SignUp" asp-action="Index" class="login-register">Register Here</a></span>
                 </div>
 
             </div>

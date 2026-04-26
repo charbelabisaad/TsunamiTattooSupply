@@ -1,0 +1,127 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Sign Up";
+}
+
+<link rel="stylesheet" href="~/css/SignUp.css" asp-append-version="true" />
+
+<div class="signup d-flex align-items-center justify-content-center">
+
+    <div id="SignUpCard" class="custom-card">
+
+        <div class="text-center"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="custom-card-logo" /></div>
+
+        <div class="custom-card-content">
+
+            <div class="custom-card-header">Sign Up</div>
+
+            <div class="custom-card-body mt-4 d-flex flex-column align-items-center">
+
+                <!-- Full Name -->
+                <div class="signup-input-wrapper">
+                    <input id="SignUpFullName"
+                           type="text"
+                           name="SignUpFullName"
+                           class="signup-input"
+                           placeholder="Full Name" />
+                </div>
+
+                <!-- Phone -->
+                <div class="signup-input-wrapper mt-3">
+                    <div class="d-flex phone-group">
+                        <div style="width:30%">
+                            <input id="SignUpPhoneCountryCode"
+                               type="text"
+                               name="SignUpPhoneCountryCode"
+                               class="signup-input phone-code"
+                               placeholder="+961" />
+                        </div>
+                        <div style="padding-left:10px; width:70%">
+                        <input id="SignUpPhoneCode"
+                               type="text"
+                               name="SignUpPhoneCode"
+                               class="signup-input phone-number"
+                               placeholder="Phone Number" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="signup-input-wrapper mt-3">
+                    <input id="SignUpEmail"
+                           type="email"
+                           name="SignUpEmail"
+                           class="signup-input"
+                           placeholder="Username@gmail.com" />
+                </div>
+
+                <!-- Password -->
+                <div class="signup-input-wrapper mt-3">
+                    <input id="SignUpPassword"
+                           type="password"
+                           name="SignUpPassword"
+                           class="signup-input"
+                           placeholder="Password" />
+                </div>
+
+                <!-- Confirm Password -->
+                <div class="signup-input-wrapper mt-3">
+                    <input id="SignUpConfirmPassword"
+                           type="password"
+                           name="SignUpConfirmPassword"
+                           class="signup-input"
+                           placeholder="Confirm Password" />
+                </div>
+
+                <!-- Button -->
+                <div class="signup-input-wrapper mt-4">
+                    <button id="btnSignUp"
+                            type="button"
+                            class="btn-orange-gradiant w-100 m-0">
+                        Sign Up
+                    </button>
+                </div>
+
+                <!-- Login Link -->
+                <div class="signup-text-center mt-4">
+                    <span class="signup-already-have-an-account">
+                        Already have an account?
+                        <a id="SignUpLogIn" class="signup-login">
+                            Login Here
+                        </a>
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts{
+
+    <script>
+
+        $(document).ready(function (){
+
+            $('#SignUpLogIn').on('click', function () {
+
+                $('#LogInModalParent')
+                    .css('display', 'flex')   // 🔥 force flex
+                    .hide()
+                    .fadeIn(200);
+
+                    $("#LogInEmail").focus();
+
+            });
+
+        });
+
+    </script>
+
+}
