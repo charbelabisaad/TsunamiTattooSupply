@@ -12,7 +12,7 @@
 }
 
 .signup-input-wrapper {
-    width: 250px;
+    width: 300px;
 }
  
 .signup-input {
@@ -29,12 +29,16 @@
     outline: none;
 }
 
-.signup-already-have-an-account{
+.signup-text-center{
+    text-align:center;
+}
+
+.signup-already-have-an-account {
     color: #FFFFFF;
     font-family: Inter;
     font-weight: 400;
     font-style: normal;
-    font-size: 9.96px; 
+    font-size: 9.96px;
     letter-spacing: 0;
     text-align: center;
     vertical-align: middle;
@@ -62,5 +66,51 @@
 }
 
 
+.country-dropdown {
+    position: relative;
+    width: 100%;
+}
 
+.selected-country {
+    background: #fff;
+    padding: 8px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.selected-country img {
+    width: 20px;
+    margin-right: 6px;
+}
+
+.country-list {
+    position: absolute;
+    width: 100%;
+    background: #fff;
+    border-radius: 6px;
+    margin-top: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+    display: none;
+    z-index: 999;
+}
+
+.country-item {
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.country-item img {
+    width: 20px;
+    margin-right: 6px;
+}
+
+.country-item:hover {
+    background: #f1f1f1;
+}
 

@@ -105,6 +105,23 @@
 
     </script>
 
+    <script>
+        $(document).ready(function () {
+
+            var success = '@(TempData["Success"] ?? "")';
+            var error = '@(TempData["Error"] ?? "")';
+
+            if (success !== '') {
+                toastr.success(success);
+            }
+
+            if (error !== '') {
+                toastr.error(error);
+            }
+
+        });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

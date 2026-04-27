@@ -45,6 +45,8 @@ namespace TsunamiTattooSupply.Models
 
 		public bool Approvement { get; set; } = false;
 
+		public DateTime CreationDate { get; set; }
+
 		public int? EditUserID { get; set; }
 
 		public DateTime? EditDate { get; set; }

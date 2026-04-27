@@ -26,6 +26,7 @@ namespace TsunamiTattooSupply.ViewModels
 		public List<ClientsDto> clients { get; set; }
 		public List<GroupDto> brands { get; set; }
 		public List<StockDto> stocks { get; set; }
+		public List<CountryDto> countries { get; set; }
 
 	}
 }

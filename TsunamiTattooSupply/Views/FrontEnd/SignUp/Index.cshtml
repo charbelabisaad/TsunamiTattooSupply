@@ -8,6 +8,12 @@
 
 <link rel="stylesheet" href="~/css/SignUp.css" asp-append-version="true" />
 
+<style>
+    .is-invalid {
+        border: 1px solid red !important;
+    }
+</style>
+
 <div class="signup d-flex align-items-center justify-content-center">
 
     <div id="SignUpCard" class="custom-card">
@@ -20,32 +26,69 @@
 
             <div class="custom-card-body mt-4 d-flex flex-column align-items-center">
 
+                <form id="signUpForm" method="post" asp-controller="SignUp" asp-action="SignUp">
+
                 <!-- Full Name -->
                 <div class="signup-input-wrapper">
                     <input id="SignUpFullName"
-                           type="text"
-                           name="SignUpFullName"
-                           class="signup-input"
-                           placeholder="Full Name" />
+                    type="text"
+                    name="SignUpFullName"
+                    class="signup-input"
+                    placeholder="Full Name" />
                 </div>
 
                 <!-- Phone -->
                 <div class="signup-input-wrapper mt-3">
                     <div class="d-flex phone-group">
-                        <div style="width:30%">
-                            <input id="SignUpPhoneCountryCode"
-                               type="text"
-                               name="SignUpPhoneCountryCode"
-                               class="signup-input phone-code"
-                               placeholder="+961" />
+
+                        <!-- COUNTRY -->
+                        <div style="width:50%">
+                            <div class="country-dropdown" id="countryDropdown">
+
+                                <!-- selected -->
+                                <div class="selected-country">
+                                    <img id="selectedFlag" src="" />
+                                    <span id="selectedText">Select</span>
+                                    <i class="fa fa-chevron-down"></i>
+                                </div>
+
+                                <!-- list -->
+                                <div class="country-list">
+
+                                    @foreach (var obj in Model.countries)
+                                    {
+                                        <div class="country-item"
+                                             data-id="@obj.ID"
+                                             data-code="@obj.Code"
+
+                                             data-flag="@Url.Content(obj.FlagPath + obj.Flag)"
+                                             data-iso3="@obj.ISO3"
+                                             data-name="@obj.Name"
+                                             data-native="@obj.Native">
+
+                                            <img src="@Url.Content(obj.FlagPath + obj.Flag)" />
+                                            <span>@obj.Code (@obj.ISO3)</span>
+
+                                        </div>
+                                    }
+
+                                </div>
+
+                            </div>
+
+                            <!-- hidden for submit -->
+                            <input type="hidden" id="SignUpPhoneCountryCode" name="SignUpPhoneCountryCode" />
                         </div>
-                        <div style="padding-left:10px; width:70%">
-                        <input id="SignUpPhoneCode"
-                               type="text"
-                               name="SignUpPhoneCode"
-                               class="signup-input phone-number"
-                               placeholder="Phone Number" />
+
+                        <!-- PHONE -->
+                        <div style="padding-left:10px; width:50%">
+                            <input id="SignUpPhoneNumber"
+                                   type="text"
+                                   name="SignUpPhoneNumber"
+                                   class="signup-input phone-number"
+                                   placeholder="Phone Number" />
                         </div>
+
                     </div>
                 </div>
 
@@ -78,11 +121,19 @@
 
                 <!-- Button -->
                 <div class="signup-input-wrapper mt-4">
-                    <button id="btnSignUp"
-                            type="button"
-                            class="btn-orange-gradiant w-100 m-0">
-                        Sign Up
-                    </button>
+                        <button id="btnSignUp"
+                                type="submit"
+                                class="btn-orange-gradiant w-100 d-flex justify-content-center align-items-center">
+
+                            <span class="btn-text">Sign Up</span>
+                            <span class="spinner-border spinner-border-sm d-none"></span>
+
+                        </button>
+                </div>
+
+                <div id="signUpErrorMessage"
+                        class="bg-white text-danger text-center rounded-pill w-100 mt-2"
+                        style="display:none;">
                 </div>
 
                 <!-- Login Link -->
@@ -94,6 +145,8 @@
                         </a>
                     </span>
                 </div>
+
+                </form>
 
             </div>
 
@@ -109,6 +162,8 @@
 
         $(document).ready(function (){
 
+        
+
             $('#SignUpLogIn').on('click', function () {
 
                 $('#LogInModalParent')
@@ -117,6 +172,150 @@
                     .fadeIn(200);
 
                     $("#LogInEmail").focus();
+
+            });
+
+                 // open dropdown
+            $('.selected-country').on('click', function () {
+                $('.country-list').toggle();
+            });
+
+            // select country
+            $('.country-item').on('click', function () {
+
+                let id = $(this).data('id');
+                let code = $(this).data('code');
+                let flag = $(this).data('flag');
+                let iso3 = $(this).data('iso3');
+                let name = $(this).data('name');
+
+                $('#SignUpPhoneCountryCode').val(id);
+
+                $('#selectedFlag').attr('src', flag);
+                $('#selectedText').text(code + ' (' + iso3 + ')');
+
+                $('.country-list').hide();
+
+                // auto fill phone code
+          
+            });
+
+            // default selected (Native)
+            let native = $('.country-item[data-native="True"]').first();
+            if (native.length) {
+                native.click();
+            }
+
+            // close outside
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#countryDropdown').length) {
+                    $('.country-list').hide();
+                }
+            });
+
+            $('#btnSignUp').on('click', function (e) {
+
+                e.preventDefault(); // stop submit first
+
+                let btn = $(this);
+
+                let fullName = $('#SignUpFullName').val().trim();
+                let country = $('#SignUpPhoneCountryCode').val();
+                let phone = $('#SignUpPhoneNumber').val().trim();
+                let email = $('#SignUpEmail').val().trim();
+                let password = $('#SignUpPassword').val().trim();
+                let confirmPassword = $('#SignUpConfirmPassword').val().trim();
+
+                let errorMessage = $('#signUpErrorMessage'); // 🔥 add this div in HTML
+                let required = false;
+
+                // reset UI
+                errorMessage.hide().text("");
+
+                $('.signup-input')
+                    .css('background-color', '');
+
+                $('#countryDropdown .selected-country')
+                    .css('background-color', '');
+
+                // =========================
+                // VALIDATION
+                // =========================
+                if (fullName === '') {
+                    $('#SignUpFullName').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (country === '') {
+                    $('#countryDropdown .selected-country').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (phone === '') {
+                    $('#SignUpPhoneNumber').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (email === '') {
+                    $('#SignUpEmail').css('background-color', '#eea666');
+                    required = true;
+                }
+                else {
+
+                    let emailPattern = @Html.Raw(@"/^[^\s@]+@[^\s@]+\.[^\s@]+$/");
+
+                    if (!emailPattern.test(email)) {
+                        $('#SignUpEmail').css('background-color', '#eea666');
+
+                        errorMessage
+                            .hide()
+                            .text("Invalid email format!")
+                            .fadeIn(500);
+
+                        return;
+                    }
+                }
+                if (password === '') {
+                    $('#SignUpPassword').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (confirmPassword === '') {
+                    $('#SignUpConfirmPassword').css('background-color', '#eea666');
+                    required = true;
+                }
+
+                if (password && confirmPassword && password !== confirmPassword) {
+                    $('#SignUpConfirmPassword').css('background-color', '#eea666');
+                    errorMessage
+                        .hide()
+                        .text("Passwords do not match!")
+                        .fadeIn(500);
+                    return;
+                }
+
+                // =========================
+                // STOP IF REQUIRED
+                // =========================
+                if (required === true) {
+                    errorMessage
+                        .hide()
+                        .text("Please fill all required fields!")
+                        .fadeIn(500);
+                    return;
+                }
+
+                // =========================
+                // SHOW SPINNER
+                // =========================
+                btn.prop('disabled', true);
+                btn.find('.btn-text').addClass('d-none');
+                btn.find('.spinner-border').removeClass('d-none');
+
+                // =========================
+                // SUBMIT FORM
+                // =========================
+                $('#signUpForm')[0].submit();
 
             });
 
