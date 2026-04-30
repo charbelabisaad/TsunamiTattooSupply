@@ -52,5 +52,9 @@ namespace TsunamiTattooSupply.Models
 		[StringLength(500)]
 		public string?  Flag{ get; set; }
 		 
+		[Column(TypeName = "text")]
+		public string? FlagEmoji { get; set; }
+
+		 
 	}
 }
