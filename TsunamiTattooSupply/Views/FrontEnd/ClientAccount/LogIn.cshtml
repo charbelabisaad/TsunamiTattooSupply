@@ -4,10 +4,12 @@
 @{
 }
 
-<div id="LogInModalParent" class="custom-modal-parent">
 
-    <button id="btnCloseLogIn" type="button" class="custom-modal-close" value="CLSLOGIN"><i class="fas fa-close"></i></button>
 
+<link rel="stylesheet" href="~/css/LogIn.css" asp-append-version="true" />
+
+<div class="login d-flex align-items-center justify-content-center">
+      
     <div id="LogInCard" class="custom-card">
 
         <div class="text-center"><img src="~/Images/GENERAL/TsunamiTattooSupplyLogo.png" class="custom-card-logo" /></div>
@@ -53,8 +55,7 @@
                                         <rect width="17.075" height="17.075" rx="8.5375" fill="white" />
                                     </clipPath>
                                 </defs>
-                            </svg>
-
+                            </svg> 
                         </button>
                     </div>
                     <div class="col-6">
@@ -75,7 +76,7 @@
                 </div>
 
                 <div class="text-center mt-4">
-                    <span class="login-have-an-account-yet">Don’t have an account yet? <a asp-area="" asp-controller="SignUp" asp-action="Index" class="login-register">Register Here</a></span>
+                    <span class="login-have-an-account-yet">Don’t have an account yet? <a asp-area="" asp-controller="ClientAccount" asp-action="SignUp" class="login-register">Register Here</a></span>
                 </div>
 
             </div>

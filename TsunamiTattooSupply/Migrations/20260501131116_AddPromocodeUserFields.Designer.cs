@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260501131116_AddPromocodeUserFields")]
+    partial class AddPromocodeUserFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1237,16 +1240,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("GobalDiscount")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<bool>("ISConfirmed")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPlaced")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsReceived")
                         .HasColumnType("boolean");
 
                     b.Property<decimal>("MoneyTransferFees")
@@ -2156,16 +2150,16 @@ namespace TsunamiTattooSupply.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int?>("CreatedUserID")
+                    b.Property<int>("CreatedUserID")
                         .HasColumnType("integer");
 
-                    b.Property<DateTime?>("CreationDate")
+                    b.Property<DateTime>("CreationDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("DeletedUserID")
+                    b.Property<int>("DeletedUserID")
                         .HasColumnType("integer");
 
                     b.Property<string>("Description")
@@ -2175,7 +2169,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<DateTime?>("EditDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("EditUserID")
+                    b.Property<int>("EditUserID")
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("ExpiryDate")
@@ -4079,15 +4073,21 @@ namespace TsunamiTattooSupply.Migrations
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "CreatedUser")
                         .WithMany()
-                        .HasForeignKey("CreatedUserID");
+                        .HasForeignKey("CreatedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "DeletedUser")
                         .WithMany()
-                        .HasForeignKey("DeletedUserID");
+                        .HasForeignKey("DeletedUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.User", "EditUser")
                         .WithMany()
-                        .HasForeignKey("EditUserID");
+                        .HasForeignKey("EditUserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("TsunamiTattooSupply.Models.Status", "Status")
                         .WithMany()

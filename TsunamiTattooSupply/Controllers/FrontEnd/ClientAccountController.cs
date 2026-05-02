@@ -7,18 +7,23 @@ using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.FrontEnd
 {
-	public class SignUpController : Controller
+	public class ClientAccountController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;
-		private readonly ILogger<SignUpController> _logger;
+		private readonly ILogger<ClientAccountController> _logger;
 
-		public SignUpController(TsunamiDbContext dbContext, ILogger<SignUpController> logger)
+		public ClientAccountController(TsunamiDbContext dbContext, ILogger<ClientAccountController> logger)
 		{
 			_dbContext = dbContext;
 			_logger = logger;
 		}
+		 
+		public IActionResult LogIn()
+		{
+			return View("~/Views/FrontEnd/ClientAccount/LogIn.cshtml");
+		}
 
-		public IActionResult Index()
+		public IActionResult SignUp()
 		{
 			FilePathService fp = new FilePathService(_dbContext);
 
@@ -29,7 +34,7 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				countries = GetCountries(),
 			};
 
-			return View("~/Views/FrontEnd/SignUp/Index.cshtml", vm);
+			return View("~/Views/FrontEnd/ClientAccount/SignUp.cshtml", vm);
 		}
 
 		public List<CountryDto> GetCountries()

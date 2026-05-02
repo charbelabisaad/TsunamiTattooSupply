@@ -67,14 +67,20 @@ namespace TsunamiTattooSupply.Models
 		public decimal GobalDiscount { get; set; }
 
 		[Required]
-		public DateTime PlacedOn {  get; set; }
-		
-		public DateTime? ReceivedOn { get; set; }
-
-		public DateTime? ConfirmedOn { get; set; }
+		public bool IsPlaced { get; set; } = false; 
 
 		[Required]
+		public DateTime PlacedOn {  get; set; }
+
+		[Required]
+		public bool IsReceived { get; set; } = false;
+
+		public DateTime? ReceivedOn { get; set; }
+ 
+		[Required]
 		public bool IsConfirmed { get; set; } = false;
+
+		public DateTime? ConfirmedOn { get; set; }
 
 		[Column(TypeName = "decimal(12,2)")]
 		public decimal? TotalFixed {  get; set; }

@@ -38,7 +38,19 @@ namespace TsunamiTattooSupply.Models
 
 		[Required]
 		public string StatusID { get; set; }
+		 
+		public int? CreatedUserID { get; set; }
 
+		public DateTime? CreationDate { get; set; }
+
+		public int? EditUserID { get; set; }
+
+		public DateTime? EditDate {  get; set; } 
+
+		public int? DeletedUserID { get; set; }
+
+		public DateTime? DeletedDate { get; set; }
+		 
 		[ForeignKey("ClientID")]
 		public Client Client { get; set; }	
 

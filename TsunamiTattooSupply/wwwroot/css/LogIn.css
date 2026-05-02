@@ -1,4 +1,13 @@
-﻿ 
+﻿
+.login {
+    background: url('/Images/GENERAL/ClientAccount.webp');
+    background-repeat: no-repeat;
+    background-size: cover;
+    max-width: 1240px;
+    min-height: 882px;
+    margin: 70px auto 0px auto;
+}
+
 .login-input {
     width: 250px;
     height: 40px; 

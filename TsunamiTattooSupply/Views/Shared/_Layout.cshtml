@@ -20,8 +20,7 @@
 
     <link rel="icon" href="~/Images/GENERAL/favicon32.png" />
     <link rel="icon" href="~/Images/GENERAL/favicon16.png" />
-
-
+     
         <!-- 🔥 Open Graph (WhatsApp / Facebook) -->
     <meta property="og:title" content="Tsunami Tattoo Supply" />
     <meta property="og:description" content="Shop premium tattoo supplies." />
@@ -40,9 +39,7 @@
 
 </head>
 <body>
-
-    <partial name="LogIn" />
-
+     
     @await Component.InvokeAsync("Header")
 
     @* <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3"> *@
@@ -90,13 +87,9 @@
     <script>
          
         $('#btnHeaderUser').on('click', function () {
-            $('#LogInModalParent')
-                .css('display', 'flex')   // 🔥 force flex
-                .hide()
-                .fadeIn(200);
 
-                $("#LogInEmail").focus();
-
+            window.location.href = '@Url.Action("LogIn", "ClientAccount")';
+             
         });
 
         $('#btnCloseLogIn').on('click', function () {

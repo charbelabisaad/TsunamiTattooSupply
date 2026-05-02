@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TsunamiTattooSupply.Data;
@@ -11,9 +12,11 @@ using TsunamiTattooSupply.Data;
 namespace TsunamiTattooSupply.Migrations
 {
     [DbContext(typeof(TsunamiDbContext))]
-    partial class TsunamiDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260501132450_PromocodeUserFieldsNull")]
+    partial class PromocodeUserFieldsNull
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1237,16 +1240,7 @@ namespace TsunamiTattooSupply.Migrations
                     b.Property<decimal>("GobalDiscount")
                         .HasColumnType("decimal(12,2)");
 
-                    b.Property<bool>("ISConfirmed")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("IsConfirmed")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsPlaced")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("IsReceived")
                         .HasColumnType("boolean");
 
                     b.Property<decimal>("MoneyTransferFees")
