@@ -7,9 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions;
 using TsunamiTattooSupply.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TsunamiTattooSupply.Controllers.FrontEnd
-{
+{ 
 	public class HomeController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

@@ -17,7 +17,7 @@ using System.Text.RegularExpressions;
  
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class ProductsController : Controller
 	{
 

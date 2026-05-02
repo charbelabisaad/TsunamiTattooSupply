@@ -91,19 +91,19 @@ namespace TsunamiTattooSupply.Controllers
 
 				var identity = new ClaimsIdentity(
 					claims,
-					CookieAuthenticationDefaults.AuthenticationScheme
+					"AdminScheme"   // 🔥 use your backend scheme
 				);
 
 				var principal = new ClaimsPrincipal(identity);
 
 				await HttpContext.SignInAsync(
-					CookieAuthenticationDefaults.AuthenticationScheme,
-					principal,
-					new AuthenticationProperties
-					{
-						IsPersistent = true,
-						ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
-					});
+				"AdminScheme",  // 🔥 same here
+				principal,
+				new AuthenticationProperties
+				{
+					IsPersistent = true,
+					ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+				});
 
 				// ================================
 				// 🔑 FORCE CHANGE PASSWORD
@@ -159,15 +159,11 @@ namespace TsunamiTattooSupply.Controllers
 		[HttpPost]
 		public async Task<IActionResult> LogOut()
 		{
-			await HttpContext.SignOutAsync(
-				CookieAuthenticationDefaults.AuthenticationScheme
-			);
-
-			Response.Cookies.Delete(".AspNetCore.Cookies");
+			await HttpContext.SignOutAsync("AdminScheme");
 
 			return RedirectToAction("Index", "BackEnd");
 		}
-		 
+
 		private string ComputeSha256Hash(string input)
 		{
 			using (SHA256 sha256 = SHA256.Create())

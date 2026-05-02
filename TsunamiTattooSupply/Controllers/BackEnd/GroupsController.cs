@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class GroupsController : Controller
 	{
 

@@ -8,6 +8,12 @@
 
 <link rel="stylesheet" href="~/css/LogIn.css" asp-append-version="true" />
 
+<style>
+    .login-input {
+        padding-right: 40px;
+    }
+</style>
+
 <div class="login d-flex align-items-center justify-content-center">
       
     <div id="LogInCard" class="custom-card">
@@ -24,8 +30,16 @@
                      <input id="LogInEmail" type="text" name="LogInEmail" class="login-input" placeholder="Username@gmail.com" />
                 </div>
 
-                <div class="mt-3">
-                    <input id="LogInPassword" type="password" name="LogInPassword" class="login-input" placeholder="Password" />
+                <div class="mt-3 position-relative">
+                    <input id="LogInPassword"
+                           type="password"
+                           name="LogInPassword"
+                           class="login-input pr-5"
+                           placeholder="Password" />
+
+                    <i class="fa fa-eye toggle-password"
+                       data-target="#LogInPassword"
+                       style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer;"></i>
                 </div>
 
                 <div class="mt-1">
@@ -33,11 +47,23 @@
                 </div>
 
                 <div class="mt-4">
-                    <button id="btnLogIn" type="button" class="btn-orange-gradiant w-100 m-0" value="LGIN">Sign In</button>
+                    <button id="btnLogIn" type="button" class="btn-orange-gradiant w-100 m-0" value="LGIN">
+                        <span id="btnText">Sign In</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2" style="display:none;"></span>
+                    </button>
                 </div>
 
                 <div class="mt-4">
                     <div class="login-or-continue-with">or continue with</div>
+                   
+                </div>
+
+                <div class="row mt-3">
+
+                    <div class="col-12">
+                        <label id="logInErrorMessage" class="bg-white text-danger text-center rounded-pill w-100" style="display:none"></label>
+                    </div>
+
                 </div>
 
                 <div class="row mt-4">
@@ -86,3 +112,91 @@
     </div>
 
 </div>
+
+@section Scripts{
+
+    <script>
+
+        $(document).ready(function (){
+             
+            $('#btnLogIn').on('click', function () {
+
+                let email = $('#LogInEmail').val();
+                let password = $('#LogInPassword').val();
+
+                // 🔥 hide previous error
+                $('#loginErrorMessage').hide().text('');
+
+                if (email === '' || password === '') {
+                    $('#logInErrorMessage')
+                        .text('Please enter email and password')
+                        .fadeIn(200);
+                    return;
+                }
+
+                // 🔥 spinner + disable
+                $('#btnSpinner').show();
+                $('#btnText').text('Signing...');
+                $('#btnLogIn').prop('disabled', true);
+
+                $.ajax({
+                    url: '@Url.Action("LogIn", "ClientAccount")',
+                    type: 'POST',
+                    data: {
+                        LogInEmail: email,
+                        LogInPassword: password
+                    },
+
+                    success: function (res) {
+
+                        if (res.success) {
+                            loginSuccess = true;
+                        } else {
+                            $('#logInErrorMessage')
+                                .text(res.message)
+                                .fadeIn(200);
+                        }
+                    },
+
+                    error: function () {
+                        $('#logInErrorMessage')
+                            .text('Server error')
+                            .fadeIn(200);
+                    },
+
+                    complete: function () {
+
+                        // 🔥 reset button
+                        $('#btnSpinner').hide();
+                        $('#btnText').text('Sign In');
+                        $('#btnLogIn').prop('disabled', false);
+
+                        // 🔥 redirect if success
+                        if (loginSuccess) {
+                            window.location.href = '@Url.Action("Index", "Home")';
+                        }
+                    }
+                });
+
+            });
+
+            $(document).on('click', '.toggle-password', function () {
+
+                let input = $($(this).data('target'));
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+                }
+
+            });
+
+
+        }); 
+
+    </script>
+
+}

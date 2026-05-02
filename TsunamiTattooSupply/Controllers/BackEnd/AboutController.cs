@@ -9,7 +9,7 @@ using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class AboutController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

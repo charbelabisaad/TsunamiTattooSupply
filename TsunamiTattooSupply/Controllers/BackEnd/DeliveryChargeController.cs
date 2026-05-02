@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class DeliveryChargeController : Controller
 	{
 		public IActionResult Index()

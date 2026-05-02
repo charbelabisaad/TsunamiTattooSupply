@@ -9,9 +9,15 @@
 <link rel="stylesheet" href="~/css/SignUp.css" asp-append-version="true" />
 
 <style>
+
     .is-invalid {
         border: 1px solid red !important;
     }
+
+    .signup-input {
+        padding-right: 40px;
+    }
+
 </style>
 
 <div class="signup d-flex align-items-center justify-content-center">
@@ -102,21 +108,29 @@
                 </div>
 
                 <!-- Password -->
-                <div class="signup-input-wrapper mt-3">
+                <div class="signup-input-wrapper mt-3 position-relative">
                     <input id="SignUpPassword"
-                           type="password"
-                           name="SignUpPassword"
-                           class="signup-input"
-                           placeholder="Password" />
+                            type="password"
+                            name="SignUpPassword"
+                            class="signup-input pr-5"
+                            placeholder="Password" />
+
+                    <i class="fa fa-eye toggle-password"
+                        data-target="#SignUpPassword"
+                        style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer;"></i>
                 </div>
 
                 <!-- Confirm Password -->
-                <div class="signup-input-wrapper mt-3">
+                <div class="signup-input-wrapper mt-3 position-relative">
                     <input id="SignUpConfirmPassword"
-                           type="password"
-                           name="SignUpConfirmPassword"
-                           class="signup-input"
-                           placeholder="Confirm Password" />
+                            type="password"
+                            name="SignUpConfirmPassword"
+                            class="signup-input pr-5"
+                            placeholder="Confirm Password" />
+
+                    <i class="fa fa-eye toggle-password"
+                        data-target="#SignUpConfirmPassword"
+                        style="position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer;"></i>
                 </div>
 
                 <!-- Button -->
@@ -315,7 +329,66 @@
                 // =========================
                 // SUBMIT FORM
                 // =========================
-                $('#signUpForm')[0].submit();
+                let signUpSuccess = false;
+
+                $.ajax({
+                    url: '/ClientAccount/SignUp',
+                    type: 'POST',
+                    data: {
+                        SignUpFullName: fullName,
+                        SignUpPhoneCountryCode: country,
+                        SignUpPhoneNumber: phone,
+                        SignUpEmail: email,
+                        SignUpPassword: password,
+                        SignUpConfirmPassword: confirmPassword
+                    },
+
+                    success: function (res) {
+
+                        if (res.success) {
+                            signUpSuccess = true; // ✅ mark success
+                        } else {
+                            errorMessage
+                                .hide()
+                                .text(res.message)
+                                .fadeIn(500);
+                        }
+                    },
+
+                    error: function () {
+                        errorMessage
+                            .hide()
+                            .text("Server error")
+                            .fadeIn(500);
+                    },
+
+                    complete: function () {
+
+                        // reset button
+                        btn.prop('disabled', false);
+                        btn.find('.btn-text').removeClass('d-none');
+                        btn.find('.spinner-border').addClass('d-none');
+
+                        // ✅ redirect ONLY if success
+                        if (signUpSuccess) {
+                            window.location.href = '/Home/Index';
+                        }
+                    }
+                });
+
+            });
+
+            $(document).on('click', '.toggle-password', function () {
+
+                let input = $($(this).data('target'));
+
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    $(this).removeClass('fa-eye').addClass('fa-eye-slash');
+                } else {
+                    input.attr('type', 'password');
+                    $(this).removeClass('fa-eye-slash').addClass('fa-eye');
+                }
 
             });
 

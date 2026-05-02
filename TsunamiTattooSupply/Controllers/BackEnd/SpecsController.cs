@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TsunamiTattooSupply.Data;
 using TsunamiTattooSupply.DTO;
@@ -7,6 +8,7 @@ using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class SpecsController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

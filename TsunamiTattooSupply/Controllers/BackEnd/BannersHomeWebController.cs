@@ -10,7 +10,7 @@ using TsunamiTattooSupply.Models;
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	[Route("/BackEnd/[controller]/[action]")]
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class BannersHomeWebController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

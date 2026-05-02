@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class ColorsController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

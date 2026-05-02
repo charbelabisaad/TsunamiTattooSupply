@@ -4,6 +4,9 @@ using TsunamiTattooSupply.DTO;
 using TsunamiTattooSupply.Functions;
 using TsunamiTattooSupply.Models;
 using TsunamiTattooSupply.ViewModels;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace TsunamiTattooSupply.Controllers.FrontEnd
 {
@@ -55,31 +58,25 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 		}
 
 		[HttpPost]
-		public IActionResult SignUp(string SignUpFullName,
-							   string SignUpPhoneCountryCode,
-							   string SignUpPhoneNumber,
-							   string SignUpEmail,
-							   string SignUpPassword,
-							   string SignUpConfirmPassword)
+		public async Task<IActionResult> SignUp(string SignUpFullName,
+											   string SignUpPhoneCountryCode,
+											   string SignUpPhoneNumber,
+											   string SignUpEmail,
+											   string SignUpPassword,
+											   string SignUpConfirmPassword)
 		{
 			try
 			{
-			 
-
-				 
-
 				if (!int.TryParse(SignUpPhoneCountryCode, out int countryId))
 				{
-					TempData["Error"] = "Invalid country";
-					return RedirectToAction("Index", "SignUp");
+					return Json(new { success = false, message = "Invalid country" });
 				}
 
 				bool exists = _dbContext.Clients.Any(c => c.Email == SignUpEmail);
 
 				if (exists)
 				{
-					TempData["Error"] = "Email already exists";
-					return RedirectToAction("Index", "SignUp");
+					return Json(new { success = false, message = "Email already exists" });
 				}
 
 				var client = new Client
@@ -87,7 +84,6 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 					Name = SignUpFullName,
 					Email = SignUpEmail,
 					Password = SignUpPassword,
-					//Password = BCrypt.Net.BCrypt.HashPassword(SignUpPassword),
 					PasswordMobile = SignUpPassword.Length > 10
 										? SignUpPassword.Substring(0, 10)
 										: SignUpPassword,
@@ -100,16 +96,91 @@ namespace TsunamiTattooSupply.Controllers.FrontEnd
 				_dbContext.Clients.Add(client);
 				_dbContext.SaveChanges();
 
-				TempData["Success"] = "Account created successfully";
+				// 🔥 AUTO LOGIN (same as before)
+				var claims = new List<Claim>
+		{
+			new Claim("ClientID", client.ID.ToString()), // 🔥 IMPORTANT FIX
+            new Claim(ClaimTypes.NameIdentifier, client.ID.ToString()),
+			new Claim(ClaimTypes.Name, client.Name),
+			new Claim(ClaimTypes.Email, client.Email)
+		};
 
-				return RedirectToAction("Index", "Home"); // ✅ ALWAYS HOME
+				var identity = new ClaimsIdentity(claims, "ClientScheme");
+				var principal = new ClaimsPrincipal(identity);
+
+				await HttpContext.SignInAsync("ClientScheme", principal);
+
+				return Json(new { success = true });
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "SignUp Error");
-				TempData["Error"] = "Server error";
-				return RedirectToAction("Index", "Home");
+
+				return Json(new { success = false, message = "Server error" });
 			}
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> LogIn(string LogInEmail, string LogInPassword)
+		{
+			try
+			{
+				var client = _dbContext.Clients
+					.FirstOrDefault(c => c.Email == LogInEmail);
+
+				if (client == null)
+				{
+					return Json(new { success = false, message = "Invalid email or password" });
+				}
+
+				// 🔥 Keep your current password logic (as requested)
+				if (client.Password != LogInPassword)
+				{
+					return Json(new { success = false, message = "Invalid email or password" });
+				}
+
+				// 🔥 Create Claims (Client)
+				var claims = new List<Claim>
+				{
+					new Claim("ClientID", client.ID.ToString()), // 🔥 ADD THIS
+					new Claim(ClaimTypes.NameIdentifier, client.ID.ToString()),
+					new Claim(ClaimTypes.Name, client.Name),
+					new Claim(ClaimTypes.Email, client.Email)
+				};
+
+				var identity = new ClaimsIdentity(claims, "ClientScheme");
+				var principal = new ClaimsPrincipal(identity);
+
+				// 🔥 Sign in using ClientScheme
+				await HttpContext.SignInAsync(
+					"ClientScheme",
+					principal,
+					new AuthenticationProperties
+					{
+						IsPersistent = true,
+						ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
+					});
+
+				return Json(new { success = true });
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Client Login Error");
+
+				return Json(new
+				{
+					success = false,
+					message = "Server error"
+				});
+			}
+		}
+
+		[HttpPost]
+		public async Task<IActionResult> LogOut()
+		{
+			await HttpContext.SignOutAsync("ClientScheme");
+
+			return Json(new { success = true });
 		}
 
 	}

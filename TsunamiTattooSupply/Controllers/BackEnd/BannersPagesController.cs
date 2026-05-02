@@ -11,7 +11,7 @@ using TsunamiTattooSupply.ViewModels;
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	[Route("/BackEnd/[controller]/[action]")]
-	[Authorize]
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class BannersPagesController : Controller
 	{
 		private readonly TsunamiDbContext _dbContext;

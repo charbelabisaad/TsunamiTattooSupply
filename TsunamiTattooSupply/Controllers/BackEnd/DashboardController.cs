@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	 
-	[Route("BackEnd/[controller]/[action]")]
-	[Authorize]
+	[Route("BackEnd/[controller]/[action]")] 
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class DashboardController : Controller
 	{
 		[HttpGet]

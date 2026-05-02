@@ -37,9 +37,14 @@
     <meta name="twitter:description" content="Shop premium tattoo supplies" />
     <meta name="twitter:image" content="https://new.tsunamitattoosupply.com/Images/GENERAL/TsunamiTattooSupplyLogo.png" />
 
+    
+
 </head>
+
 <body>
      
+    <partial name="LogOut" />
+
     @await Component.InvokeAsync("Header")
 
     @* <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3"> *@
@@ -74,21 +79,29 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/plugins/toastr/toastr.min.js" asp-append-version="true"></script>
-     
+
     <script>
+
+    $(document).ready(function () {
+
         toastr.options = {
             "closeButton": true,
             "progressBar": true,
             "positionClass": "toast-top-right",
             "timeOut": "3000"
         };
-    </script>
 
-    <script>
-         
+        var isClientLoggedIn = @(User.Identity.IsAuthenticated.ToString().ToLower());
+
         $('#btnHeaderUser').on('click', function () {
 
-            window.location.href = '@Url.Action("LogIn", "ClientAccount")';
+            if (!isClientLoggedIn) {
+
+                window.location.href = '@Url.Action("LogIn", "ClientAccount")';
+
+            }else{
+                $('#clientMenuCard').fadeToggle(200);
+            }
              
         });
 
@@ -96,10 +109,7 @@
             $('#LogInModalParent').fadeOut(200);
         });
 
-    </script>
-
-    <script>
-        $(document).ready(function () {
+   
 
             var success = '@(TempData["Success"] ?? "")';
             var error = '@(TempData["Error"] ?? "")';
@@ -112,9 +122,47 @@
                 toastr.error(error);
             }
 
+        // open modal
+        $('#aClientLogOut').on('click', function () {
+            $('#logoutModal').modal('show');
         });
+
+        // confirm logout
+        $('#btnConfirmLogout').on('click', function () {
+
+            $.ajax({
+                url: '@Url.Action("LogOut", "ClientAccount")',
+                type: 'POST',
+                headers: {
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+
+                success: function (res) {
+
+                    if (res.success) {
+
+                        // close modal
+                        $('#logoutModal').modal('hide');
+
+                        // close dropdown
+                        $('#clientMenuCard').fadeOut(200);
+
+                        // redirect
+                        window.location.href = '/';
+                    }
+                },
+
+                error: function () {
+                    alert('Logout failed');
+                }
+            });
+
+        });
+     });
+
     </script>
 
+   
     @await RenderSectionAsync("Scripts", required: false)
 
 </body>

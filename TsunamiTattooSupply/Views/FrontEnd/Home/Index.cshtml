@@ -174,7 +174,9 @@
 
             @foreach (var obj in Model.newarrivals)
             {
-                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="col-6 col-md-4 col-lg-3 home-new-arrival-product">
+
+
 
                     <div class="home-new-arrival-product-cover">
 
@@ -476,6 +478,142 @@
                     }
                 );
             }
+
+        // 🔥 STAGGER DELAY
+        $('.home-new-arrival-product').each(function (index) {
+            $(this).css('transition-delay', (index * 0.1) + 's');
+        });
+
+        // 🔥 ABOUT DELAY
+        $('.home-about-image').css('transition-delay', '0s');
+        $('.home-about-title').css('transition-delay', '0.2s');
+        $('.home-about-cover').css('transition-delay', '0.3s');
+        $('.home-about-text').css('transition-delay', '0.4s');
+        $('#btnAboutLearnMore').css('transition-delay', '0.6s');
+
+
+        // 🔥 REVEAL ON SCROLL
+        function revealOnScroll() {
+
+            let windowTop = $(window).scrollTop();
+            let windowBottom = windowTop + $(window).height();
+
+            // ===============================
+            // PRODUCTS
+            // ===============================
+            $('.home-new-arrival-product').each(function () {
+
+                let elementTop = $(this).offset().top;
+                let elementBottom = elementTop + $(this).outerHeight();
+
+                if (elementBottom > windowTop + 100 && elementTop < windowBottom - 100) {
+                    $(this).addClass('show');
+                } else {
+                    $(this).removeClass('show');
+                }
+
+            });
+
+            // ===============================
+            // ADVERTISING
+            // ===============================
+            $('.home-banner-advertising-image').each(function () {
+
+                let elementTop = $(this).offset().top;
+                let elementBottom = elementTop + $(this).outerHeight();
+
+                if (elementBottom > windowTop + 100 && elementTop < windowBottom - 100) {
+                    $(this).addClass('show');
+                } else {
+                    $(this).removeClass('show');
+                }
+
+            });
+
+                    // ===============================
+        // 🔥 ABOUT SECTION (IMPROVED)
+        // ===============================
+        $('.home-about').each(function () {
+
+            let section = $(this);
+
+            let elementTop = section.offset().top;
+            let elementBottom = elementTop + section.outerHeight();
+
+            if (elementBottom > windowTop + 100 && elementTop < windowBottom - 100) {
+
+                section.find('.home-about-image').addClass('show');
+                section.find('.home-about-title').addClass('show');
+                section.find('.home-about-cover').addClass('show');
+                section.find('.home-about-text').addClass('show');
+                section.find('#btnAboutLearnMore').addClass('show');
+
+            } else {
+
+                section.find('.home-about-image').removeClass('show');
+                section.find('.home-about-title').removeClass('show');
+                section.find('.home-about-cover').removeClass('show');
+                section.find('.home-about-text').removeClass('show');
+                section.find('#btnAboutLearnMore').removeClass('show');
+
+            }
+
+        });
+
+                // ===============================
+        // 🔥 CATEGORY SECTION (NO TITLE)
+        // ===============================
+        $('.home-category').each(function () {
+
+            let section = $(this);
+
+            let elementTop = section.offset().top;
+            let elementBottom = elementTop + section.outerHeight();
+
+            if (elementBottom > windowTop + 100 && elementTop < windowBottom - 100) {
+
+                // 🔥 FIX: animate description per box
+                section.find('.category-box-cover').each(function () {
+
+                    let box = $(this);
+
+                    let boxTop = box.offset().top;
+                    let boxBottom = boxTop + box.outerHeight();
+
+                    if (boxBottom > windowTop + 100 && boxTop < windowBottom - 100) {
+                        box.find('.home-category-description').addClass('show');
+                    } else {
+                        box.find('.home-category-description').removeClass('show');
+                    }
+
+                });
+
+                // keep your box animation
+                section.find('.category-box-large').addClass('show');
+                section.find('.category-box-small').addClass('show');
+                section.find('.category-box-medium').addClass('show');
+
+            } else {
+
+                section.find('.home-category-description').removeClass('show');
+
+                section.find('.category-box-large').removeClass('show');
+                section.find('.category-box-small').removeClass('show');
+                section.find('.category-box-medium').removeClass('show');
+
+            }
+
+        });
+
+        }
+
+        // run once
+        revealOnScroll();
+
+        // run on scroll
+        $(window).on('scroll', revealOnScroll);
+
+
 
         });
 

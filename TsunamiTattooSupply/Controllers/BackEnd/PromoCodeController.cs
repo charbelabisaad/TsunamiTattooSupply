@@ -5,7 +5,7 @@ namespace TsunamiTattooSupply.Controllers.BackEnd
 {
 	public class PromoCodeController : Controller
 	{
-		[Authorize]
+		[Authorize(AuthenticationSchemes = "AdminScheme")]
 		public IActionResult Index()
 		{
 			return View("~/Views/BackEnd/PromoCode/Index.cshtml");

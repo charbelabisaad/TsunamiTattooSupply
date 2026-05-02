@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using TsunamiTattooSupply.Data;
@@ -9,6 +10,7 @@ using TsunamiTattooSupply.ViewModels;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class BannersHomeMobileController : Controller
 	{ 
 		private readonly TsunamiDbContext _dbContext;

@@ -28,13 +28,23 @@ builder.Services.AddControllersWithViews()
 // ===============================
 // 🔐 AUTHENTICATION (THIS IS REQUIRED)
 // ===============================
-builder.Services.AddAuthentication(
-	CookieAuthenticationDefaults.AuthenticationScheme)
-.AddCookie(options =>
+builder.Services.AddAuthentication(options =>
 {
-	options.LoginPath = "/BackEnd/Index";     // 👈 LOGIN PAGE
+	options.DefaultAuthenticateScheme = "ClientScheme";   // 🔥 IMPORTANT
+	options.DefaultChallengeScheme = "ClientScheme";      // optional but good
+})
+.AddCookie("AdminScheme", options =>
+{
+	options.LoginPath = "/BackEnd/Index";
 	options.LogoutPath = "/BackEnd/LogOut";
 	options.AccessDeniedPath = "/BackEnd/Index";
+	options.ExpireTimeSpan = TimeSpan.FromHours(8);
+})
+.AddCookie("ClientScheme", options =>
+{
+	options.LoginPath = "/ClientAccount/LogIn";
+	options.LogoutPath = "/ClientAccount/LogOut";
+	options.AccessDeniedPath = "/ClientAccount/LogIn";
 	options.ExpireTimeSpan = TimeSpan.FromHours(8);
 });
 

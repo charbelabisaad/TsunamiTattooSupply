@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using TsunamiTattooSupply.Data;
 
 namespace TsunamiTattooSupply.Controllers.BackEnd
 {
+	[Authorize(AuthenticationSchemes = "AdminScheme")]
 	public class SiteSettingsController : Controller
 	{
 
